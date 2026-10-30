@@ -46,9 +46,11 @@ orchestrated fold evaluations.
 
 Those modules are preserved together under `archive/legacy/` so their original
 imports have a coherent root. Their integration tests, historical guide and
-configuration are not mixed with the active offline suite. External model
-implementations, trained weights and database contents remain unavailable in
-the public source release.
+configuration are not mixed with the active offline suite. The original
+model/training implementation is published separately in
+[Reinforce / CAIRO](https://github.com/miladssamiei/reinforce). Trained weights
+and database contents are not distributed. See [project lineage](PROJECT_LINEAGE.md)
+for the distinction between the foundation and this later bridge archive.
 
 ## Portability boundary
 

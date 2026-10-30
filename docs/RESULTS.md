@@ -74,6 +74,12 @@ adjusted for the full project-wide search.
 
 ## CAIRO
 
+The original model/training architecture and idea are documented in the
+separate **[Reinforce / CAIRO foundation repository](https://github.com/miladssamiei/reinforce)**.
+It preserves the seven model families, features, ensemble methods, walk-forward
+training, inference and risk components. See [project lineage](PROJECT_LINEAGE.md)
+for how that work led to the execution research here.
+
 The old ML bridge did not reproduce its offline performance in MT5 and received
 a no-go verdict. Its source is preserved in the [legacy archive](../archive/legacy/README.md),
 not promoted as an available trained trading product.

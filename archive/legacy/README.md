@@ -4,6 +4,12 @@ This archive preserves the earlier CAIRO system separately from the active
 strategy-research program. It is retained for code provenance and analysis of
 the gap between offline predictions and executable trading results.
 
+The **complete original learning/training framework** is now published as
+**[Reinforce / CAIRO](https://github.com/miladssamiei/reinforce)**. Start there for
+the original idea, seven model families, feature pipeline, ensemble methods and
+inference architecture. This archive retains the later RR bridge/orchestration
+snapshot; it is not the full foundation project.
+
 ## Components
 
 | Path | Purpose |
@@ -18,10 +24,11 @@ the gap between offline predictions and executable trading results.
 | `docs/` | Original GUIDE and project snapshots, with original historical claims |
 
 `train/`, `live/` and `optimizer/` preserve the available scaffolding. The public
-repository is not a full distribution of the external CAIRO/Reinforce project.
+repository is not a full distribution of the separately published Reinforce project.
 Checkpoint files, training datasets, PostgreSQL databases and compiled DLLs are
 not included. External model code and packages referenced by these modules must
-be supplied separately; installing the active project's core dependencies does
+be supplied through the foundation project and a compatible local environment;
+installing the active project's core dependencies does
 not make this archive runnable.
 
 ## Historical verdict

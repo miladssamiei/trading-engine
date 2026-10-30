@@ -165,8 +165,8 @@
     },
     {
       "path": "archive/legacy/README.md",
-      "bytes": 2380,
-      "sha256": "cd523eb613b396e1c2d5c2e7f5a10f42c00b360f0b4e7247ac8e8c5438619a58"
+      "bytes": 2808,
+      "sha256": "31a19db3ab483828e970f9d2f58e758d8b1c3d4d3af82b3492759b0cc601173d"
     },
     {
       "path": "archive/legacy/tests/smoke_roundtrip.py",
@@ -2865,8 +2865,8 @@
     },
     {
       "path": "docs/ARCHITECTURE.md",
-      "bytes": 3236,
-      "sha256": "485fc97c13aa9087e86df7b1706e8034af666b06cc0a77648bdeaf7b0e88bb10"
+      "bytes": 3426,
+      "sha256": "3e85b15406a2b072872a2f015b9697f5179008ff7a85587b84ece4d73c54839b"
     },
     {
       "path": "docs/DATA.md",
@@ -2884,6 +2884,11 @@
       "sha256": "82bb35e32c3a961fe44387dfcb77d467be8a2c68a85e5197420d1acb83979873"
     },
     {
+      "path": "docs/PROJECT_LINEAGE.md",
+      "bytes": 4456,
+      "sha256": "c81a8df9bdbd436b9dbf13acfde21cbd2ab746279cbe352336aaa8096f0314ac"
+    },
+    {
       "path": "docs/PUBLICATION.md",
       "bytes": 2930,
       "sha256": "5d1e51f9ecc2397485866ec40fdebea28205479e5be17fd7f5e6ee39f7e1a4b1"
@@ -2895,8 +2900,8 @@
     },
     {
       "path": "docs/RESULTS.md",
-      "bytes": 4420,
-      "sha256": "68e1190196dd1a537162e78898242363b1ac2b7d6853b5840f2c59b42e3b8625"
+      "bytes": 4809,
+      "sha256": "60686bb79d83575a3c261766e27b9d8310696c5dd5bd11148a72649ffd526ef4"
     },
     {
       "path": "docs/STUDIES.md",
@@ -4095,8 +4100,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 15472,
-      "sha256": "b9ea2aeb1d3b118dd9da42897d6272f0170407f4b7dd9a204087f4e9eb5ae01e"
+      "bytes": 17778,
+      "sha256": "a05ec02ddd37a456565b0b8e6e1cb21339c78674b73c694b4e199dc979ffc337"
     },
     {
       "path": "requirements.txt",

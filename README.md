@@ -20,6 +20,7 @@ strategies are retained alongside them.
 
 - [What the project does](#what-the-project-does)
 - [Two systems, separate scopes](#two-systems-separate-scopes)
+- [Foundation: Reinforce and CAIRO](#foundation-reinforce-and-cairo)
 - [Architecture](#architecture)
 - [Quick start](#quick-start)
 - [Repository layout](#repository-layout)
@@ -53,12 +54,46 @@ frozen assumptions remain visible for audit.
 | System | Location | Scope and status |
 | --- | --- | --- |
 | Active strategy research | `evaluate/`, `ea/`, `Include/`, `scripts/`, `data/results/` | Explicit hypothesis tests, causal replay, MT5 reconciliation and account-risk experiments |
-| Historical CAIRO ensemble | [archive/legacy/](archive/legacy/README.md) | ML voting, Python-to-MT5 bridge and job orchestration; historical no-go after offline-to-tester performance failed to transfer |
+| Original Reinforce / CAIRO framework | [Separate foundation repository](https://github.com/miladssamiei/reinforce) | Full original learning, training, feature, ensemble and inference architecture |
+| Later CAIRO integration archive | [archive/legacy/](archive/legacy/README.md) | Python-to-MT5 bridge and job orchestration retained with this project's history |
 | Standalone experiment | [archive/experiments/](archive/experiments/README.md) | Exploratory SP2L Python bot; separate from the frozen native SP2L baseline |
 
-The CAIRO archive preserves its own internal layout. Its external training
-project, model checkpoints and databases are not distributed. The old GUIDE is
-historical context, not the active system's installation guide.
+The CAIRO archive preserves its own internal layout. The original training
+framework is now documented and published separately in Reinforce; model
+checkpoints and databases remain local. The old GUIDE is historical context,
+not the active system's installation guide.
+
+## Foundation: Reinforce and CAIRO
+
+Trading Engine grew out of **[Reinforce / CAIRO](https://github.com/miladssamiei/reinforce)**,
+the original project behind the broader idea. CAIRO—Collective AI Reinforced
+Intelligence for trading Outcomes—explored a collective decision system built
+from independently trained learning algorithms, a common trading action
+interface and a separate risk/execution layer.
+
+The original framework brought together **PPO, IMPALA, APPO, SAC, TQC,
+LightGBM and a Decision Transformer**. It included rolling walk-forward training,
+technical and optional regime/context features, saved model probabilities,
+uniform/weighted/regime-aware aggregation, sizing, portfolio coordination,
+checkpoint preparation, HTTP inference and MetaTrader integration. This is the
+foundation of the project, beyond the smaller bridge snapshot archived here.
+
+The original hypothesis was that different learning objectives could contribute
+complementary trading decisions. Models emitted SELL/HOLD/BUY outputs; the
+ensemble combined them before independent controls determined the permitted
+execution request. Model agreement and high offline metrics required empirical
+validation, rather than establishing an edge by themselves.
+
+The attempt to carry these model decisions into MT5 led to the execution audits
+in this repository. The recorded performance gap motivated the later emphasis
+on explicit causal signals, executable price sides, frozen research gates,
+real-tick reconciliation and marked-equity risk. Those findings concern the
+validation claim; the original architecture and idea are documented in full in
+their own repository.
+
+Read the **[Reinforce overview](https://github.com/miladssamiei/reinforce#readme)**,
+its **[model guide](https://github.com/miladssamiei/reinforce/blob/main/docs/MODELS.md)**
+and the **[project lineage](docs/PROJECT_LINEAGE.md)** for the complete relationship.
 
 ## Architecture
 
@@ -284,6 +319,7 @@ EA compilation or live-order correctness.
 | Document | Read it for |
 | --- | --- |
 | [Architecture](docs/ARCHITECTURE.md) | Modules, boundaries and legacy separation |
+| [Project lineage](docs/PROJECT_LINEAGE.md) | Reinforce/CAIRO foundation, later bridge and successor research |
 | [Research protocol](docs/RESEARCH_PROTOCOL.md) | Frozen artifacts, gates and causal validation |
 | [Data conventions](docs/DATA.md) | Input schema, clocks, gaps and provenance |
 | [Checked environment](docs/ENVIRONMENT.md) | Local verification scope and installed versions |
