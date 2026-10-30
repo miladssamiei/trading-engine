@@ -89,13 +89,14 @@ metadata permits Python 3.11–3.13; individual optional packages may narrow tha
 range. Historical full evaluations were run on Windows in a dedicated environment.
 
 ```powershell
+git clone https://github.com/miladssamiei/trading-engine.git
+cd trading-engine
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install --upgrade pip
 .\.venv\Scripts\python.exe -m pip install -e ".[dev]"
 ```
 
-Run these commands from the repository root after cloning it using GitHub's
-**Code** menu. On Linux/macOS, substitute `.venv/bin/python` for the Windows Python path.
+On Linux/macOS, substitute `.venv/bin/python` for the Windows Python path.
 No broker connection, credentials, paid feed or market-data download is required
 for the offline test suite and synthetic example.
 

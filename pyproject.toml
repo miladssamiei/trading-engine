@@ -27,6 +27,11 @@ research = [
 mt5 = ["MetaTrader5>=5.0.45; sys_platform == 'win32'"]
 dev = ["pytest>=8,<10"]
 
+[project.urls]
+Repository = "https://github.com/miladssamiei/trading-engine"
+Documentation = "https://github.com/miladssamiei/trading-engine/blob/main/README.md"
+Issues = "https://github.com/miladssamiei/trading-engine/issues"
+
 [tool.setuptools.packages.find]
 include = ["evaluate", "evaluate.*"]
 
