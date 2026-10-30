@@ -1,0 +1,5 @@
+G1: The source passes chronology, OHLC and NY RTH entry validation, and its SHA256 and actual date range are recorded.
+G2: Every closed trade obeys its executable-side bracket, pessimistic collision and adverse gap rules; gross-minus-net equals the single modeled cost, and no trade profit exceeds 1500.
+G3: Every arm has exactly 10,000 evaluations with PASS/FAIL/CENSORED outcomes; all absorbed paths respect their account boundary, have no trade after absorption, and the EV identities reconcile.
+G4: A point pass probability without censoring bounds is admissible only if its arm has zero censored paths; otherwise report both lower and upper bounds and label the estimate censored.
+G5: Compare the primary repeat-until-static-boundary simulation to its matching Markov baseline; retain 32.65% as a two-consecutive-win comparator and disclose the rule difference. Exact broker execution, firm-specific compliance and funded withdrawal certainty remain unvalidated.

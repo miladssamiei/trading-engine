@@ -1,0 +1,6 @@
+G-VW1: At least 120 fully resolved 2024-2026 Monday-to-Thursday US100 trades on 120 distinct NY entry dates, zero unresolved exits, no missing qualifying prior Cboe signal and only real M1 fills.
+G-VW2: Strictly positive 2024-2026 stressed mean US100 points per trade after 1.45 executable spread plus another 1.45 spread and 0.25 slippage.
+G-VW3: Five-week circular moving-block bootstrap P(mean stressed points <= 0) at most 0.05 using 10000 draws and seed 20261005.
+G-VW4: Strictly positive stressed US100 point totals separately in complete 2024, complete 2025 and partial 2026.
+G-VW5: If Phase 1 passes, a separately frozen two-stage EUR10000 180-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts in one fixed 0.5%, 1% or 2% initial-risk row.
+G-VW6: All three source hashes, causal common prior Cboe close, prior completed ATR, correctly sided synthetic Bid/Ask stops, no weekend exposure, zero swap and fixed predeclared costs are verified with no account orders.

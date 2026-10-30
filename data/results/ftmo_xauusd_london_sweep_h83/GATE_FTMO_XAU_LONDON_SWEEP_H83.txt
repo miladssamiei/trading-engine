@@ -1,0 +1,6 @@
+G-LS1: At least 150 gated executed or marked trades on at least 150 distinct London dates, with zero unresolved exits and zero missing entry bars after a signal.
+G-LS2: Strictly positive mean extra-0.41-cost-stress net gold units per gated trade.
+G-LS3: London-date bootstrap P(mean base net <= 0) at most 0.05, 10000 resamples, seed 20260926.
+G-LS4: Strictly positive base net total gold units in each gated year 2025 and partial 2026.
+G-LS5: At least 150 fully observed rolling 180-calendar-day starts and at least one predeclared risk row with pass rate at least 0.70 and breach rate at most 0.10.
+G-LS6: Every executed trade is intraday on the same Europe/Prague date with positive stop/target distances; source is non-custom, unique chronological UTC M15, hash-recorded and sample tick-aligned.

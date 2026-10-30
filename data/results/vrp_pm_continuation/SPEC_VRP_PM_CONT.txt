@@ -1,0 +1,84 @@
+SPEC: VRP-CONDITIONED PM CONTINUATION BREAKOUT ON US500 - PHASE 1 (HYPOTHESIS #44)
+Declared: 2026-09-23, before any code for this study existed.
+
+0. CONTEXT
+  - PM-session companion of #31/#43: tests whether the VRP-conditioned edge
+    (if any) expresses in the AFTERNOON session using a [13:00, 13:15) ET
+    opening range with breakout continuation into the close, on the same
+    Arm A population. Null result pre-accepted as a complete deliverable.
+  - Population: the 171 Arm A (VRP > trailing P50) DATES realized as trade
+    dates in the #31 artifact
+    data/results/orb_vrp_filter/orb_vrp_filtered_trades.csv (ny_date). These
+    are the only dated Arm A records; the in-sample conditioning lineage of
+    #31 is inherited unchanged (#31 overall verdict FAIL on G-VRP3 stands;
+    #43 Euro-session companion FAIL).
+
+1. DATA
+  1.1 Tape: data/results/vwap_2021_2026/us500tick_m1.csv (1,791,504 M1
+      bars, epoch-UTC open-time Bid OHLC; verified full-24h artifact). All
+      wall-time logic in America/New_York.
+  1.2 Day unit: the Arm A ny_date; a date participates iff it has >= 1
+      printed M1 bar in [13:00, 13:15) ET (minute-of-day [780, 795)).
+
+2. PM OPENING RANGE
+  2.1 PM_OR_High = max High, PM_OR_Low = min Low over printed M1 bars with
+      ET minute-of-day in [780, 795).
+
+3. SIGNAL GENERATION
+  3.1 Signal window: M1 bars STRICTLY between 13:15 and 15:30 ET
+      (minute-of-day in [796, 929], open interval per project convention).
+  3.2 LONG candidate: first bar with Close > PM_OR_High; SHORT candidate:
+      first bar with Close < PM_OR_Low; independent per-direction first
+      breakout, max 1 long + 1 short per day; dropped candidates (degenerate
+      risk, no-entry) do not re-arm their direction.
+  3.3 Entry: the Open of the next PRINTED M1 bar after the signal bar. No
+      next bar with minute-of-day <= 959 -> no-entry drop.
+  3.4 Stop: opposite OR boundary (LONG SL = PM_OR_Low, SHORT SL =
+      PM_OR_High). Initial risk = |entry - SL| in points; risk <= 0 is
+      degenerate and dropped.
+
+4. EXCURSION WALK AND ECONOMICS (NET)
+  4.1 Walk from the entry bar (inclusive) through the last printed M1 bar of
+      the date with ET minute-of-day <= 959 (16:00 ET cash close boundary).
+      Early exit when a walk bar TOUCHES the stop: LONG exits if Low <= SL
+      at the SL price; SHORT if High >= SL at the SL price. HONEST-FILL
+      RULE: if the touching bar OPENS beyond the stop, fill at the open
+      (flag STOP_GAP; #40/#42/#43 convention). Otherwise TIME exit at the
+      close of the last session bar.
+  4.2 MFE/MAE in points over the walk bars (entry bar through exit bar,
+      exit bar's full M1 bar included).
+  4.3 Gross exit PnL points = direction * (exit - entry). Net = gross - 0.51
+      (verified US500 CFD round-trip spread floor; no swap - intraday).
+  4.4 Net Sharpe = per-trade mean/std(ddof=1) of Net PnL x sqrt(252)
+      (#31 family convention).
+  4.5 Overlap with the AM ORB (descriptive): same-date direction agreement
+      vs the #31 Arm A NY-cash ORB trade (BUY/SELL) and mean Net PnL for
+      agree vs disagree.
+
+5. GATES (frozen verbatim in GATE_VRP_PM_CONT.txt)
+  G-PM1 total executed trades >= 50.
+  G-PM2 Net Sharpe Ratio > 0.
+  G-PM3 day-block bootstrap (10,000 resamples, seed 20260924) P(mean Net
+      PnL <= 0) <= 0.20.
+  G-PM3 operationalization (frozen): pooled-mean day-block bootstrap over
+      NY-date blocks (resample dates with replacement; pooled mean = sum of
+      block sums / sum of block counts), rng seed 20260924, 10,000 resamples
+      (#36/#38/#43 family convention).
+
+6. DELIVERABLES
+  - evaluate/vrp_pm_continuation_phase1.py, run with project python.
+  - data/results/vrp_pm_continuation/{SPEC,GATE}_VRP_PM_CONT.txt (frozen
+    before any code).
+  - data/results/vrp_pm_continuation/REPORT_VRP_PM_CONT_PHASE1.txt,
+    vrp_pm_signals.csv, run_meta.json.
+  - PROGRESS.md entry as Hypothesis #44.
+
+7. HONESTY AND ANTI-LEAK RULES
+  - Causality: the PM OR is fully formed before the signal window opens;
+    signals use only the signal bar's close vs precomputed levels; entries
+    at printed next-bar opens; stops evaluated on completed bars only.
+  - The Arm A date set is in-sample conditioning realized through #31's
+    trade dates; every metric inherits that optimism; #31 FAIL stands.
+  - No parameter search: OR window, signal window, stop rule, 0.51 cost are
+    frozen archetype values.
+  - Null result is final for this artifact; verdicts quote frozen gates only.

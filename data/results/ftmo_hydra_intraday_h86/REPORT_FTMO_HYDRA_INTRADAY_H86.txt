@@ -1,0 +1,65 @@
+HYPOTHESIS 86 FINAL REPORT — FAIL
+Date: 2026-09-25
+
+Predeclared protocol: SPEC_FTMO_HYDRA_INTRADAY_H86.txt and
+GATE_FTMO_HYDRA_INTRADAY_H86.txt were frozen before source copy,
+adaptation and tester execution. No input, risk row or date window was
+selected after seeing returns. This artifact is final and must not be
+rewritten; any remeasurement needs a new SPEC/GATE/name.
+
+Pinned public source:
+https://raw.githubusercontent.com/sriramvarun0636/HydraPrime/b5b7169ec49c0dab762cdeb4f49f1afebae7ec9f/main.mq5
+Original SHA256: 64D9F8F63D6E88623E10AB07691413EF5250863135997B65CB824D15A519A4D7
+Adapted source SHA256: B6064F2A9BFAE2E49EE2BA0B2DDE22AC296C68610967012504EE5D3D922BCFCA
+Compiled EX5 SHA256: 7BF0FB56DCB10FDE67743030335E272CB06D091A815BC78543F96EE97738DE30
+The original public source did not compile: GlobalVariableExist is not
+an MQL5 function. Before testing, it was replaced with documented
+GlobalVariableCheck; the intended existence-check behavior is the same.
+The adapted source also implements the predeclared GMT/DST session
+correction, scoped bounded daily breaker and 22:30 server-time flat.
+All other setup inputs were left at the public source defaults; only
+InpRisk_Per_Trade was set to 0.5 and 1.0 in the two tester rows.
+Compile result: zero errors, one upstream version-format warning.
+
+Tester: connected native FTMO-Demo XAUUSD, EUR 10,000 start, 100 oz/lot,
+M5, configured Model=4, 2025-01-01 to 2026-09-25 exclusive. The source
+quote observed before testing had 0.43 gold units spread (quoted target
+0.41); public EA's InpSpread_Max=300 permits 3.00 gold units on this
+0.01-point contract. Both batches completed 82,606,274 XAUUSD tester
+ticks and 121,547 M5 bars, with no account orders placed outside tester.
+
+DECISIVE DATA FAILURE (G-HY1): Agent journal states 277,621 of 607,651
+minute bars (45.69%) had real ticks DISCARDED, with generated ticks
+substituted because real tick prices did not match the M1 history.
+It also reports 119 minutes with real ticks absent and 11 whole days
+with real ticks discarded. The two risk rows show the same defect.
+Selecting Model=4 did not make this a clean native real-tick replay.
+G-HY1 therefore FAILS independently of trade count or ending balance.
+The journals are archived under batches/risk_05 and batches/risk_10.
+
+Descriptive, NONQUALIFYING ending balances after about 21 months:
+0.5% risk: EUR 10,618.34 (+6.18%); 1.0% risk: EUR 11,403.82 (+14.04%).
+These are tester final balances, not verified net expectancy, a
+90-calendar-day pass rate, or proof of an edge after extra cost stress.
+The positive 1.0% ending balance is particularly easy to overread:
+it arrived across approximately 21 months, while the stated user
+objective is a much faster FTMO challenge pass.
+
+Gate disposition:
+G-HY1 FAIL — 45.69% of minute bars substituted generated ticks.
+G-HY2 NOT ESTABLISHED — no trustworthy real-tick cost-adjusted EUR
+  trade ledger; predeclared extra 0.41+0.25 gold-unit stress uncomputed.
+G-HY3 NOT ESTABLISHED — date-block bootstrap not valid on this replay.
+G-HY4 NOT ESTABLISHED — annual stressed totals unavailable.
+G-HY5 NOT ESTABLISHED — floating-equity challenge replay and 150 fully
+  observed rolling starts unavailable; final balance cannot substitute.
+G-HY6 NOT ESTABLISHED — source/compile journals archived, but all
+  entry-exit Prague dates and complete exposure were not independently
+  reconstructed from tester deals.
+Overall H86 verdict: FAIL. No verified fast intraday system identified.
+Do not trade this EA or use these balances to buy a paid evaluation.
+
+Limitations: MT5 did not write the requested XML report file, although
+the agent journal confirms each test finished. The journals record the
+tick substitution and ending balances. Restoring the target terminal's
+ordinary connection after tester use does not change the H86 verdict.

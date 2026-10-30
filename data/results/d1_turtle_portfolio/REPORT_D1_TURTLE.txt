@@ -1,0 +1,29 @@
+DAILY TURTLE DONCHIAN FOUR-ASSET TRANSFER - REPORT
+OVERALL FOUR-ASSET GATE: FAIL
+17:00 ET daily M1-open buckets; 2020-2026 entry-cohort scoring.
+Net metrics are in pips after one fixed round-turn cost per trade.
+
+ASSET | CLOSED | WIN% | NET PIPS/TRADE | TOTAL NET PIPS | SHARPE | MBB P | STOP | STOP GAP | DONCHIAN10 | GATE
+USDJPY | 50 | 30.00 | 34.717 | 1735.87 | 0.1024 | 0.1883 | 18 | 1 | 31 | FAIL
+GBPJPY | 51 | 27.45 | -53.137 | -2709.98 | -0.1280 | 0.8333 | 19 | 1 | 31 | FAIL
+EURJPY | 58 | 27.59 | -51.012 | -2958.70 | -0.1790 | 0.9144 | 24 | 0 | 34 | FAIL
+EURUSD | 57 | 42.11 | -15.003 | -855.14 | -0.1050 | 0.7500 | 18 | 1 | 38 | FAIL
+
+YEAR-BY-YEAR NET PNL MATRIX (PIPS; 2026 PARTIAL)
+ASSET | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026
+USDJPY | -1135.02 | 294.85 | 1946.69 | 353.77 | 1470.28 | -265.82 | -928.88
+GBPJPY | -275.98 | -27.19 | -1630.74 | 848.64 | 508.24 | -928.93 | -1204.03
+EURJPY | -394.13 | -233.17 | -1592.65 | -403.29 | -137.71 | 1271.16 | -1468.90
+EURUSD | -114.45 | -113.66 | -764.98 | 233.31 | 191.00 | 79.21 | -365.57
+
+SOURCE AND GATE DETAILS
+USDJPY: D1 2010-01-01..2026-09-25 (4294 bars); source C:\Users\Milad\download\download\usdjpy-m1-bid-2010-01-01-2026-09-27.csv; SHA256 8f0cb0a90ae858c68e6bd0433a38e0a67b60cf7b165907ba2dd01934eba4d32d; raw M1 7294895, observed M1 6094404, carried removed 1200491, 2024-10 repairs 468; cost 0.9 pips; open_end 0; gates {'G1': True, 'G2': True, 'G3': True, 'G4': False, 'G5': False}; annual counts {'2020': 11, '2021': 7, '2022': 6, '2023': 6, '2024': 7, '2025': 7, '2026': 6}; funnel {'signals': 552, 'shadowed': 420, 'no_next_daily_open': 0}
+GBPJPY: D1 2010-01-01..2026-09-25 (4345 bars); source C:\Users\Milad\download\download\gbpjpy-m1-bid-2010-01-01-2026-09-27.csv; SHA256 fe6cda4fe3545d8c0a27a64e0134fea3aa078a2ce2a13e7fdfe8f23874f6e356; raw M1 7382558, observed M1 6225347, carried removed 1157211, 2024-10 repairs 11; cost 2.5 pips; open_end 1; gates {'G1': True, 'G2': False, 'G3': False, 'G4': False, 'G5': False}; annual counts {'2020': 7, '2021': 10, '2022': 8, '2023': 6, '2024': 8, '2025': 7, '2026': 5}; funnel {'signals': 532, 'shadowed': 403, 'no_next_daily_open': 0}
+EURJPY: D1 2010-01-01..2026-09-25 (4337 bars); source C:\Users\Milad\download\download\eurjpy-m1-bid-2010-01-01-2026-09-27.csv; SHA256 4ce8feb8baf0a864169784b88c2534311a9f1dc17cf8b70585224fa9e482a51d; raw M1 7369552, observed M1 6212482, carried removed 1157070, 2024-10 repairs 266; cost 1.5 pips; open_end 1; gates {'G1': True, 'G2': False, 'G3': False, 'G4': False, 'G5': False}; annual counts {'2020': 8, '2021': 10, '2022': 12, '2023': 8, '2024': 9, '2025': 4, '2026': 7}; funnel {'signals': 539, 'shadowed': 406, 'no_next_daily_open': 0}
+EURUSD: D1 2020-01-02..2026-09-18 (1746 bars); source C:\Users\Milad\Desktop\RR\data\results\eurusd_onboarding\eurusdtick_m1.csv; SHA256 e578692f3b02d985a97c17d13f0fbd0f6797e47c9b31a43970667d020f4d7242; raw M1 2490896, observed M1 2490896, carried removed 0, 2024-10 repairs 0; cost 0.3 pips; open_end 1; gates {'G1': True, 'G2': False, 'G3': False, 'G4': False, 'G5': False}; annual counts {'2020': 7, '2021': 8, '2022': 11, '2023': 8, '2024': 10, '2025': 7, '2026': 6}; funnel {'signals': 216, 'shadowed': 158, 'no_next_daily_open': 0}
+
+LIMITATIONS
+BID proxy plus fixed cost floor omits variable spread, slippage, swaps and account-level FTMO loss limits.
+Hard stops use chronological M1 extrema with adverse open gap fills. Daily close exits fill at the next real daily open.
+Open-end trades are not included in closed PnL, Sharpe or MBB. Different source end dates make 2026 partial across assets.
+Price-unit PnL is converted to pips per asset; pips are not currency-adjusted or risk-weighted portfolio returns.

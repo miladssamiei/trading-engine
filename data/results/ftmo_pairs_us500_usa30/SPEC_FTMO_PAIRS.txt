@@ -1,0 +1,187 @@
+SPEC_FTMO_PAIRS
+Study dir: data/results/ftmo_pairs_us500_usa30/
+Pre-declared: 2026-09-13, BEFORE any EA code, ini, or orchestrator script exists.
+Hypothesis number: #24 (owner-tasked; continues the post-Path-C descriptive lane;
+sibling of ftmo_macro_reversal, Hypothesis #23, same pipeline discipline).
+
+SECTION 0. SCOPE, PREMISE, AND STATUS
+
+0.1 Premise (swap-free): hypothesis #19 pairs_us500_usa30 FAILED its economics
+gates ONLY because of CFD financing: 18 OOS spread trades, gross +$1,572.62,
+spread cost -$30.77, swap -$5,510.00, net -$3,968.14 (REPORT_PAIRS_US500_
+USA30.txt; win rate 44.4%, avg hold 56.3 nights; the study's own caveat notes
+the USA30 leg swap was unavailable and treated as 0, so the realized bleed is a
+lower bound). This study asks the NARROW counterfactual: on an FTMO $10,000
+Phase-1 Challenge account that is SWAP-FREE (swap forced to 0.00 on every
+trade), does the EXACT, ALREADY-GENERATED, UNMODIFIED pairs trade list
+(pairs_trades.csv, 18 trades, 2021-03-12..2026-06-23) reach the +8% profit
+target ($10,800) before breaching the 5% daily ($500) or 10% max ($1,000)
+loss limits, at some FixedLots multiplier?
+
+0.2 This is NOT new strategy research: no signal, window, beta rule, or exit is
+created or tuned. The trade list is replayed as-is. The #19 FAIL verdict stands
+untouched. Path C remains in force for the US500/XAUUSD CFD tapes; this is a
+post-termination execution/what-if simulation of frozen trades.
+
+0.3 This is NOT an FTMO qualification: ftmo10k_qualification_v1 remains
+INCOMPLETE. FTMO rule numbers (5% daily, 10% max, +8% target, swap-free) are
+the owner-stated challenge parameters, simulated. downstream_model_allowed=
+false and live_execution_allowed=false regardless of verdict.
+
+SECTION 1. EXECUTION PIPELINE (dual-symbol Signal-Reader EA)
+
+1.1 New EA ea/Pairs_FTMO.mq5 (chart symbol US500.c; second leg DJ30.c — the
+broker symbol table has no USA30.c; DJ30.c is the Dow CFD, same index scale as
+the study's USA30 tape):
+  - OnInit calls SymbolSelect("DJ30.c", true) so the tester loads and
+    synchronizes the Dow symbol.
+  - Parses MQL5-common g2-style input pairs_trades.csv (runner stages it via
+    FILE_COMMON — build 6182 agent sandboxes do not serve pre-staged reads,
+    per ftmo_macro_reversal). Columns used: entry_date, exit_date, direction,
+    lots30. lots30 is the EXACT usa30_lot_ratio of the original study
+    (beta * P_US500 / P_USA30 at the entry bar); it is NOT recomputed.
+  - EXECUTION TIMESTAMP RULE (same D1-close proxy as Hypothesis #23): the
+    original study traded D1-close to D1-close; the EA arms entry at
+    entry_date 00:00 + 1 day and exit at exit_date 00:00 + 1 day; fills land
+    on the first US500.c tick at/after those instants. DJ30.c fills use the
+    DJ30.c price current at that same tick (documented multi-symbol
+    approximation: the tester clock is the chart symbol's tick stream).
+  - LONG_SPREAD: buy 1.0*FixedLots US500.c + sell lots30*FixedLots DJ30.c.
+    SHORT_SPREAD: sell 1.0*FixedLots US500.c + buy lots30*FixedLots DJ30.c.
+    Both legs are opened in one OnTick pass (two market orders, explicit
+    grid-normalized prices, deviation 20, magic 26091301). Lot sizes are
+    normalized per-symbol to SYMBOL_VOLUME_STEP (floor) and clamped UP to
+    SYMBOL_VOLUME_MIN if the floored volume is below the minimum (ratio
+    distortion recorded in the output).
+  - Exit: both legs closed by market order when TimeCurrent() >= armed exit
+    time. Signals whose window fully passed while flat are skipped.
+  - Input InpProfitTargetUSD (default 10800): once REALIZED balance >= target
+    the EA opens no new pairs (Phase-1 pass semantics; open pair completes).
+  - OnDeinit writes (FILE_COMMON) ftmo_pairs_trades.csv: ONE logical row per
+    pair trade — tickets (US500 leg, DJ30 leg), entry/exit times, direction,
+    lots (both legs), open/close prices (both legs), combined profit,
+    commission, and swap (per leg and combined), per-leg tick_value/tick_size/
+    point, volume normalization notes, close reason; plus ftmo_pairs_status.csv
+    (initial equity, final balance/equity, target_reached, breach flag/reason,
+    signals_total/next, trades executed, last time).
+
+1.2 PropFirmGuard integration (Include/PropFirmGuard.mqh, unmodified frozen
+deploy infrastructure): identical to Hypothesis #23 — PG_Init registration,
+PG_IsBreached latch, PG_Breach/PG_CloseEverything panic flatten (which closes
+ALL positions: both legs), EOD-anchor protocol reused; the LIMIT CHECKS are
+the FTMO Challenge values implemented in-EA because the include's compile-time
+3.5%/8.0% constants cannot be re-parameterized post-inclusion (declared
+deviation, same as SPEC 1.2 of ftmo_macro_reversal):
+  - DAILY: (prior server-day 00:00 latched balance - floating equity) /
+    latched balance >= 5.0% -> PG_Breach("FTMO_DAILY_DRAWDOWN").
+  - MAX LOSS: floating equity <= initial equity * 0.90 (static $9,000 floor)
+    -> PG_Breach("FTMO_MAX_LOSS").
+  - ACCOUNT_EQUITY natively aggregates the floating PnL of both open legs.
+
+SECTION 2. TESTER PROTOCOL
+
+2.1 configs/tester_FTMO_Pairs.ini generated by the orchestrator:
+    Expert=Pairs_FTMO, Symbol=US500.c, Period=D1, Model=0 (every tick from
+    M1 bars of the chart symbol; constant synthetic spread), FromDate=2020-01-01,
+    ToDate=2026-07-01 (covers the full 18-trade span incl. the +1-day exit
+    arming), Deposit=10000, Currency=USD, Leverage=100, VisualMode=0,
+    ReplaceReport=1, ShutdownTerminal=1, Report=<study>/tester_report_<label>.xml.
+    Inputs via MQL5\Profiles\Tester\<label>.set (FixedLots, target, magic).
+2.2 Headless batch via subprocess, generous timeout (>= 7200 s); terminal64 and
+    metatester64 killed before/after; the tester aggregate log at
+    <terminal-data>\Tester\logs is read as a delta and archived; EA outputs are
+    collected from Common\Files (fresh by mtime).
+2.3 REFERENCE RUN at FixedLots=1.0 (max-information run; every multiplier
+    M >= 1.0 accumulates dollar PnL monotonically faster than the 1.0 run, so
+    fills up to the 1.0-lot pass date cover the whole [1.0, 30.0] sweep).
+2.4 CONFIRMATION RUN at the sweep-selected optimal multiplier.
+
+SECTION 3. PYTHON ANALYSIS (evaluate/ftmo_pairs_test.py)
+
+3.1 DJ30.c D1 data acquisition: the orchestrator exports DJ30.c D1 bars
+    (2020-01-01..2026-07-01) via the MetaTrader5 python API from the project
+    terminal BEFORE the tester runs, archiving dj30c_d1.csv in the study dir
+    (provenance: bar count + range printed and archived). US500.c D1 marks
+    come from the existing verified momentum_multihorizon/us500c_d1.csv. If
+    the export cannot cover the first trade date, the study reports
+    INFEASIBLE (data), not FAIL.
+
+3.2 CRITICAL SWAP OVERRIDE: the tester applies broker default swaps; the
+    analysis FORCES swap = 0.00 on every trade: swap_free_profit = raw
+    DEAL_PROFIT sum - commission, both legs combined. The tester-charged swap
+    total is reported alongside as the documented delta (the original study's
+    -$5,510 bleed, now on broker DJ30.c terms).
+
+3.3 Equity simulation from $10,000 on the US500.c D1 server-date grid:
+  - Realized balance: cumulative swap-free combined profits of closed pairs.
+  - Marks: equity marked at D1 closes for open legs (both symbols).
+  - Worst-case floating within each day uses both legs' adverse D1 extremes
+    simultaneously (low-for-long / high-for-short per leg) — deliberately
+    pessimistic for a spread (true same-instant spread behavior is milder).
+  - FTMO daily loss: (prior server-day 00:00 realized balance - worst
+    floating equity during the day) / anchor < 5.0%.
+  - FTMO max loss: worst floating equity > $9,000 at all times (static floor).
+3.4 Multiplier sweep M in {1.0, 1.5, ..., 30.0}: per-trade combined dollar
+    PnL, commission, and floating coefficients scale linearly in M (lots30 =
+    ratio * M; spread is embedded in the recorded fills; per-leg $/pt from
+    EA-recorded tick values). For each M the simulation runs chronologically
+    UP TO ITS OWN pass date (first D1-close equity >= $10,800); M passes iff
+    no daily-loss or max-loss breach occurs up to that date (pessimistic
+    same-day rule: a breach on the pass date voids the pass). Optimal M =
+    earliest pass date (trading days from the first trade date); ties broken
+    toward the smaller multiplier.
+3.5 Cross-checks: per-trade fill-based combined gross vs the CSV gross_usd
+    (median/total drift; broker DJ30.c economics vs the study's $1/pt
+    convention), volume-normalization distortion report, per-year table.
+
+SECTION 4. GATES (verbatim in GATE_FTMO_PAIRS.txt)
+
+G-P1 EXECUTION INTEGRITY: EA compiles 0 errors/0 warnings; the reference
+tester run completes (tester log shows generation + Test passed; fresh
+ftmo_pairs_trades.csv collected from Common\Files); executed pair trades
+>= 95% of the signals armed before the EA target-stop (or tape end); every
+executed pair has BOTH legs filled and closed.
+G-P2 SWAP-FREE OVERRIDE AUDIT: every trade's analysis PnL has swap forced to
+0.00; the tester-charged swap total is reported; no trade dropped.
+G-P3 FTMO PHASE-1 FEASIBILITY: at least one M in [1.0, 30.0] (step 0.5)
+reaches equity >= $10,800 (D1-close mark) with, up to its pass date, no 5%
+daily-loss breach and equity strictly above $9,000 including worst-floating
+extremes.
+G-P4 CONFIRMATION RUN: a second tester run at the optimal M shows realized
+balance reaching >= $10,800 (within one holding period of the Python pass
+date) with no EA guard breach before the pass.
+OVERALL: PASS iff G-P1..G-P4 all PASS. G-P3 FAIL (no feasible multiplier) is
+a complete, final answer: the swap-free pairs counterfactual does not pass
+Phase 1.
+
+SECTION 5. HONESTY RULES
+
+5.1 The pairs_trades.csv list is frozen; ANY modification of entries, betas,
+    ratios, directions, or timing voids the study. lots30 is applied as
+    recorded. Fills land on real tester ticks; no fill is edited.
+5.2 Pessimistic conventions: worst-intraday-floating via simultaneous adverse
+    D1 extremes of both legs; static $9,000 floor on floating equity; daily
+    anchor is the prior-day 00:00 realized balance (tasking definition).
+5.3 Model=0 constant synthetic spread underestimates real spreads (US500
+    ~0.41 vs ~0.51 median; DJ30.c unknown, same class of bias); DJ30.c fills
+    price at US500.c tick instants; the volume-min clamp may distort the
+    legs' ratio at small multipliers (recorded per trade).
+5.4 No claim of FTMO qualification, no live authorization, no re-opening of
+   the #19 FAIL verdict. The comparison to ftmo_macro_reversal in the report
+   is descriptive scaling/risk context only.
+
+SECTION 6. ARTIFACTS (data/results/ftmo_pairs_us500_usa30/)
+
+  SPEC_FTMO_PAIRS.txt / GATE_FTMO_PAIRS.txt   (frozen before code)
+  dj30c_d1.csv                                (API export, provenance-logged)
+  compile/                                    (EA source, .ex5, compile log, sha256)
+  ini/ + batches/<label>/                     (generated configs, tester log
+                                              deltas, EA outputs, reports)
+  ftmo_pairs_trades.csv / ftmo_pairs_status.csv (archived EA outputs)
+  ftmo_pairs_equity_curve.png                 (equity + drawdown at optimal M)
+  REPORT_FTMO_PAIRS.txt                       (verdicts, optimal multiplier,
+                                              pass date, peak FTMO drawdown
+                                              percentages, macro-reversal
+                                              comparison, per-year table)
+
+END OF SPEC. FROZEN 2026-09-13.

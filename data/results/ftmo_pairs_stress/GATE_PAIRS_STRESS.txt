@@ -1,0 +1,17 @@
+GATE_PAIRS_STRESS
+Verbatim extraction of SECTION 4 gates of SPEC_PAIRS_STRESS.txt
+(frozen 2026-09-21, BEFORE any script for this study existed).
+
+G-S1 DATA INTEGRITY: both mark grids load; exactly 18 trades; all entry/exit
+dates present in the common grid; swap-free realized total (gross_usd -
+spread_cost_usd) equals $1,541.85 within $0.01 with the 0.51/2.28 pt spreads
+retained; all 18 rolling starts simulated with pass + fail + unresolved =
+18.
+
+G-S2 ROLLING PASS RATE: rolling-start pass rate over RESOLVED runs >= 50%.
+
+G-S3 MONTE-CARLO ROBUSTNESS: MC pass rate over RESOLVED runs >= 50% AND
+95th-percentile peak drawdown < 10.0%.
+
+OVERALL: PASS iff G-S1..G-S3 all PASS. FAIL is a complete, final answer: the
+#24 Multiplier=5.0 pass is start-luck/sequencing fragile.

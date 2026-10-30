@@ -1,0 +1,69 @@
+ENGINE A/B STRUCTURAL ADAPTATIONS - REPORT
+OVERALL SIXTEEN-CELL GATE: FAIL
+RTH entry in NY wall time; equities long only; owner -5% annual weekday swap.
+SWING keeps normal stops; FLAT closes at last real RTH M1 close after stop checks.
+
+ASSET | ENGINE | ARM | CLOSED | WIN% | NET/TRADE | TOTAL NET | SHARPE | MBB P | SWAP PAID | GATE
+US500 | A_KC | SWING | 73 | 39.73 | 1.250840 | 91.3113 | 0.02931 | 0.4248 | 204.4749 | FAIL
+US500 | A_KC | FLAT | 130 | 49.23 | 0.070962 | 9.2250 | 0.00409 | 0.4534 | 0.0000 | FAIL
+US500 | B_DONCHIAN | SWING | 214 | 42.99 | 3.024974 | 647.3444 | 0.05810 | 0.2561 | 375.4503 | FAIL
+US500 | B_DONCHIAN | FLAT | 344 | 54.07 | 0.239418 | 82.3597 | 0.00986 | 0.4516 | 0.0000 | FAIL
+USTECH | A_KC | SWING | 102 | 42.16 | 11.375171 | 1160.2675 | 0.04800 | 0.1894 | 999.2034 | FAIL
+USTECH | A_KC | FLAT | 201 | 53.73 | 1.527398 | 307.0070 | 0.01888 | 0.3945 | 0.0000 | FAIL
+USTECH | B_DONCHIAN | SWING | 301 | 47.18 | 12.080079 | 3636.1037 | 0.05809 | 0.1305 | 1383.5778 | FAIL
+USTECH | B_DONCHIAN | FLAT | 410 | 57.07 | 6.245357 | 2560.5966 | 0.05613 | 0.1157 | 0.0000 | FAIL
+USOIL | A_KC | SWING | 150 | 32.67 | -0.433190 | -64.9785 | -0.15525 | 0.9926 | 5.1302 | FAIL
+USOIL | A_KC | FLAT | 248 | 43.95 | -0.117810 | -29.2169 | -0.15177 | 0.9906 | 0.0000 | FAIL
+USOIL | B_DONCHIAN | SWING | 509 | 38.11 | -0.082087 | -41.7823 | -0.03869 | 0.7854 | 10.6972 | FAIL
+USOIL | B_DONCHIAN | FLAT | 679 | 49.78 | -0.046230 | -31.3904 | -0.04393 | 0.8963 | 0.0000 | FAIL
+GBPJPY | A_KC | SWING | 165 | 35.15 | -0.156240 | -25.7796 | -0.10616 | 0.9421 | 13.8562 | FAIL
+GBPJPY | A_KC | FLAT | 315 | 49.84 | 0.010736 | 3.3818 | 0.01403 | 0.3747 | 0.0000 | FAIL
+GBPJPY | B_DONCHIAN | SWING | 591 | 35.70 | -0.069977 | -41.3563 | -0.06246 | 0.9382 | 28.7932 | FAIL
+GBPJPY | B_DONCHIAN | FLAT | 839 | 48.27 | 0.005881 | 4.9345 | 0.00913 | 0.3708 | 0.0000 | FAIL
+
+ANNUAL NET PNL MATRIX (NATIVE PRICE UNITS; 2026 PARTIAL)
+ASSET | ENGINE | ARM | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026
+US500 | A_KC | SWING | 0.0000 | -45.6549 | -27.9634 | -14.2312 | 5.7450 | 175.0344 | -1.6184
+US500 | A_KC | FLAT | 0.0000 | -11.1800 | 115.7400 | -50.2490 | -7.7600 | -22.4490 | -14.8770
+US500 | B_DONCHIAN | SWING | 0.0000 | 186.9737 | -141.1637 | 247.1386 | 501.9925 | -1.1816 | -146.4151
+US500 | B_DONCHIAN | FLAT | 0.0000 | -33.0476 | -0.8791 | 184.6005 | 105.1239 | -219.3996 | 45.9616
+USTECH | A_KC | SWING | 324.9032 | 516.1382 | -914.9639 | -24.2009 | 1873.9433 | 25.4516 | -641.0041
+USTECH | A_KC | FLAT | -542.1318 | -428.2300 | 223.8700 | -126.8463 | 831.8714 | -107.9602 | 456.4340
+USTECH | B_DONCHIAN | SWING | 1488.2016 | 1886.6619 | 129.0380 | 624.8554 | 1521.5038 | -1692.2343 | -321.9226
+USTECH | B_DONCHIAN | FLAT | 536.0575 | 779.1044 | 571.0195 | 715.5393 | 930.6675 | -1995.6038 | 1023.8122
+USOIL | A_KC | SWING | -1.1111 | -9.5582 | -16.7146 | -19.2947 | -10.7206 | -5.7990 | -1.7803
+USOIL | A_KC | FLAT | 1.3060 | -2.9440 | -19.5260 | 1.6950 | -3.3060 | -4.8979 | -1.5440
+USOIL | B_DONCHIAN | SWING | 19.4745 | 0.3431 | -17.7754 | -10.3277 | -17.9924 | 2.1901 | -17.6945
+USOIL | B_DONCHIAN | FLAT | 3.0568 | 3.7249 | -20.7807 | 3.0081 | -2.5144 | -6.2011 | -11.6840
+GBPJPY | A_KC | SWING | -7.6478 | 3.3418 | -1.5867 | -5.4379 | -5.7882 | -12.2256 | 3.5649
+GBPJPY | A_KC | FLAT | -4.2944 | -0.1077 | 4.3635 | -0.2110 | -0.3515 | -2.0997 | 6.0827
+GBPJPY | B_DONCHIAN | SWING | 1.1674 | 2.6058 | -5.7708 | -20.3147 | -13.2228 | -9.0898 | 3.2686
+GBPJPY | B_DONCHIAN | FLAT | -2.4147 | -3.9978 | 9.1750 | 0.0996 | -3.1939 | 0.3921 | 4.8741
+
+SOURCE AND EXECUTION AUDIT
+US500: source {'path': 'C:\\Users\\Milad\\Desktop\\RR\\data\\results\\vwap_2021_2026\\us500tick_m1.csv', 'sha256': '29ad8f8b25b43be43a87c4ac39575c3cd280d557661c31f8e691990949087453', 'raw_rows': 1791504, 'observed_m1': 1791504, 'carried_removed': 0, 'known_2024_10_ohlc_repaired': 0, 'first_utc': 1609714800, 'last_utc': 1777593540, 'gaps_over_3h': 320, 'max_gap_hours': 73.78333333333333}, error None
+USTECH: source {'path': 'C:\\Users\\Milad\\Desktop\\RR\\data\\results\\virgin_assets\\ustech_m1.csv', 'sha256': '152f9c995b370e5391cb7da99b64a8002ceee5e52cc68899ddca409ac7e15e39', 'raw_rows': 2936100, 'observed_m1': 2297525, 'carried_removed': 638575, 'known_2024_10_ohlc_repaired': 0, 'first_utc': 1577836800, 'last_utc': 1790207940, 'gaps_over_3h': 764, 'max_gap_hours': 53.766666666666666}, error None
+USOIL: source {'path': 'C:\\Users\\Milad\\download\\lightcmdusd-m1-bid-2015-01-01-2026-09-27.csv', 'sha256': '26367f0fa8b0486694f379747da93ad9552d3238e01a5837f8db370e48ae84ea', 'raw_rows': 5127472, 'observed_m1': 3932792, 'carried_removed': 1194680, 'known_2024_10_ohlc_repaired': 0, 'first_utc': 1420156800, 'last_utc': 1790369940, 'gaps_over_3h': 1343, 'max_gap_hours': 74.26666666666667}, error None
+GBPJPY: source {'path': 'C:\\Users\\Milad\\download\\download\\gbpjpy-m1-bid-2010-01-01-2026-09-27.csv', 'sha256': 'fe6cda4fe3545d8c0a27a64e0134fea3aa078a2ce2a13e7fdfe8f23874f6e356', 'raw_rows': 7382558, 'observed_m1': 6225347, 'carried_removed': 1157211, 'known_2024_10_ohlc_repaired': 11, 'first_utc': 1262304000, 'last_utc': 1790369940, 'gaps_over_3h': 1766, 'max_gap_hours': 50.03333333333333}, error None
+US500 A_KC SWING: exits {'SL_INIT': 0, 'SL_TRAIL': 73, 'FORCED_RTH': 0}, open_end 0, closed swap 204.474868, open accrued 0.000000, rollovers 211, max mark stale 27.78h, gates {'G1': True, 'G2': True, 'G3': True, 'G4': False, 'G5': True}, funnel {'candidates': 1418, 'shadowed': 562, 'no_real_entry_bucket': 217, 'side_filtered': 344, 'outside_rth': 222, 'forced_nonfinal_minute': 0}
+US500 A_KC FLAT: exits {'SL_INIT': 1, 'SL_TRAIL': 0, 'FORCED_RTH': 129}, open_end 0, closed swap -0.000000, open accrued 0.000000, rollovers 0, max mark stale 0.00h, gates {'G1': True, 'G2': True, 'G3': True, 'G4': False, 'G5': True}, funnel {'candidates': 1418, 'shadowed': 0, 'no_real_entry_bucket': 381, 'side_filtered': 344, 'outside_rth': 563, 'forced_nonfinal_minute': 3}
+US500 B_DONCHIAN SWING: exits {'SL_INIT': 23, 'SL_TRAIL': 191, 'FORCED_RTH': 0}, open_end 0, closed swap 375.450337, open accrued 0.000000, rollovers 390, max mark stale 27.78h, gates {'G1': True, 'G2': True, 'G3': True, 'G4': False, 'G5': True}, funnel {'candidates': 2639, 'shadowed': 997, 'no_real_entry_bucket': 0, 'side_filtered': 969, 'outside_rth': 459, 'forced_nonfinal_minute': 0}
+US500 B_DONCHIAN FLAT: exits {'SL_INIT': 27, 'SL_TRAIL': 13, 'FORCED_RTH': 304}, open_end 0, closed swap -0.000000, open accrued 0.000000, rollovers 0, max mark stale 0.00h, gates {'G1': True, 'G2': True, 'G3': True, 'G4': False, 'G5': True}, funnel {'candidates': 2639, 'shadowed': 329, 'no_real_entry_bucket': 0, 'side_filtered': 969, 'outside_rth': 997, 'forced_nonfinal_minute': 10}
+USTECH A_KC SWING: exits {'SL_INIT': 1, 'SL_TRAIL': 101, 'FORCED_RTH': 0}, open_end 1, closed swap 978.305037, open accrued 20.898319, rollovers 300, max mark stale 24.78h, gates {'G1': True, 'G2': True, 'G3': True, 'G4': False, 'G5': True}, funnel {'candidates': 2080, 'shadowed': 963, 'no_real_entry_bucket': 196, 'side_filtered': 495, 'outside_rth': 323, 'forced_nonfinal_minute': 0}
+USTECH A_KC FLAT: exits {'SL_INIT': 6, 'SL_TRAIL': 0, 'FORCED_RTH': 195}, open_end 0, closed swap -0.000000, open accrued 0.000000, rollovers 0, max mark stale 0.00h, gates {'G1': True, 'G2': True, 'G3': True, 'G4': False, 'G5': True}, funnel {'candidates': 2080, 'shadowed': 0, 'no_real_entry_bucket': 417, 'side_filtered': 495, 'outside_rth': 967, 'forced_nonfinal_minute': 4}
+USTECH B_DONCHIAN SWING: exits {'SL_INIT': 32, 'SL_TRAIL': 269, 'FORCED_RTH': 0}, open_end 0, closed swap 1383.577769, open accrued 0.000000, rollovers 429, max mark stale 24.78h, gates {'G1': True, 'G2': True, 'G3': True, 'G4': False, 'G5': True}, funnel {'candidates': 3602, 'shadowed': 1192, 'no_real_entry_bucket': 0, 'side_filtered': 1343, 'outside_rth': 766, 'forced_nonfinal_minute': 0}
+USTECH B_DONCHIAN FLAT: exits {'SL_INIT': 36, 'SL_TRAIL': 18, 'FORCED_RTH': 356}, open_end 0, closed swap -0.000000, open accrued 0.000000, rollovers 0, max mark stale 0.00h, gates {'G1': True, 'G2': True, 'G3': True, 'G4': False, 'G5': True}, funnel {'candidates': 3602, 'shadowed': 433, 'no_real_entry_bucket': 0, 'side_filtered': 1343, 'outside_rth': 1416, 'forced_nonfinal_minute': 8}
+USOIL A_KC SWING: exits {'SL_INIT': 1, 'SL_TRAIL': 149, 'FORCED_RTH': 0}, open_end 0, closed swap 5.130157, open accrued 0.000000, rollovers 369, max mark stale 24.03h, gates {'G1': True, 'G2': False, 'G3': False, 'G4': False, 'G5': True}, funnel {'candidates': 3334, 'shadowed': 2151, 'no_real_entry_bucket': 160, 'side_filtered': 0, 'outside_rth': 739, 'forced_nonfinal_minute': 0}
+USOIL A_KC FLAT: exits {'SL_INIT': 1, 'SL_TRAIL': 0, 'FORCED_RTH': 247}, open_end 0, closed swap -0.000000, open accrued 0.000000, rollovers 0, max mark stale 0.00h, gates {'G1': True, 'G2': False, 'G3': False, 'G4': False, 'G5': True}, funnel {'candidates': 3334, 'shadowed': 0, 'no_real_entry_bucket': 663, 'side_filtered': 0, 'outside_rth': 2199, 'forced_nonfinal_minute': 8}
+USOIL B_DONCHIAN SWING: exits {'SL_INIT': 70, 'SL_TRAIL': 439, 'FORCED_RTH': 0}, open_end 0, closed swap 10.697250, open accrued 0.000000, rollovers 764, max mark stale 27.27h, gates {'G1': True, 'G2': False, 'G3': False, 'G4': False, 'G5': True}, funnel {'candidates': 5226, 'shadowed': 2528, 'no_real_entry_bucket': 0, 'side_filtered': 0, 'outside_rth': 1779, 'forced_nonfinal_minute': 0}
+USOIL B_DONCHIAN FLAT: exits {'SL_INIT': 46, 'SL_TRAIL': 10, 'FORCED_RTH': 623}, open_end 0, closed swap -0.000000, open accrued 0.000000, rollovers 0, max mark stale 0.00h, gates {'G1': True, 'G2': False, 'G3': False, 'G4': False, 'G5': True}, funnel {'candidates': 5226, 'shadowed': 903, 'no_real_entry_bucket': 0, 'side_filtered': 0, 'outside_rth': 3084, 'forced_nonfinal_minute': 26}
+GBPJPY A_KC SWING: exits {'SL_INIT': 0, 'SL_TRAIL': 165, 'FORCED_RTH': 0}, open_end 1, closed swap 13.856175, open accrued -0.000000, rollovers 412, max mark stale 22.02h, gates {'G1': True, 'G2': False, 'G3': False, 'G4': False, 'G5': True}, funnel {'candidates': 3735, 'shadowed': 2877, 'no_real_entry_bucket': 124, 'side_filtered': 0, 'outside_rth': 317, 'forced_nonfinal_minute': 0}
+GBPJPY A_KC FLAT: exits {'SL_INIT': 1, 'SL_TRAIL': 12, 'FORCED_RTH': 302}, open_end 0, closed swap -0.000000, open accrued 0.000000, rollovers 0, max mark stale 0.00h, gates {'G1': True, 'G2': True, 'G3': True, 'G4': False, 'G5': True}, funnel {'candidates': 3735, 'shadowed': 738, 'no_real_entry_bucket': 683, 'side_filtered': 0, 'outside_rth': 1516, 'forced_nonfinal_minute': 1}
+GBPJPY B_DONCHIAN SWING: exits {'SL_INIT': 79, 'SL_TRAIL': 512, 'FORCED_RTH': 0}, open_end 1, closed swap 28.793235, open accrued -0.000000, rollovers 877, max mark stale 24.02h, gates {'G1': True, 'G2': False, 'G3': False, 'G4': False, 'G5': True}, funnel {'candidates': 7120, 'shadowed': 4533, 'no_real_entry_bucket': 0, 'side_filtered': 0, 'outside_rth': 1151, 'forced_nonfinal_minute': 0}
+GBPJPY B_DONCHIAN FLAT: exits {'SL_INIT': 66, 'SL_TRAIL': 50, 'FORCED_RTH': 723}, open_end 0, closed swap -0.000000, open accrued 0.000000, rollovers 0, max mark stale 0.00h, gates {'G1': True, 'G2': True, 'G3': True, 'G4': False, 'G5': True}, funnel {'candidates': 7120, 'shadowed': 2427, 'no_real_entry_bucket': 0, 'side_filtered': 0, 'outside_rth': 2559, 'forced_nonfinal_minute': 3}
+
+LIMITATIONS
+Price units differ by asset and are not summed as cash portfolio equity.
+The fixed round-turn floors and -5% annualized both-side swap are owner scenarios, not verified historical FTMO charges.
+M1 BID OHLC does not reproduce broker ticks, variable spread or all intraminute event order; adverse stop has priority.
+The two arms and engines are independent counterfactuals. No capital sizing, FTMO loss guard or challenge EV is modeled.

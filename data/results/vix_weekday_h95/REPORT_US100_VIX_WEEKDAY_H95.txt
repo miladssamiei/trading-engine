@@ -1,0 +1,11 @@
+H95 US100 VIX CURVE WEEKDAY - PHASE1_PASS_NEEDS_PHASE2
+Cboe daily close signal; Dukascopy BID M1 fixed-spread proxy; no orders.
+Sources/SPEC/GATE/script SHA256: {"data\\results\\virgin_assets\\ustech_m1.csv": "152f9c995b370e5391cb7da99b64a8002ceee5e52cc68899ddca409ac7e15e39", "data\\results\\vix_weekday_h95\\VIX_History.csv": "4c1af3176a904f3a0dd6dcc55b3762283ed0d972f55c863641cd29c03bf6efd6", "data\\results\\vix_weekday_h95\\VIX9D_History.csv": "6b5ca2eb12aae4c072e21ec6ee8f7806f7e4c12e319e2bf754fdc6ee44ea97cb"} / 7c290599080102afe52ef4d43002d0abf88e42b5ced7fc40bc5451f442fc059a / 5b4a94f15f19fb31327940cc4b8b27fd933183b32758eeca4b6c53b8aa50cc13 / 9f3fefaf18f7a9a730aa533989b187a00412804569175b0a6b35ed6daee9cd39
+All/evaluation trades: (345, 142)
+Unresolved/missing signal: (0, 0)
+Coverage/sides: {"EXECUTED": 345, "NO_PRIOR_ATR": 4, "NO_MONDAY_CASH_OPEN": 1, "INCOMPLETE_TAPE_WEEK": 1} / {"LONG": 128, "SHORT": 14}
+Evaluation stressed mean/total/bootstrap P: (78.67803864051679, 11172.281486953383, 0.0121)
+Annual: {"2024": {"n": 53, "stress_sum": 1080.388917842687}, "2025": {"n": 52, "stress_sum": 5438.592183064131}, "2026": {"n": 37, "stress_sum": 4653.300386046571}}
+Gates: {"G-VW1": true, "G-VW2": true, "G-VW3": true, "G-VW4": true, "G-VW5": "NOT_RUN", "G-VW6": true}
+H94 asset outcomes were exposed before H95; no genuinely unseen forward confirmation.
+Native FTMO variable quotes, EUR conversion, floating equity and two-stage prop pace untested.

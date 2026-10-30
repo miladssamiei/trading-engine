@@ -1,0 +1,41 @@
+REPORT: ASIAN RANGE LONDON BREAKOUT - PHASE 1 (HYPOTHESIS #38)
+Generated: 2026-09-23 17:11:59  |  script: evaluate/asian_range_breakout_eurusd_phase1.py
+SPEC/GATE: data/results/asian_range_breakout/{SPEC,GATE}_ASIAN_BREAKOUT.txt (frozen before code)
+
+VERDICT: FAIL   (G-AS1=True, G-AS2=True, G-AS3=False)
+
+1. FUNNEL (UTC dates, tape eurusdtick_m1.csv)
+   dates in tape: 2101
+   morning-active dates (>=1 bar before 17:00 UTC): 1748
+   no Asian-window bars: 0
+   Asian range > 30 pips (blocked): 582
+   tight-range valid days: 1166  (mean 20.0 / median 20.2 pips)
+   valid days with no breakout-window bars: 0
+   candidates: LONG 631 / SHORT 631
+   dropped no-entry: 0  degenerate-risk: 0
+   FINAL SIGNALS: 1262  (LONG 631 / SHORT 631)
+   by year: 2020=177, 2021=244, 2022=97, 2023=211, 2024=253, 2025=149, 2026=131
+
+2. AGGREGATE EXCURSIONS (pips, pre-cost)
+   n=1262  MFE 27.57 vs MAE 26.74  diff +0.83
+   medians: MFE 21.20 vs MAE 20.45  MFE>MAE share 51.2%
+   risk multiples: MFE/R 1.408 vs MAE/R 1.389
+   LONG: n=631  MFE 27.09 vs MAE 26.43  diff +0.66
+   SHORT: n=631  MFE 28.05 vs MAE 27.06  diff +1.00
+
+3. RAW TIME-EXIT EXPECTANCY (descriptive, pre-cost)
+   mean raw PnL +1.099 pips (median +1.300, win 51.2%)
+   vs verified London/NY overlap cost floor 0.3 pips -> mean clears the floor
+   by direction: LONG +0.017, SHORT +2.181
+
+4. GATES (frozen verbatim in GATE file)
+   G-AS1 >= 150 signals: 1262 -> True
+   G-AS2 mean MFE > mean MAE (strict): 27.571 vs 26.742 -> True
+   G-AS3 bootstrap P(mean(MFE-MAE)<=0) <= 0.20: 0.2021 (n_day_blocks=1074) -> False
+   OVERALL PHASE-1: FAIL
+
+5. NOTES AND CAVEATS
+   - Pre-cost Bid-tape screen; 0.3-pip overlap median floor reported alongside, never netted in gates.
+   - Tight-range filter (>30 pips blocked) is the frozen archetype condition; no range-grid search.
+   - First close-breakout per direction per day; dropped candidates (no-entry/degenerate) do not re-arm.
+   - Null result is final for this artifact.

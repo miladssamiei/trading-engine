@@ -1,0 +1,72 @@
+FUTURES PROP VALIDATION INTRADAY - REPORT
+VERDICT: FAIL
+H52 is a 15m Bollinger pullback; H53 is a 1h sweep/FVG. No frozen 15m SMC order-block rule exists. Both unselected D interpretations are reported.
+Bid-only CFD proxy bars, owner-supplied futures cost floors in fills; no CME executions or account-dollar prop threshold.
+Per-trade Net Sharpe is unannualized. Same-bar share uses each engine's execution timeframe.
+
+GC / C_H56_M1 | 2020-01-01T23:00:00+00:00 .. 2026-09-01T20:59:00+00:00 | 2337538 M1 rows
+  Executed 503; net expectancy 0.666831 price units/trade; total 335.4160; Net Sharpe 0.19888; MBB p 0.0000; gate PASS
+  Exits: normal stops 190, targets 313, PROP_LIQUIDATION 0, END 0
+  Same execution-bar exit share 10.54%; exact same-M1-minute share 10.54%
+  Funnel {'setups': 12940, 'busy': 10721, 'cooldown': 0, 'killed': 37, 'expired': 1679, 'entered': 503, 'trend_dead': 541}
+  Annual entry cohorts: 2020: n=80 net=35.914, 2021: n=50 net=1.827, 2022: n=58 net=15.941, 2023: n=37 net=35.026, 2024: n=72 net=28.502, 2025: n=133 net=88.178, 2026: n=73 net=130.028
+
+GC / D52_H52_M15 | 2020-01-01T23:00:00+00:00 .. 2026-09-01T20:59:00+00:00 | 2337538 M1 rows
+  Executed 329; net expectancy -3.709815 price units/trade; total -1220.5293; Net Sharpe -0.09936; MBB p 0.9535; gate FAIL
+  Exits: normal stops 116, targets 213, PROP_LIQUIDATION 0, END 0
+  Same execution-bar exit share 9.73%; exact same-M1-minute share 5.78%
+  Funnel {'candidates': 15509, 'busy': 3856, 'cooldown': 0, 'unfilled': 6682, 'no_real': 4642, 'invalid_risk': 0}
+  Annual entry cohorts: 2020: n=43 net=-128.921, 2021: n=41 net=-131.562, 2022: n=34 net=22.787, 2023: n=57 net=47.053, 2024: n=52 net=-92.349, 2025: n=54 net=-367.858, 2026: n=48 net=-569.680
+
+GC / D53_H53_H1 | 2020-01-01T23:00:00+00:00 .. 2026-09-01T20:59:00+00:00 | 2337538 M1 rows
+  Executed 3747; net expectancy -0.054932 price units/trade; total -205.8320; Net Sharpe -0.00406; MBB p 0.5743; gate FAIL
+  Exits: normal stops 598, targets 3071, PROP_LIQUIDATION 78, END 0
+  Same execution-bar exit share 75.21%; exact same-M1-minute share 65.15%
+  Funnel {'candidates': 10204, 'busy': 5820, 'cooldown': 563, 'unfilled': 0, 'no_real': 72, 'invalid_risk': 2}
+  Annual entry cohorts: 2020: n=497 net=-314.763, 2021: n=633 net=0.907, 2022: n=552 net=148.468, 2023: n=594 net=-24.602, 2024: n=568 net=64.094, 2025: n=613 net=-790.652, 2026: n=290 net=710.716
+
+NQ / C_H56_M1 | 2020-01-01T00:00:00+00:00 .. 2026-09-23T23:59:00+00:00 | 2936100 M1 rows
+  Executed 447; net expectancy 1.343841 price units/trade; total 600.6970; Net Sharpe 0.23476; MBB p 0.0000; gate PASS
+  Exits: normal stops 149, targets 298, PROP_LIQUIDATION 0, END 0
+  Same execution-bar exit share 27.29%; exact same-M1-minute share 27.29%
+  Funnel {'setups': 61398, 'busy': 58073, 'cooldown': 0, 'killed': 774, 'expired': 2104, 'entered': 447, 'trend_dead': 1662}
+  Annual entry cohorts: 2020: n=65 net=78.281, 2021: n=97 net=37.144, 2022: n=52 net=98.852, 2023: n=82 net=146.598, 2024: n=76 net=62.018, 2025: n=49 net=112.195, 2026: n=26 net=65.609
+
+NQ / D52_H52_M15 | 2020-01-01T00:00:00+00:00 .. 2026-09-23T23:59:00+00:00 | 2936100 M1 rows
+  Executed 0; net expectancy nan price units/trade; total 0.0000; Net Sharpe nan; MBB p nan; gate FAIL
+  Exits: normal stops 0, targets 0, PROP_LIQUIDATION 0, END 0
+  Same execution-bar exit share nan%; exact same-M1-minute share nan%
+  Funnel {'candidates': 0, 'busy': 0, 'cooldown': 0, 'unfilled': 0, 'no_real': 0, 'invalid_risk': 0}
+  Annual entry cohorts: 
+
+NQ / D53_H53_H1 | 2020-01-01T00:00:00+00:00 .. 2026-09-23T23:59:00+00:00 | 2936100 M1 rows
+  Executed 3796; net expectancy -0.005904 price units/trade; total -22.4100; Net Sharpe -0.00006; MBB p 0.5187; gate FAIL
+  Exits: normal stops 684, targets 2973, PROP_LIQUIDATION 138, END 1
+  Same execution-bar exit share 70.21%; exact same-M1-minute share 61.20%
+  Funnel {'candidates': 10180, 'busy': 5712, 'cooldown': 665, 'unfilled': 0, 'no_real': 7, 'invalid_risk': 0}
+  Annual entry cohorts: 2020: n=557 net=842.591, 2021: n=590 net=-770.412, 2022: n=533 net=1080.250, 2023: n=527 net=-1960.088, 2024: n=580 net=-1713.651, 2025: n=532 net=2654.793, 2026: n=477 net=-155.893
+
+ES / C_H56_M1 | 2021-01-03T23:00:00+00:00 .. 2026-04-30T23:59:00+00:00 | 1791504 M1 rows
+  Executed 752; net expectancy 0.344358 price units/trade; total 258.9570; Net Sharpe 0.08548; MBB p 0.0087; gate PASS
+  Exits: normal stops 321, targets 431, PROP_LIQUIDATION 0, END 0
+  Same execution-bar exit share 8.38%; exact same-M1-minute share 8.38%
+  Funnel {'setups': 17916, 'busy': 15575, 'cooldown': 0, 'killed': 30, 'expired': 1559, 'entered': 752, 'trend_dead': 643}
+  Annual entry cohorts: 2021: n=106 net=26.925, 2022: n=213 net=102.302, 2023: n=122 net=-4.283, 2024: n=94 net=32.422, 2025: n=170 net=79.175, 2026: n=47 net=22.416
+
+ES / D52_H52_M15 | 2021-01-03T23:00:00+00:00 .. 2026-04-30T23:59:00+00:00 | 1791504 M1 rows
+  Executed 276; net expectancy -1.406368 price units/trade; total -388.1575; Net Sharpe -0.03050; MBB p 0.7062; gate FAIL
+  Exits: normal stops 86, targets 190, PROP_LIQUIDATION 0, END 0
+  Same execution-bar exit share 7.25%; exact same-M1-minute share 5.07%
+  Funnel {'candidates': 13269, 'busy': 3151, 'cooldown': 0, 'unfilled': 4981, 'no_real': 4861, 'invalid_risk': 0}
+  Annual entry cohorts: 2021: n=46 net=-152.554, 2022: n=52 net=105.193, 2023: n=65 net=118.002, 2024: n=51 net=-105.431, 2025: n=44 net=-335.309, 2026: n=18 net=-18.058
+
+ES / D53_H53_H1 | 2021-01-03T23:00:00+00:00 .. 2026-04-30T23:59:00+00:00 | 1791504 M1 rows
+  Executed 2720; net expectancy 0.444075 price units/trade; total 1207.8850; Net Sharpe 0.02019; MBB p 0.1438; gate PASS
+  Exits: normal stops 509, targets 2109, PROP_LIQUIDATION 102, END 0
+  Same execution-bar exit share 67.87%; exact same-M1-minute share 56.58%
+  Funnel {'candidates': 7407, 'busy': 4198, 'cooldown': 456, 'unfilled': 0, 'no_real': 32, 'invalid_risk': 1}
+  Annual entry cohorts: 2021: n=530 net=31.197, 2022: n=481 net=653.684, 2023: n=491 net=409.407, 2024: n=533 net=-393.293, 2025: n=481 net=169.706, 2026: n=204 net=337.184
+
+Overnight swap in the new model = 0. Comparable baseline CFD swap charges for all three mapped sources are not defined; total swap saved is N/A.
+Apex's real threshold is account-wide and a breach ends an evaluation; this per-trade 2.5R guard with cooldown is the requested diagnostic overlay, not firm-rule compliance.
+Frozen source parameters were transferred without optimization. Retrospective full-tape gates are exploratory, not walk-forward confirmation.

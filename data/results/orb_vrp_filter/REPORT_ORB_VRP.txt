@@ -1,0 +1,39 @@
+REPORT: VRP-CONDITIONED ORB - PHASE 1 (HYPOTHESIS #31)
+Generated: 2026-09-21 23:44:57  |  script: evaluate/orb_vrp_filter_phase1.py
+SPEC/GATE: data/results/orb_vrp_filter/{SPEC,GATE}_ORB_VRP.txt (frozen before code)
+
+VERDICT: FAIL   (G-VRP1=True, G-VRP2=True, G-VRP3=False, best_arm=A (High VRP > P50))
+
+1. DATA AND JOIN
+  Trades: data\results\orb_2021_present\py_trades.csv (source rows=442, 2021-01-06 .. 2026-04-22)
+  Features: data\results\daily_feature_engineering\daily_features_stationary.csv (rows=1112, 2022-01-04 .. 2026-04-30, column vrp; s->s+1 shift already applied in source)
+  Inner join on NY trading date: 368 trades, 2022-01-06 .. 2026-04-22 (BASELINE timeframe)
+  Trailing 252-obs percentiles inclusive of d (causal; vrp(d) known by day-d open);
+  first arm-eligible trade date: 2022-12-22 (268 trades arm-eligible, 100 in warmup dead-zone)
+
+2. METRICS (net = gross - 0.51 pt spread; no swap, ORB is intraday; per-trade Sharpe x sqrt(252))
+  BASELINE (joined timeframe):     n=368 win=51.9% gross=547.91 net=360.23 avg_net=0.979 net_sharpe=0.525
+  BASELINE (warmup-matched, descr):n=268 win=51.5% gross=309.14 net=172.46 avg_net=0.644 net_sharpe=0.345
+  Arm A (High VRP > P50): n=171 win=51.5% gross=540.56 net=453.35 avg_net=2.651 net_sharpe=1.560 edge_conc=+170.8%
+  Arm B (Very High VRP > P75): n=118 win=49.2% gross=241.77 net=181.59 avg_net=1.539 net_sharpe=0.937 edge_conc=+57.2%
+  Arm C (Extreme VRP > P90): n=53 win=50.9% gross=140.24 net=113.21 avg_net=2.136 net_sharpe=1.374 edge_conc=+118.2%
+  Arm D (Low VRP < P50, control): n=97 win=51.5% gross=-231.42 net=-280.89 avg_net=-2.896 net_sharpe=-1.365 edge_conc=-395.8%
+
+3. EDGE CONCENTRATION (avg net PnL/trade vs joined baseline)
+  Arm A: +170.8%  (avg_net 2.651 vs baseline 0.979)
+  Arm B: +57.2%  (avg_net 1.539 vs baseline 0.979)
+  Arm C: +118.2%  (avg_net 2.136 vs baseline 0.979)
+
+4. GATES (frozen verbatim in GATE file)
+  G-VRP1 at least one of A/B/C retains >= 100 trades: A n=171; B n=118; C n=53 -> True
+  G-VRP2 best arm (A) net Sharpe 1.5599 > baseline 0.5255: True
+  G-VRP3 best arm (A) win rate 0.5146 > baseline 0.5190: False
+  OVERALL PHASE-1: FAIL
+
+5. NOTES AND CAVEATS
+  - Arms cover only post-warmup dates (2022-12-22 onward); the joined baseline includes the warmup year,
+    so arm-vs-baseline comparisons embed a regime-shift; the warmup-matched baseline row isolates this.
+  - Arm D is the inverted control (bottom 50%); it is never eligible as the best passing arm.
+  - Multiple arms are nested (B is a subset of A); no multiple-comparison correction is applied -
+    this is a pre-declared screen, not a selection tournament.
+  - Null result is final for this artifact.

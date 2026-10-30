@@ -1,0 +1,114 @@
+REPORT: HYPOTHESIS 74 PAXG WEEKEND GOLD CONTINUATION
+{
+  "source": {
+    "source_manifest_sha256": "b8dc6726c5686861475109bea8b9bfa82c3587da335df6a01d9cbea468c6e9fc",
+    "source_months": 73,
+    "source_months_ok": 73,
+    "source_rows": 52649,
+    "first_utc": "2020-08-28 12:00:00+00:00",
+    "last_utc": "2026-08-31 23:00:00+00:00"
+  },
+  "xau_sha256": "a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f",
+  "spec_sha256": "c83d97f77c428368234b712aebc82a48f3a172dcfc3c3f971da75610ec459098",
+  "gate_sha256": "c59926dd4c023073e7063364c27ce64f6fe04b8646dc6d6272a8ba0e564d9b38",
+  "signal_sundays": 314,
+  "executed_sundays": 288,
+  "skip_reasons": {
+    "ZERO_SIGNAL": 16,
+    "MISSING_XAU_ENTRY": 9,
+    "MISSING_XAU_EXIT": 1
+  },
+  "calibration_through_2022": {
+    "trades": 109,
+    "gross_mean_units": -0.3577339449541404,
+    "base_mean_units": -0.7677339449541404,
+    "base_total_units": -83.6830000000013,
+    "stress_mean_units": -1.1777339449541404,
+    "stress_total_units": -128.3730000000013,
+    "win_rate_base": 0.46788990825688076
+  },
+  "gated_2023_plus": {
+    "trades": 179,
+    "gross_mean_units": 2.183290502793278,
+    "base_mean_units": 1.7732905027932786,
+    "base_total_units": 317.41899999999686,
+    "stress_mean_units": 1.3632905027932787,
+    "stress_total_units": 244.02899999999687,
+    "win_rate_base": 0.5307262569832403
+  },
+  "bootstrap_p_nonpositive": 0.1266,
+  "yearly": {
+    "2020": {
+      "trades": 18,
+      "gross_mean_units": 0.8399444444444271,
+      "base_mean_units": 0.4299444444444269,
+      "base_total_units": 7.738999999999685,
+      "stress_mean_units": 0.01994444444442678,
+      "stress_total_units": 0.358999999999682,
+      "win_rate_base": 0.5
+    },
+    "2021": {
+      "trades": 50,
+      "gross_mean_units": 0.17449999999999363,
+      "base_mean_units": -0.23550000000000637,
+      "base_total_units": -11.775000000000318,
+      "stress_mean_units": -0.6455000000000065,
+      "stress_total_units": -32.275000000000325,
+      "win_rate_base": 0.54
+    },
+    "2022": {
+      "trades": 41,
+      "gross_mean_units": -1.5326097560975773,
+      "base_mean_units": -1.9426097560975775,
+      "base_total_units": -79.64700000000067,
+      "stress_mean_units": -2.3526097560975776,
+      "stress_total_units": -96.45700000000068,
+      "win_rate_base": 0.36585365853658536
+    },
+    "2023": {
+      "trades": 43,
+      "gross_mean_units": 0.4612558139534739,
+      "base_mean_units": 0.051255813953473846,
+      "base_total_units": 2.2039999999993753,
+      "stress_mean_units": -0.35874418604652636,
+      "stress_total_units": -15.426000000000634,
+      "win_rate_base": 0.5116279069767442
+    },
+    "2024": {
+      "trades": 52,
+      "gross_mean_units": -0.05990384615386382,
+      "base_mean_units": -0.46990384615386344,
+      "base_total_units": -24.435000000000898,
+      "stress_mean_units": -0.8799038461538641,
+      "stress_total_units": -45.75500000000093,
+      "win_rate_base": 0.5384615384615384
+    },
+    "2025": {
+      "trades": 49,
+      "gross_mean_units": -2.219795918367328,
+      "base_mean_units": -2.6297959183673267,
+      "base_total_units": -128.85999999999902,
+      "stress_mean_units": -3.039795918367328,
+      "stress_total_units": -148.94999999999908,
+      "win_rate_base": 0.46938775510204084
+    },
+    "2026": {
+      "trades": 35,
+      "gross_mean_units": 13.795999999999927,
+      "base_mean_units": 13.385999999999928,
+      "base_total_units": 468.5099999999975,
+      "stress_mean_units": 12.975999999999928,
+      "stress_total_units": 454.15999999999747,
+      "win_rate_base": 0.6285714285714286
+    }
+  },
+  "gates": {
+    "G-PW1": true,
+    "G-PW2": true,
+    "G-PW3": false,
+    "G-PW4": false
+  },
+  "verdict": "FAIL",
+  "caveat": "BID M1 plus fixed-spread proxy, not variable native quotes; no stop, intraday floating-risk or FTMO pace validation. Historical data previously exposed to project research."
+}
+FINAL PHASE-1 VERDICT: FAIL

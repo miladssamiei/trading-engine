@@ -1,0 +1,43 @@
+HYPOTHESIS 92: H91 WEEKLY GOLD TREND DAILY-ANCHOR CORRECTION
+Declared 2026-09-25 before H92 code or H92 return run.
+H91 REPORT is immutable FINAL_FAIL and does not establish the weekly
+rule's effect because its inherited H30 daily date shifted New York
+timestamps by eight hours: 325 daily bars received Saturday labels,
+which caused the H91 prior-Thursday-or-Friday freshness gate to skip
+most weeks (only 23 historical trades). This count is a source-date
+diagnostic, not an H92 return or profit calculation.
+
+H92 inherits the complete H91 signal, 21 completed trading-day
+momentum, ATR20, first real Monday 00:00-00:05 M1 entry, single
+weekly trade, 2*ATR stop path, first real Thursday 14:00-14:15
+M1 exit, source hash, zero swap, commission, base/stress costs,
+always-long descriptive benchmark, bootstrap, calendar splits,
+honesty and Phase-2 stop rules verbatim except this one source-date
+correction: assign each M1 bar to the trading day given by its
+America/New_York WALL timestamp plus seven wall hours. Thus
+Sunday 17:00 belongs to Monday and Friday 16:59 belongs to Friday;
+no Saturday trading-day labels are permitted. Group only real M1
+bars to daily OHLC; no synthetic OHLC. A completed daily bar must
+end before the Monday 00:00 signal, and its date must still be the
+immediately preceding Thursday or Friday. The 21-bar close lag and
+ATR20 are computed on this corrected series, without tuning or
+substituting a different rule.
+
+The exact same frozen H91 BID+0.41 ASK, per-side 0.000007 gold
+commission, and further 0.66 spread/slippage stress apply. OOS is
+2024 through the tape end; the tape has been seen in earlier studies
+and is not independent forward confirmation. All resolved/unresolved
+weeks and benchmark coverage must be reported. A Phase-1 FAIL ends
+H92 with no challenge replay. If it passes, declare the two-stage
+EUR10000 90-day prop replay under a separate SPEC/GATE before code.
+No account orders are authorized.
+
+VERBATIM GATES
+G-WC1: At least 100 fully resolved executed 2024-2026 weeks, zero unresolved exits and every entry and exit backed by a real source M1 bar before Friday.
+G-WC2: Strictly positive mean 2024-2026 stressed net gold units per trade after 0.41 executable spread, current metal commission and an additional 0.66 spread/slippage stress.
+G-WC3: Five-week circular moving-block bootstrap P(mean stressed net <= 0) at most 0.05, 10000 draws and seed 20261002.
+G-WC4: Strictly positive 2024, 2025 and partial-2026 stressed net gold totals separately.
+G-WC5: If Phase 1 passes, a separately frozen two-stage EUR10000 90-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts in one fixed risk row.
+G-WC6: Source hash, corrected completed-day signals, real M1 fills, same-week exits, zero swap and fixed predeclared costs are verified with no account orders.
+
+All six gates must pass; Phase-1 PASS is not a verified system.

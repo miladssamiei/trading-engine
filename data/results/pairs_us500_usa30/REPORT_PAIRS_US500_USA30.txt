@@ -1,0 +1,37 @@
+REPORT_PAIRS_US500_USA30
+Study dir: data/results/pairs_us500_usa30/
+Script: evaluate/pairs_us500_usa30.py
+Executed: 2026-09-10 21:09:53 UTC
+SPEC: SPEC_PAIRS_US500_USA30.txt (pre-declared 2026-09-10)
+
+DATA
+  us500: us500c_d1.csv D1 closes (3146 bars)
+  usa30: usa30tick_m1.csv M1 -> last-bar-before-16:00 NY daily closes (1716 days)
+  joined NY cash dates: 2020-01-02..2026-08-27 (1713 days)
+  note: overlap extends past the expected 2026-04 boundary if the refreshed D1 spine allows; actual intersection governs
+  rolling mean beta: 1.1850 (min 0.7076 max 1.7514)
+
+COST INPUTS
+  spreads: US500 0.51 pt, USA30 2.28 pt (per side, both legs)
+  US500 swap: long -20 / short 2 pt per night, Wednesday x5
+  USA30.c swap: MISSING (symbol not found in broker symbol table; near-matches: ['AUDJPY', 'AUDJPY.cnt', 'AUDJPY.ecn', 'CADJPY', 'CADJPY.cnt', 'CADJPY.ecn', 'DJ30.c', 'DJ30.ecn', 'NZDJPY', 'NZDJPY.cnt']) - USA30 swap treated as 0.0 AND FLAGGED; net metrics are net-of-spread only
+  dollars/point: US500 1.0000, USA30 1.0000
+
+GATES
+  G-P1 ADF p<0.05 fraction 0.2231 >= 0.40 : FAIL
+  G-P2 gross expectancy per trade 87.37 USD > 0 : PASS
+  G-P3 net annualized Sharpe -0.8344 > 0 : FAIL
+
+PERFORMANCE (USD, 1.0-lot US500 base, no compounding)
+  trades: 18
+  hold avg: 56.3 nights
+  gross total 1572.62 | spread total -30.77 | swap total -5510.00
+  net total -3968.14 | win rate 44.4%
+  Sharpe gross 0.6166 | Sharpe net -0.8344
+  exits: {'MEAN_REVERT': 13, 'HARD_STOP': 5}
+  by direction: {'LONG_SPREAD': {'count': 10, 'sum': -7179.05}, 'SHORT_SPREAD': {'count': 8, 'sum': 3210.91}}
+
+VERDICT: FAIL
+CAVEAT: G-P3 evaluated with USA30 swap unavailable (broker has no USA30.c); true net Sharpe can only be worse than reported unless the USA30 leg swap is a large credit, which is atypical.
+
+Artifacts: pairs_trades.csv (18 rows), this report.

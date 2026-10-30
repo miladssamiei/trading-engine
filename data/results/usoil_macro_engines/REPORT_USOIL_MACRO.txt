@@ -1,0 +1,24 @@
+US OIL ENGINE A/B MACRO TRANSFER - REPORT
+OVERALL PHASE-1 GATE: DATA BLOCKED
+Full 2010-2026 Dukascopy LIGHTCMDUSD BID M1; scored entries 2020-2026.
+Net price units = BID-coordinate gross -0.03 floor - modeled swap.
+
+ACQUISITION: {'command': 'npx dukascopy-node -i lightcmdusd -from 2010-01-01 -to 2026-09-27 -t m1 -f csv --cache', 'cwd': 'C:\\Users\\Milad\\download', 'attempted': True, 'return_code': 1, 'stdout_tail': '\nSomething went wrong:\n > fetch failed\n\n', 'stderr_tail': 'npm notice run npx\nnpm notice run dukascopy-cli -i lightcmdusd -from 2010-01-01 -to 2026-09-27 -t m1 -f csv --cache\n', 'status': 'COMMAND_FAILED'}
+SOURCE: None
+
+ENGINE | CLOSED | WIN% | GROSS/TRADE | NET/TRADE | TOTAL NET | SWAP PAID ALL | SHARPE | MBB P | GATE
+A_KC | NA | NA | NA | NA | NA | NA | NA | NA | DATA BLOCKED
+B_DONCHIAN | NA | NA | NA | NA | NA | NA | NA | NA | DATA BLOCKED
+
+YEAR-BY-YEAR NET PNL MATRIX (USD PRICE UNITS PER ONE BARREL; 2026 PARTIAL)
+ENGINE | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026
+A_KC | NA | NA | NA | NA | NA | NA | NA
+B_DONCHIAN | NA | NA | NA | NA | NA | NA | NA
+
+ENGINE AUDIT
+
+LIMITATIONS
+The 0.03 spread and -5% annual swap are owner assumptions applied to all years, not verified historical FTMO USOIL charges.
+Swap USD values are per one barrel, not per broker lot; absolute cash needs verified contract size and volume.
+Dukascopy LIGHTCMDUSD is a BID proxy and can have roll/quote gaps; no broker ticks, variable spread, slippage or account guard is modeled.
+A and B may overlap. Their price-unit totals are not a sized account equity curve. OPEN_END financing is included in swap paid but not closed-return statistics.

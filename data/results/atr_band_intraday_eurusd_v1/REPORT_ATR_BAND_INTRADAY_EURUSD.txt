@@ -1,0 +1,23 @@
+REPORT: EURUSD INTRADAY ATR LOWER-BAND LIMIT TRANSFER, HYPOTHESIS 62
+Generated UTC: 2026-09-24T23:20:20.798811+00:00   PHASE-1 VERDICT: FAIL
+Fixed H22/#61 long rule; EURUSD 08:00-11:00 NY; M1 Ask proxy; 0.3-pip median spread.
+Prior exposure means historical replication, not virgin out-of-sample evidence.
+
+FUNNEL: {"eligible_bars": 61865, "m1_rows": 2490896, "m1_sha256": "e578692f3b02d985a97c17d13f0fbd0f6797e47c9b31a43970667d020f4d7242", "m5_rows": 500814, "m5_sha256": "20f1a145497434c31a2629cb224cea026c2b53ab8871e41f2a83ee7e51027d1a", "no_printed_m1_in_order_window": 0, "orders_filled": 328, "orders_unfilled": 61537, "session_days": 1740, "valid_days": 1732}
+CALIBRATION (diagnostic): {"double_cost_mean_pips": -1.1255000879000108, "exit_counts": {"STOP": 119, "TARGET": 63, "TIME": 12}, "gross_mean_pips": -0.52550008790001, "max_drawdown_pips": 310.00892050136895, "median_hold_wall_minutes": 2.0, "n": 194, "net_mean_pips": -0.8255000879000103, "net_total_pips": -160.147017052602, "same_entry_m1_exit_fraction": 0.28350515463917525, "win_rate": 0.3711340206185567}
+TEST 2024+ (gated): {"double_cost_mean_pips": -1.1816443422047556, "exit_counts": {"STOP": 92, "TARGET": 41, "TIME": 1}, "gross_mean_pips": -0.5816443422047549, "max_drawdown_pips": 164.4217544146187, "median_hold_wall_minutes": 1.0, "n": 134, "net_mean_pips": -0.8816443422047553, "net_total_pips": -118.14034185543721, "same_entry_m1_exit_fraction": 0.373134328358209, "win_rate": 0.31343283582089554}
+BOOTSTRAP (date blocks): {"ci_95_high_pips": 0.48680211537295015, "ci_95_low_pips": -2.1591519891670012, "date_blocks": 130, "p_mean_le_zero": 0.8966}
+GATES: {"G-EAB1": false, "G-EAB2": false, "G-EAB3": false, "G-EAB4": false}
+YEARLY:
+  2020: {"double_cost_mean_pips": 2.0524659866086745, "exit_counts": {"STOP": 12, "TARGET": 11, "TIME": 4}, "gross_mean_pips": 2.6524659866086746, "max_drawdown_pips": 40.18598866942335, "median_hold_wall_minutes": 2.0, "n": 27, "net_mean_pips": 2.3524659866086743, "net_total_pips": 63.516581638434204, "same_entry_m1_exit_fraction": 0.1111111111111111, "win_rate": 0.5555555555555556}
+  2021: {"double_cost_mean_pips": -0.5213280230405736, "exit_counts": {"STOP": 25, "TARGET": 17, "TIME": 4}, "gross_mean_pips": 0.07867197695942713, "max_drawdown_pips": 69.01628199998953, "median_hold_wall_minutes": 2.0, "n": 46, "net_mean_pips": -0.22132802304057303, "net_total_pips": -10.181089059866359, "same_entry_m1_exit_fraction": 0.1956521739130435, "win_rate": 0.41304347826086957}
+  2022: {"double_cost_mean_pips": -3.0790956348323055, "exit_counts": {"STOP": 29, "TARGET": 11, "TIME": 2}, "gross_mean_pips": -2.4790956348323037, "max_drawdown_pips": 152.50891869015402, "median_hold_wall_minutes": 2.0, "n": 42, "net_mean_pips": -2.779095634832304, "net_total_pips": -116.72201666295676, "same_entry_m1_exit_fraction": 0.3333333333333333, "win_rate": 0.2857142857142857}
+  2023: {"double_cost_mean_pips": -1.524816366686242, "exit_counts": {"STOP": 53, "TARGET": 24, "TIME": 2}, "gross_mean_pips": -0.9248163666862416, "max_drawdown_pips": 173.7669138947573, "median_hold_wall_minutes": 1.0, "n": 79, "net_mean_pips": -1.2248163666862415, "net_total_pips": -96.76049296821309, "same_entry_m1_exit_fraction": 0.3670886075949367, "win_rate": 0.3291139240506329}
+  2024: {"double_cost_mean_pips": -1.8698790645718768, "exit_counts": {"STOP": 50, "TARGET": 18}, "gross_mean_pips": -1.2698790645718765, "max_drawdown_pips": 128.1072086345736, "median_hold_wall_minutes": 1.0, "n": 68, "net_mean_pips": -1.569879064571877, "net_total_pips": -106.75177639088763, "same_entry_m1_exit_fraction": 0.45588235294117646, "win_rate": 0.2647058823529412}
+  2025: {"double_cost_mean_pips": -0.19947659808780344, "exit_counts": {"STOP": 23, "TARGET": 14}, "gross_mean_pips": 0.40052340191219715, "max_drawdown_pips": 39.386585838245836, "median_hold_wall_minutes": 2.0, "n": 37, "net_mean_pips": 0.10052340191219673, "net_total_pips": 3.719365870751279, "same_entry_m1_exit_fraction": 0.2702702702702703, "win_rate": 0.3783783783783784}
+  2026: {"double_cost_mean_pips": -0.8209631494931334, "exit_counts": {"STOP": 19, "TARGET": 9, "TIME": 1}, "gross_mean_pips": -0.22096314949313295, "max_drawdown_pips": 32.82702488604183, "median_hold_wall_minutes": 2.0, "n": 29, "net_mean_pips": -0.5209631494931332, "net_total_pips": -15.107931335300862, "same_entry_m1_exit_fraction": 0.3103448275862069, "win_rate": 0.3448275862068966}
+
+OVERALL PHASE-1 VERDICT: FAIL
+PASS only permits a new predeclared Model=4 real-tick execution study.
+FAIL is final; no post-hoc subset or tuning rescues this artifact.
+Fixed-spread Bid M1 cannot establish real Ask fills or exact minute path.

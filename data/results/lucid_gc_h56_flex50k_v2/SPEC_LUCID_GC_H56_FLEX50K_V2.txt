@@ -1,0 +1,18 @@
+LUCID GC H56 50K FLEX - RISK RESERVE CORRECTION V2 SPEC
+Date: 2026-09-26. Frozen before V2 code or report.
+
+V1 is preserved as historical diagnostic. Its short-side pretrade reserve
+used the structural risk from the source ledger but omitted the difference
+between the V1 source's 0.13 gold-unit execution floor and each new scenario
+cost. V2 fixes only that reserve calculation: short stop proxy loss in gold
+units = initial_risk + (scenario_cost - 0.13) + extra adverse cost. Long stop
+proxy loss remains initial_risk + scenario_cost + extra adverse cost. Multiply
+by ounces and contract count. This matches the V1 gross-ledger cost transfer.
+
+All other V1 SPEC choices, fixed case grid, data caveats, Lucid account model,
+rolling-start method, reporting, stop rules and no-order policy remain the
+same. The V1 SPEC/GATE/REPORT remain unchanged. V2 output is separately named.
+
+The source is a fully exposed XAUUSD bid-M1 proxy with optimistic bar-extreme
+entry, not CME GC, historical bid/ask, contract rolls or Lucid fills. No
+statistical proxy result can satisfy the native execution gate.

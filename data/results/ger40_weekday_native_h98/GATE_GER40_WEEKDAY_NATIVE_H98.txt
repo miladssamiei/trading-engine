@@ -1,0 +1,6 @@
+G-GE1: At least 120 fully resolved 2024-2026 Monday-to-Thursday GER40 trades on distinct Berlin entry dates, zero unresolved required exits, and native real-tick-derived M1 fills only.
+G-GE2: Strictly positive 2024-2026 mean stressed native GER40 points per trade after actual variable ASK/BID spread and another 7.60 points stress.
+G-GE3: Five-week circular moving-block bootstrap P(mean stressed GER40 points <= 0) at most 0.05 using 10000 draws and seed 20261008.
+G-GE4: Strictly positive stressed GER40 point totals separately in complete 2024, complete 2025 and partial 2026.
+G-GE5: If Phase 1 passes, a separately frozen exact-native EUR10000 two-stage 180-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts at fixed 2% initial risk.
+G-GE6: Tick-derived source hash, native first-tick variable Ask/Bid, causal prior completed cash ATR, actual Bid stop path, fixed prior-known closure skips, no weekend position, zero-swap assumption and fixed stress are verified with no account orders.

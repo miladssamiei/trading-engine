@@ -1,0 +1,12 @@
+H90 BEFORE-RUN ACCOUNT-TERMS CLARIFICATION
+Written 2026-09-25 after H90 SPEC/GATE and evaluator code, but BEFORE
+the first H90 return run. The owner confirms the connected EUR10000
+FTMO-Demo account is a Free Trial with the same specifications as
+their target EUR10000 swap-free prop account. The owner separately
+states news holds are permitted. Apply the already-frozen H90 zero-
+swap and news-allowed assumptions. The connected MT5 symbol's
+negative default swap fields are not a reason to silently charge
+swap against this owner-stated account setting. Any later native
+tester must reconcile actual swap postings or explicit swap-free
+configuration before its results can establish target execution.
+No signal, parameter, source, cost stress or gate is changed.

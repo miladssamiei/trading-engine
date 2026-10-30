@@ -1,0 +1,20 @@
+LUCID MICRO GOLD H70 50K FLEX - PREDECLARED GATES
+Frozen before the evaluator and report.
+
+G1: Exactly 321 H70 quote-path rows matching the frozen 15:59 quote ledger;
+zero unresolved required exits; all positions same NY weekday and closed
+strictly before 16:45 New York. Any violation FAIL.
+G2: At least 50 complete 180-calendar-day rolling entry-day starts. Otherwise
+FAIL. Source-invalid starts remain in the denominator for G3.
+G3: For a fixed sizing/cost row, at least 50% of all complete starts pass the
+50K Flex evaluation within 180 days with at most 10% BREACH_FLOAT or closed-
+balance breach. Otherwise that row is a diagnostic FAIL.
+G4: For a fixed row, net dollar sums for complete 2024, complete 2025 and
+partial 2026 are each strictly positive. Otherwise diagnostic FAIL.
+G5: A tradeable GO requires native, point-in-time CME GC/MGC quotes or trades
+with roll handling, actual spread/fees, and prospective Lucid-platform fills.
+Spot CFD quote paths and assumed futures costs cannot satisfy this gate.
+Otherwise overall NO GO regardless of G1-G4.
+
+No parameter search, row selection as proof, post-hoc gate change or
+re-interpretation of a FAIL. All rows and null outcomes must be reported.

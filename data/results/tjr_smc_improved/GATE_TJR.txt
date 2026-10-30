@@ -1,0 +1,4 @@
+G1: Each asset requires at least 150 closed trades.
+G2: Each asset requires net expectancy > 0 after its strict fixed spread floor.
+G3: Each asset requires moving-block bootstrap P(mean net <= 0) <= 0.05 using 10000 resamples, block length 5, seed 20261012.
+G4: The overall two-asset Phase 1 screen passes only if XAUUSD and US500 both pass G1-G3; a Phase 1 pass is eligible for separately predeclared execution/forward validation, not a live-verified system.

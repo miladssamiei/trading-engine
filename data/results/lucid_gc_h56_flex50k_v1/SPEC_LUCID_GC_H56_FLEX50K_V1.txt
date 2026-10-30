@@ -1,0 +1,73 @@
+LUCID GC H56 50K FLEX - PREDECLARED ACCOUNT TRANSFER SPEC
+Date: 2026-09-26. Written before this transfer evaluator or its outputs.
+
+PURPOSE
+Test whether the frozen, corrected C_H56_M1 gold proxy ledger could clear a
+Lucid 50K Flex evaluation under optimistic account arithmetic. This is a
+diagnostic, not a native GC backtest, live recommendation or new H56 verdict.
+Preserve all prior H56 and futures proxy SPEC/GATE/REPORT artifacts.
+
+INPUT AND RULE
+Read only the GC / C_H56_M1 rows in the immutable V2 futures intraday
+remeasurement trades.csv, in entry-time order. H56 is the three-completed-M1-
+candle aligned expansion with a >1.0 gold-unit gap and middle body >1.5x
+neighbors. Later pullback at the M1 bar extreme, EMA60 direction, ADX14 >=20,
+NY entry [01:00,05:00), structural pre-spike stop, 1R target, at most one
+position, no overnight hold. Do not refit or select parameters on this ledger.
+All rows must have entry/exit on the same New York weekday and exit strictly
+before 16:45 America/New_York; any violation fails the time gate.
+
+DATA LIMITS
+The signal and exits were measured on XAUUSD bid-only M1 bars, not a CME GC
+contract, quotes, market orders, depth, roll-adjusted continuous future or
+Lucid platform fills. M1-bar-extreme entry is optimistic and intraminute
+path is unknown. The proxy is fully exposed 2020-2026 and not a prospective
+walk-forward confirmation. These missing sources fail the native evidence
+gate regardless of favorable account arithmetic.
+
+ACCOUNT AND COST
+Assume Lucid 50K Flex evaluation, no optional daily-loss limit. Starting
+balance $50,000; profit target $3,000; max loss $2,000; 50% largest positive
+day / account profit consistency; max 4 minis or 40 micros. EOD closing
+balance high-water mark trails by $2,000 until it locks at $50,100 when a
+closing balance exceeds $52,100. Evaluate the active MLL after each trade and
+at each day close. Conservative pretrade safety check: if balance minus the
+trade's structural stop loss reaches the active MLL, count as breach before
+entry. This checks risk reserve, not actual historical floating equity.
+The true floating path and margin remain unverified.
+
+GC = 100 troy ounces and MGC = 10. Both tick by $0.10/oz. Lucid lists
+commission $2.30/GC side, $0.80/MGC side. Assume exactly one tick bid/ask
+spread, zero slippage and no extra fee: GC cost 0.146 gold units/contract
+round trip, MGC 0.26. This is a scenario floor, not observed spread. Derive
+proxy net dollars as (ledger gross - scenario cost - extra adverse cost) x
+contract ounces x count. Gross is only the proxy ledger price change; this
+does not re-run brackets under new costs. Run the complete fixed grid:
+  1 GC, 1-tick spread, 0 extra; 1 GC, 1-tick, 0.5 extra gold units;
+  2 GC, 1-tick, 0 extra; 5 MGC, 1-tick, 0 extra.
+The 0.5 extra case represents five additional gold price ticks round trip;
+it is a diagnostic stress, not an empirical fill estimate.
+
+ROLLING EVALUATION
+Use every unique entry day from 2020 through the last entry day that leaves
+a complete 180-calendar-day horizon before the data end. A start uses all
+trades with entry day >= start and < start+180 calendar days, chronological.
+Start balance and MLL reset for each start. Pass at the first closed trade
+where balance >=$53,000 and the largest positive daily closed PnL divided by
+total account profit is <=0.5. A breach at or below active MLL occurs first.
+Loss check uses dollar stop bound: long risk = initial_risk+scenario cost+
+extra cost; short risk = initial_risk+extra cost (the structural ask stop
+already includes the scenario spread), multiplied by ounces and count.
+Track session daily PnL for consistency. Update EOD MLL only after the last
+trade of the NY day. Zero-trade days do not change its high watermark.
+If neither pass nor breach by horizon end, label timeout. Also report full-
+ledger mean, annual sums, and 180-day pass/breach/timeout for all four rows.
+No order, vendor purchase or historical artifact overwrite is authorized.
+
+GATES AND HONESTY
+The verbatim gates are frozen in GATE_LUCID_GC_H56_FLEX50K_V1.txt before the
+runner. A row can only be called a diagnostic PASS if all numerical gates
+pass. Overall GO additionally needs genuine CME point-in-time GC Bid/Ask or
+trade/quote data, contract roll handling, and Lucid-platform forward fills;
+the proxy cannot meet that evidence gate. A favorable diagnostic is not a
+verified strategy and does not support buying an evaluation.

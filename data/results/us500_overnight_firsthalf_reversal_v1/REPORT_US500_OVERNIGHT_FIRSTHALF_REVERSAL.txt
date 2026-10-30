@@ -1,0 +1,146 @@
+REPORT: H81 US500 OVERNIGHT GAP FIRST-HALF-HOUR REVERSAL
+{
+  "study": "H81 US500 overnight-firsthalf reversal",
+  "source": {
+    "sha256": "a8ee68f1a0010a1be9704c0d59fd5382aa798846cdae4d519b799ae21ec66c2d",
+    "selected_m5_rows": 10913,
+    "valid_cash_dates": 1325,
+    "first_cash_date": "2021-01-04",
+    "last_cash_date": "2026-04-30",
+    "valid_firsthalf_dates": 1324
+  },
+  "spec_sha256": "68abb3ba552b8fff6dde6e484d2d3335c7d97e800528cb0a1bfdf491af6eeecd",
+  "gate_sha256": "3062115aec11f7d5720c11e15a21b3f5e676874fb213e839ebe4eb5cf4082f6a",
+  "signal_dates": 1325,
+  "executed": 633,
+  "skip_reasons": {
+    "GAP_NOT_ABOVE_PRIOR_MEDIAN": 650,
+    "MISSING_20_PRIOR_COMPLETE_DAYS": 41,
+    "MISSING_OR_INVALID_CURRENT_REAL_M5_PATH": 1
+  },
+  "calibration_2021_2023": {
+    "trades": 346,
+    "dates": 346,
+    "gross_mean_points": -0.8298713872832169,
+    "base_mean_points": -1.339871387283217,
+    "base_total_points": -463.5954999999931,
+    "stress_mean_points": -1.8498713872832164,
+    "base_win_rate": 0.44508670520231214,
+    "stops": 67,
+    "longs": 168,
+    "shorts": 178
+  },
+  "gated_2024_2026": {
+    "trades": 287,
+    "dates": 287,
+    "gross_mean_points": 0.1362508710801118,
+    "base_mean_points": -0.37374912891988843,
+    "base_total_points": -107.26600000000798,
+    "stress_mean_points": -0.8837491289198877,
+    "base_win_rate": 0.45993031358885017,
+    "stops": 61,
+    "longs": 108,
+    "shorts": 179
+  },
+  "bootstrap": {
+    "p_mean_nonpositive": 0.6541,
+    "ci95_points": [
+      -2.3387407665505555,
+      1.6180310540069027
+    ]
+  },
+  "annual": {
+    "2021": {
+      "trades": 110,
+      "dates": 110,
+      "gross_mean_points": 0.53205000000001,
+      "base_mean_points": 0.022050000000010332,
+      "base_total_points": 2.4255000000011364,
+      "stress_mean_points": -0.4879499999999896,
+      "base_win_rate": 0.509090909090909,
+      "stops": 25,
+      "longs": 44,
+      "shorts": 66
+    },
+    "2022": {
+      "trades": 125,
+      "dates": 125,
+      "gross_mean_points": -2.8556919999999884,
+      "base_mean_points": -3.365691999999989,
+      "base_total_points": -420.71149999999864,
+      "stress_mean_points": -3.875691999999986,
+      "base_win_rate": 0.376,
+      "stops": 21,
+      "longs": 71,
+      "shorts": 54
+    },
+    "2023": {
+      "trades": 111,
+      "dates": 111,
+      "gross_mean_points": 0.10180630630634574,
+      "base_mean_points": -0.40819369369365377,
+      "base_total_points": -45.309499999995566,
+      "stress_mean_points": -0.9181936936936538,
+      "base_win_rate": 0.4594594594594595,
+      "stops": 21,
+      "longs": 53,
+      "shorts": 58
+    },
+    "2024": {
+      "trades": 130,
+      "dates": 130,
+      "gross_mean_points": -0.31891923076927925,
+      "base_mean_points": -0.8289192307692791,
+      "base_total_points": -107.75950000000628,
+      "stress_mean_points": -1.3389192307692792,
+      "base_win_rate": 0.45384615384615384,
+      "stops": 26,
+      "longs": 43,
+      "shorts": 87
+    },
+    "2025": {
+      "trades": 116,
+      "dates": 116,
+      "gross_mean_points": -0.39067672413793375,
+      "base_mean_points": -0.9006767241379353,
+      "base_total_points": -104.4785000000005,
+      "stress_mean_points": -1.4106767241379328,
+      "base_win_rate": 0.45689655172413796,
+      "stops": 31,
+      "longs": 43,
+      "shorts": 73
+    },
+    "2026": {
+      "trades": 41,
+      "dates": 41,
+      "gross_mean_points": 3.0702926829267976,
+      "base_mean_points": 2.560292682926798,
+      "base_total_points": 104.9719999999987,
+      "stress_mean_points": 2.0502926829267976,
+      "base_win_rate": 0.4878048780487805,
+      "stops": 4,
+      "longs": 22,
+      "shorts": 19
+    }
+  },
+  "challenge_180d_1pct": {
+    "starts": 230,
+    "pass": 0,
+    "breach": 8,
+    "timeout": 222,
+    "pass_rate": 0.0,
+    "breach_rate": 0.034782608695652174,
+    "median_days_to_pass": null
+  },
+  "gates": {
+    "G-OG1": true,
+    "G-OG2": false,
+    "G-OG3": false,
+    "G-OG4": false,
+    "G-OG5": true,
+    "G-OG6": false
+  },
+  "verdict": "FAIL",
+  "limitations": "Fixed-spread BID M5 proxy, not actual Bid/Ask fills or FTMO feed; all historical US500 years previously exposed to project research."
+}
+PHASE-1 VERDICT: FAIL

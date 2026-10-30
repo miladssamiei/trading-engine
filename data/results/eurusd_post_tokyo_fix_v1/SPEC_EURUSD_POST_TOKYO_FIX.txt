@@ -1,0 +1,78 @@
+HYPOTHESIS 69: EURUSD POST-TOKYO-FIX DOLLAR REVERSAL
+Declared 2026-09-25 before this study's code or Phase-1 run.
+
+1. EXTERNAL MECHANISM AND FIXED RULE
+Krohn et al., Foreign Exchange Fixings and Returns around the Clock,
+Journal of Finance 2024, https://doi.org/10.1111/jofi.13306,
+Table I reports EURUSD midpoint appreciation of +2.34 basis points
+from the 09:55 Tokyo fixing to 02:00 New York in 1999-2019 data.
+The paper explicitly accounts for New York DST because Tokyo has no
+DST, and reports that Tokyo-fix reversal disappears on Japanese
+holidays. Ex ante broker-CFD rule: BUY EURUSD at 09:55:05 Asia/Tokyo
+on every Monday-Friday Tokyo civil date; sell at 02:00:00
+America/New_York on the same civil date. Five seconds after the
+fix allows reaction to the known clock instant. Include Japanese
+holidays rather than sourcing a possibly revised calendar; this
+dilutes the published effect and avoids a post-hoc date filter.
+This is the final third prepublished fix leg considered here.
+Failed #67 and #68 verdicts remain final. Three legs are a small
+part of many earlier project hypotheses; historical significance
+alone cannot validate a live edge after broad research selection.
+
+2. QUOTE SOURCE AND ROSTER
+Use only verified raw EURUSD CSV C:/Users/Milad/download/
+eurusd-tick-2020-01-01-2026-09-20.csv with epoch-ms UTC timestamp,
+askPrice, bidPrice, and source sha256
+23376d5ffd9d5f287f92875faa4df303032162158fff20387c4c284894a8e3b1.
+Construct Monday-Friday Asia/Tokyo dates 2020-01-02 through
+2026-09-18 inclusive, independent of prices. Map 09:55:05 Tokyo
+and 02:00:00 New York to UTC using IANA time zones. The session
+may cross midnight in New York, but lasts about five to six hours
+and does not cross the 17:00 New York swap/rollover boundary.
+
+3. EXECUTION PROXY AND COST
+Take first valid quote at or after target within 10 seconds
+inclusive for both entry and exit. Valid: finite, positive Ask
+and Bid with Ask>=Bid. Count and exclude invalid sampled quotes;
+skip and log dates missing either quote. No holiday, news,
+volatility, spread, or day-of-week filter; no stop, target, extra
+attempt, or alternate exit. Enter long at Ask, close at Bid.
+Midpoint gross pips = (exitMid-entryMid)/0.00010. Executable quote
+net pips = (exitBid-entryAsk)/0.00010. Actual quote spread is
+charged; extra-cost stress net pips = quote net - 0.3 to buffer
+additional slippage/latency equal to the user's spread floor.
+No swap expected during this exact hold. First quote is an
+optimistic fill proxy: live latency, rejection and market impact
+are untested.
+
+4. PARTITION AND INFERENCE
+2020-2023 is descriptive only; 2024-01-01 through 2026-09-18
+is the gated chronological historical block. Published source
+sample ended 2019; no parameters are estimated from this broker
+tape. Report every year, with 2026 partial separated; quote and
+midpoint net means/totals, stress means, win rate, measured spread
+distribution, hold duration, max drawdown, skipped-date funnel.
+Bootstrap gated Tokyo dates with replacement 10000 times, seed
+20261005; report P(mean quote net<=0) and 95% descriptive quantiles.
+Use Bonferroni one-sided alpha 0.05/3 = 0.0166667 for the three
+published fix legs tested in sequence. This does not account for
+all prior project search, so later independent forward trading
+observation remains mandatory even after a historical PASS.
+
+5. GATES, FROZEN BEFORE PHASE 1
+G-PTF1: At least 150 executed EURUSD trades on distinct 2024-2026 Tokyo dates.
+G-PTF2: Strictly positive mean extra-cost stress net pips per executed trade in the gated block.
+G-PTF3: Date-bootstrap P(mean executable quote net <= 0) at most 0.0166667, 10000 resamples, seed 20261005.
+G-PTF4: Strictly positive executable quote-net total pips in each complete gated year 2024 and 2025.
+All gates required for Phase-1 PASS. Otherwise FAIL is final for
+this artifact. Never rescue a failure by changing signal time,
+direction, exit, or filtering Japanese holidays after observation.
+
+6. STOP RULE AND ARTIFACTS
+Save frozen SPEC, verbatim GATE, date roster, quote trades, skips,
+metadata, and REPORT even on FAIL. On FAIL do not run Model=4 MT5.
+On PASS first freeze a new Model=4 order-execution SPEC/GATE that
+requires >=150 trades, year-sign agreement, positive expectation,
+and order-state reconciliation. Independent forward confirmation
+must follow because this tape has hosted extensive research.
+Never alter historical SPEC/GATE/REPORT artifacts.

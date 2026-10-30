@@ -1,0 +1,25 @@
+GATE_FTMO_HYBRID_LONG
+Verbatim extraction of SECTION 4 gates of SPEC_FTMO_HYBRID_LONG.txt
+(frozen 2026-09-16, BEFORE any EA/ini/orchestrator code existed).
+
+G-H1 EXECUTION INTEGRITY: EA compiles 0 errors/0 warnings; the reference
+tester run completes (tester log shows generation + Test passed; fresh
+ftmo_hybrid_long_trades.csv collected from Common\Files); executed trades
+>= 95% of the signals armed before the EA target-stop (or tape end); every
+executed trade has both an open and a close fill recorded.
+
+G-H2 SWAP-FREE OVERRIDE AUDIT: every trade's analysis PnL has swap forced to
+0.00; the tester-charged swap total is reported; no trade dropped.
+
+G-H3 FTMO PHASE-1 FEASIBILITY: at least one M in [1.0, 30.0] (step 0.5)
+reaches close-event equity >= $10,800 with, up to and including its pass
+date, no 5% daily-loss breach (worst-floating audit per SPEC 3.2) and
+worst-case equity strictly above $9,000.
+
+G-H4 CONFIRMATION RUN: a second tester run at the optimal M shows realized
+balance reaching >= $10,800 (within two trades of the Python pass point)
+with no EA guard breach before the pass.
+
+OVERALL: PASS iff G-H1..G-H4 all PASS. G-H3 FAIL (no feasible multiplier) is
+a complete, final answer: the swap-free ATR band-touch long counterfactual
+does not pass Phase 1.

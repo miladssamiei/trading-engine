@@ -1,0 +1,26 @@
+US OIL ENGINE A/B 2015-SOURCE CORRECTION - REPORT
+OVERALL PHASE-1 GATE: FAIL
+V1 exact 2010-start download returned fetch failed; earliest Dukascopy-node LIGHTCMDUSD M1 is 2011-09-23.
+V2 uses local 2015-2026 BID M1 with five pre-2020 warmup years; scoring 2020-2026 is unchanged.
+Net price units = BID-coordinate gross -0.03 floor - modeled swap per one barrel.
+SOURCE: {'source': 'C:\\Users\\Milad\\download\\lightcmdusd-m1-bid-2015-01-01-2026-09-27.csv', 'sha256': '26367f0fa8b0486694f379747da93ad9552d3238e01a5837f8db370e48ae84ea', 'raw_rows': 5127472, 'observed_m1': 3932792, 'carried_removed': 1194680, 'first_utc': 1420156800, 'last_utc': 1790369940, 'annual_observed_m1': {'2015': 321069, '2016': 329381, '2017': 291449, '2018': 325691, '2019': 319874, '2020': 343081, '2021': 347676, '2022': 354264, '2023': 349432, '2024': 345696, '2025': 345171, '2026': 260008}, 'gaps_over_3h': 1343, 'max_gap_hours': 74.26666666666667}
+ERROR: None
+
+ENGINE | CLOSED | WIN% | GROSS/TRADE | NET/TRADE | TOTAL NET | SWAP PAID ALL | SHARPE | MBB P | GATE
+A_KC | 231 | 33.33 | -0.258472 | -0.319250 | -73.7468 | 7.1099 | -0.11919 | 0.9821 | FAIL
+B_DONCHIAN | 802 | 35.16 | 0.033835 | -0.011788 | -9.4542 | 12.5298 | -0.00579 | 0.5639 | FAIL
+
+YEAR-BY-YEAR NET PNL MATRIX (PRICE UNITS; 2026 PARTIAL)
+ENGINE | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026
+A_KC | 8.4048 | -11.0961 | -44.5199 | -15.1799 | -7.7880 | -1.6911 | -1.8766
+B_DONCHIAN | 25.3021 | 7.3671 | -19.5155 | -14.0882 | -30.2269 | 9.0770 | 12.6301
+
+ENGINE AUDIT
+A_KC: closed swap paid 7.109851, OPEN_END accrued 0.000000, rollovers 504, weighted rollovers 734, max stale mark 24.35h, open_end 0, exits {'SL_INIT': 2, 'SL_TRAIL': 229}, gates {'G1': True, 'G2': False, 'G3': False, 'G4': False, 'G5': False}, annual counts {'2020': 30, '2021': 36, '2022': 41, '2023': 35, '2024': 35, '2025': 31, '2026': 23}, funnel {'candidates': 3334, 'shadowed': 2821, 'no_real_entry_bar': 103}
+B_DONCHIAN: closed swap paid 12.529797, OPEN_END accrued 0.000000, rollovers 893, weighted rollovers 1275, max stale mark 27.27h, open_end 0, exits {'SL_INIT': 119, 'SL_TRAIL': 683}, gates {'G1': True, 'G2': False, 'G3': False, 'G4': False, 'G5': False}, annual counts {'2020': 100, '2021': 117, '2022': 120, '2023': 126, '2024': 135, '2025': 121, '2026': 83}, funnel {'candidates': 5226, 'shadowed': 3802, 'no_real_entry_bar': 0}
+
+LIMITATIONS
+The original 2010-start source requirement is unavailable; this V2 does not claim a 2010-2026 tape.
+The fixed 0.03 spread and -5% annualized swap are owner assumptions, not verified historical FTMO terms.
+Swap dollars are per one barrel, not a broker lot; quote gaps can leave stale rollover marks.
+BID M1 OHLC cannot reproduce broker ticks, variable spread, futures rolls, slippage or FTMO account rules.

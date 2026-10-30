@@ -1,0 +1,127 @@
+HYPOTHESIS #50 SPEC: DUAL-TIMEFRAME KELTNER CHANNEL BREAKOUT MOMENTUM (4h execution, D1 17:00 ET anchor)
+Study ID: cross_asset_kc_breakout
+Date frozen: 2026-09-23, before any evaluation code was written or run.
+Status: frozen. Corrections or re-measurements require a NEW study name.
+Lineage: fourth cross-asset study. #47/#48 (squeeze family) and #49 (Alligator
+1:1 bracket) all FAILed. This study tests an execution-level KC(29/2.77)
+breakout gated by a D1 EMA(50) direction filter, with an EMA-baseline riding
+stop - a stop paradigm not yet screened (stop = channel baseline, not ATR
+trail or fixed bracket). Parameterization (EMA 29/50, 2.77 multiplier, 1.5xATR
+clamp) is owner-supplied and frozen as given; no parameter search, one run per
+instrument.
+
+1. DATA
+1.1 Tapes (verified M1, epoch-UTC time, columns time,open,high,low,close,
+    tick_volume; sorted ascending defensively before aggregation):
+    - US500 : data/results/vwap_2021_2026/us500tick_m1.csv  (points; cost floor 0.51)
+    - EURUSD: data/results/eurusd_onboarding/eurusdtick_m1.csv (pips, 1 pip = 0.0001; cost floor 0.3)
+    - XAUUSD: data/results/xauusd_onboarding/xauusdtick_m1.csv (price units; cost floor 0.41)
+1.2 Timezone America/New_York (EST/EDT) for all wall-time logic.
+1.3 Cost floors are round-trip, subtracted once per trade from gross.
+
+2. MULTI-TIMEFRAME AGGREGATION
+2.1 Continuous 1h base grid: M1 epochs floored to 3600s slots; open=first,
+    high=max, low=min, close=last, volume=sum per slot; reindexed to the FULL
+    continuous 3600s grid with missing bars forward-filled OHLC = prior close,
+    volume = 0 (synthetic flat bars). NY wall hour boundaries align exactly
+    with the epoch-3600 grid (NY UTC offset is always whole hours).
+2.2 4h execution bars: built FROM the continuous 1h grid by NY WALL-clock
+    bucket [00:00-04:00), [04:00-08:00), ... DST-transition buckets span 3 or
+    5 real hours; buckets are contiguous by construction.
+2.3 D1 anchor bars: strict forex/CFD daily bars ENDING 17:00 ET - built FROM
+    the same continuous 1h grid by NY WALL-clock daily bucket [17:00, 17:00).
+    DST-transition days span 23 or 25 real hours in wall bucketing; the first
+    and last buckets of the tape may be partial. Because the [16:00-20:00) 4h
+    bucket straddles the 17:00 boundary, D1 bars are aggregated at 1h
+    resolution (never from the 4h series) so daily closes are true 17:00 ET
+    closes. Both series derive from the same continuous grid (strictly
+    aligned).
+2.4 For a 4h execution bar t with wall start w: the most recently completed
+    D1 bar is the [17:00,17:00) bucket whose end <= w (the daily bucket
+    strictly before the bucket containing w). Its Close and EMA include that
+    bar's own 17:00 close, known at its end.
+
+3. STATE MACHINE (causal indicators)
+3.1 D1 anchor trend filter: EMA(50) of D1 Close (span=50, adjust=False,
+    masked NaN before index 49). Direction of the prior completed D1 bar k:
+    BULLISH iff Close(k) > EMA50(k); BEARISH iff Close(k) < EMA50(k);
+    equality arms neither side.
+3.2 4h execution Keltner channels, evaluated on the strictly prior 4h bar
+    t-1 (its EMA/ATR include bar t-1's close, known at its close):
+    - Base: EMA(29) of 4h Close (span=29, adjust=False, masked NaN < 28).
+    - Range: Wilder ATR(29) on 4h High/Low/Close (TR=max(H-L,|H-cPrev|,
+      |L-cPrev|), ATR(28)=mean(TR 0..28), ATR(i)=(ATR(i-1)*28+TR(i))/29).
+    - Upper(t-1) = EMA29(t-1) + 2.77*ATR29(t-1);
+      Lower(t-1) = EMA29(t-1) - 2.77*ATR29(t-1).
+3.3 Armed: bar t is armed iff Close(t-1), Upper(t-1), Lower(t-1), EMA29(t-1),
+    ATR29(t-1) and the mapped D1 Close/EMA50 direction are all non-NaN
+    (implicit warmup ~29 4h bars + ~50 D1 buckets).
+
+4. SIGNALS AND EXECUTION
+4.1 Long signal at 4h bar t: Close(t-1) > Upper(t-1) AND D1 anchor BULLISH.
+    Short: Close(t-1) < Lower(t-1) AND D1 anchor BEARISH.
+4.2 Execution cap: max ONE open trade per instrument; signals while a trade
+    is open are counted (ignored-while-open) and discarded. A trade occupies
+    bars [entry_bar, exit_bar] inclusive; the next actionable signal is at
+    exit_bar + 1 or later.
+4.3 Entry: Open price of the signal bar t.
+
+5. EXCURSION WALK AND EMA-BASELINE RIDING STOP
+5.1 Initial risk distance D = max(|Entry - EMA29(t-1)|, 1.5*ATR29(t-1))
+    (EMA-baseline distance, clamped at a minimum of 1.5*ATR to prevent
+    degenerate tight stops; both terms from the strictly prior bar t-1,
+    frozen at entry). Initial SL = Entry - D (long) / Entry + D (short).
+    R multiple = side*(Exit - Entry)/D.
+5.2 Walk 4h bars j = entry_bar, entry_bar+1, ... in order (long case; short
+    mirrored):
+    a) Open(j) <= SL -> exit at Open(j), reason SL_GAP (honest fill);
+    b) Low(j)  <= SL -> exit at SL, reason SL (worst-case default);
+    c) at the close of j, ratchet to the EMA baseline: SL = max(SL,
+       EMA29(j)) for longs (mins for shorts). EMA29(j) includes bar j's
+       close, known at that close.
+5.3 If no stop is hit by the final 4h bar, exit at that bar's close, reason
+    FORCED_EOD, included in results.
+5.4 Per-trade record includes MFE/MAE excursions over [entry_bar..exit_bar]
+    (long MFE = max High - Entry, MAE = Entry - min Low; short mirrored),
+    in instrument units, descriptive only.
+
+6. ECONOMICS
+6.1 Gross = side*(Exit - Entry) in instrument units: points for US500 and
+    XAUUSD, pips (x10,000) for EURUSD. Net = Gross - cost floor (0.51 / 0.3 /
+    0.41 respectively), one round trip per trade.
+6.2 Net Sharpe (per-trade convention): mean(Net)/std(Net, ddof=1) * sqrt(252)
+    over executed trades of the instrument.
+
+7. PHASE 1 GATES (applied INDEPENDENTLY to each instrument; frozen verbatim in
+   GATE_KC_BREAKOUT.txt)
+    G-KC1: Total executed signals >= 30.
+    G-KC2: Net Sharpe Ratio > 0.
+    G-KC3: Moving-block bootstrap (10,000 resamples, block=5 trades,
+           seed 20260928) P(mean Net PnL <= 0) <= 0.20.
+    VERDICT RULE: an instrument PASSES only if G-KC1 AND G-KC2 AND G-KC3 all
+    PASS. OVERALL verdict PASS only if ALL THREE instruments PASS. Any FAIL is
+    final for this artifact; corrections require a new study name. Null
+    results are complete, expected deliverables.
+
+8. OUTPUTS (data/results/cross_asset_kc_breakout/)
+    SPEC_KC_BREAKOUT.txt (this file), GATE_KC_BREAKOUT.txt (written before
+    the run), REPORT_KC_BREAKOUT_PHASE1.txt (funnel, net expectancy, win
+    rate, MFE/MAE excursion asymmetry), kc_breakout_signals.csv (all
+    instruments, asset column), run_meta.json (sha256 lineage of tapes and
+    script, funnel, gates, verdict).
+
+9. HONESTY / ANTI-LEAK RULES
+9.1 All 4h inputs strictly prior (bar t-1); all D1 inputs completed buckets;
+    entries only at 4h bar opens; no intrabar lookahead; gap fills at the
+    open; worst-case same-bar stop.
+9.2 Single frozen parameterization; no optimization, no re-runs, no post-hoc
+    filtering; sides, years and instruments reported separately and pooled.
+9.3 CONSEQUENCE OF 2.1, declared honestly: synthetic flat bars feed the
+    indicators - EMA flattens toward the last close, Wilder ATR decays across
+    long gaps (narrowing the channels), and flat closes cannot print new
+    breakouts. D1 direction persists unchanged across flat weekend buckets.
+    Accepted under the declared continuity convention; no bar-skipping or
+    ATR-freezing fix is applied.
+9.4 Phase 2 (MT5 execution) only on overall PASS; in-sample character of
+    this screen acknowledged; MFE/MAE are exploratory descriptors, never
+    results.

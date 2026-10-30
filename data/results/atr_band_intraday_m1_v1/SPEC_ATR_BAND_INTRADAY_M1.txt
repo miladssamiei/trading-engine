@@ -1,0 +1,100 @@
+HYPOTHESIS 61: INTRADAY ATR LOWER-BAND LIMIT TOUCH WITH M1 PATH AUDIT
+Declared 2026-09-25 before this study's code or Phase-1 run.
+
+1. PROVENANCE AND MECHANISM
+Hypothesis 22's fixed long rule, Close(M5,i-1) - 3.1 x ATR14(M5,i-1),
+has positive bar-model expectancy on both US500 and XAUUSD. Its source
+code fills at a Bid-bar low touching that band and assumes an exact
+limit fill, often followed by an exit on the same M5 bar. A later
+FTMO replay used market entry at the bar open, which does not test the
+intended limit order. The present study is a NEW, predeclared fidelity
+and intraday test: a buy limit must be reachable on the Ask side at
+the instrument's documented median spread, entry/exit are walked on
+M1, and all trades are forced flat within a fixed same-day session.
+This is motivated by the known artifact; it does not change or reopen
+the frozen H22 or FTMO verdicts. Existing full-tape exposure makes any
+PASS historical and non-virgin. Both assets and all parameters below
+are fixed now, with no parameter or side search.
+
+2. VERIFIED TAPES AND PRICE CONVENTION
+US500-tick: M5 data/results/orb_2021_present/us500tick_m5.csv and M1
+data/results/vwap_2021_2026/us500tick_m1.csv; spread 0.51 point.
+XAUUSD-tick: M5 data/results/xauusd_onboarding/xauusdtick_m5.csv and
+M1 data/results/xauusd_onboarding/xauusdtick_m1.csv; spread 0.41 gold
+price unit. Both are Bid OHLC exports from imported ticks. Convert
+epoch UTC to America/New_York. Build no M15 bars. Exact M1 printed
+minutes only; never forward-fill missing minutes. Skip dates without
+the specified entry-session opening M5 bar or exact exit minute.
+US500 session: eligible entry M5 opens [09:35,15:50] ET, forced exit
+at exact printed 15:59 M1 close. Cash day needs a 09:30 M5 bar.
+XAUUSD session: eligible entry M5 opens [08:20,13:20] ET, forced exit
+at exact printed 13:29 M1 close. Gold day needs an 08:20 M5 bar.
+These are fixed liquid-session choices, not optimized from results.
+One long position maximum per asset; assets are independent.
+
+3. CAUSAL INDICATOR AND LIMIT ORDER
+Use the source script's ACTUAL Wilder ATR seed so the fidelity change
+isolates execution: TR[0] = High[0]-Low[0], later TR = max(H-L,
+abs(H-Cprev), abs(L-Cprev)); ATR[14] = mean(TR[0:15]); for k>14,
+ATR[k] = (13*ATR[k-1]+TR[k])/14. ATR is computed across the full
+M5 tape, including overnight gaps. For eligible M5 bar i, after
+bar i-1 completed, buy-limit Ask level L = CloseBid[i-1] - 3.1
+x ATR[i-1]. Order is active for printed M1 bars with open epoch
+times in [M5open[i], M5open[i]+300 seconds), then cancelled if
+unfilled. No entry on the 09:30 US500 bar, and no outside-session
+entry on either asset. Enter only if M1 LowBid + fixed spread <= L.
+When the M1 open Bid + spread <= L, treat the entry as immediately
+filled at L anyway (no favorable gap improvement). Otherwise treat
+the first qualifying low in the minute as the fill, still at L.
+The fixed Ask proxy is a Phase-1 approximation; Model=4 real Bid/Ask
+ticks are required for confirmation. A signal with no M1 touch is
+counted as an unfilled order, not a trade.
+
+4. EXITS, OCCUPANCY, AND COST
+Initial stop is L - 1.5 x entry ATR; target is L + 2.0 x entry ATR.
+Evaluate Bid M1 bars from the fill minute through the exact forced-
+exit minute. Stop first if LowBid <= stop; fill at min(stop, OpenBid)
+for a gap through stop on a later minute, or stop for the entry minute.
+If stop not hit, target if HighBid >= target; fill at target.
+On the entry minute only, a target is allowed if OpenBid+spread <= L
+(order filled at the minute open); otherwise defer a target hit on
+that minute because its high may have occurred before the limit
+fill. Stop still takes priority on the entry minute. If neither
+bracket fires, exit at the forced minute's Bid close. Skip new M5
+signals while a trade is open; after exit, first eligible new M5
+bar is the first whose open is strictly after the exit M1 open.
+No trade spans the session boundary; no swap. Gross points = exit
+Bid - (L - spread), a Bid-to-Bid reference; base net points =
+exit Bid - L, equivalent to gross - spread. Double-cost stress net
+= base net - spread on the SAME trades; it is a cost buffer, not a
+second fill-probability simulation. Units are points for US500 and
+gold price units for XAUUSD, always 1 unit/lot and no compounding.
+
+5. PARTITION AND UNCERTAINTY
+For both assets, 2024-01-01 onward by NY entry date is the gated
+historical test block; earlier dates are diagnostic. The XAUUSD
+tape ends 2026-09-01; US500 ends 2026-04-30. 2026 is partial.
+Report all years, long-only trades, samples, unfilled orders, bracket
+vs forced exits, hold durations, net mean/total/win rate/max drawdown,
+and the fraction of trades exiting in the entry M1 bar. Resample
+test-block entry dates with replacement 10,000 times; seed 20260927.
+Because two assets are tested, use family-wise one-sided threshold
+0.025 for each asset. Report descriptive 95% bootstrap quantiles.
+
+6. GATES, FROZEN BEFORE PHASE 1
+G-AB1: At least one instrument has at least 150 executed trades in its 2024-2026 test block.
+G-AB2: At least one instrument with at least 150 test-block trades has strictly positive mean double-cost net per trade.
+G-AB3: At least one instrument satisfying G-AB1 and G-AB2 has date-bootstrap P(mean base net <= 0) at most 0.025, using 10,000 resamples and seed 20260927.
+G-AB4: The same instrument satisfying G-AB1 through G-AB3 has strictly positive base-net total in each complete test-block year 2024 and 2025.
+The SAME instrument must satisfy all four for overall Phase-1 PASS.
+Otherwise FAIL is final for this artifact. No post-hoc filtering by
+instrument year, order time, hold duration, or exit type is allowed.
+
+7. STOP, LIMITS, AND ARTIFACTS
+If Phase 1 fails, stop; no MT5 tester. If it passes, a separate
+predeclared Model=4 real-tick execution SPEC/GATE is required, with
+native Ask limit triggers, order-state reconciliation, >=150 trades,
+year-sign agreement, and positive net expectancy. Even a Phase-1
+PASS is only an M1 proxy, not a deployable result. Freeze this SPEC,
+its verbatim GATE, code, trade CSV, metadata, and REPORT. Always
+write the REPORT, including on FAIL. Never edit historical records.

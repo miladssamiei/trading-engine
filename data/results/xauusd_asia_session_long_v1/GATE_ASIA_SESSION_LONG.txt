@@ -1,0 +1,6 @@
+G-AS1: At least 150 executed 2024-2026 trades on at least 150 distinct UTC entry dates.
+G-AS2: Strictly positive mean extra-0.41-stress net gold units per gated trade.
+G-AS3: Date-bootstrap P(mean fixed-spread net <= 0) at most 0.05, 10000 resamples, seed 20261009.
+G-AS4: Strictly positive fixed-spread net gold-unit total in each complete gated year 2024 and 2025.
+G-AS5: Every executed trade has real 00:00 and 08:00 M1 bars, one UTC/Prague entry-and-exit date, and a complete real M1 intratrade minimum path.
+G-AS6: At fixed 1x gold notional, at least 70% of eligible 180-day Challenge windows PASS and at most 10% BREACH using the declared M1 floating-low proxy.

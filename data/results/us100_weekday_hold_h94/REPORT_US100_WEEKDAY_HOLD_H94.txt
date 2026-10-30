@@ -1,0 +1,10 @@
+H94 US100 WEEKDAY HOLD - PHASE1_PASS_NEEDS_PHASE2
+Dukascopy BID M1 proxy; owner-stated zero swap; news holds allowed. No orders.
+Source/SPEC/GATE SHA256: 152f9c995b370e5391cb7da99b64a8002ceee5e52cc68899ddca409ac7e15e39 / 951329e499c995d9bf2c48cc1ee9f7eacb65b6ee4aad83c1d5203faed4c121e7 / ff903175866061c382579347d032b23611a191b65d5c6ad2ee6b8dc6a419d310
+M1/cash-day rows: (2936100, 1743)
+All/OOS trades/unresolved: (345, 142, 0)
+Coverage: {'EXECUTED': 345, 'NO_PRIOR_ATR': 4, 'NO_MONDAY_CASH_OPEN': 1, 'INCOMPLETE_TAPE_WEEK': 1}
+OOS stressed mean/total/bootstrap P: (70.00732015872848, 9941.039462539444, 0.0324)
+Annual: {"2024": {"n": 53, "stress_sum": 2760.0904307336214}, "2025": {"n": 52, "stress_sum": 5421.5676244752885}, "2026": {"n": 37, "stress_sum": 1759.3814073305336}}
+Gates: {"G-WU1": true, "G-WU2": true, "G-WU3": true, "G-WU4": true, "G-WU5": "NOT_RUN", "G-WU6": true}
+Historical exposed proxy, not native FTMO execution or unseen forward confirmation.

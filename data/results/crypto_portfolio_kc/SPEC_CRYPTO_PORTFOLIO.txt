@@ -1,0 +1,140 @@
+HYPOTHESIS #55 SPEC: CRYPTO PORTFOLIO KC BREAKOUT - POOLED R-MULTIPLE VALIDATION (4h execution / D1 17:00 ET anchor)
+Study ID: crypto_portfolio_kc
+Date frozen: 2026-09-24, before any evaluation code was written or run.
+Status: frozen. Corrections or re-measurements require a NEW study name.
+Lineage: #54 (unseen_asset_kc) FAILED overall but BTCUSD and ETHUSD passed
+individually at the instrument level; its disposition named "a pre-registered
+BTC+ETH portfolio" as the compliant follow-up. This study IS that follow-up,
+owner-tasked: the #51/#54 mechanics are frozen verbatim, both crypto tapes
+are re-walked identically, and the executed trades are pooled into ONE
+chronological portfolio ledger normalized in initial-risk (R) units, with
+gates on the pooled ledger.
+
+0. NAMING HONESTY (declared up front)
+The tasking title says "Walk-Forward Validation". Under validation_discipline
+this study is NOT walk-forward confirmation: the identical trade set was
+already observed and reported in #54's instrument-level passes (same tapes,
+same mechanics, same parameters). The genuinely new content is (a) the
+R-multiple normalization, (b) the pooled portfolio ledger, and (c) the
+portfolio gates - all declared HERE, before computation. A PASS certifies
+portfolio-level robustness of already-seen instrument results (the #51
+bounded-pass pattern), never independent discovery, and does not by itself
+unblock Phase 2.
+
+1. DATA
+1.1 Tapes (standard schema; onboarded 2026-09-24 by
+    evaluate/virgin_assets_onboarding.py, sha256 lineage in
+    data/results/virgin_assets/onboarding_stats.json):
+    - BTCUSD: data/results/virgin_assets/btc_m1.csv  (3,260,989 M1 bars, price units; cost floor 15.0 RT)
+    - ETHUSD: data/results/virgin_assets/eth_m1.csv  (3,375,260 M1 bars, price units; cost floor  2.0 RT)
+    Both span 2020-01-01 00:00 UTC .. 2026-09-23 23:59 UTC.
+1.2 Timezone America/New_York (EST/EDT) for all wall-time logic.
+1.3 Cost floors remain OWNER ESTIMATES (no ask side in the M1 BID exports;
+    carried unchanged from #54): 15.0 (BTCUSD) / 2.0 (ETHUSD) price units
+    round trip, subtracted once per trade in native units BEFORE
+    normalization.
+1.4 tick_volume = 0 (schema placeholder, never interpreted).
+
+2. MULTI-TIMEFRAME AGGREGATION (identical machinery to #50/#51/#54)
+2.1 1h base: M1 epochs floored to 3600s slots; OHLC first/max/min/last per
+    slot; reindexed to the FULL continuous 3600s grid; missing hours
+    forward-filled OHLC = prior close, volume = 0.
+2.2 4h execution bars: NY WALL buckets [00:00-04:00), [04:00-08:00), ...
+    from the continuous 1h grid; contiguous; DST buckets span 23 or 25
+    real hours.
+2.3 D1 anchors: NY WALL [17:00 -> next 17:00) buckets from the continuous
+    1h grid; D1 close = last 1h close of the bucket; completes at its
+    17:00 ET boundary; mapped to each 4h bar strictly from completed
+    buckets only.
+
+3. STATE MACHINE AND EXECUTION (frozen #51/#54 mechanics verbatim)
+3.1 D1 EMA(50) (ewm span=50, adjust=False; first 49 NaN); Bullish iff
+    D1 Close > EMA(50); Bearish iff <.
+3.2 4h EMA(29) (first 28 NaN); Wilder ATR(29); Upper/Lower = EMA29
+    +/- 2.77*ATR29.
+3.3 Armed at 4h bar t iff Close, EMA29, ATR29, bands at t-1 are non-NaN
+    AND the mapped completed D1 bar exists with non-NaN EMA(50). Warm-up
+    (~Feb 2020) trades are simply absent from the ledger.
+3.4 LONG  iff Close(t-1) > Upper(t-1) AND D1 Bullish;
+    SHORT iff Close(t-1) < Lower(t-1) AND D1 Bearish.
+    Entry = Open(t), market. Max ONE open trade per INSTRUMENT (the
+    portfolio may hold up to two concurrent positions, one per asset);
+    trades occupy [entry_bar, exit_bar]; signals while that instrument is
+    open are counted (ignored-while-open) and not acted on.
+3.5 Initial stop: SL = Entry - max(|Entry - EMA29(t-1)|, 1.5*ATR29(t-1))
+    for LONG; Entry + same for SHORT. This distance is
+    Initial_Risk_Distance, frozen at entry, NEVER re-based when the trail
+    moves.
+3.6 EMA-riding trail: on every 4h bar j of the walk (entry bar included),
+    AFTER that bar's exit checks, SL ratchets to EMA29(j) (LONG: max;
+    SHORT: min; only tightens; NaN skipped).
+3.7 Exit walk (long case; short mirrored) per bar j in order:
+    a) Open(j) <= SL -> exit at Open(j), SL_GAP (honest);
+    b) Low(j) <= SL -> exit at SL, reason SL (worst-case same-bar);
+    c) apply 3.6 and continue.
+    No take-profit; FORCED_EOD at the final 4h bar's close if nothing
+    hits, included in results.
+
+4. R-MULTIPLE NORMALIZATION AND PORTFOLIO POOLING
+4.1 Per trade: Gross = side*(Exit - Entry) in native price units;
+    Net = Gross - cost floor (native units);
+    Net_R = Net / Initial_Risk_Distance (dimensionless).
+    Gross R = side*(Exit-Entry)/Initial_Risk_Distance is also recorded.
+    R-normalization is what makes heterogeneous units poolable; each
+    asset's cost burden enters in its own units before normalization.
+4.2 Portfolio ledger: ALL executed trades from both instruments, sorted
+    chronologically by 4h entry bar time; deterministic tie-break on
+    asset name (BTCUSD before ETHUSD) when both enter the same 4h bar.
+    The equity curve is EVENT-INDEXED cumulative Net R in ledger order
+    (concurrent overlapping trades appear sequentially by entry) - a
+    declared simplification, not calendar marking.
+4.3 Portfolio statistics reported: n, mean/median/total Net R, win rate,
+    per-trade R Sharpe (mean/std(ddof=1)*sqrt(252), informational only),
+    max drawdown of the cumulative Net R curve (peak-to-trough, R units),
+    per-asset n/mean/total Net R, per-year pooled Net R, side mix, exit
+    mix.
+
+5. PHASE 1 GATES (applied to the POOLED PORTFOLIO LEDGER, Net R units;
+   frozen verbatim in GATE_CRYPTO_PORTFOLIO.txt)
+    G-PORT1: Total pooled executed trades >= 300.
+    G-PORT2: Portfolio Net R-Multiple Expectancy > 0.15 R per trade.
+    G-PORT3: Moving-block bootstrap (10,000 resamples, block=10 trades,
+            seed 20261003) P(mean Net R <= 0) <= 0.10.
+    VERDICT RULE: OVERALL PASS only if G-PORT1 AND G-PORT2 AND G-PORT3 all
+    PASS. Any FAIL is final for this artifact; corrections require a new
+    study name. Null results are complete, expected deliverables.
+    Declared expectation (from #54, before this run): identical mechanics
+    should reproduce ~342 pooled trades, so G-PORT1 has a thin margin;
+    G-PORT2/G-PORT3 thresholds are stricter than any prior study
+    (0.15 R; block 10; p <= 0.10) and are taken as given.
+
+6. OUTPUTS (data/results/crypto_portfolio_kc/)
+    SPEC_CRYPTO_PORTFOLIO.txt (this file), GATE_CRYPTO_PORTFOLIO.txt
+    (written before the run), REPORT_CRYPTO_PORTFOLIO.txt (pooled equity
+    curve stats, per-asset R-expectancy, gates), crypto_portfolio_signals.csv
+    (the pooled ledger, asset + block-date columns), run_meta.json (sha256
+    lineage, funnel per asset, gates, verdict).
+
+7. HONESTY / ANTI-LEAK RULES
+7.1 Mechanics, parameters, walk logic copied verbatim from #54 (frozen
+    from #51/#50); prior-bar indicator inputs only; completed D1 anchors
+    only; exit checks before ratchet; worst-case same-bar stop; honest
+    gap fills. No adaptation beyond the pooled R normalization declared
+    here.
+7.2 The trade set is NOT fresh data: #54 already reported these
+    instrument-level results (section 0). Pooling is the pre-declared
+    aggregation step; a PASS upgrades nothing to "validated result"
+    status by itself. Phase 2 (MT5 execution) requires, in addition:
+    a NEW pre-declared forward-tracking or strict-partition SPEC meeting
+    validation_discipline (>=150 trades, year-by-year sign agreement,
+    gates declared before the run).
+7.3 Cost floors are owner estimates (1.3): R-expectancy margins within
+    plausible floor error are flagged by reporting gross R alongside net
+    R everywhere; no floor is re-tuned after seeing results.
+7.4 Continuous forward-fill consequences as declared in #50/#51/#54
+    (EMA flattens, ATR decays, flat closes cannot print breakouts, D1
+    direction persists); mostly moot on 24/7 crypto printing (BTC 7.9% /
+    ETH 4.6% synthetic 1h bars).
+7.5 Single frozen parameterization; no optimization, no re-runs, no
+    post-hoc filtering; assets, years, sides and exit reasons reported
+    as run. MFE/MAE are exploratory descriptors, never results.

@@ -1,0 +1,5 @@
+G1: Two complete v1.02 XAUUSD tester segments cover 2024-01-01 through 2026-09-25, one A/H4 and one B/H1, and the frozen independent H1 snapshot is ordered, valid and covers the available 2024-2026 broker history.
+G2: Every MT5 OPEN and MIN_LOT_OVERRIDE has a same-hour, same-direction independent Python signal. Every minimum-lot override logs 0.01 lots and a planned initial-stop risk <= 3.5% of balance. No unexplained minimum-lot blocks.
+G3: Every MT5 OPEN initial SL and every logged ratchet new SL agrees with the independently calculated level within 0.01 Gold unit. List each violation with time and values.
+G4: All observed MT5 opens pair with an observed close or are explicitly open at test end; report execution exceptions, panic closes and post-fill risk closures separately.
+G5: Same-feed tick-fill and intrabar-exit parity is UNTESTED unless complete broker M1/tick history becomes available; no profitability validation claim follows from this audit.

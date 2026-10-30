@@ -1,0 +1,68 @@
+XAUUSD SALEH SAME-DAY PROP CHALLENGE PACE AUDIT
+Declared 2026-09-25 before this audit's calculation code or run.
+
+PURPOSE AND FROZEN STATUS
+This is an account-speed diagnostic of the frozen Hypothesis 70 native
+quote trade list, not a new trading hypothesis. The 15:59 quote replay
+has a final FAIL from one unresolved exit, so an attractive challenge
+simulation cannot validate that rule or authorize an MT5 tester/live
+trade. No signal, stop, exit, spread, historical trade or old record
+will be changed. The 2024-02-14 unresolved trade's last-quote PnL
+remains in the primary diagnostic, explicitly marked non-executable.
+
+ACCOUNT AND HORIZON
+Use the owner's previously confirmed FTMO $10,000 2-Step Swing first
+Challenge, currently Challenge phase. The public 2-Step rules are a
+$1,000 closed-balance profit target, $500 daily equity loss allowance
+from Prague midnight balance, static $9,000 equity floor, four distinct
+Prague trading days and no formal time limit. Assess pass within 90 and
+180 calendar days; 180 is a conservative interpretation of the user's
+new request to avoid an 8-9 month challenge. Verification is separate.
+The local policy manifest also caps position risk at $10; evaluate
+0.1% as policy-compliant and 0.25%, 0.5%, 1%, 1.5%, 2% as diagnostics
+requiring a separately reviewed policy change, not recommendations.
+Sources: https://ftmo.com/en/trading-objectives/ and
+https://ftmo.com/en/how-it-works/; local policy manifest at
+configs/prop/ftmo_2step_swing_10k_v1.json.
+
+FROZEN INPUT AND NORMALIZATION
+Use exactly the frozen native_quote_trades.csv from
+xauusd_saleh_intraday_real_quotes_close1559_v1, 2024-01-01 onward,
+including every trade and the one non-executable diagnostic mark.
+Initial planned stop risk units for BUY = entry Ask - initial SL;
+SELL = initial SL - entry Bid. R = actual quote-net gold units divided
+by this positive initial planned stop distance. Planned risk dollars
+per trade = initial $10,000 times the declared risk fraction, fixed
+dollars rather than compounding. Closed PnL = R times planned risk.
+This assumes fractional position sizing with no FTMO volume grid,
+margin or fill constraints. It is optimistic because actual FTMO
+contract economics and real floating-equity minima are unavailable.
+
+ROLLING CHALLENGE SIMULATION
+Use every distinct NY entry date in the 2024+ frozen list as a start
+date if the full 90/180-calendar-day follow-up is observable before
+the tape's last NY date. A window includes all trades from that date
+through the day before start + horizon. At each Prague midnight reset
+the daily loss floor to prior-day closed balance minus $500. Since
+these trades enter/exit the same Prague date, closed PnL updates the
+balance in time order, and the date of each entry counts once toward
+the four-day minimum. Static floor $9,000. On each close check floor
+breach first, then closed balance >=$11,000 and >=4 trading days.
+Stop at first pass or breach; otherwise TIMEOUT at horizon. A close-
+only breach check is an optimistic lower bound on true breaches;
+unobserved adverse floating moves can turn a reported pass/timeout
+into a fail. This audit does not claim FTMO execution evidence.
+
+PREDECLARED REPORTING AND VERDICT
+For each risk and horizon report eligible start count, pass, breach,
+timeout counts/rates, median days among passes, and 2024/2025 start-
+year rows. Report trade count/month and mean R by calendar year.
+Pace screen passes only if some risk setting at or below 1% reaches
+the Challenge target in <=180 calendar days in at least 70% of all
+eligible rolling starts while breaching on close in <=10%; the
+policy-compliant 0.1% row must also be shown separately. This is a
+descriptive threshold, not a statistical edge test. Overall strategy
+validation remains FAIL because the prior native-quote execution gate
+failed, irrespective of pace. Never pick a risk row after seeing
+results and call it an authorized trading size. Save all rows and a
+REPORT even on FAIL; append PROGRESS, retain frozen source hashes.

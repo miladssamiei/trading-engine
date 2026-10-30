@@ -1,0 +1,42 @@
+REPORT: VRP-CONDITIONED EUROPEAN SESSION BREAKOUT - PHASE 1 (HYPOTHESIS #43)
+Generated: 2026-09-23 19:21:33  |  script: evaluate/vrp_orb_euro_session_phase1.py
+SPEC/GATE: data/results/vrp_orb_euro/{SPEC,GATE}_VRP_EURO.txt (frozen before code)
+
+VERDICT: FAIL   (G-EU1=True, G-EU2=False, G-EU3=False)
+
+1. FUNNEL
+   Arm A dates (from #31 artifact): 171 (2022-12-22 .. 2026-03-18)
+   days without [03:00,03:15) OR bars: 0
+   candidates: LONG 147 / SHORT 143
+   dropped: degenerate 0, no-entry 0
+   EXECUTED TRADES: 290 (LONG 147 / SHORT 143)
+   by year: 2022=6, 2023=139, 2024=71, 2025=51, 2026=23
+   exit mix: STOP=240, STOP_GAP=10, TIME=40
+
+2. NET ECONOMICS (points; net = gross - 0.51 spread floor)
+   n=290  net/trade -0.21 (median -6.26, total -60.0, win 13.8%)
+   MFE 15.44 vs MAE 7.18 pt  |  Net Sharpe (per-trade x sqrt252) -0.164
+   LONG: n=147 win 12% net -0.72  MFE 14.46 vs MAE 7.36
+   SHORT: n=143 win 15% net +0.32  MFE 16.45 vs MAE 6.99
+   exit STOP: 240 (82.8%) mean net -7.29
+   exit STOP_GAP: 10 (3.4%) mean net -6.15
+   exit TIME: 40 (13.8%) mean net +43.77
+
+3. OVERLAP WITH NY ORB (#31 Arm A same-date trades)
+   direction agreement with same-date NY-cash ORB trade: 142/290 (49.0%)
+   mean net | agree +4.97 vs disagree -5.17 pt
+   Euro trades exiting strictly before 09:30 ET: 69.7%
+
+4. GATES (frozen verbatim in GATE file)
+   G-EU1 >= 50 executed: 290 -> True
+   G-EU2 Net Sharpe > 0: -0.164 -> False
+   G-EU3 bootstrap P(mean Net <= 0) <= 0.20: 0.5719 (n_day_blocks=171) -> False
+   OVERALL PHASE-1: FAIL
+
+5. NOTES AND CAVEATS
+   - Arm A date set is in-sample conditioning realized through #31 trade dates; all metrics
+     inherit that optimism; #31's overall FAIL (G-VRP3) stands, not re-litigated.
+   - Pre-spread-floor economics; 0.51 pt netted per the verified floor; no swap (intraday).
+   - MFE/MAE include the exit bar's full M1 bar; gap-through stops fill at the open.
+   - Frozen archetype parameters (OR window, signal window, stop rule); no search.
+   - Null result is final for this artifact.

@@ -1,0 +1,134 @@
+REPORT_SP2L_XAUUSD_NATIVE_RETEST.txt
+SP2L (XAUUSD native re-test) - FINAL REPORT
+Written 2026-09-05. Domain re-test of the SP2L spike/gap/continuation
+hypothesis on its ORIGINAL target instrument (third-party XAUUSD M1 bot);
+original SPEC/GATE/REPORT artifacts untouched; pipeline logic VERBATIM
+(audit diffs DIFF_phase1.txt / DIFF_step3.txt).
+
+=======================================================================
+VERDICT: PHASE 1 PASS (16/48 configurations). STEP 3: exactly ONE
+configuration CONFIRMED under both pre-declared conventions (LON_EAS,
+Sharpe 0.62 E-CLS). STEP-4 BUILDABILITY (E-NEXT) GATE FAILS
+(best-year 62.4% > 60%) -> NO EA CONSTRUCTION, NO MT5 TICK IMPORT, NO
+MODEL=4 RUN (nothing to reconcile against). ECONOMICS: the confirmed
+configuration's gross expectancy per leg ($0.248 E-CLS / $0.243 E-NEXT)
+is BELOW the independently measured XAUUSD cost floor ($0.41 full-tape
+median spread): net-of-cost the walk-forward LOSES money under every
+honest fill convention. Only the known-optimistic E-XTM convention
+($0.665/leg) clears costs - and E-XTM fills are not achievable.
+=======================================================================
+
+-----------------------------------------------------------------------
+1. THE TASK'S CENTRAL QUESTION: NATIVE GOLD vs FORCED US500
+
+Does SP2L's edge look meaningfully different on its actual original
+instrument? YES - the offline edge is REAL and LARGER on native gold:
+
+  US500 forced-domain (frozen)          XAUUSD native (this re-test)
+  Phase 1: passers existed              Phase 1: 16/48 pass (incl. the
+                                        UNFILTERED NY baseline)
+  Step 3: EA built, validated           Step 3: LON_EAS CONFIRMED both
+  Model=0 Sharpe 0.275 (synthetic)      conventions; WF Sharpe 0.62
+  Model=4 Sharpe 0.133 (real ticks)     (E-CLS, gross), 0.61 (E-NEXT)
+                                        across 2022H1..2026H1 folds
+  gross edge vs US500 floor: marginal   gross edge vs gold floor: $0.25
+                                        vs $0.41 -> BELOW floor
+
+So the pattern is genuinely native: signal quality survives both fill
+conventions on gold (it needed filters to do that on US500), and the
+walk-forward Sharpe is ~4-5x the US500 Model=4 number. BUT the deeper
+project lesson repeats verbatim: the honest-fill gross expectancy does
+not clear the instrument's own measured spread. The wrong-instrument
+excuse is removed; the cost-floor excuse is not - it follows the pattern
+to its home.
+
+-----------------------------------------------------------------------
+2. SETUP (all pre-declared 2026-09-05 in SPEC_ADDENDUM/GATE_ADDENDUM)
+
+- Tape: xauusdtick_m1.csv, 2,337,538 bars, 2020-01..2026-09 (onboarded,
+  385.5M ticks, structurally complete, 0 integrity violations).
+- Binding units (task-owner resolution Q2): PGAP $1.00 / MAX_SL $10.00
+  FIXED DOLLAR (original 2-decimal-broker reading); literal 0.001-point
+  reading rejected as a feed artifact. Sensitivity {$0.50, $2.00}
+  informational only.
+- 48-config ablation, E-XTM/E-CLS, LON/NY/ALL24, Step-3 TP_R grid,
+  occupancy re-simulation, burn-in pre-2022, folds 2022H1..2026H1
+  (final ends 2026-09), trailing-expectancy selection - all identical
+  to the frozen protocol.
+
+-----------------------------------------------------------------------
+3. PHASE 1 RESULTS
+
+PGAP $1.00 -> 4,985 setups (2,416 buy / 2,569 sell) over 2,074 NY dates.
+G1+G2 passers (both conventions): 16 of 48 -
+  ALL24: 24_EAS, 24_ETA, 24_ETAS
+  NY:    NY_base, NY_S, NY_AS, NY_E, NY_ES, NY_EA, NY_EAS, NY_ET, NY_ETS
+  LON:   LON_E, LON_ES, LON_EA, LON_EAS
+Notable: the UNFILTERED NY baseline passes on native gold (on US500 the
+unfiltered baseline failed; filters were load-bearing there).
+PGAP sensitivity (informational): $0.50 and $2.00 both FAIL G1-cls - the
+pass lives at the pre-declared $1.00 cell only; reported, non-gating.
+
+-----------------------------------------------------------------------
+4. STEP 3 WALK-FORWARD (2022H1..2026H1, gross-of-cost)
+
+E-XTM (optimistic fills): 13/16 passers pass all gates (Sharpe up to
+2.8) - consistent with E-XTM being known-optimistic; not confirmation.
+E-CLS (pessimistic fills): exactly ONE passer -
+  LON_EAS: n=2,031 legs, total +$503.31, expt $0.2478/leg, Sharpe 0.620,
+  maxDD $160.66, years 2022..2026 = -77.94 / +48.97 / +64.56 / +284.16 /
+  +183.56 (4/5 positive, best year 56.5% < 60%). G1/G2/G3 PASS.
+CONFIRMED (xtm AND cls): LON_EAS.
+E-NEXT (EA-convention fills; tightening-only step-4 buildability gate):
+  n=2,034, total +$495.24, expt $0.2435, Sharpe 0.612, 4/5 years, best
+  year 62.4% > 60% -> G3 FAIL -> STEP-4 READY: NONE. Per the frozen
+  original protocol: no EA, no parameter adoption, no Step 4.
+
+-----------------------------------------------------------------------
+5. COST-FLOOR ANALYSIS (Q4; measured XAUUSD floor $0.41, non-gating)
+
+  Convention   n      gross expt/leg   cost x n        net total
+  E-CLS        2,031  $0.2478          $0.41 x 2,031   -$329.40
+  E-NEXT       2,034  $0.2435          $0.41 x 2,034   -$338.70
+  E-XTM        1,829  $0.6655          $0.41 x 1,829   +$467.22
+The twice-confirmed project rule (intraday gross edge must exceed the
+instrument's real median spread) holds on native gold: the confirmed
+configuration does not clear it under any honest fill convention.
+(Using the cash-session floor $0.399 changes nothing material.)
+
+-----------------------------------------------------------------------
+6. MT5 PROGRESSION (task-owner bar: Phase 1 pass AND Step-3 CONFIRMED)
+
+The necessary condition was met (16 passers; LON_EAS confirmed), but the
+pipeline's own pre-declared stop rule binds first: E-NEXT G3 failure =
+no EA construction = no Model=4 subject to reconcile. MT5 tick import
+and the Model=4 probe were therefore NOT performed. Importing 385M ticks
+and building a Model=4 harness for a configuration that already fails
+buildability and the cost floor would be spending infrastructure on a
+result whose best honest-case is negative. Model=0 was not used anywhere.
+
+-----------------------------------------------------------------------
+7. HONEST CAVEATS
+
+- The 2025-2026 fold profits dominate (gold bull/vol regime); the
+  E-NEXT G3 failure (62.4%) is exactly this concentration - a real
+  weakness, not a technicality.
+- Fixed-dollar thresholds were task-owner-fixed BEFORE any XAUUSD signal
+  existed; the percent-denominated alternative would have produced
+  fewer/different setups as gold ran 1,520 -> 5,400 (declared rejected).
+- Sensitivity arms at $0.50/$2.00 fail G1-cls: the result is
+  threshold-anchored, and the anchor is the original bot's own number.
+
+-----------------------------------------------------------------------
+8. ARTIFACTS
+
+data/results/sp2l_xauusd_retest/
+  SPEC_ADDENDUM_SP2L_XAUUSD_NATIVE_RETEST.txt / GATE_ADDENDUM_... .txt
+  sp2l_phase1_xauusd.py / sp2l_step3_xauusd.py (verbatim derivatives)
+  DIFF_phase1.txt / DIFF_step3.txt (audit)
+  phase1_ablation.csv, phase1_stats.json, signals/*.csv (50 configs)
+  step3/phaseA_grid.csv, insample_occ.csv, wf_all.csv, wf_folds.csv,
+  step3/step3_summary.json, step3/wf_trades/*.csv
+  REPORT_SP2L_XAUUSD_NATIVE_RETEST.txt (this file)
+Upstream: data/results/xauusd_onboarding/ (tape verification),
+evaluate/sp2l_phase1.py + sp2l_step3.py (frozen originals).

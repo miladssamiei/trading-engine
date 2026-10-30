@@ -1,0 +1,5 @@
+G-SID1: At least 150 executed 2024-2026 trades spanning at least 150 distinct New York entry dates.
+G-SID2: Strictly positive mean extra-cost stress net gold units per gated trade.
+G-SID3: Date-bootstrap P(mean reconstructed quote net <= 0) at most 0.05, 10000 resamples, seed 20261006.
+G-SID4: Strictly positive reconstructed net total gold units in each complete gated year 2024 and 2025.
+G-SID5: Every executed trade has same NY entry/exit date and holding time below 16 hours.

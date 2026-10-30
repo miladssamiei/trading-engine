@@ -1,0 +1,94 @@
+HYPOTHESIS 72: XAUUSD ASIAN SESSION LONG, FIXED EIGHT-HOUR HOLD
+Declared 2026-09-25 before this hypothesis's code or Phase-1 run.
+
+1. MECHANISM AND PRIOR EVIDENCE
+Wenling Wei, Who Moves the Price? Trading-Session Return Decomposition
+and Cross-Session Momentum in Gold and Silver Markets, 2026,
+https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7257240
+reports that 00:00-08:00 UTC contributed much of XAUUSD spot's
+2024-2026 return and that only a long-only session strategy remained
+positive after the paper's cost assumption. The strong gold bull
+market and the paper's same-sample selection limit transferability.
+Test the simplest distinct implication: buy every eligible gold CFD
+UTC date at 00:00 and sell at 08:00, regardless of news, previous
+session return or any technical condition. No side/time filter, stop,
+target, threshold, momentum overlay or selected weekday. Earlier
+gold macro/closing studies are separate and remain frozen.
+
+2. CAUSAL BID M1 PRICE DATA AND EXECUTION PROXY
+Use verified native-gold BID M1 bars at data/results/xauusd_onboarding/
+xauusdtick_m1.csv (2020-01 to 2026-09-01), SHA256
+a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f.
+Epoch seconds UTC. Include every UTC calendar date with BOTH a REAL
+00:00 M1 bar and REAL 08:00 M1 bar; other dates are logged as
+unavailable, never price-filled or selected by outcome. Entry at
+00:00 real BID open plus fixed 0.41 XAUUSD ASK spread; exit at the
+08:00 real BID open. This is a bar-open execution proxy, with no
+overnight/rollover financing between those UTC times. Market order
+fills at the exact open are optimistic. For intratrade floating-risk
+diagnostics use the minimum BID low across all real M1 bars whose
+UTC starts are 00:00 through 07:59 inclusive, including entry bar.
+No position spans Prague midnight; dates without complete M1 path
+are counted and excluded, not repaired. Native variable Bid/Ask
+and actual first-quote availability require later Phase-2 replay.
+
+3. SPREAD, ECONOMICS AND PARTITION
+Gross price units/trade = exit BID open - entry BID open. Fixed-spread
+net = gross -0.41. Extra cost stress = net - another 0.41, so total
+screen friction is 0.82 gold price units/trade. One trade per UTC
+date, long only. Report trade count, eligible/unavailable dates,
+gross/net/stress mean and sum, win rate, max drawdown, all-year
+totals and mean/median entry spread assumption. 2020-2023 is
+descriptive calibration; UTC entry dates 2024-01-01 through the tape
+end 2026-09-01 are gated historical. 2026 partial separate.
+Bootstrap gated UTC entry dates with replacement 10000 times, seed
+20261009; report P(mean fixed-spread net<=0) and 95% descriptive
+quantiles. This sample has extensive prior gold research and overlap
+with the cited paper, so even a historical PASS is selected evidence.
+
+4. PROP CHALLENGE PACE SCREEN
+The owner has confirmed FTMO $10k 2-Step Swing first Challenge.
+Use the public 10% profit target, 5% daily equity loss and 10%
+static maximum loss, four distinct Europe/Prague trading dates.
+Source https://ftmo.com/en/trading-objectives/ . Apply fixed
+$10,000 gold notional to each trade, so ounces = 10000 / entry ASK;
+rounding/volume constraints are not yet modeled. Dollar closed PnL
+= ounces*(exit BID-entry ASK). Dollar worst floating PnL in that
+session = ounces*(minimum M1 BID low-entry ASK). This fixed 1x
+notional is a research diagnostic and is above the local manifest's
+$10 per-position risk cap unless separately approved; it is not a
+live sizing instruction. Do not compound or optimize leverage.
+For every gated UTC entry date with a complete 180-calendar-day
+follow-up before tape end, start a fresh $10k Challenge, include
+all eligible trades until the horizon, and reset daily floor at
+Prague midnight to previous closed balance minus $500. At each
+entry date, first test worst floating equity against this floor and
+the static $9000 floor; if below either, record BREACH. Otherwise
+realize the trade's closed PnL, test floors again, and PASS if flat
+balance >=$11000 after >=4 distinct Prague entry dates. Remaining
+windows TIMEOUT. Report pass, breach and timeout rates and median
+days among passes; also report 90-day windows descriptively.
+M1 low is an optimistic BID proxy for actual liquidation, while
+one-bar minimum can be conservative about any post-entry path; real
+quote/order/state replay is mandatory before a prop claim.
+
+5. VERBATIM PHASE-1 GATES
+G-AS1: At least 150 executed 2024-2026 trades on at least 150 distinct UTC entry dates.
+G-AS2: Strictly positive mean extra-0.41-stress net gold units per gated trade.
+G-AS3: Date-bootstrap P(mean fixed-spread net <= 0) at most 0.05, 10000 resamples, seed 20261009.
+G-AS4: Strictly positive fixed-spread net gold-unit total in each complete gated year 2024 and 2025.
+G-AS5: Every executed trade has real 00:00 and 08:00 M1 bars, one UTC/Prague entry-and-exit date, and a complete real M1 intratrade minimum path.
+G-AS6: At fixed 1x gold notional, at least 70% of eligible 180-day Challenge windows PASS and at most 10% BREACH using the declared M1 floating-low proxy.
+All six are required for Phase-1 PASS. FAIL is final for this exact
+artifact. No post-hoc session, stop, trend, side, year or size rescue.
+
+6. OUTPUTS AND STOP RULE
+Save this SPEC and its verbatim GATE before any code/run; then save
+trade CSV, unavailable-date list, challenge-window CSV, metadata and
+REPORT even on FAIL. On FAIL no MT5 tester on this rule. On PASS,
+first freeze a separate native gold Bid/Ask replay SPEC/GATE for
+00:00 and 08:00 first-quote market orders, exact intratrade floating
+equity, account floors, fill coverage, year signs and realistic
+extra execution cost, then a Model=4 tester only if that passes.
+Fresh forward confirmation remains necessary. A Phase-1 PASS alone
+is neither an executable edge nor proof of FTMO account suitability.

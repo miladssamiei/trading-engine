@@ -1,0 +1,6 @@
+G-XI1: At least 300 executed trades on 300 distinct valid FTMO-native US100/US500 NY dates, with zero unresolved signaled exits, zero unknown causal FX quotes and zero out-of-window source timestamps.
+G-XI2: Strictly positive mean stressed EUR net/trade in one fixed risk row after actual Bid/Ask and extra 0.51-point spread plus 0.25-point slippage costs.
+G-XI3: NY-date bootstrap P(mean stressed EUR net/trade <= 0) at most 0.05 with 10000 draws and seed 20260930 in the same fixed risk row.
+G-XI4: Strictly positive stressed EUR totals in complete 2025 and partial 2026 in the same qualifying risk row.
+G-XI5: At least 150 fully observed rolling paid 90-calendar-day starts, with pass rate at least 0.70 and floating-equity breach rate at most 0.10 in the same qualifying risk row.
+G-XI6: Every trade uses only causal completed opening quotes, observed Bid/Ask fills, a positive tick-grid stop, same-day noon flat and frozen source/configuration with no account orders.

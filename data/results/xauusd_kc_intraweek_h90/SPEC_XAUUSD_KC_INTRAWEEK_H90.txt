@@ -1,0 +1,92 @@
+HYPOTHESIS 90: CORRECTED GOLD 4H KELTNER, FLAT BEFORE FRIDAY CLOSE
+Declared 2026-09-25 before any H90 evaluator code or return run.
+Null/FAIL is complete. H50/H51 SPEC/GATE/REPORT stay frozen.
+This is a new corrected-source intra-week adaptation, NOT a
+validation of the old H51 historical PASS. The owner states their
+EUR10000 prop account is swap-free and permits news holds. Assume
+zero swaps and no news blackout. Account identity/other rules are
+provisional until the owner confirms the prop firm/account type.
+No account orders are authorized.
+
+SOURCE AND CORRECTION
+Use the immutable verified Dukascopy BID M1 file
+data/results/xauusd_onboarding/xauusdtick_m1.csv through its native
+2026-09-01 end; source SHA256 must equal
+a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f.
+Do not append partial September CLI chunks to the gated tape.
+Aggregate actual M1 OHLC to UTC 1h. Make a continuous 1h grid;
+missing 1h O/H/L/C must ALL equal the immediately prior hour's
+close, and volume=0. This repairs the H51 implementation/SPEC
+mismatch. Build NY wall-time 4h buckets [00,04), [04,08), ...
+and 17:00-to-17:00 daily anchor bars exactly as H51 specifies.
+NY DST repeated-hour behavior follows H51's wall-key grouping.
+Every executed entry/exit must have a real M1 source bar; synthetic
+hours serve indicators only. Missing required entry/Friday exit is
+coverage FAIL, never silently filled at a synthetic quote.
+
+INDICATORS AND ENTRIES
+H51 EMA50 of completed D1 closes, EMA29 and Wilder ATR29 of 4h
+bars, 2.77*ATR Keltner bands, prior 4h close outside band and
+completed D1 EMA50 direction must align. Indicators are causal and
+frozen at the 4h signal-bar open. One open position maximum.
+Eligible entry bar starts on NY Monday-Friday and strictly before
+Friday 15:45 NY. Entry is first actual M1 open in [4h bar start,
+start+5 minutes); if none, log NO_REAL_ENTRY and skip. Buy at
+synthetic ASK = BID+0.41, sell at BID, both in Dukascopy gold units.
+Initial D=max(|entry BID-previous 4h EMA29|,1.5*previous ATR29),
+positive; initial stop at executable entry +/- D, with direction.
+No target. A long's exit executable price is BID; a short's is
+synthetic ASK=BID+0.41. No parameter, side or year selection.
+
+EXIT PATH AND INTRA-WEEK LIMIT
+Replay actual M1 BID opens/highs/lows from the entry minute forward.
+At each new 4h bar apply ratchets from all fully completed preceding
+4h EMA29 values, never from an incomplete bar. At each M1 first test
+gap-through at the executable open, then stop touch using BID low
+for longs and BID high+0.41 for shorts; fill at worse actual open on
+gap or at stop otherwise. Same-minute stop takes priority over any
+favorable excursion. At the FIRST real M1 open in NY Friday
+[15:45,16:00), close before evaluating that minute's range; if no
+such quote is available, flag UNRESOLVED and fail coverage. Never
+carry a position across Friday 16:00 NY or the weekend. Positions
+open at tape end are UNRESOLVED, not credited as winners. Exit-bar
+signals cannot create a new trade until the following 4h bar.
+
+ECONOMICS AND RISK
+Base per-ounce USD net = executable direction*(exit-entry) less
+0.000007*entry price and 0.000007*exit price in commission. The
+0.0007% per-side metal CFD rate is the FTMO published current rate,
+applied conservatively to all years; its use is provisional if the
+owner's swap-free account is a different firm. BID+0.41 synthetic
+ASK already charges the owner's 0.41 gold spread once. Stress net
+subtracts a FURTHER 0.41 gold spread and 0.25 slippage per trade.
+Swap is exactly ZERO by owner instruction; news trades allowed.
+This BID M1 proxy is not native target Bid/Ask execution and has no
+verified exact intraminute chronology. No FTMO native gold tester
+promotion until its 2025-26 real-tick discard issue is resolved.
+Report every trade's source timestamps, side, entry/exit, D, reason,
+base/stress net and hold duration, plus coverage, annual sums, and
+moving-block bootstrap 10000 resamples/block5/seed20261001.
+
+PACE AND STOP RULE
+If any of G-IW1..G-IW4 or G-IW6 fails in Phase 1, write FINAL FAIL
+and leave G-IW5 NOT RUN; do not invent a fast-pass rate from an
+economically failed proxy. If all those gates pass, a separate
+predeclared Phase 2 must replay 0.5% and 1.0% initial-EUR10000
+risk rows, real EURUSD conversion, EUR11000 first-stage target,
+EUR10500 verification target after reset, four entry days per
+stage, EUR500 daily equity limit and EUR9000 overall equity floor,
+including floating M1 paths, both stages within 90 calendar days.
+No return result may be called validated until genuinely unseen
+forward data and at least 150 trades with year sign agreement exist.
+
+VERBATIM GATES
+G-IW1: At least 50 fully resolved executed 2024-2026 Friday-flat gold trades on 50 distinct NY entry dates, zero unresolved exits and no synthetic entry or Friday fill.
+G-IW2: Strictly positive mean 2024-2026 stressed net gold units/trade after BID+0.41 executable prices, current metal commission and an additional 0.41 spread plus 0.25 slippage.
+G-IW3: Moving-block bootstrap P(mean stressed gold net/trade <= 0) at most 0.05 using block 5, 10000 draws and seed 20261001.
+G-IW4: Strictly positive stressed gold net totals in complete 2024, complete 2025 and partial 2026 separately.
+G-IW5: If Phase 1 passes, a separately frozen two-stage EUR10000 90-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts in one fixed risk row.
+G-IW6: All source hashes, flat missing-hour OHLC, causal prior-bar indicators, real M1 fills, zero weekend exposure, zero swap and predeclared fixed costs are verified with no account orders.
+
+All six gates must PASS for H90; otherwise FINAL FAIL. A Phase 1
+PASS by itself is not a verified system or permission to trade.

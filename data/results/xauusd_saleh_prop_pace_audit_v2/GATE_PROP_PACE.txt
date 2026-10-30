@@ -1,0 +1,4 @@
+G-PACE1: Some predeclared risk at or below 1% passes within 180 calendar days in at least 70% of eligible rolling starts.
+G-PACE2: The same risk breaches neither closed-balance FTMO floor in more than 10% of those rolling starts.
+G-PACE3: Every counted pass has at least four distinct Prague entry dates and at least $11,000 flat closed balance.
+G-PACE4: The frozen prior native-quote execution artifact has an overall PASS with zero unresolved trades.

@@ -1,0 +1,13 @@
+H89 US100 OPENING RELATIVE MOVE -> US500 - FINAL FAIL
+Predeclared SPEC/GATE unchanged. FTMO-Demo native raw Bid/Ask.
+No account orders.
+Source days/US500 quotes/US100 quotes: 450/8731206/2765529
+Signals/executed/unresolved: 444/444/[]
+Entry/exit spread p50/p90: 0.56/0.66/0.56/0.66
+Base/stressed mean points: 0.12211711711719553/-0.6378828828828047
+Bootstrap: {"0.5": {"n": 444, "mean_stressed_eur": -4.648034628501964, "p_nonpositive": 0.95, "ci95": [-10.33850323397384, 0.8934143775032967]}, "1.0": {"n": 444, "mean_stressed_eur": -9.01034872695308, "p_nonpositive": 0.9453, "ci95": [-20.346956506593532, 2.070473221618576]}}
+Annual stressed EUR: {"0.5": {"2025": {"n": 255, "stressed_total_eur": -1031.030829202223}, "2026": {"n": 189, "stressed_total_eur": -1032.696545852649}}, "1.0": {"2025": {"n": 255, "stressed_total_eur": -1934.65730790136}, "2026": {"n": 189, "stressed_total_eur": -2065.9375268658073}}}
+Paid 90-day pace: {"0.5": {"paid_90d": {"starts": 380, "pass": 0, "breach": 18, "timeout": 362, "pass_rate": 0.0, "breach_rate": 0.04736842105263158, "median_pass_days": null}}, "1.0": {"paid_90d": {"starts": 380, "pass": 37, "breach": 175, "timeout": 168, "pass_rate": 0.09736842105263158, "breach_rate": 0.4605263157894737, "median_pass_days": 51.0}}}
+Gates: {"0.5": {"G-XI1": true, "G-XI2": false, "G-XI3": false, "G-XI4": false, "G-XI5": false, "G-XI6": true}, "1.0": {"G-XI1": true, "G-XI2": false, "G-XI3": false, "G-XI4": false, "G-XI5": false, "G-XI6": true}}
+Source errors: []
+Any historical PASS is selected exploratory evidence, not a verified trading system.

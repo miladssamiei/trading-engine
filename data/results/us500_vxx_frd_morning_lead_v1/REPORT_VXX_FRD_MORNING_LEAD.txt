@@ -1,0 +1,109 @@
+REPORT: HYPOTHESIS 80 VXX FRD MORNING LEAD
+{
+  "vxx_source": {
+    "sha256": "ce49f06c3fb0cae20457df6a65bba209cd1f675819123816f46af84a90748da5",
+    "rows": 121604,
+    "first_wall": "2022-09-30 04:13:00",
+    "last_wall": "2023-09-29 19:59:00",
+    "dates_with_any_signal_bar": 251,
+    "dates_with_15_valid_bars": 251
+  },
+  "us500_sha256": "a8ee68f1a0010a1be9704c0d59fd5382aa798846cdae4d519b799ae21ec66c2d",
+  "spec_sha256": "afdcf58f1ef3bbc04016d85284bf795b4924315358fdf3a2a72e21d894df7ef4",
+  "gate_sha256": "a08777bc6d98947d6c5194fe468c90ee1f10214d8b37d876c5d56c1fd0bd76ef",
+  "candidate_dates": 261,
+  "executed_dates": 245,
+  "skip_reasons": {
+    "MISSING_OR_INVALID_VXX_15_BARS": 10,
+    "ZERO_VXX_SIGNAL": 6
+  },
+  "calibration_2022q4": {
+    "trades": 63,
+    "gross_mean_points": 1.1236031746031716,
+    "base_mean_points": 0.6136031746031717,
+    "base_total_points": 38.65699999999982,
+    "stress_mean_points": 0.10360317460317152,
+    "stress_total_points": 6.526999999999806,
+    "base_win_rate": 0.49206349206349204,
+    "longs": 34,
+    "shorts": 29
+  },
+  "gated_2023q1_q3": {
+    "trades": 182,
+    "gross_mean_points": -0.5188956043955936,
+    "base_mean_points": -1.0288956043955937,
+    "base_total_points": -187.25899999999805,
+    "stress_mean_points": -1.5388956043955933,
+    "stress_total_points": -280.07899999999796,
+    "base_win_rate": 0.4725274725274725,
+    "longs": 110,
+    "shorts": 72
+  },
+  "bootstrap_p_nonpositive": 0.8488,
+  "quarterly": {
+    "2022Q3": {
+      "trades": 1,
+      "gross_mean_points": -25.028999999999996,
+      "base_mean_points": -25.538999999999998,
+      "base_total_points": -25.538999999999998,
+      "stress_mean_points": -26.048999999999996,
+      "stress_total_points": -26.048999999999996,
+      "base_win_rate": 0.0,
+      "longs": 0,
+      "shorts": 1
+    },
+    "2022Q4": {
+      "trades": 62,
+      "gross_mean_points": 1.5454193548387065,
+      "base_mean_points": 1.0354193548387063,
+      "base_total_points": 64.19599999999978,
+      "stress_mean_points": 0.5254193548387066,
+      "stress_total_points": 32.57599999999981,
+      "base_win_rate": 0.5,
+      "longs": 34,
+      "shorts": 28
+    },
+    "2023Q1": {
+      "trades": 62,
+      "gross_mean_points": -1.3778548387096723,
+      "base_mean_points": -1.8878548387096727,
+      "base_total_points": -117.04699999999971,
+      "stress_mean_points": -2.3978548387096725,
+      "stress_total_points": -148.6669999999997,
+      "base_win_rate": 0.4838709677419355,
+      "longs": 38,
+      "shorts": 24
+    },
+    "2023Q2": {
+      "trades": 62,
+      "gross_mean_points": 0.04311290322579548,
+      "base_mean_points": -0.46688709677420426,
+      "base_total_points": -28.947000000000664,
+      "stress_mean_points": -0.9768870967742045,
+      "stress_total_points": -60.567000000000675,
+      "base_win_rate": 0.4838709677419355,
+      "longs": 34,
+      "shorts": 28
+    },
+    "2023Q3": {
+      "trades": 58,
+      "gross_mean_points": -0.20146551724133915,
+      "base_mean_points": -0.7114655172413393,
+      "base_total_points": -41.264999999997684,
+      "stress_mean_points": -1.221465517241339,
+      "stress_total_points": -70.84499999999765,
+      "base_win_rate": 0.4482758620689655,
+      "longs": 38,
+      "shorts": 20
+    }
+  },
+  "gates": {
+    "G-VF1": true,
+    "G-VF2": false,
+    "G-VF3": false,
+    "G-VF4": false
+  },
+  "verdict": "FAIL",
+  "caveat": "Vendor-derived 2022-23 VXX M1 archive and US500 BID M5 fixed-spread proxy only; no recent year, native execution, account feed, stop or prop pace validation."
+}
+FINAL PHASE-1 VERDICT: FAIL

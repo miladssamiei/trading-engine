@@ -1,0 +1,159 @@
+SPEC_SALEH_DONCHIAN.txt - HYPOTHESIS #57: SALEH 4H/1H DONCHIAN SUPERTREND - XAUUSD PHASE 1
+Written 2026-09-24, BEFORE any Phase 1 code for this hypothesis ran. Gates are
+extracted verbatim into GATE_SALEH_DONCHIAN.txt, also frozen before the run.
+
+0. PROVENANCE AND RELATION TO PRIOR STUDIES
+
+Owner-specified system ("Saleh Donchian"): a two-timeframe trend-following
+breakout on native XAUUSD - a 4H Supertrend(10, 3.0) direction anchor gates
+1H Donchian(20) breakout entries filtered by 1H ADX(14) >= 20, entered at the
+1H bar open, initial stop at 4x ATR(14), trailed at every 1H close by
+max/min(prev SL, close -/+ 4xATR). No take-profit; exits are the trailing
+stop or tape end. Relation to prior studies: Donchian-channel breakout
+execution has not been tested in this program (the closed intraday families
+are the US500-tape studies; #52 used Supertrend only as a pullback gate on
+15m limit fills - a different mechanism and horizon). No parameter was tuned
+on this tape; the only statistics examined from this tape before this SPEC
+are the onboarding integrity/spread measurements (cost floor 0.41 fixed
+there, before any strategy logic ran on the tape).
+
+1. DATA
+
+Tape: data/results/xauusd_onboarding/xauusdtick_m1.csv - 2,337,538 verified
+M1 bars, 2020-01-01 23:00 UTC to 2026-09-01 20:59 UTC, columns
+time,open,high,low,close,tick_volume; time = bar-OPEN epoch seconds UTC;
+prices are bid-side. Timezone America/New_York (DST-aware) for all wall-clock
+bucketing and calendar keys. Full tape, single pass. CAL [2020..2023] vs OOS
+[2024..present] split by NY entry date is REPORTING ONLY (gates are on the
+full tape, section 7). Integrity was verified in the onboarding; it is not
+re-verified here.
+
+2. MULTI-TIMEFRAME AGGREGATION (CONTINUOUS FILL GRIDS)
+
+1H execution bars: epoch top-of-hour 3600s slots (time // 3600; identical to
+NY wall-clock hours since the NY UTC offset is whole hours). Each real slot
+aggregates its M1 bars: open = first, high = max, low = min, close = last.
+4H anchor bars: NY wall-clock buckets [00:00-04:00), [04:00-08:00),
+[08:00-12:00), [12:00-16:00), [16:00-20:00), [20:00-24:00), keyed by NY
+calendar date; on fall-back dates a repeated wall hour merges into one
+bucket; on spring-forward dates the skipped wall hour simply has no M1 bars.
+Both grids are enumerated continuously over their full key range and missing
+bars are forward-filled PER FIELD from the previous bar (the #47-#53
+project convention). A grid bar with >= 1 underlying M1 bar is REAL; a
+forward-filled bar is a FILL bar. Indicators (section 3) are computed on the
+continuous grids (FILL bars included - structural continuity). Execution
+(section 5) touches only REAL bars: entries, stop checks, and trailing
+ratchets occur on REAL 1H bars only, so no fill ever happens at a synthetic
+price and no stop ratchets on synthetic closes.
+
+3. INDICATORS (ALL CAUSAL, ON COMPLETED BARS ONLY)
+
+- 4H Supertrend(10, 3.0) on the continuous 4H grid: Wilder ATR(10)
+  (TR ewm alpha = 1/10); basic bands = hl2 +/- 3.0 * ATR; final-band
+  recursion per the standard (TradingView) definition - the upper band falls
+  or resets when the prior close crosses above it, the lower band rises or
+  resets when the prior close crosses below it; the Supertrend line is the
+  lower band while bullish and the upper band while bearish; direction flips
+  to bullish when close crosses above the current final upper band and to
+  bearish when close crosses below the current final lower band. Seed: first
+  grid bar bearish (line = basic upper band); the 2020 warmup absorbs seed
+  effects. Trend is BULLISH if 4H close > Supertrend line, BEARISH if
+  4H close < line (the recursion guarantees sign consistency).
+- 1H Donchian(20): Upper(t) = highest high of bars t-19..t; Lower(t) =
+  lowest low of bars t-19..t (min_periods = 20; FILL bars participate).
+- 1H ADX(14): source-exact Wilder ADX (#56 implementation).
+- 1H ATR(14): Wilder ATR (TR ewm alpha = 1/14).
+
+4. SIGNAL GENERATION
+
+Evaluated at the OPEN of each 1H grid bar t (index i), using only completed
+state: close(t-1), Donchian and ADX at t-1, Donchian at t-2, and the 4H
+anchor bar that is STRICTLY COMPLETED before the open of bar t = the wall 4H
+bucket preceding the bucket containing t on the continuous 4H grid (the
+containing bucket is in progress or just started at t's open; the previous
+grid bucket is the last one whose end <= t's open).
+
+LONG signal at bar t (all required):
+  L1  close(t-1) > 1H Donchian Upper(t-2)   (breakout close vs channel
+      excluding bar t-1 itself)
+  L2  mapped 4H Supertrend BULLISH
+  L3  1H ADX14(t-1) >= 20.0 (finite)
+  L4  bar t is a REAL 1H bar and ATR14(t-1) finite
+Entry = open price of 1H bar t. SHORT signal is the exact mirror:
+close(t-1) < Donchian Lower(t-2), anchor BEARISH, same L3/L4. LONG and
+SHORT cannot fire on the same bar (Upper >= Lower). Signals on FILL bars are
+skipped, not queued. Max 1 open trade: while a trade is open all signals are
+shadowed; the machine resumes at the first signal bar strictly AFTER the
+exit bar (a signal at the exit bar itself is shadowed too).
+
+5. EXECUTION, STOPS, AND EXITS (SPREAD-AWARE, #56 MECHANICS)
+
+Fixed spread 0.41 price units round-trip (onboarding full-tape median),
+Ask = Bid + 0.41 everywhere. Position size 1.0 lot; PnL in price units;
+$100 per unit per lot is a display conversion only. No TP: exits are the
+trailing stop or tape end. Worst-case same-bar priority: the stop is checked
+on the entry bar itself (no TP exists, so no TP/SL ordering conflict).
+Honest gap fills: a bar OPENING beyond the stop fills at its open (adverse),
+otherwise at the level.
+
+LONG: entry executes at Ask = open(t) + 0.41.
+  Initial SL (bid level) = open(t) - 4.0 * ATR14(t-1).
+  Stop triggers on BID: exit when low(j) <= SL, fill = min(SL, open(j)).
+  Trailing: at the close of every REAL 1H bar j >= t, in bar order, AFTER
+  that bar's stop check: SL = max(SL, close(j) - 4.0 * ATR14(j)); the SL
+  never loosens.
+SHORT: entry executes at Bid = open(t).
+  Initial SL (ask-trigger level) = open(t) + 4.0 * ATR14(t-1).
+  Stop triggers on ASK: exit when high(j) >= SL - 0.41,
+  fill (ask) = max(SL, open(j) + 0.41).
+  Trailing: SL = min(SL, close(j) + 4.0 * ATR14(j)) at every REAL close.
+A trade still open at the tape end exits at the last bar close (END): long
+at bid close, short at ask = close + 0.41.
+
+Net PnL per trade as defined above embeds the full 0.41 round-trip in the
+fills; it is algebraically identical to Gross Exit PnL (bid-to-bid) minus
+the 0.41 cost floor (long: fill_bid - open_bid - 0.41; short:
+open_bid - fill_bid - 0.41). Initial-stop loss is -(4*ATR + 0.41) for longs
+and exactly -(4*ATR) for shorts (the #56 long/short asymmetry, implemented
+literally).
+
+6. COST-SENSITIVITY TREATMENT
+
+One cost model only (fixed 0.41, applied inside the fills). No sweep, no
+ablation: one configuration, one pass. Gross-vs-net means are reported so
+the floor's share is visible.
+
+7. STATISTICS AND GATES
+
+Population: all executed trades of the single machine pass, chronological.
+Net PnL per trade in price units (section 5). Win = Net PnL > 0. Profit
+factor = sum(wins) / abs(sum(losses)). Net Sharpe = mean(trade Net PnL) /
+std(trade Net PnL, ddof=1), event-indexed per trade, NOT annualized (the
+#47-#56 convention). Moving-block bootstrap: n = trade count; per resample
+draw ceil(n/5) block starts uniformly from {0..n-5}, concatenate the
+5-trade blocks, truncate to n, take the mean; 10,000 resamples; seed
+20261005; P = fraction of resample means <= 0. GATES on the FULL tape:
+GATE_SALEH_DONCHIAN.txt. CAL [2020..2023] / OOS [2024..present] blocks and
+the per-year table are reporting only. Reported alongside (not gated):
+funnel tallies, direction split, exit mix (initial-stop vs trailed-stop vs
+END), holding times, initial-risk distribution, MFE-style character of the
+trailing exits.
+
+8. HONESTY / STOP RULES
+
+- ONE pre-declared configuration; no variant, parameter, or cost floor runs
+  before the verdict; no re-run after the verdict for any purpose other than
+  a documented mechanical defect fix (which would be re-declared under a new
+  name).
+- Null results are complete, expected deliverables; FAIL is final for this
+  artifact.
+- PASS would NOT be a validated result under validation_discipline
+  (in-sample full-tape screen, no walk-forward, no year-sign gate); any
+  Phase 2 requires a NEW pre-declared SPEC meeting the standard discipline
+  (>= 150 trades, year-by-year sign agreement, gates before runs).
+- Known optimism, declared: bar-open entries and level-touch stop fills are
+  best-case executions on an H1 bar reconstruction (no intrabar queue, no
+  slippage beyond the fixed spread); trailing exits assume the stop level
+  trades when the bar range touches it. The exit-mix / holding / character
+  statistics are computed precisely so a hollow or degenerate pass is
+  detectable from the report.

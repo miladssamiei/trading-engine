@@ -1,0 +1,69 @@
+CATEGORICAL REGIME-SWITCHING OMNIBUS - REPORT
+OVERALL GATE: FAIL
+Six independent bid-only M1 proxy runs; static structural stops in CFD, separate per-position 6xH1 ATR open-equity guard in futures.
+Net Sharpe is unannualized per trade. MBB p-value uses 10000 five-trade block resamples, seed 20260927.
+Gate per row: >=30 closed trades and Net Sharpe >0; MBB p is descriptive.
+
+TAPE GC: data/results/xauusd_onboarding/xauusdtick_m1.csv | 2337538 M1 rows | 2020-01-01T23:00:00+00:00 through 2026-09-01T20:59:00+00:00 | H1 38988/58438 real
+SHA256 a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f
+TAPE NQ: data/results/virgin_assets/ustech_m1.csv | 2936100 M1 rows | 2020-01-01T00:00:00+00:00 through 2026-09-23T23:59:00+00:00 | H1 49201/58992 real
+SHA256 152f9c995b370e5391cb7da99b64a8002ceee5e52cc68899ddca409ac7e15e39
+TAPE ES: data/results/vwap_2021_2026/us500tick_m1.csv | 1791504 M1 rows | 2021-01-03T23:00:00+00:00 through 2026-04-30T23:59:00+00:00 | H1 31382/46633 real
+SHA256 29ad8f8b25b43be43a87c4ac39575c3cd280d557661c31f8e691990949087453
+
+GC / CFD | cost 0.41 | GATE FAIL
+Closed trades 3814; entries 3814; net expectancy -0.380118 price units/trade; net total -1449.772; Net Sharpe -0.027709; MBB p 0.9712
+Consolidation: 1672 trades, PnL -1001.586, mean -0.5990347879741957
+Directional: 2142 trades, PnL -448.185, mean -0.20923691602500252
+Exits {'STOP_LOSS': 2492, 'TARGET': 1322, 'PROP_LIQUIDATION': 0, 'OPEN_END': 0}; exact PROP_LIQUIDATION count 0
+M1 ties 1; adverse exit gaps 30; same-M1 exits 29; NY overnight entries 690
+OPEN_END last-close mark excluded from stats 0.000; funnel {'candidates': 5565, 'busy': 1745, 'no_real': 0, 'invalid_target_after_gap': 6, 'entered': 3814, 'filled_prior_signals': 19}
+Annual NY entry cohorts: {"2020": {"net_total": -432.30140072191546, "trades": 567}, "2021": {"net_total": -279.88244314545466, "trades": 585}, "2022": {"net_total": -447.57268276710585, "trades": 545}, "2023": {"net_total": -157.96584023806855, "trades": 573}, "2024": {"net_total": -353.0064340501847, "trades": 608}, "2025": {"net_total": -225.92704146661555, "trades": 596}, "2026": {"net_total": 446.88420277092405, "trades": 340}}
+
+GC / FUTURES | cost 0.13 | GATE FAIL
+Closed trades 3775; entries 3775; net expectancy -0.098778 price units/trade; net total -372.888; Net Sharpe -0.007142; MBB p 0.6966
+Consolidation: 1634 trades, PnL -522.013, mean -0.31946955733056515
+Directional: 2141 trades, PnL 149.125, mean 0.06965196841035334
+Exits {'STOP_LOSS': 2387, 'TARGET': 1388, 'PROP_LIQUIDATION': 0, 'OPEN_END': 0}; exact PROP_LIQUIDATION count 0
+M1 ties 2; adverse exit gaps 27; same-M1 exits 29; NY overnight entries 706
+OPEN_END last-close mark excluded from stats 0.000; funnel {'candidates': 5565, 'busy': 1788, 'no_real': 0, 'invalid_target_after_gap': 2, 'entered': 3775, 'filled_prior_signals': 19}
+Annual NY entry cohorts: {"2020": {"net_total": -176.70806488937814, "trades": 560}, "2021": {"net_total": -95.86830909428456, "trades": 572}, "2022": {"net_total": -371.4777898719689, "trades": 549}, "2023": {"net_total": 12.00576324574725, "trades": 562}, "2024": {"net_total": -216.49345248570953, "trades": 599}, "2025": {"net_total": -18.567293877401536, "trades": 595}, "2026": {"net_total": 494.2207546614254, "trades": 338}}
+
+NQ / CFD | cost 1.00 | GATE FAIL
+Closed trades 4646; entries 4646; net expectancy -0.158753 price units/trade; net total -737.564; Net Sharpe -0.001973; MBB p 0.5661
+Consolidation: 1687 trades, PnL -2102.622, mean -1.246367591216073
+Directional: 2959 trades, PnL 1365.058, mean 0.46132406074127225
+Exits {'STOP_LOSS': 2909, 'TARGET': 1737, 'PROP_LIQUIDATION': 0, 'OPEN_END': 0}; exact PROP_LIQUIDATION count 0
+M1 ties 3; adverse exit gaps 67; same-M1 exits 38; NY overnight entries 944
+OPEN_END last-close mark excluded from stats 0.000; funnel {'candidates': 7468, 'busy': 2818, 'no_real': 0, 'invalid_target_after_gap': 4, 'entered': 4646, 'filled_prior_signals': 0}
+Annual NY entry cohorts: {"2020": {"net_total": 1285.3699250643285, "trades": 671}, "2021": {"net_total": -973.049435531062, "trades": 657}, "2022": {"net_total": -2683.1532829076677, "trades": 711}, "2023": {"net_total": 755.171350835948, "trades": 692}, "2024": {"net_total": -1297.694068159839, "trades": 729}, "2025": {"net_total": 1279.908571649863, "trades": 683}, "2026": {"net_total": 895.8827084003387, "trades": 503}}
+
+NQ / FUTURES | cost 0.39 | GATE PASS
+Closed trades 4645; entries 4645; net expectancy 0.307652 price units/trade; net total 1429.043; Net Sharpe 0.003819; MBB p 0.4044
+Consolidation: 1679 trades, PnL -1310.198, mean -0.7803444312744018
+Directional: 2966 trades, PnL 2739.241, mean 0.9235473393749329
+Exits {'STOP_LOSS': 2881, 'TARGET': 1763, 'PROP_LIQUIDATION': 1, 'OPEN_END': 0}; exact PROP_LIQUIDATION count 1
+M1 ties 7; adverse exit gaps 60; same-M1 exits 36; NY overnight entries 950
+OPEN_END last-close mark excluded from stats 0.000; funnel {'candidates': 7468, 'busy': 2819, 'no_real': 0, 'invalid_target_after_gap': 4, 'entered': 4645, 'filled_prior_signals': 0}
+Annual NY entry cohorts: {"2020": {"net_total": 1566.3942848329182, "trades": 669}, "2021": {"net_total": -813.425402565656, "trades": 659}, "2022": {"net_total": -2410.885134883614, "trades": 711}, "2023": {"net_total": 953.4896226889181, "trades": 693}, "2024": {"net_total": -1002.5180140808781, "trades": 728}, "2025": {"net_total": 2005.162584454787, "trades": 682}, "2026": {"net_total": 1130.8251680298044, "trades": 503}}
+
+ES / CFD | cost 0.51 | GATE FAIL
+Closed trades 3199; entries 3200; net expectancy -0.289731 price units/trade; net total -926.848; Net Sharpe -0.016220; MBB p 0.8187
+Consolidation: 1214 trades, PnL -1270.557, mean -1.046587063167946
+Directional: 1985 trades, PnL 343.709, mean 0.17315305061145492
+Exits {'STOP_LOSS': 2003, 'TARGET': 1196, 'PROP_LIQUIDATION': 0, 'OPEN_END': 1}; exact PROP_LIQUIDATION count 0
+M1 ties 2; adverse exit gaps 86; same-M1 exits 27; NY overnight entries 662
+OPEN_END last-close mark excluded from stats -10.716; funnel {'candidates': 5015, 'busy': 1811, 'no_real': 0, 'invalid_target_after_gap': 4, 'entered': 3200, 'filled_prior_signals': 7}
+Annual NY entry cohorts: {"2021": {"net_total": 253.45805227579285, "trades": 573}, "2022": {"net_total": -276.7068110225549, "trades": 631}, "2023": {"net_total": -253.04018753808788, "trades": 616}, "2024": {"net_total": 183.82308953197892, "trades": 616}, "2025": {"net_total": -601.2479674786114, "trades": 583}, "2026": {"net_total": -233.13406499065135, "trades": 180}}
+
+ES / FUTURES | cost 0.30 | GATE FAIL
+Closed trades 3191; entries 3192; net expectancy -0.112866 price units/trade; net total -360.156; Net Sharpe -0.006288; MBB p 0.6199
+Consolidation: 1209 trades, PnL -1064.191, mean -0.8802243780498231
+Directional: 1982 trades, PnL 704.035, mean 0.355214316385973
+Exits {'STOP_LOSS': 1970, 'TARGET': 1221, 'PROP_LIQUIDATION': 0, 'OPEN_END': 1}; exact PROP_LIQUIDATION count 0
+M1 ties 5; adverse exit gaps 95; same-M1 exits 27; NY overnight entries 677
+OPEN_END last-close mark excluded from stats -10.506; funnel {'candidates': 5015, 'busy': 1819, 'no_real': 0, 'invalid_target_after_gap': 4, 'entered': 3192, 'filled_prior_signals': 7}
+Annual NY entry cohorts: {"2021": {"net_total": 326.2725845094817, "trades": 571}, "2022": {"net_total": -262.98400617253304, "trades": 632}, "2023": {"net_total": -239.5614461504543, "trades": 613}, "2024": {"net_total": 426.7336618171453, "trades": 616}, "2025": {"net_total": -497.74687043519447, "trades": 580}, "2026": {"net_total": -112.87042155369691, "trades": 179}}
+
+Limitations: The futures costs/guard are applied to CFD-derived proxy M1 bars, not native CME execution. The guard is per position rather than account-wide, and M1 extrema have unknown ordering.
+Variable CFD spread, futures quotes/queue/rolls, swap/financing, sizing and full prop-account drawdown are unmeasured. Full-tape findings are exploratory, not walk-forward confirmation.

@@ -1,0 +1,46 @@
+H104 XAGUSD PHASE 1 PHASE1_FAIL
+{
+  "verdict": "PHASE1_FAIL",
+  "source_hash": "c73194dba207ff8a71fd7adce4b60ed40dce60c954dd01991ace981aff153f9c",
+  "counts": {
+    "planned": 286,
+    "covered": 279,
+    "feature_ready": 286,
+    "signaled": 176,
+    "unresolved": 2,
+    "normal_hours_gaps": 21571
+  },
+  "resolved_oos": 174,
+  "bootstrap_p_nonpositive": 0.7198,
+  "oos_stress_mean": -0.08386468634482772,
+  "years": {
+    "2024": {
+      "n": 62,
+      "stress_sum": -9.712050115325008,
+      "stress_mean": -0.15664596960201627
+    },
+    "2025": {
+      "n": 77,
+      "stress_sum": 3.8483796011499503,
+      "stress_mean": 0.04997895585909026
+    },
+    "2026": {
+      "n": 35,
+      "stress_sum": -8.728784909824967,
+      "stress_mean": -0.24939385456642763
+    }
+  },
+  "gates": {
+    "G-H104-1": false,
+    "G-H104-2": false,
+    "G-H104-3": false,
+    "G-H104-4": false,
+    "G-H104-5": true,
+    "G-H104-6": false
+  },
+  "oos_swap_sum": -7.546000000000001,
+  "oos_commission_sum": 0.10845542400000001,
+  "oos_entry_spread_median": 0.016000000000003567,
+  "ledger_sha256": "ebd575837493019ef60f442594f46e2c8d4555654f2b30d1b145a66bd12c9b95",
+  "phase2": "NOT_RUN"
+}

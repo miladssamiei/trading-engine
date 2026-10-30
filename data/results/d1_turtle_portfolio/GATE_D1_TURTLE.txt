@@ -1,0 +1,6 @@
+G1: Each asset requires at least 30 closed scored trades entered from 2020 through the available 2026 tape.
+G2: Each asset requires positive net expectancy after its specified all-inclusive cost floor.
+G3: Each asset requires unannualized per-trade net Sharpe > 0.
+G4: Each asset requires MBB P(mean net <= 0) <= 0.05 with 10000 resamples, block length 5, seed 20261020.
+G5: Each asset requires no negative net entry-cohort PnL in any full calendar year 2020-2025; partial 2026 is reported but not gated.
+G6: Overall four-asset Phase 1 passes only if all four assets have qualifying sources and pass G1-G5; any unavailable source makes the overall verdict DATA BLOCKED.

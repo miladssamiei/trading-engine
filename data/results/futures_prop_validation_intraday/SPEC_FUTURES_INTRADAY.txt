@@ -1,0 +1,91 @@
+FUTURES PROP VALIDATION INTRADAY - PREDECLARED SPEC
+Date: 2026-09-26. New diagnostic study; H52/H53/H56 records remain frozen.
+
+SCOPE AND HISTORICAL LABEL RESOLUTION
+The requested "#52/#53 15m SMC order-block" engine does not exist as one
+frozen strategy. H52 is a 15m Bollinger limit pullback with a 4h trend anchor;
+H53 is a 1h prior-day range sweep and inversion FVG with a D1 anchor. Neither
+defines an order-block threshold. To preserve exact lineage without inventing
+a rule, Engine D is reported as two separate, unselected rows: D52 (the 15m
+timeframe match) and D53 (the sweep mechanism match). Neither is called 15m
+SMC. The three engines run independently per asset; no row is selected for
+the verdict or optimized after observation.
+
+DATA AND COSTS
+GC = XAUUSD bid-only M1 proxy, NQ = USTECH bid-only M1 proxy, ES = US500-tick
+M1 proxy. Use their full available tapes: GC and NQ start 2020; ES starts
+2021 and ends April 2026. There are no CME trade, roll or bid/ask tapes.
+Owner-supplied round-turn fills: GC 0.13, NQ 0.39, ES 0.30 native price units;
+long buy at reference bid + floor and sell at bid, short sell at bid and buy
+at reference bid + floor. Swap is zero. The resulting units are price units
+per one underlying unit, not CME contract dollars.
+
+ENGINE C - H56 EXACT GOLD-NATIVE PARAMETER TRANSFER
+Use the frozen H56 three-candle pattern on completed M1 bars: P-gap > 1.0
+price unit, spike-body ratio > 1.5. A single pending order updates the maximum
+one consecutive opposite move rule, pullback trigger and risk on later M1
+bars; invalidate risk > 10 price units; require close versus EMA60, Wilder
+ADX14 >= 20, and NY entry open time [01:00,05:00). Pending expires at NY date
+end. Entry executes at the trigger bar's own low (long) or high (short), as
+H56's known optimistic M1 extreme fill. Structural stop is pre-spike low/high;
+1:1 TP uses H56's asymmetric spread-aware bracket (long TP = ask entry +
+initial risk on bid; short TP = bid entry - initial risk on ask). Same-bar SL
+before TP; subsequent stops/targets gap at M1 open. No other filter or
+timeframe substitution, including on NQ and ES.
+
+ENGINE D52 - H52 15M BOLLINGER LIMIT PULLBACK
+Build continuous epoch 15m OHLC by fieldwise forward fill; build NY wall 4h
+bars from that grid. Use H52's frozen prior completed 4h RSI14/Supertrend
+(10,3)/ADX14 gates and prior 15m ADX14 >20; limit at prior BB20 +/- 2
+population-SD near band. One 15m bar order validity. A real M1 touch fills
+at the band or a favorable gap open; synthetic bars cannot fill. Structural
+bracket: stop 6x prior 15m Wilder ATR14 from fill, target prior opposite BB
+band. No changes to H52 indicators, level definitions or fixed brackets.
+
+ENGINE D53 - H53 1H SWEEP / INVERSION FVG
+Build continuous epoch 1h OHLC by fieldwise forward fill; build D1 [17:00,
+17:00) NY anchors. Track most recent bullish/bearish three-candle 1h FVG
+and each current session's prior-day-high/low sweeps and extremes exactly as
+H53. Enter next real 1h bar at first M1 open after prior close-through of
+the opposing FVG. Short stop = swept PDH extreme, target = prior-day low;
+long stop = swept PDL extreme, target = prior-day high. Static brackets and
+no signal recency or wall-hour filters. Synthetic 1h bars update indicators
+and sweep state but cannot execute an entry.
+
+M1 EXECUTION AND PROP GUARD
+For D52/D53, scan M1 from the first executable minute. A standing stop has
+priority over target when both touch the same M1 bar. On later M1 bars,
+adverse stop gaps and favorable target gaps fill at the M1 open. On a limit
+entry minute, the touch must precede exit; if both bracket sides touch,
+score the stop first. This is an OHLC proxy, with unknown intraminute order.
+For each position, initial risk is the positive distance from reference entry
+to initial structural stop. Peak_Open_Equity starts at zero net PnL and
+updates with favorable M1 high/low marked net of the round-turn floor.
+Liquidation floor = peak - 2.5 * initial risk, fixed for that position.
+After bracket checks on each M1 bar, if M1 close net open equity <= floor,
+exit at that M1 close as PROP_LIQUIDATION. Shadow all new signals and setups
+until exit UTC epoch + 86400 inclusive. Signals while occupied are discarded;
+next actionable higher-timeframe signal is strictly after the exit bar.
+Engines and assets are independent. This per-position price-unit overlay is
+not an account-wide Apex or Topstep dollar threshold. A real firm threshold
+persists across trades and may fail the account at breach; this diagnostic
+cooldown is the owner-requested counterfactual.
+
+STATS AND GATES
+Each of nine asset-engine rows is gated on its full tape: executed trades >=
+30, event-indexed per-trade Net Sharpe = mean / sample std(ddof=1) > 0, and
+moving-block bootstrap P(mean net <= 0) <= 0.20. Bootstrap: 10,000 resamples,
+five-trade contiguous blocks with replacement, seed 20260926. If fewer than
+five trades or undefined Sharpe, gate FAIL. Overall PASS only if all nine
+rows PASS. No optimization, ablation, winner-picking or refitting. CAL/OOS
+and yearly views are diagnostics only. A FAIL is final for this artifact;
+a PASS remains an in-sample proxy, not a confirmed live result.
+
+REPORTING
+Save report, trade CSV and run metadata with input/script hashes. Show net
+expectancy, MBB p, normal stop/target/prop/end counts, and same-bar exit
+share. Same-bar means entry and exit in the same strategy execution bar:
+M1 for C, 15m for D52, 1h for D53. Also show exact same-M1-minute share
+for D52/D53. Cost floor savings are transaction differences, not swaps;
+historical comparable swap schedules are unavailable. No CME or prop firm
+rule compliance is asserted.

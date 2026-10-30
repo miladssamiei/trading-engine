@@ -1,0 +1,38 @@
+LUCID MGC H70 50K FLEX - V2 TRANSFER REPORT
+OVERALL VERDICT: NO GO
+V2 source check uses the 2024-26 subset of the full 2020-26 quote ledger.
+H70 15:59 native CFD quote rows 321; exact gated-ledger match True.
+Unresolved required exits 1; G1 FAIL.
+Complete 180-day rolling starts 267; G2 PASS.
+G5 FAIL: no native CME GC/MGC quotes, contract rolls or Lucid forward fills.
+Floor uses spot midpoint and one-tick MGC cost; stress double-charges spread.
+Worst floating path is a native CFD quote proxy, not observed MGC equity.
+Every historical row is exposed, so rolling starts are not forward confirmation.
+
+1_MGC_mid_floor: 1 MGC, 320 resolved trades
+  Net mean $38.29/trade, total $12251.49; annual $ {'2024': 808.34, '2025': 6187.1, '2026': 5256.06}
+  180d: pass 89, breach 69, timeout 93, invalid source 16 / 267 starts
+  G3 FAIL, G4 PASS, diagnostic FAIL
+
+2_MGC_mid_floor: 2 MGC, 320 resolved trades
+  Net mean $76.57/trade, total $24502.99; annual $ {'2024': 1616.68, '2025': 12374.2, '2026': 10512.11}
+  180d: pass 142, breach 106, timeout 3, invalid source 16 / 267 starts
+  G3 FAIL, G4 PASS, diagnostic FAIL
+
+1_MGC_double_spread_stress: 1 MGC, 320 resolved trades
+  Net mean $28.67/trade, total $9173.72; annual $ {'2024': -204.58, '2025': 4973.04, '2026': 4405.26}
+  180d: pass 72, breach 72, timeout 107, invalid source 16 / 267 starts
+  G3 FAIL, G4 FAIL, diagnostic FAIL
+
+2_MGC_double_spread_stress: 2 MGC, 320 resolved trades
+  Net mean $57.34/trade, total $18347.44; annual $ {'2024': -409.16, '2025': 9946.08, '2026': 8810.52}
+  180d: pass 128, breach 119, timeout 4, invalid source 16 / 267 starts
+  G3 FAIL, G4 FAIL, diagnostic FAIL
+
+No evaluation purchase or account order is justified by this report.
+Sources:
+https://support.lucidtrading.com/en/articles/12945790-lucidflex-evaluation-account
+https://support.lucidtrading.com/en/articles/12945815-lucidflex-drawdown
+https://support.lucidtrading.com/en/articles/12945805-lucidflex-consistency-percentage
+https://support.lucidtrading.com/en/articles/11404729-allowed-trading-times
+https://support.lucidtrading.com/en/articles/11508978-approved-products-and-commissions

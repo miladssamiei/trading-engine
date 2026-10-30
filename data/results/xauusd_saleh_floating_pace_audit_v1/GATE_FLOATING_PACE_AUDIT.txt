@@ -1,0 +1,4 @@
+G-FP1: All 321 frozen 2024+ quote-trade intervals have at least one exact valid native Bid/Ask tick, all source hashes match, and no trade row is omitted.
+G-FP2: For every audited trade, the native worst-floating net is no greater than its frozen realized quote-net and no greater than its frozen initial planned stop-distance gain.
+G-FP3: At some frozen risk no greater than 2%, at least 70% of eligible 180-day starts pass and at most 10% breach using native worst-floating equity marks.
+G-FP4: The prior 15:59 native-quote execution artifact has a full PASS with zero unresolved exits.

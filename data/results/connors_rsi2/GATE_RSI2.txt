@@ -1,0 +1,5 @@
+G1: US500 and USTECH each require at least 150 closed trades.
+G2: US500 and USTECH each require net expectancy > 0 after their fixed cost floors.
+G3: US500 and USTECH each require unannualized per-trade net Sharpe > 0.
+G4: US500 and USTECH each require MBB P(mean net <= 0) <= 0.05 using 10000 resamples, block length 5 and seed 20261010.
+G5: The overall Phase 1 screen passes only if both assets pass G1 through G4; a pass is eligible for separately predeclared execution/forward validation, not validated execution.

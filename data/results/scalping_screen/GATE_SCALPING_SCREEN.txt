@@ -1,0 +1,47 @@
+GATE — SCALPING SCREEN. Verbatim extraction of every gate declared in
+SPEC_SCALPING_SCREEN.txt (written 2026-09-03, BEFORE any script ran).
+Nothing here may be re-negotiated after numbers are seen. A gate clause
+that cannot be evaluated (missing data, degenerate case) counts as FAIL.
+
+STAGE A — GATE A1 (all three clauses required):
+  (i) n >= 150 eligible signals;
+  (ii) count(MFE >= t) > count(MAE >= t) at EVERY binding threshold,
+       t in {0.50, 0.75, 1.00} x ATR14(signal bar, pattern TF);
+  (iii) day-block bootstrap P(mean(e) <= 0) <= 0.20, e = (MFE - MAE) /
+       ATR14, resampling DAY MEANS with replacement, 10,000 draws,
+       seed 20260903.
+  FAIL => DROP-A, no R:R grid is run for that combination.
+
+STAGE B — GATE B1 (at least one of the 16 cells satisfies ALL of):
+  (i) expectancy_after_cost > 0 (0.51 pt cost);
+  (ii) STRICT NEIGHBORHOOD: the cell AND every existing orthogonal
+       grid neighbor has expectancy_after_cost > 0;
+  (iii) n_trades >= 150.
+  FAIL (no cell qualifies) => DROP-B.
+
+STAGE C — walk-forward (burn-in 2021, folds 2022H1..2026H1, 52-cell
+space, trailing expectancy_after_cost selection, >= 20 trailing trades
+else DEFAULT cell M0/1.00/1.50, occupancy one-position-at-a-time):
+
+  GATE C1: WF Sharpe > 0 AND >= 150 WF trades.
+  GATE C2: >= 4 of 5 years (2022, 2023, 2024, 2025, 2026-partial) net
+       positive AND no year > 60% of total net (concentration clause
+       only when total net > 0).
+  GATE C3: WF mean expectancy_after_cost (0.51 pt, BINDING) > 0
+       (0.80 pt legacy reported alongside, non-binding).
+  ANY fail => DROP-C, stop, documented reason.
+
+STAGE D — MT5 execution check, MODEL=4 ONLY, Stage-C survivors only:
+
+  GATE D1: MT5 WF Sharpe within +/- 0.15 of the Python WF reference.
+  GATE D2: per-trade reconciliation agreement >= 85%, every residual
+       classified.
+  Model=0 is used NOWHERE in this study. If no combination reaches
+  Stage D, Stage D is not run and the funnel records that fact.
+
+Multiple-testing context (declared, non-waivable): 50 combinations at
+Stage A (~10 false passes expected at p <= 0.20 by chance); up to 800
+in-sample cells at Stage B; up to 52 WF cells per combination at
+Stage C. Narrow-margin survivors are reported with skepticism; wide
+margins are prioritized. Every combination's fate appears in
+funnel_master.csv regardless of outcome.

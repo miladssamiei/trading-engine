@@ -1,0 +1,119 @@
+SPEC_VWAP_MR_EURUSD_STD.txt
+
+VOLATILITY-STANDARDIZED VWAP MEAN REVERSION - EURUSD PHASE 1
+SIGNAL-QUALITY SCREEN
+Hypothesis #36 (owner-tasked, 2026-09-23). Phase-1 MFE/MAE excursion screen
+ONLY: no trade rule beyond first-touch excursions, no EA, no tester, no
+Phase 2 implied by any outcome.
+
+1. TASKING AND LINEAGE
+- Direct follow-up to Hypothesis #35 (vwap_mr_eurusd, FAIL 2026-09-22 by
+  sample starvation: fixed 0.25% bands under a 0.40% max-move cap are
+  nearly self-excluding because VWAP always lies inside the session
+  range; 1 signal in 6.7 years). #36 replaces BOTH fixed scalars with
+  volatility-standardized quantities: 2.0-sigma volume-weighted deviation
+  bands and a 1.0 x ATR14(D1) dynamic session-range filter. This is the
+  owner-tasked standardization fix, a NEW pre-declared artifact; the #35
+  verdict stands and is not re-litigated. US500 VWAP-MR nulls
+  (vwap_rr_verdict) remain frozen lineage context. Null result
+  pre-accepted as a complete deliverable.
+
+2. DATA
+- Intraday: data/results/eurusd_onboarding/eurusdtick_m1.csv (verified
+  onboarding 2026-09-22: 2,490,896 M1 bars, Bid OHLC + tick_volume,
+  epoch-UTC open times).
+- Daily: data/results/eurusd_onboarding/eurusdtick_d1.csv (1,748 rows;
+  columns date,open,high,low,close,tick_volume; date = YYYYMMDD NY date
+  of the 17:00 ET Forex close; D1 bar D covers (D-1 17:00 ET, D 17:00]).
+- Timezone: America/New_York (DST-aware). Trading day = NY calendar
+  date. Session = M1 bars of that NY date with open wall minute in
+  [08:00, 16:00) ET (wall in [480, 960)). Session open price = open of
+  the session's first printed bar.
+
+3. DAILY VOLATILITY STATE (CAUSAL)
+- True Range on D1 bars: TR_i = max(H-L, |H - C_prev|, |L - C_prev|).
+- Wilder ATR14: ATR_14 = mean(TR_1..TR_14) at the 14th bar, then
+  ATR_i = (ATR_{i-1} * 13 + TR_i) / 14. Computed causally along the D1
+  tape in date order.
+- Causal lookup: for session day D, the last COMPLETED D1 bar is the
+  latest D1 row with date < D (the bar dated D is still in progress
+  during D's session). ATR(D) = Wilder ATR through that bar. If fewer
+  than 14 D1 bars precede D (warmup), ATR is undefined: no signals that
+  day (tallied as days_no_atr).
+
+4. INTRADAY STATE MACHINE (PER NY DATE, SESSION BARS IN ORDER)
+- Cumulative VWAP: TP = (High + Low + Close) / 3; VWAP[t] =
+  cumsum(TP * tick_volume) / cumsum(tick_volume) from the 08:00 ET
+  anchor (reset per NY date). VWAP keeps updating through walk bars.
+- Volume-weighted standard deviation:
+  sigma[t] = sqrt(max(0, cumsum(TP^2 * tick_volume) / cumsum(tick_volume)
+                       - VWAP[t]^2)).
+- Bands: upper = VWAP + 2.0 * sigma[t]; lower = VWAP - 2.0 * sigma[t].
+  Bands ARM only after 30 minutes of cumulative session data:
+  t_open - session_first_bar_open >= 1800 s.
+- 30-minute slope: slope[t] = VWAP[t] - VWAP[ref(t)], ref(t) = the LAST
+  session bar with open time <= t_open - 1800 s; if no such bar exists,
+  slope undefined -> no signal at t.
+- Dynamic session-range filter: rolling (Max High - Min Low) over
+  session bars so far (inclusive of the current bar); if it EXCEEDS
+  1.0 * ATR(D) (strictly greater), the session is invalidated for
+  signal generation from that bar onward (already-open walks are
+  unaffected).
+
+5. SIGNAL GENERATION
+- Signal window: M1 bars with open wall strictly inside (08:30, 15:30)
+  ET (510 < wall < 930), bands armed, slope defined, dynamic range
+  filter not yet triggered.
+- SHORT: Close > upper band AND slope <= 0.
+- LONG: Close < lower band AND slope >= 0.
+- Execution cap: FIRST valid signal per direction per NY date (max one
+  SHORT + one LONG per day; later candidates of an already-fired
+  direction are counted pre-cap and dropped).
+- Entry: the OPEN of the next printed M1 bar after the signal bar, if it
+  has the same NY date and open wall < 960; otherwise no-entry (dropped,
+  counted). Same cap semantics as #35: the first candidate consumes the
+  direction even if its entry is missing.
+
+6. EXCURSION WALK (PRE-COST)
+- From the entry bar (entry price = its open) over session bars (same NY
+  date, wall < 960), in order, until the FIRST of:
+  TARGET: evolving VWAP touched - SHORT: bar Low <= VWAP[bar]; LONG:
+          bar High >= VWAP[bar] (inclusive; the entry bar itself can be
+          the target).
+  TIME:   session end (last session bar with wall < 960).
+- MFE = (max High - entry) for LONG / (entry - min Low) for SHORT;
+  MAE = (max High - entry) for SHORT / (entry - min Low) for LONG; over
+  the walk bars inclusive of the exit bar, in pips (1 pip = 0.00010).
+- Descriptive cost context ONLY (Phase 1 stays gross): verified EURUSD
+  London/NY overlap median spread 0.3 pips; mean/median MFE, MAE and
+  MFE-MAE compared against it in the report. No net gate at Phase 1.
+
+7. GATES (FROZEN IN GATE_VWAP_MR_EURUSD_STD.TXT BEFORE ANY CODE EXISTS)
+G-VW1   total session-valid signals >= 150.
+G-VW2   aggregate mean MFE > mean MAE (strict, pips).
+G-VW3   day-block bootstrap: resample NY dates with replacement (10,000
+        resamples, numpy.random.default_rng(20260921)); statistic =
+        pooled mean of (MFE - MAE) in pips over resampled signals;
+        P(statistic <= 0) <= 0.20.
+OVERALL PASS requires all three. Any FAIL is final for this artifact.
+
+8. HONESTY / ANTI-LEAK RULES
+- All state causal: VWAP/sigma/range/slope at bar t use session bars up
+  to and including t only; ATR(D) uses D1 bars completed strictly
+  before day D; entries use only bars after the signal bar; the walk
+  uses the evolving VWAP strictly forward.
+- No parameter search: band multiple (2.0), ATR multiple (1.0), ATR
+  span (14), slope span (30 min), caps, window, seed are frozen here;
+  nothing tuned after seeing results. The standardization motive comes
+  from #35's pre-diagnosed starvation, not from peeking at #36 outcomes.
+- Null pre-accepted; US500 and #35 EURUSD verdicts stand untouched.
+- Phase-1 excursions are signal-quality measurements, not tradable
+  results.
+
+9. ARTIFACTS (data/results/vwap_mr_eurusd_std/)
+- SPEC_VWAP_MR_EURUSD_STD.txt, GATE_VWAP_MR_EURUSD_STD.txt (BEFORE code)
+- REPORT_VWAP_MR_EURUSD_STD_PHASE1.txt (funnel, pips expectancy,
+  win-rate-to-VWAP-target, cost-floor comparison, gate verdicts)
+- vwap_mr_eurusd_std_signals.csv (one row per executed signal)
+- run_meta.json (frozen parameters, counts, gate outcomes)
+- PROGRESS.md section logged as Hypothesis #36.

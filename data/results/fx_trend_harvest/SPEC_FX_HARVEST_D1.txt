@@ -1,0 +1,94 @@
+HYPOTHESIS #46 SPEC: EURUSD D1 TREND HARVEST - DONCHIAN BREAKOUT WITH FIXED 2R TAKE-PROFIT
+Study ID: fx_trend_harvest
+Date frozen: 2026-09-23, before any evaluation code was written or run.
+Status: frozen. Corrections or re-measurements require a NEW study name.
+Lineage: follow-up to #42 (fx_trend_d1, VERDICT FAIL, G-FX3 p=0.8367). #42 found an
+MFE/MAE excursion asymmetry (MFE 173 vs MAE 97 pips) that its 2xATR trailing stop
+destroyed (-6.2 pips/trade). This study tests a materially different exit mechanic -
+a FIXED asymmetric harvest at +2.0R against a tightened 1.5xATR initial stop - on the
+same signal family. This is a NEW pre-declared mechanic, not a re-run of #42.
+
+1. DATA
+1.1 Tape: data/results/eurusd_onboarding/eurusdtick_d1.csv (verified EURUSD D1,
+    17:00 ET closes; columns date(YYYYMMDD), open, high, low, close, tick_volume;
+    ~1,748 bars from 2020-01-02). Sorted ascending by date; duplicate dates, if any,
+    abort the run.
+1.2 All indicator and PnL arithmetic runs on raw price units; PnL is reported in
+    pips (1 pip = 0.0001).
+
+2. STATE MACHINE (causal indicators, computed per completed bar t)
+2.1 20-day Donchian channel STRICTLY PRIOR: dch(t) = max High over bars
+    [t-20, t-1]; dcl(t) = min Low over [t-20, t-1]. No overlap with bar t.
+2.2 Wilder ATR(14) STRICTLY PRIOR: TR(i) = max(H-L, |H-C(i-1)|, |L-C(i-1)|),
+    TR(0) = H0-L0; ATR(13) = mean(TR(0..13)); ATR(i) = (ATR(i-1)*13 + TR(i))/14.
+    The value used at signal bar t is ATR(t-1) (one further shift; strictly
+    prior 14 days [t-14, t-1] as observed through bar t-1).
+2.3 Warmup: bar t is ARMED only if index(t) >= 21 (0-based; at least 21 prior
+    bars) AND dch(t), dcl(t), ATR(t-1) are all non-NaN.
+
+3. SIGNALS AND EXECUTION
+3.1 Long signal at t: Close(t) > dch(t). Short signal at t: Close(t) < dcl(t).
+3.2 Execution cap: maximum ONE open trade; signals are actionable only while
+    flat. Signal occurrences during an open trade are counted in the funnel as
+    ignored-while-open and otherwise discarded.
+3.3 On the exit day e the position is flat by that day's close, so a signal at
+    bar e is actionable (entry e+1). Pre-declared here.
+3.4 Entry: Open of the next bar t+1. If t is the final bar of the tape the
+    signal is void (no trade).
+3.5 If both a signal day and its entry exist, the trade executes (no other
+    filters).
+
+4. R-MULTIPLE MECHANICS AND EXCURSION WALK
+4.1 1R (initial risk) = 1.5 * ATR(t-1) in price units, fixed at entry.
+4.2 Initial stop: Long = Entry - 1.5*ATR; Short = Entry + 1.5*ATR.
+4.3 Hard take-profit at +2.0R (asymmetric harvest): Long = Entry + 3.0*ATR;
+    Short = Entry - 3.0*ATR.
+4.4 Walk D1 bars from the ENTRY bar onward, in order, per bar (long case;
+    short mirrored):
+    a) Open <= SL  -> exit at Open, reason SL_GAP (honest fill);
+    b) Open >= TP  -> exit at Open, reason TP_GAP (honest fill);
+    c) Low  <= SL  -> exit at SL,  reason SL  (worst-case default: if both
+       levels are touched in the same bar, the SL fills);
+    d) High >= TP  -> exit at TP,  reason TP.
+    Checks run in the order a-d; the open-gap rules dominate intrabar touches.
+4.5 If no level is reached by the tape's final bar, the trade closes at the
+    final close, reason FORCED_EOD, and is INCLUDED in results.
+4.6 Per-trade record: signal date, entry date, side, ATR used, entry, SL, TP,
+    exit, exit reason, gross pips, R multiple = side*(exit-entry)/(1.5*ATR),
+    bars held.
+
+5. ECONOMICS (GROSS by owner designation)
+5.1 Gross pips = side * (exit - entry) * 10000. NO spread/commission is
+    deducted anywhere in this study; all three gates assess GROSS.
+5.2 Honesty note: the verified EURUSD cost floor is ~0.3 pip round-trip
+    (study #38/#42 convention). A PASS here would still need net accounting
+    before any Phase-2 consideration; at ~0.3 pip the margin between gross
+    and net is small relative to D1 ATR scales.
+
+6. GATES (frozen; see GATE_FX_HARVEST_D1.txt)
+G-FXH1: total executed signals >= 30.
+G-FXH2: mean Gross PnL (pips) > 0, strict.
+G-FXH3: moving-block bootstrap on per-trade gross pips - block length 5
+        trades, 10,000 resamples, seed 20260925, overlapping start positions
+        0..n-5, b = ceil(n/5) blocks per resample, concatenated and truncated
+        to n trades - P(mean gross <= 0) <= 0.20.
+Verdict rule: PASS only if all three PASS; any FAIL is final for this
+artifact.
+
+7. HONESTY / ANTI-LEAK RULES
+7.1 Zero loads of #42 artifacts or any other results file; the pipeline is
+   rebuilt natively from the D1 tape.
+7.2 Single frozen mechanic; no parameter search, no variant swaps, no
+   post-hoc gate changes. The 1.5xATR stop and 2.0R TP are pre-declared by
+   the owner's tasking and are not swept.
+7.3 Year-by-year gross totals are reported for sign inspection regardless of
+   verdict.
+7.4 A null result (any gate FAIL) is a complete, expected deliverable.
+
+8. ARTIFACTS (data/results/fx_trend_harvest/)
+- SPEC_FX_HARVEST_D1.txt (this file), GATE_FX_HARVEST_D1.txt (frozen pre-run)
+- fx_trend_harvest_signals.csv (all executed trades)
+- REPORT_FX_HARVEST_D1_PHASE1.txt (funnel, gross pip expectancy, win rate,
+  exit mix TP vs SL, R stats, yearly breakdown, gates, verdict)
+- run_meta.json (integrity + params + sha256 pins)
+- PROGRESS.md entry as Hypothesis #46.

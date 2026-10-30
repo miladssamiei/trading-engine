@@ -1,0 +1,115 @@
+REPORT_FTMO_PAIRS
+Generated: 2026-09-16T15:00:51
+
+PREMISE: pairs_us500_usa30 (#19) failed its economics gates on financing alone (gross +$1,572.62,
+spread -$30.77, swap -$5,510.00, net -$3,968.14 over 18 OOS spread trades; the study's USA30-leg
+swap was unavailable and treated as 0, so the true bleed is worse). This study replays the SAME
+18 frozen trades under simulated FTMO $10k Phase-1 Swap-Free rules (5% daily / 10% max / +8% target).
+DOW LEG: no broker Dow history covers 2021-03..2022-09 (DJ30.c server depth starts
+2022-11-21, 933 D1 bars; DJ30.ecn 7 bars; no USA30.c/ecn) and no headless terminal-side
+custom-symbol build exists (tester CustomSymbolCreate=4014; services do not auto-start;
+start-config [Charts] opens no chart on an empty workspace). Per SPEC_ADDENDUM_3_
+FTMO_PAIRS.txt (frozen before this run) the US500.c leg is REAL tester execution and
+the Dow leg is VIRTUAL: priced from the VERIFIED Dukascopy USA30 M5 tape (same tape as
+study #19), EET wall clock, $1/pt/lot, exact lots30 ratio, 2.28-pt RT spread charged;
+the in-EA FTMO guard aggregates the virtual floating PnL into every equity check. It is
+a what-if simulation, NOT an FTMO qualification (ftmo10k_qualification_v1 stays INCOMPLETE);
+downstream_model_allowed=false, live_execution_allowed=false; the #19 FAIL verdict stands.
+
+EXECUTION: EA fills the US500.c leg at the first tester tick at/after entry/exit-date+1day
+(D1-close proxy); the virtual Dow leg prices at the same instant from the restamped tape.
+Reference run multiplier 1.0: wall=56.0s, ticks=120180789, bars=1679,
+tester pass=True, executed=15 pair trades, status={'initial_equity': '10000.00', 'final_balance': '10858.04', 'final_equity': '10858.04', 'account_balance': '9285.13', 'virtual_cash': '1572.91', 'target_reached': '1', 'breached': '0', 'breach_reason': '', 'signals_total': '18', 'signals_next': '15', 'trades_executed': '15', 'last_time': '2026.06.30 23:57'}
+SWAP OVERRIDE: tester charged swap total -32.18 USD -> forced to 0.00 for every trade
+(swap-free mirror); analysis PnL = combined raw DEAL_PROFIT - commission; commission total +0.00 USD.
+LEG ECONOMICS: $/pt/lot US500.c 1.0000, USA30Duk 1.0000 (recorded).
+FILL-VS-MODEL: combined swap-free fill $ vs CSV gross_usd over first 15 trades: median -7.02, mean -20.27, total -304.1 USD
+(USA30Duk fill economics + spread + daily-boundary execution vs the study's $1/pt convention).
+
+GATES
+G-P1 EXECUTION INTEGRITY: compile 0/0, run passed=True, not timed out=True, both legs on all trades=True, executed 15 >= 95% of 15 armed -> PASS
+G-P2 SWAP-FREE OVERRIDE AUDIT: 15 trades, all swap-zeroed, tester swap -32.18 reported -> PASS
+G-P3 FTMO PHASE-1 FEASIBILITY: 7 passing multipliers -> PASS
+G-P4 CONFIRMATION RUN: PASS (multiplier 5.0: {'target_reached': True, 'breached': False, 'trades': 2, 'balance': 11016.97, 'py_trades_to_pass': 1, 'wall_s': 46.0})
+OVERALL VERDICT: PASS
+
+MULTIPLIER SWEEP (D1-close marks, worst-floating via simultaneous adverse D1 extremes of both legs)
+ mult   pass_date  days  peak_daily%  max_trail% verdict first_breach
+  1.0  2025-04-09  1050         4.17        4.22    PASS            -
+  1.5           -     -         5.43        3.96    FAIL   2021-11-26
+  2.0           -     -         5.38        5.23    FAIL   2021-11-19
+  2.5           -     -         5.39        4.51    FAIL   2021-09-20
+  3.0           -     -         5.51        4.48    FAIL   2021-09-10
+  3.5           -     -         5.33        5.17    FAIL   2021-09-07
+  4.0  2021-05-13    44         2.97        2.51    PASS   2021-09-06
+  4.5  2021-05-13    44         3.34        2.82    PASS   2021-08-31
+  5.0  2021-05-11    42         3.72        3.13    PASS   2021-07-19
+  5.5  2021-05-11    42         4.09        3.44    PASS   2021-06-21
+  6.0  2021-05-11    42         4.46        3.75    PASS   2021-06-21
+  6.5  2021-05-11    42         4.83        4.06    PASS   2021-06-21
+  7.0           -     -         5.05        4.37    FAIL   2021-03-18
+  7.5           -     -         5.41        4.68    FAIL   2021-03-18
+  8.0           -     -         5.77        4.99    FAIL   2021-03-18
+  8.5           -     -         6.13        5.30    FAIL   2021-03-18
+  9.0           -     -         6.49        5.61    FAIL   2021-03-18
+  9.5           -     -         6.85        5.92    FAIL   2021-03-18
+ 10.0           -     -         7.21        6.23    FAIL   2021-03-18
+ 10.5           -     -         7.57        6.54    FAIL   2021-03-18
+ 11.0           -     -         7.93        6.84    FAIL   2021-03-18
+ 11.5           -     -         8.29        7.15    FAIL   2021-03-18
+ 12.0           -     -         8.65        7.46    FAIL   2021-03-18
+ 12.5           -     -         9.01        7.76    FAIL   2021-03-18
+ 13.0           -     -         9.37        8.07    FAIL   2021-03-18
+ 13.5           -     -         5.15        0.00    FAIL   2021-03-15
+ 14.0           -     -         5.34        0.00    FAIL   2021-03-15
+ 14.5           -     -         5.54        0.00    FAIL   2021-03-15
+ 15.0           -     -         5.73        0.00    FAIL   2021-03-15
+ 15.5           -     -         5.92        0.00    FAIL   2021-03-15
+ 16.0           -     -         6.11        0.00    FAIL   2021-03-15
+ 16.5           -     -         6.30        0.00    FAIL   2021-03-15
+ 17.0           -     -         6.49        0.00    FAIL   2021-03-15
+ 17.5           -     -         6.68        0.00    FAIL   2021-03-15
+ 18.0           -     -         6.87        0.00    FAIL   2021-03-15
+ 18.5           -     -         7.06        0.00    FAIL   2021-03-15
+ 19.0           -     -         7.25        0.00    FAIL   2021-03-15
+ 19.5           -     -         7.44        0.00    FAIL   2021-03-15
+ 20.0           -     -         7.63        0.00    FAIL   2021-03-15
+ 20.5           -     -         7.83        0.00    FAIL   2021-03-15
+ 21.0           -     -         8.02        0.00    FAIL   2021-03-15
+ 21.5           -     -         8.21        0.00    FAIL   2021-03-15
+ 22.0           -     -         8.40        0.00    FAIL   2021-03-15
+ 22.5           -     -         8.59        0.00    FAIL   2021-03-15
+ 23.0           -     -         8.78        0.00    FAIL   2021-03-15
+ 23.5           -     -         8.97        0.00    FAIL   2021-03-15
+ 24.0           -     -         9.16        0.00    FAIL   2021-03-15
+ 24.5           -     -         9.35        0.00    FAIL   2021-03-15
+ 25.0           -     -         9.54        0.00    FAIL   2021-03-15
+ 25.5           -     -         9.73        0.00    FAIL   2021-03-15
+ 26.0           -     -         9.92        0.00    FAIL   2021-03-15
+ 26.5           -     -        10.12        0.00    FAIL   2021-03-15
+ 27.0           -     -        10.31        0.00    FAIL   2021-03-15
+ 27.5           -     -        10.50        0.00    FAIL   2021-03-15
+ 28.0           -     -        10.69        0.00    FAIL   2021-03-15
+ 28.5           -     -        10.88        0.00    FAIL   2021-03-15
+ 29.0           -     -        11.07        0.00    FAIL   2021-03-15
+ 29.5           -     -        11.26        0.00    FAIL   2021-03-15
+ 30.0           -     -        11.45        0.00    FAIL   2021-03-15
+
+OPTIMAL: multiplier 5.0 -> pass 2021-05-11 (42 trading days from 2021-03-15)
+  win rate: 100.00% over the 1 pairs closed by the pass date
+  peak FTMO daily loss: 3.72% (limit 5.00%)
+  max trailing DD of close-equity: 3.13%
+  avg holding per pair (all executed): 51.87 calendar days
+  average days-to-pass across passing multipliers: 186.6 (min 42, max 1050)
+
+COMPARISON vs ftmo_macro_reversal (frozen REPORT_FTMO_MACRO_REVERSAL.txt):
+  macro reversal optimal: 15.0 lots, pass 2021-01-06 (2 trading days), peak daily loss 3.32%
+  pairs (this study): multiplier 5.0, pass 2021-05-11 (42 trading days), peak daily loss 3.72%
+  peak-daily-drawdown comparison at each strategy's own optimal: pairs 3.72% vs macro-reversal 3.32% (lower is safer against the 5% FTMO daily limit).
+
+CAVEATS: Model=0 constant synthetic spread underestimates the real US500 spread (~0.41 vs
+~0.51 median; the virtual Dow leg carries the verified 2.28-pt spread by configuration);
+worst-floating assumes SIMULTANEOUS adverse D1 extremes of both legs (very pessimistic for
+a spread); daily anchor is prior-day realized total balance (tasking definition); the virtual
+Dow leg prices are Dukascopy-derived on the Europe/Athens wall clock (<= 1 h DST-rule skew
+vs the broker clock at fill instants; Python marks use the same tape).

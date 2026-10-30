@@ -1,0 +1,90 @@
+REPORT - HYPOTHESIS #50: DUAL-TIMEFRAME KELTNER CHANNEL BREAKOUT MOMENTUM (4h execution / D1 17:00 ET anchor)
+Generated: 2026-09-23T22:12:31.135073+00:00  |  OVERALL VERDICT: FAIL
+Mechanics: prior 4h Close beyond KC(EMA29 +/- 2.77*ATR29(4h)) with D1 EMA(50) direction filter (17:00 ET
+daily buckets from the continuous 1h grid); entry at 4h signal-bar open; initial SL = entry -/+
+max(|Entry-EMA29|, 1.5*ATR29) then ratcheted to the EMA29 baseline at each 4h close; honest gap fills;
+worst-case same-bar stop; continuous forward-filled grids per SPEC_KC_BREAKOUT.txt.
+
+=== US500 (cost floor 0.51 points RT) ===
+1. DATA: 1791504 M1 rows -> 1h base 46633 (15251 synthetic = 32.7%) / 11659 4h bars / 1944 D1 anchors, 2021-01-03 16:00:00 .. 2026-04-30 16:00:00
+   tape sha256 29ad8f8b25b43be4...
+2. FUNNEL: armed 4h bars=11358  D1 direction: bull=7806 bear=3552
+   breakouts (prior close beyond band): up=998 down=778
+   direction-aligned candidates L/S=904/514  ignored-while-open=1418  EXECUTED=171
+3. NET ECONOMICS (points): mean=-0.423/trade  median=-12.638  total=-72.3  win=38.0%  Net Sharpe=-0.106
+   excursion asymmetry: mean MFE=65.37 vs mean MAE=39.37  (MFE/MAE=1.66)
+   sides: LONG: n=102 mean=7.31  SHORT: n=69 mean=-11.85
+   exit mix: {'SL': 171}
+   year-by-year net:
+      2021: n=  24  total=    -206.3  mean=  -8.598
+      2022: n=  39  total=    -166.6  mean=  -4.273
+      2023: n=  31  total=     197.3  mean=   6.364
+      2024: n=  35  total=     190.7  mean=   5.448
+      2025: n=  29  total=     288.8  mean=   9.960
+      2026: n=  13  total=    -376.2  mean= -28.936
+4. GATES (independent, frozen in GATE_KC_BREAKOUT.txt):
+   G-KC1 executed >= 30          :   171          -> PASS
+   G-KC2 Net Sharpe > 0           :    -0.106    -> FAIL
+   G-KC3 MBB P(mean<=0) <= 0.20   :    0.5700    -> FAIL  (block=5, 10000 resamples, seed 20260928)
+   US500 VERDICT: FAIL
+
+=== EURUSD (cost floor 0.3 pips RT) ===
+1. DATA: 2490896 M1 rows -> 1h base 58847 (17098 synthetic = 29.1%) / 14713 4h bars / 2452 D1 anchors, 2020-01-01 16:00:00 .. 2026-09-18 16:00:00
+   tape sha256 e578692f3b02d985...
+2. FUNNEL: armed 4h bars=14412  D1 direction: bull=7194 bear=7218
+   breakouts (prior close beyond band): up=885 down=900
+   direction-aligned candidates L/S=734/752  ignored-while-open=1486  EXECUTED=186
+3. NET ECONOMICS (pips): mean=5.117/trade  median=-16.267  total=951.9  win=38.7%  Net Sharpe=1.048
+   excursion asymmetry: mean MFE=79.42 vs mean MAE=43.96  (MFE/MAE=1.81)
+   sides: LONG: n=96 mean=2.67  SHORT: n=90 mean=7.73
+   exit mix: {'SL': 185, 'FORCED_EOD': 1}
+   year-by-year net:
+      2020: n=  25  total=     521.3  mean=  20.854
+      2021: n=  33  total=    -228.4  mean=  -6.921
+      2022: n=  27  total=     424.4  mean=  15.719
+      2023: n=  30  total=    -209.7  mean=  -6.989
+      2024: n=  28  total=      40.2  mean=   1.436
+      2025: n=  29  total=      38.3  mean=   1.321
+      2026: n=  14  total=     365.7  mean=  26.119
+4. GATES (independent, frozen in GATE_KC_BREAKOUT.txt):
+   G-KC1 executed >= 30          :   186          -> PASS
+   G-KC2 Net Sharpe > 0           :     1.048    -> PASS
+   G-KC3 MBB P(mean<=0) <= 0.20   :    0.2062    -> FAIL  (block=5, 10000 resamples, seed 20260928)
+   EURUSD VERDICT: FAIL
+
+=== XAUUSD (cost floor 0.41 price units RT) ===
+1. DATA: 2337538 M1 rows -> 1h base 58438 (19450 synthetic = 33.3%) / 14611 4h bars / 2435 D1 anchors, 2020-01-01 16:00:00 .. 2026-09-01 16:00:00
+   tape sha256 a8c4c1d6551d27f3...
+2. FUNNEL: armed 4h bars=14310  D1 direction: bull=8778 bear=5532
+   breakouts (prior close beyond band): up=1284 down=728
+   direction-aligned candidates L/S=1165/543  ignored-while-open=1708  EXECUTED=198
+3. NET ECONOMICS (price units): mean=3.945/trade  median=-8.881  total=781.1  win=35.4%  Net Sharpe=1.072
+   excursion asymmetry: mean MFE=47.09 vs mean MAE=22.34  (MFE/MAE=2.11)
+   sides: LONG: n=129 mean=8.11  SHORT: n=69 mean=-3.84
+   exit mix: {'SL': 198}
+   year-by-year net:
+      2020: n=  23  total=      16.8  mean=   0.732
+      2021: n=  25  total=     -16.2  mean=  -0.647
+      2022: n=  34  total=    -141.5  mean=  -4.162
+      2023: n=  34  total=      15.1  mean=   0.446
+      2024: n=  31  total=       0.1  mean=   0.002
+      2025: n=  33  total=     379.7  mean=  11.507
+      2026: n=  18  total=     526.9  mean=  29.273
+4. GATES (independent, frozen in GATE_KC_BREAKOUT.txt):
+   G-KC1 executed >= 30          :   198          -> PASS
+   G-KC2 Net Sharpe > 0           :     1.072    -> PASS
+   G-KC3 MBB P(mean<=0) <= 0.20   :    0.1746    -> PASS  (block=5, 10000 resamples, seed 20260928)
+   XAUUSD VERDICT: PASS
+
+OVERALL VERDICT: FAIL (requires all three instruments to pass G-KC1..G-KC3 independently)
+
+HONESTY NOTES
+- Continuous forward-fill convention: synthetic flat bars fill no-tick minutes, maintenance breaks, holidays
+  and weekends; EMA flattens toward the last close, Wilder ATR decays across long gaps (narrowing channels),
+  flat closes cannot print new breakouts, and D1 direction persists unchanged across flat weekend buckets -
+  declared consequences of the continuity convention (SPEC 2.1/9.3), not post-hoc fixes.
+- D1 anchors are true 17:00 ET closes aggregated at 1h resolution (never from the straddling [16:00-20:00) 4h
+  bucket), so no daily-close lookahead leaks into the 20:00 ET 4h evaluations.
+- Single pre-declared parameterization (owner-supplied); no optimization, no re-runs; sides, years and
+  instruments reported as run. Phase-1 screen is in-sample by construction; MFE/MAE are exploratory
+  descriptors, never results. Phase 2 (MT5 execution) only on overall PASS; any FAIL is final here.

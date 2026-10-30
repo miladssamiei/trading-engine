@@ -1,0 +1,33 @@
+REPORT_MACRO_QUALIFICATION.txt
+Generated 2026-09-07T21:08:36.399058+00:00  (tool: evaluate/macro_qualification.py)
+Gates executed verbatim from GATE_MACRO_QUALIFICATION.txt (SPEC_MACRO_QUALIFICATION.txt, 2026-09-06).
+
+======================================================================
+VERDICTS (thresholds verbatim from GATE_MACRO_QUALIFICATION.txt)
+window analyzed: window 2020-01-01..2026-08-31 (PRE-DECLARED FALLBACK)
+
+G-Q1 EVENT PROVENANCE: FAIL
+  (a) primary source archived+hashed, secondary source named: PASS
+  (b) NFP: 67/80 months field-complete = 83.8% -> FAIL (>= 95%; official schedule count approximated by calendar months, one scheduled release per family per month - reconcile against BLS/Census schedule pages in the manual audit)
+  (b) RETAIL: 67/80 months field-complete = 83.8% -> FAIL (>= 95%; official schedule count approximated by calendar months, one scheduled release per family per month - reconcile against BLS/Census schedule pages in the manual audit)
+  (b) DURABLE: 67/80 months field-complete = 83.8% -> FAIL (>= 95%; official schedule count approximated by calendar months, one scheduled release per family per month - reconcile against BLS/Census schedule pages in the manual audit)
+  excluded events by reason code: {'simultaneous': 4}
+  (c) agency/ALFRED manual audit of the sampled events: PENDING HUMAN VERIFICATION (sample + pointers written to clock_sync_audit.txt; each discrepancy removes the event; >3 of 12 discrepant -> G-Q1 FAIL)
+  (d) cleaned dataset written: macro_event_dataset.csv (PASS)
+
+G-Q2 CLOCK SYNCHRONIZATION: PASS (provisional - 6 manual spot-checks pending)
+  DST-invariant violations: 0 of 203 window events (0.0%); systematic threshold >10% -> not triggered
+  isolated invariant violations dropped: 0; simultaneous-release events excluded: 4
+  tick-join exclusions by code: {'nfp_burst_fail': 55, 'no_ticks_window': 5}
+  events with valid T0/buffer/exit ticks: 139
+  6 tick-window spot-check transcripts: PENDING HUMAN VERIFICATION (clock_sync_audit.txt)
+
+G-Q3 STATISTICAL POWER: FAIL
+  usable events: 139 (>= 150 required); unique NY dates: 139 (>= 150 required)
+  pre-declared fallback window used: YES
+
+G-Q4 POST-LATENCY MEASUREMENT: NOT RUN (prior gate failed)
+
+======================================================================
+QUALIFICATION VERDICT: FAIL (failed gates: G-Q1, G-Q3; G-Q4 not run per the SPEC stop rule)
+Per SPEC section 7 this is a COMPLETE deliverable and terminates the hypothesis: no family substitution, no new buffers/horizons/thresholds, no source switch, no 19th invented pattern. The project accepts single-instrument CFD-tape intraday exhaustion; remaining shortlist paths are the daily-horizon candidates of LITERATURE_EDGE_REVIEW.txt.

@@ -1,0 +1,57 @@
+Study: entry_execution_safe_model4_v1
+Date frozen: 2026-09-11
+Status: pre-declared before new EA code, compilation, or tester execution
+
+Purpose
+Correct the two remaining market-entry submission defects documented by execution_safe_model4_v1 while preserving the complete entry signal, price-level, risk, stop, target, size, time, calendar, close, and accounting behavior of its versioned EAs. This is an execution-validity study, not a performance hypothesis.
+
+Immediate parent artifacts
+ea/ORB_ExecutionSafe_v1.mq5
+ea/SP2L_ExecutionSafe_v1.mq5
+These immediate parents and all earlier frozen artifacts remain unchanged. Corrections are implemented only in new versioned experts:
+ea/ORB_EntrySafe_v1.mq5
+ea/SP2L_EntrySafe_v1.mq5
+
+Pre-study diagnostic evidence
+ORB on 2022-10-14 reached its existing sellBeyond branch at 14:00:15 UTC and submitted the same market SELL twice with CTrade price=0.0, SL=3711.97, and TP=3635.06. Both requests returned TRADE_RETCODE_INVALID_PRICE 10015. Imported real ticks around the event show the first tick at 14:00:15.187 with bid=3650.706 and ask=3651.171. The custom symbol trades on a 0.01 price grid, so the raw bid was off grid. Because g_ordersPlaced stayed false, the unmodified state machine called PlaceOrders again at 14:05 and entered at 3658.88 with the same SL/TP.
+
+SP2L on 2025-12-29 generated a SELL candidate whose pre-spike stop was 6906.699, normalized to 6906.70. At 15:01:00.172 UTC the real tick was bid=6906.239 and ask=6906.755. The existing normalized entry was 6906.24, risk was 0.46, and the unchanged 2R target was 6905.32. The SELL stop loss was already below the current ask, so two identical submissions returned TRADE_RETCODE_INVALID_STOPS 10016. The setup was not filled. The sp2l_days distinction is intentional: entered counts candidates that reached the entry decision, while entries counts actual fills; for this event entered=1 and entries=0.
+
+Approved correction A: ORB explicit grid-normalized market entry
+Replace only the ORB market BUY/SELL calls used when price has already crossed a breakout level with an explicit TRADE_ACTION_DEAL helper. On every helper call, read the current ask for BUY or bid for SELL, normalize that price through the existing NormPrice function, and submit it with the unchanged direction, lot, SL, TP, magic, timing, and comments/artifact identifiers. Preserve the existing immediate retry structure, but every retry must refresh and renormalize the quote. Log one machine-readable ENTRY_SAFE_SEND record per submitted request containing strategy, side, raw bid, raw ask, normalized request price, SL, TP, sent flag, local MqlTradeResult retcode/comment, GetLastError, and accepted flag. Accepted retcodes are DONE, PLACED, or DONE_PARTIAL only.
+
+Approved correction B: SP2L pre-send protective-level validation
+Keep the SP2L entry price, risk, stop, and 2R target formulas unchanged. Immediately before any market-entry submission, read the current raw bid/ask, SYMBOL_TRADE_STOPS_LEVEL, SYMBOL_TRADE_FREEZE_LEVEL, _Point, and trade tick size. Define minimum protective distance as max(stops_level, freeze_level) times _Point. A BUY candidate is executable only when its normalized SL is strictly below bid minus that distance and normalized TP is strictly above ask plus that distance. A SELL candidate is executable only when its normalized SL is strictly above ask plus that distance and normalized TP is strictly below bid minus that distance. Prices must also be finite, positive, and aligned to the tick grid.
+
+Log one machine-readable ENTRY_SAFE_PREFLIGHT record for every SP2L candidate reaching PlaceMarketEntry. It must contain strategy, side, raw bid, raw ask, normalized entry price, SL, TP, stops level, freeze level, minimum distance, executable flag, and a deterministic reason. If unexecutable, submit no order, do not retry, retain the existing entered candidate count and zero actual entries/fills, and log entry_unexecutable. Do not widen or move the SL/TP, synthesize a fill, delay the same candidate, or alter the signal. If executable, use an explicit TRADE_ACTION_DEAL request at the normalized price and log ENTRY_SAFE_SEND with the same local-result fields required for ORB. A failed submitted request may be retried once only after refreshing and revalidating the quote; an invalid preflight must never be sent.
+
+Approved correction C: diagnostics and artifact identity
+New magic numbers, version strings, source names, comments, and machine-readable entry diagnostics may differ. Day/trade CSV schemas and meanings remain unchanged. Existing close-helper, reason-priority, nonstandard-date, and flatness corrections from the immediate parents remain intact.
+
+Frozen-behavior constraint
+Except for corrections A-C, the new sources must preserve all input defaults, setup detection, filters, directions, breakout/pending logic, price-level formulas, risk cap, SL/TP formulas, volume, session windows, retry timing, occupancy, fixed 45-date block, close behavior, exit classification, and CSV accounting. In particular, SP2L entered remains the entry-decision counter and entries remains the successful-fill counter. Performance results may not influence implementation, gates, or verdict.
+
+Tester protocol
+Compile both new experts with MetaEditor and archive fresh source, executable, log, and hashes. Run yearly Model=4 real-tick batches for ORB M5 and SP2L M1 over 2021, 2022, 2023, 2024, 2025, and 2026 through the available April endpoint: 12 batches total. First run the known diagnostic years, ORB 2022 and SP2L 2025, only as implementation smoke tests; they remain part of the final 12-batch set. Archive configs, attributable same-agent trade/day CSVs, log deltas, evidence reports, metadata, hashes, and stitched streams.
+
+Evaluation and comparison
+Audit all tester logs for ENTRY_SAFE_PREFLIGHT and ENTRY_SAFE_SEND records, terminal invalid-price/invalid-stops messages, submitted request failures, close-helper results, reason priority, Model=4 evidence, Test passed, and flat deinitialization. Audit stitched trades for negative duration, later New York close date, and blocked-date entry. Report candidate, preflight-rejection, submitted, accepted, retry, and failure counts by strategy and year. Compare against execution_safe_model4_v1 with multiset matched/added/removed/changed trades and the established descriptive metrics: trade count, PnL, common-universe daily Sharpe, maximum drawdown, year totals, and exit reasons. No performance measure is a gate.
+
+Stop rules and honesty
+Stop and report FAIL if compilation, real-tick evidence, batch completion, attribution, parsing, or any gate fails. Do not alter rules after seeing results. A null or worse-performance result is complete. PASS means only that the two predeclared market-entry defects are corrected on this historical tape. It does not establish a predictive edge, future calendar safety, FTMO economics, or live readiness. downstream_model_allowed and live_execution_allowed remain false regardless of verdict.
+
+Pre-declared gates
+I-S1: Both immediate parent EA SHA-256 hashes are recorded before implementation and remain unchanged after all work; corrections exist only in new versioned EA artifacts.
+I-S2: Static and manual diff review confirms that all inputs and strategy behavior named in the frozen-behavior constraint are unchanged outside approved corrections A-C.
+I-C1: Both new sources compile fresh with zero errors and zero warnings, and source/executable/compiler-log hashes are archived.
+I-M1: All 12 yearly batches use Model=4 and their logs explicitly evidence generation based on real ticks.
+I-M2: All 12 batches log Test passed, end flat, and produce attributable, parseable trade/day exports plus hashed config, logs, outputs, and a nonempty evidence report.
+I-O1: Every ORB market entry in the crossed-level branch and every executable SP2L market-entry candidate has a parseable ENTRY_SAFE_SEND record whose request price equals the logged side-correct quote normalized to the 0.01 tick grid.
+I-O2: Across all 12 logs, every submitted ENTRY_SAFE_SEND request is accepted and there are zero market-entry TRADE_RETCODE_INVALID_PRICE, TRADE_RETCODE_INVALID_STOPS, other unsuccessful market-entry retcodes, or terminal Invalid price/Invalid stops market-entry messages.
+I-P1: Every SP2L candidate reaching PlaceMarketEntry has exactly one parseable ENTRY_SAFE_PREFLIGHT record with complete quote and constraint fields; a request is submitted only when executable=1.
+I-P2: The known 2025-12-29 SP2L SELL candidate is logged executable=0 because SL=6906.70 is not strictly above ask=6906.755 plus minimum distance, produces no ENTRY_SAFE_SEND record, and remains entered=1, entries=0 in the day export.
+I-A1: SP2L day/trade accounting retains its parent meanings: entered counts entry-decision candidates, entries counts successful fills, entries never exceeds entered, and preflight rejections create no trade row or fill count.
+I-E1: Both stitched streams have zero later-New-York-date closes, zero negative-duration trades, and zero entries on the frozen 45-date nonstandard-session list.
+I-E2: Existing close safety remains intact: all close-helper attempts are accepted, all exit reasons obey SL/TP priority, and every batch deinitializes with owned_positions=0.
+I-R1: The final audit archives complete provenance and descriptive immediate-parent-versus-new comparisons without selecting or altering the correction based on performance.
+I-FINAL: PASS only if I-S1, I-S2, I-C1, I-M1, I-M2, I-O1, I-O2, I-P1, I-P2, I-A1, I-E1, I-E2, and I-R1 all PASS. Otherwise FAIL. In either case downstream_model_allowed=false and live_execution_allowed=false.

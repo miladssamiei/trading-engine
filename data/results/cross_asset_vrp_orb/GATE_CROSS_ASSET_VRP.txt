@@ -1,0 +1,9 @@
+GATE: CROSS-ASSET VRP-CONDITIONED ORB - PHASE 1 (HYPOTHESIS #40)
+Frozen verbatim from SPEC_CROSS_ASSET_VRP.txt on 2026-09-23, before any Phase-1 code.
+
+G-XV1 at least one new instrument (USA100 or Gold) Arm A retains >= 100
+    trades post-warmup.
+G-XV2 the qualifying instrument's Arm A Net Sharpe strictly exceeds its
+    unconditioned baseline Net Sharpe.
+G-XV3 combined portfolio (US500 + passing instruments) achieves an annual
+    trade frequency >= 120 trades/year (>= 2.5 trades/week average).

@@ -1,0 +1,35 @@
+CRYPTO + GOLD CONCURRENCY AND DAILY-BLOCK FTMO SCENARIO - FROZEN SPEC - 2026-09-29
+
+Purpose
+Estimate how a deterministic historical cap on simultaneous BTCUSD/ETHUSD/XAUUSD Engine A/B positions changes the closed-trade R stream and the owner-specified Phase-1 FTMO-like challenge outcomes. This is exploratory retrospective resampling, not a live FTMO account replay.
+
+Input
+Read exactly six data/results/crypto_gold_real_cost/trades_*.csv ledgers, one A_KC and one B_DONCHIAN per BTCUSD, ETHUSD, XAUUSD. Validate asset/engine identity, numeric epoch-UTC entry_time and exit_time with exit_time > entry_time, and 2,277 total records: 2,275 closed with finite net_r and two OPEN_END records with missing net_r. The six SHA256 values, in filename order, are:
+trades_BTCUSD_A_KC.csv f3b36e75d8e5ad2cee65284528fcce492f9d50b2221ddb83e91055b655b2a810
+trades_BTCUSD_B_DONCHIAN.csv b4e596d0940ef5764dc912a3d082512fffeb2e24c4b9c1d59eae6a2f1d370624
+trades_ETHUSD_A_KC.csv 709e07e3cc18471bbded911e915efc57426fa064e189bae138d974dd9913a5cb
+trades_ETHUSD_B_DONCHIAN.csv 54f209f6ef82e2f779eb94b973a88ae2e1ad7d0691d5588c0e62081561f782ae
+trades_XAUUSD_A_KC.csv 5e8edc9f2bdc45858a89175f9f81e1dfc354db6651e5d137f621711a83699644
+trades_XAUUSD_B_DONCHIAN.csv 530193b75b27467ac56cb9768c48b63679bc32896b9480fe9d9ae67dd0c70432
+The original 2,275 closed trades sum to +220.481515907202 net R. No new friction is charged because net_r is already after the prior owner-specified cost and swap scenario.
+
+Master merge and historical cap
+Sort all 2,277 records by entry_time ascending, then asset, engine, exit_time, and source-row number for deterministic simultaneous-entry tie resolution. Assign master_trade_id in this order. For each independent K in 1,2,3,4,6, use a min-heap of accepted open-trade exit times. At an entry, clear all accepted exits <= entry_time; accept only if heap size < K, otherwise reject/shadow; add accepted exit_time. The two OPEN_END records retain occupancy through the tape cutoff but never contribute realized R. Save the full master and five accepted-trade ledgers, including accepted OPEN_END rows. Report accepted/rejected and closed/open-end counts. Do not re-simulate strategy signals or replace rejected entries.
+
+Daily return construction
+For each K, group accepted CLOSED trades by UTC calendar date of exit_time and sum their net_r. Fill every UTC calendar day from the earliest master entry date through the latest master exit date, inclusive, with zero on no-close days. Save five daily CSVs. OPEN_END records are excluded from daily realized R. This date range and UTC convention are common to all K.
+
+Moving-block bootstrap and Phase-1 model
+Use one common set of random contiguous block starts for fair comparison of all 15 cells. NumPy default_rng seed 20261101; 10,000 paths; 10-calendar-day noncircular blocks sampled with replacement from valid starts 0..N-10; concatenate 37 blocks and truncate each path to 365 days. Risk fractions are 0.005, 0.010, 0.020 per 1.0 net R. For each day, daily PnL percentage = sampled daily net R x risk fraction and phase equity percentage starts at zero. First check daily PnL <= -0.05, then equity <= -0.10, then equity >= +0.10. Thus daily-loss failure takes priority on simultaneous breaches. End a path at first fail/pass; paths with no event at day 365 are TIMEOUT. No second evaluation phase or funded payout is modeled. The same bootstrapped daily R path is used for all three risk fractions within a K, and the same sampled calendar indices are used across K.
+
+Output and statistics
+For each K x risk cell report accepted and closed trade counts, daily sample count, 10,000-path Phase-1 pass fraction, median days to pass among passers, daily-loss failure fraction of all paths, static-max-loss failure fraction of all paths, and 365-day timeout fraction. Save full 150,000-path status ledger, summary.csv, run_meta.json, and REPORT_CONCURRENCY.txt. The report gate concerns accounting integrity, not whether a cell is profitable.
+
+Limitations
+Applying a cap to already executed overlapping engine ledgers is a counterfactual shadowing rule; accepted trades are not re-priced or re-signaled after another trade is rejected. Summing full realized R at exit date does not model intraday or overnight unrealized equity, true FTMO daily equity-loss checks, concurrent notional margin, cash position sizing, or the actual distribution of trade risk through a holding period. Ten-day calendar blocks preserve short clusters of exit-day R but break longer sequences and seasonality. The costed base ledgers were retrospective proxy runs with owner-specified historical friction. Phase-1 pass percentages are scenario estimates, not challenge pass guarantees.
+
+Gate
+G1: Six frozen input hashes and schema checks pass; 2,277 records include exactly 2,275 finite-R closed and two missing-R OPEN_END rows; closed total net R reconciles.
+G2: For each K, all 2,277 master records are either accepted or rejected exactly once; accepted occupancy never exceeds K; K=6 accepts all source records; saved accepted-ledger IDs match the walk.
+G3: Each daily series has the identical continuous UTC calendar index, sums to the net R of accepted closed trades, and contains no contribution from OPEN_END rows.
+G4: Every K x risk cell has exactly 10,000 terminal paths whose PASS, DAILY_LOSS, STATIC_LOSS and TIMEOUT counts sum to 10,000; phase thresholds, pass-day quantiles and summary rates reconcile with the saved path ledger.

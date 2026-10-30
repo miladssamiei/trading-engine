@@ -1,0 +1,85 @@
+HYPOTHESIS 105: FTMO-NATIVE US100 MONDAY-THURSDAY SWING
+Declared 2026-09-26 before H105 code or native trade returns.
+Historical 2024-26 US100/H94 outcomes were already exposed; this
+is an execution transfer and cost remeasurement, not unseen forward
+confirmation. Null/FAIL is complete. No account orders.
+
+MECHANISM AND SOURCE
+Retain H94 equity-risk-premium rule: buy US100 at Monday NY cash
+open and exit Thursday morning, with a wide daily-volatility stop.
+Use ONLY native FTMO-Demo US100.cash Bid/Ask M1, aggregated from
+all native COPY_TICKS_ALL at
+data/results/us100_native_full_source_h94/
+us100cash_ftmo_native_m1_2023_2026.csv, SHA256
+f9552440b4af1e6d20fd9934d0c54b89a21131ccf9948d2b2b1f875dad90b9a5.
+Source plan preceded export; 45/45 clean months and 140/143 exact
+2024+ endpoint pairs, with missing 2024 Jan1 entry and 2025 Dec25
+and 2026 Jan1 exit minutes. No Dukascopy price fill, zero-filled
+minute, order book or post-hoc price adjustment.
+
+RULE AND FEATURE TIME
+For each NY cash day with a real 09:30 M1, aggregate BID cash bars
+[09:30,16:00): daily high=max Bid high, low=min Bid low, close=last
+real cash M1 Bid close. Compute Wilder ATR20 from true ranges with
+first 20 average seed, then recursive (19*prior+TR)/20. At each
+Monday use the most recent completed cash day before Monday, no
+more than four calendar days old, with finite ATR20. No other signal
+filter, short, target, trailing stop, re-entry or overlapping trade.
+
+Do not enter if the scheduled Thursday is January 1 or December 25;
+these known calendar closures were identified in the source-only
+audit before this SPEC. This is an H105 change, not a rewrite of H94.
+Do not substitute a different holiday exit time. If Monday itself
+has no real 09:30 cash M1, count NO_ENTRY. Otherwise buy at first
+real M1 ASK open in Monday NY [09:30,09:35). Set stop to executable
+ASK entry minus 2*prior ATR20. From entry M1 onward until first real
+M1 in Thursday NY [11:00,11:15), fill an open gap at worse actual
+BID open if open<=stop, otherwise fill at stop if Bid low<=stop.
+At scheduled Thursday exit minute, exit at its BID open before any
+intra-minute stop check. If unstopped and Thursday window has no real
+quote, mark UNRESOLVED and FAIL; do not use later prices. Last week
+ending beyond source end is INCOMPLETE, not an observed no-trade.
+Flat before Friday on every resolved trade. M1 stop fills remain a
+proxy; a passing Phase 1 needs separate native-tick execution audit.
+
+COST AND SPLIT
+Historical actual native ASK entry and BID exit include variable
+spread. Apply connected FTMO Swing POINTS long swap snapshot
+-675.12*0.01=-6.7512 US100 index units per normal server-midnight
+rollover; Friday triple only if held then (this rule should be flat
+Thursday). Count broker midnight strictly inside entry-exit,
+Europe/Athens GMT+2 plus European DST. The snapshot is not a
+historical swap-posting series. Index commission is modeled zero,
+consistent with published FTMO index terms; record this assumption.
+Subtract a further 2.50 index units per trade for adverse entry/
+exit execution stress. Net units = exit BID-entry ASK+swap;
+stressed net = net-2.50. Contract size $1/index unit/lot;
+no EUR conversion, compounding or account order at Phase 1.
+Report actual entry spread, swap, stops, unresolved rows and annual
+returns. 2023 descriptive; complete 2024, complete 2025, and partial
+2026 through 2026-09-25 gated. Circular 5-week moving-block
+bootstrap of ordered gated stressed trades, 10000 draws and
+default_rng(20261004), P(mean<=0). No parameter or cost variants.
+
+STOP AND FUTURE EVIDENCE
+Phase 1 FAIL is final and Phase 2 NOT_RUN. If Phase 1 passes, freeze
+a separate EUR10000 FTMO Swing full two-stage 180-calendar-day
+account replay before running it, including EUR conversion, real
+lot steps/margin, floating-equity daily and overall limits,
+10%/5% targets and four opened trading days per stage. Require
+>=70% full passes and <=10% breaches over >=50 complete starts in
+one predeclared size row. At least 150 truly future unseen trades
+and native-tick MT5 execution are required for verified status.
+Existing H94 3% close-only replay only passed 19/117 full starts,
+so this costlier H105 remeasurement has a high pace hurdle; do not
+call positive Phase 1 PnL a prop-system success.
+
+VERBATIM GATES
+G-H105-1: At least 130 resolved 2024-2026 H105 native US100 trades on distinct Mondays, with zero unresolved eligible exits and only real Bid/Ask M1 entry and exit quotes.
+G-H105-2: Strictly positive 2024-2026 mean stressed index units per trade after native variable spread, current long-swap snapshot and extra 2.50 index-unit execution stress.
+G-H105-3: Five-week circular moving-block bootstrap P(mean stressed index units <= 0) at most 0.05 using 10000 draws and seed 20261004.
+G-H105-4: Strictly positive stressed US100 index-unit totals separately in complete 2024, complete 2025 and partial 2026.
+G-H105-5: The exact native source hash, prior completed Wilder ATR20, ex-ante January 1/December 25 Thursday skips, native ASK/BID fills, modeled swap and no account orders reconcile.
+G-H105-6: After Phase 1 passes, a separately frozen EUR10000 FTMO Swing two-stage 180-calendar-day replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts in one fixed risk row; at least 150 genuinely unseen forward trades and native-tick execution are required for verified status.
+
+All gates are required. In-sample historical success is exploratory.

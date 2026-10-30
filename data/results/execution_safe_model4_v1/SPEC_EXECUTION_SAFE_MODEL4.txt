@@ -1,0 +1,61 @@
+Study: execution_safe_model4_v1
+Date frozen: 2026-09-11
+Status: pre-declared before implementation, compilation, or tester execution
+
+Purpose
+Correct two execution defects observed in the frozen Model=4 ORB and SP2L exports, without changing either strategy's entry signal, stop, target, sizing, or intended regular-session exit time. The corrected experts are new artifacts. The frozen ORB_Strategy.mq5 and SP2L_SpikeGap.mq5 remain untouched.
+
+Observed defects motivating this study
+1. ORB recorded 54 positions closing on a later New York date. Tester logs show repeated TRADE_RETCODE_INVALID_PRICE (10015) when PositionClose submitted raw bid/ask prices that were not aligned to the symbol's 0.01 tick grid.
+2. SP2L recorded one later-date close: ticket 328 opened on 2025-07-04 and had no tradable tick at its intended 15:55 New York exit. It eventually closed by stop loss on 2025-07-07. Its helper also reports the CTrade object's stale result instead of the helper's local MqlTradeResult, and force-close state can override the actual SL/TP exit reason.
+
+Artifacts
+New experts only:
+- ea/ORB_ExecutionSafe_v1.mq5
+- ea/SP2L_ExecutionSafe_v1.mq5
+New evaluation/runner and tests may be added under evaluate/ and tests/. All outputs belong under data/results/execution_safe_model4_v1/.
+
+Frozen-behavior constraint
+The new experts must retain the frozen parents' strategy inputs and entry eligibility, signal calculation, direction, entry order construction, stop, target, volume, intended 15:55 New York force-exit time, and day-export semantics, except for the three explicitly approved corrections below. Version strings, comments, output filenames, and magic numbers may change to identify the new artifacts.
+
+Approved correction A: grid-safe explicit close
+Both experts must close an owned position with an explicit opposite TRADE_ACTION_DEAL request. The request price must use current bid for a long close or current ask for a short close and must pass through the existing tick-grid normalization. The helper must expose and log its own MqlTradeResult retcode/comment and GetLastError. A failed attempt must leave the position eligible for another attempt on each subsequent tick. Force-close state is complete only after the owned position is actually absent.
+
+Approved correction B: exit-reason priority
+When recording a closing deal, DEAL_REASON_SL and DEAL_REASON_TP must take priority over any force-close state. A time/force exit is recorded only when the deal reason is not SL or TP and the position was under the force-close path.
+
+Approved correction C: historical nonstandard-session entry block
+For this fixed historical-tape validation only, both experts must block new entries on the following New York dates, derived before this study from the Hypothesis #21 M5 completeness diagnostic. Existing position management remains active on blocked dates.
+2021: 20210118, 20210215, 20210531, 20210705, 20210906, 20211125, 20211126
+2022: 20220117, 20220221, 20220530, 20220620, 20220704, 20220905, 20221124, 20221125
+2023: 20230116, 20230220, 20230529, 20230619, 20230703, 20230904, 20231123, 20231124
+2024: 20240115, 20240219, 20240527, 20240619, 20240703, 20240704, 20240902, 20241128, 20241129, 20241224
+2025: 20250120, 20250217, 20250526, 20250619, 20250703, 20250704, 20250901, 20251127, 20251128, 20251224
+2026: 20260119, 20260216
+This list has 45 dates and is fixed. It is a safety rule for the available 2021-01 through 2026-04 historical tape. It is not proof of a complete future/live exchange calendar.
+
+Tester protocol
+Compile both new experts with MetaEditor. Run one yearly batch per expert for 2021, 2022, 2023, 2024, 2025, and 2026 through the available April endpoint: 12 batches total. Use US500-tick and Model=4, every tick based on real ticks. ORB uses M5 and SP2L uses M1, matching their frozen tester configuration. Preserve batch logs, reports, copied sandbox CSVs, sources, executable hashes, config hashes, and stitched outputs.
+
+Evaluation rules
+The audit must parse exported trades, day files, and tester logs. It must report trade counts, PnL, daily Sharpe under the established common-universe convention, maximum drawdown, year totals, later-New-York-date closes, negative durations, entries on blocked dates, exit-reason counts, close-helper failure retcodes, invalid-price messages, market-closed messages, and whether each batch ended flat. It must also compare the corrected and frozen Model=4 streams by added, removed, and matched trades and by performance metrics. That comparison is descriptive and has no optimization or performance gate.
+
+Stop rules
+Stop and report FAIL if either source fails compilation, any batch lacks Model=4 real-tick evidence, any batch fails, outputs cannot be reconciled, or any eligibility gate below fails. Do not revise a gate, the date list, or strategy behavior after observing results. Any further correction requires a new study name and new pre-declared SPEC/GATE.
+
+Honesty and deployment limits
+This is an execution-eligibility correction, not a claim of predictive edge and not FTMO qualification. PASS does not make either strategy profitable, walk-forward-confirmed, prop-safe, or deployable. The FTMO account and quote/fill evidence remain incomplete. downstream_model_allowed and live_execution_allowed remain false regardless of outcome.
+
+Pre-declared gates
+X-S1: Both frozen parent EA SHA-256 hashes are recorded before work and unchanged after work; only new EA artifacts implement corrections.
+X-S2: Static review confirms no change to entry signals, directions, stop/target formulas, volume, intended exit time, or day accounting outside corrections A-C and artifact identifiers.
+X-C1: Both new sources compile with zero errors and zero warnings, and compiled executable/source hashes are archived.
+X-M1: All 12 configured batches use Model=4 and their logs explicitly evidence generation based on real ticks.
+X-M2: All 12 tester batches complete successfully and produce attributable, parseable trade and day exports.
+X-E1: Across both stitched trade streams there are zero trades whose close New York date is later than their open New York date and zero negative-duration trades.
+X-E2: Across both stitched trade streams there are zero entries on the fixed 45-date nonstandard-session block list.
+X-E3: Across all tester logs there are zero invalid-price close failures, zero market-closed close failures, and zero other unsuccessful grid-close helper results for an owned position.
+X-E4: Every batch ends with no position owned by the tested expert, supported by export reconciliation and tester/log evidence.
+X-R1: Closing deals caused by SL or TP are classified as SL or TP even if force-close state was active; static tests and output reconciliation find zero priority violations.
+X-A1: The final audit archives all required provenance and descriptive frozen-versus-corrected comparisons without using performance to select or alter the correction.
+X-FINAL: PASS only if X-S1, X-S2, X-C1, X-M1, X-M2, X-E1, X-E2, X-E3, X-E4, X-R1, and X-A1 all PASS. Otherwise FAIL. In either case downstream_model_allowed=false and live_execution_allowed=false.

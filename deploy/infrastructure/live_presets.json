@@ -1,0 +1,80 @@
+{
+  "eas": [
+    {
+      "ex5_audit": {
+        "compile_log_clean": true,
+        "ex5_exists": true,
+        "ex5_fresh": true,
+        "note": "build 6140 .ex5 binaries are packed; no byte-level probes possible; embedding attested by source magic + freshness + clean compile log + pinned sha256",
+        "sha256_ex5": "6180e9b2e671e21c79d589fc01fa4768251cabc24f247370f04b19b7f67a4dde",
+        "sha256_mq5": "354c0fdee8aee7fa74465a9f1b6e7efc54026476db93f8b17119ff2285502510",
+        "source_magic_ok": true
+      },
+      "ini": "live_orb_us500.ini",
+      "inputs": {
+        "InpGapFilterPct": "1.0",
+        "InpLotSize": "1.0",
+        "InpMagicNumber": "26082201",
+        "InpOrderCancelHour": "10",
+        "InpOrderCancelMin": "30",
+        "InpRangeEndHour": "10",
+        "InpRangeEndMin": "0",
+        "InpRangeOffsetPct": "0.15",
+        "InpSessionCloseHour": "16",
+        "InpSessionCloseMin": "0",
+        "InpSessionOpenHour": "9",
+        "InpSessionOpenMin": "30",
+        "InpTakeProfitPct": "0.8"
+      },
+      "magic": 26082201,
+      "name": "ORB_Strategy_Live",
+      "period": "M5",
+      "tag": "ORB"
+    },
+    {
+      "ex5_audit": {
+        "compile_log_clean": true,
+        "ex5_exists": true,
+        "ex5_fresh": true,
+        "note": "build 6140 .ex5 binaries are packed; no byte-level probes possible; embedding attested by source magic + freshness + clean compile log + pinned sha256",
+        "sha256_ex5": "26663d9bb1a07df4e6dc544d032fce332b9d0d958cac8678b6efde5d452a2f5a",
+        "sha256_mq5": "4b29697b0697a3f8aedf5899303e2d1dee6739b0881dac38dfe96d1dafcd71f3",
+        "source_magic_ok": true
+      },
+      "ini": "live_sp2l_us500.ini",
+      "inputs": {
+        "InpEmaPeriod": "60",
+        "InpForceExitHour": "15",
+        "InpForceExitMin": "55",
+        "InpGapPct": "0.04",
+        "InpLastEntryHour": "15",
+        "InpLastEntryMin": "30",
+        "InpLotSize": "1.0",
+        "InpMagicNumber": "26082701",
+        "InpMaxSlPct": "0.40",
+        "InpSessionOpenHour": "9",
+        "InpSessionOpenMin": "30",
+        "InpSpikeRatio": "1.5",
+        "InpTpR": "2.0"
+      },
+      "magic": 26082701,
+      "name": "SP2L_SpikeGap_Live",
+      "period": "M1",
+      "tag": "SP2L"
+    }
+  ],
+  "guard": {
+    "MAX_CONCURRENT_RISK_PCT": 1.0,
+    "MAX_DAILY_LOSS_PCT": 3.5,
+    "MAX_SLIPPAGE_INDEX_PT": 0.2,
+    "MAX_SPREAD_US500_PT": 0.6,
+    "MAX_SPREAD_XAUUSD_PT": 0.45,
+    "MAX_TRAILING_DD_PCT": 8.0,
+    "RISK_PER_TRADE_PCT": 0.5,
+    "WATCHDOG_DAILY_TRIGGER_PCT": 3.7,
+    "WATCHDOG_POLL_SECONDS": 1,
+    "WATCHDOG_TRAILING_TRIGGER_PCT": 8.2
+  },
+  "symbol": "US500.c",
+  "symbol_note": "resolved live from terminal symbol table"
+}

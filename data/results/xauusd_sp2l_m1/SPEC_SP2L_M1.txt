@@ -1,0 +1,178 @@
+SPEC_SP2L_M1.txt - HYPOTHESIS #56: SP2L ADVANCED M1 SCALPER - NATIVE XAUUSD PHASE 1
+Written 2026-09-24, BEFORE any Phase 1 code for this hypothesis ran. Gates are
+extracted verbatim into GATE_SP2L_M1.txt, also frozen before the run.
+
+0. PROVENANCE AND RELATION TO PRIOR STUDIES
+
+Source system: SP2L_Advanced_Bot.py (third party, Alireza Sadabadi, XAUUSD M1
+live bot, v2.0) at repo root. The system was previously ported to US500-tick
+(data/results/sp2l_ablation/, substituted for gold because no XAUUSD data
+existed then; relative-percentage conversions were required). The verified
+XAUUSD tick onboarding (data/results/xauusd_onboarding/, 2026-09-04) ACCEPTED
+the tape for exactly this native re-test. Hypothesis #56 restores the source
+bot's NATIVE gold thresholds in absolute dollars, per the onboarding point
+convention resolution: P-gap 1.0 price unit ($1.00 / 100 points of 0.01), max
+risk 10.0 price units ($10.00 / 1000 points), spike ratio 1.5, EMA 60, ADX
+14 / min 20.0, max opposite moves 1, TP = 1.0 R. No parameter on this tape was
+tuned; the only statistics examined from this tape before this SPEC are the
+onboarding integrity/spread/session measurements (spread median 0.41 was
+selected as the cost floor there, before any strategy logic ran on the tape).
+
+1. DATA
+
+Tape: data/results/xauusd_onboarding/xauusdtick_m1.csv - 2,337,538 verified
+M1 bars, 2020-01-01 23:00 UTC to 2026-09-01 20:59 UTC, columns
+time,open,high,low,close,tick_volume; time = bar-OPEN epoch seconds UTC.
+Timezone: America/New_York (DST-aware) for all session windows and calendar
+date keys. Full tape is used; no partition is declared (single-pass full-tape
+screen; per-year breakdown is reporting only). Integrity was verified in the
+onboarding (0 monotonic violations, 0 duplicates, 0 bad prints); it is not
+re-verified here.
+
+2. COSTS
+
+Fixed spread 0.41 price units round-trip (the onboarding full-tape median),
+applied as Ask = Bid + 0.41 at every fill. Prices in the tape are bid-side.
+No additional commission, slippage, or financing is modeled: trades are M1
+scalps expected to resolve intraday (holding statistics are reported so this
+assumption can be audited). All PnL is reported in price units per 1.0 lot;
+$100 per price unit per lot (100 oz contract) is a display conversion only.
+
+3. PATTERN DETECTION (3-CANDLE EXPANSION / IMBALANCE), ON COMPLETED BARS
+
+Let t be the live forming M1 candle; detection is evaluated at the close of
+completed candle t-1 (the detection bar d = t-1), using only completed bars.
+Pattern bars are t-4 (pre-spike), t-3 (spike), t-2 (post-spike). body(x) =
+abs(close(x) - open(x)).
+
+BUY setup at d (all required):
+  B1  close > open on each of t-4, t-3, t-2 (three consecutive bullish)
+  B2  strictly higher closes across t-4 -> t-3 -> t-2
+  B3  strictly higher opens across t-4 -> t-3 -> t-2
+  B4  P-gap imbalance: low(t-2) > high(t-4) + 1.0
+  B5  spike body: body(t-3) > 1.5 * body(t-2) AND body(t-3) > 1.5 * body(t-4)
+  Valid -> register pending BUY. Structural SL = low(t-4).
+
+SELL setup is the exact mirror (bearish candles, strictly lower opens/closes,
+high(t-2) < low(t-4) - 1.0, same spike-body clauses). Valid -> pending SELL.
+Structural SL = high(t-4).
+
+If a BUY and a SELL setup fire at the same detection bar, NEITHER is taken
+(source: buy and not sell).
+
+Declared deviations from the source bot's live detection: the source's
+pullback-break condition on the forming candle (its buy0/sell0) and its spike
+ratio clause against the forming candle are NOT part of detection here; in
+this spec the pullback is exclusively the entry trigger of Section 4. This is
+the #56 mechanism as pre-declared by the owner.
+
+4. PENDING ORDER VALIDATION AND ENTRY
+
+A pending is a state machine on bars strictly after the detection bar d, on
+the same NY calendar date as d (a pending EXPIRES at its NY date's last bar;
+documented deviation from the source's indefinite overnight lifetime, adopted
+from the parent US500 port, and outcome-equivalent for entries because the
+session window of Section 5 closes at 05:00 ET inside every NY date).
+
+Single pending at a time; no new setup detection while a pending exists or a
+trade is open. Setups on bars <= a pending's outcome bar (entry exit bar,
+INVALID bar, or date end) are shadowed; the machine resumes strictly after.
+
+On each bar u > d, in this order:
+  E1  Trend structure (all bars d+1..u inclusive, updated every bar): for
+      BUY, a bar with high <= prior bar's high is an opposite move; the run
+      of consecutive opposite moves must not exceed 1. Mirror for SELL
+      (low >= prior low). Once a run of 2 occurs the pending can never enter
+      (the window only grows) - it lingers to its date end (tallied
+      trend-dead). This is the source MAX_OPPOSITE_MOVES=1 rule.
+  E2  Entry trigger / pullback: BUY low(u) < low(u-1); SELL high(u) >
+      high(u-1). No trigger -> pending persists.
+  E3  Trigger_Price = the breaking bar's own extreme (BUY low(u); SELL
+      high(u)) - the level the source bot records as its entry.
+      risk = Trigger_Price - SL (BUY) / SL - Trigger_Price (SELL).
+      risk <= 0 -> pending persists (not reached deep enough).
+  E4  risk > 10.0 -> pending KILLED (source INVALID), occupancy ends at u.
+  E5  EMA filter: BUY close(u) > EMA60(u); SELL close(u) < EMA60(u); else
+      persists.
+  E6  ADX filter: Wilder ADX14(u) >= 20.0 (finite), else persists.
+  E7  Session filter: entry bar's open-time wall minute in [01:00, 05:00)
+      ET (60 <= minute-of-day < 300). Else persists. Bars at/after 05:00 ET
+      are not evaluated further (entry impossible that date); the pending
+      expires at its date end.
+  E8  All pass -> EXECUTE at bar u. Pending clears.
+
+All indicator values are strictly causal, computed as continuous full-tape
+recursions (EMA span 60; source-exact Wilder ADX: TR/DM ewm alpha=1/14, DX,
+ewm alpha=1/14) evaluated on completed bars. The source recomputes indicators
+over its last 10,000 bars per poll; the continuous recursion is the
+deterministic closed-bar equivalent (same as the parent port).
+
+5. FILTER / SESSION CONFIGURATION (ALL ENABLED, NO ABLATION)
+
+EMA60 direction, ADX14 >= 20, trend-structure max 1 opposite move, NY session
+[01:00, 05:00) ET - all ENABLED for every entry, exactly as Section 4. One
+configuration, one pass; no sensitivity sweep is part of this screen (the
+fixed 0.41 spread is the pre-declared cost model; it is applied inside the
+execution mechanics of Section 6, which is the entirety of the
+spread-sensitivity treatment for #56 Phase 1).
+
+6. SPREAD-AWARE EXECUTION AND EXITS
+
+LONG: entry executes at Ask = Trigger_Price + 0.41.
+  SL triggers on Bid at the structural level: SL_Bid = SL.
+  TP triggers on Bid at TP_Bid = Ask_Entry + 1.0 * risk.
+  (Consequences, declared: TP gain = +risk; SL loss = -(risk + 0.41), the
+  spread is paid adversely at the structural stop.)
+SHORT: entry executes at Bid = Trigger_Price.
+  SL triggers on Ask >= SL, i.e. on Bid >= SL - 0.41.
+  TP triggers on Ask <= Bid_Entry - 1.0 * risk, i.e. on
+  Bid <= Bid_Entry - risk - 0.41.
+  (Consequences, declared: both TP gain and SL loss = risk exactly.)
+These bracket geometries are the #56 spec verbatim, including its long/short
+asymmetry, and are implemented literally.
+
+Exit walk starts ON the entry bar (after the fill at the bar's extreme) and
+continues bar by bar until resolution; worst-case same-bar priority: SL is
+checked before TP on every bar, including the entry bar. On the entry bar
+fills are at the exact trigger levels (the entry is at the bar's extreme; a
+BUY cannot touch its SL on the entry bar since risk > 0). On later bars,
+honest gap fills: a stop that the bar opens beyond fills at the open
+(adverse), a target the bar opens beyond fills at the open (favorable), else
+at the level. A trade still open at the tape's end closes at the last bar
+close (exit type END; bid for longs, ask = close + 0.41 for shorts). No
+time-based, session-based, or trailing exit exists: brackets only.
+
+Max 1 open trade at a time; no new setups while a trade is open. Position
+size fixed at 1.0 lot; no compounding.
+
+7. STATISTICS AND GATES
+
+Population: all executed trades of the single machine pass, chronological.
+Net PnL per trade in price units as defined in Section 6 (the 0.41 spread is
+embedded in the fills; no separate cost line). Win = Net PnL > 0. Profit
+factor = sum(wins) / abs(sum(losses)). Net Sharpe = mean(trade Net PnL) /
+std(trade Net PnL, ddof=1), event-indexed per trade, NOT annualized (the
+convention of #47-#55). Moving-block bootstrap: with n trades, ceil(n/5)
+blocks per resample, block start drawn uniformly from {0..n-5}, blocks
+concatenated and truncated to n; 10,000 resamples; seed 20261004;
+P = fraction of resample mean Net PnL <= 0. Gates: GATE_SP2L_M1.txt.
+Reported alongside (not gated): funnel tallies, direction split, exit mix,
+same-bar-exit share, holding bars, median risk, per-year table.
+
+8. HONESTY / STOP RULES
+
+- This is ONE pre-declared configuration; no variant, parameter, or cost
+  floor is run before the verdict; no re-run after the verdict for any
+  purpose other than a documented mechanical defect fix (which would be
+  re-declared under a new name).
+- Null results are complete, expected deliverables; FAIL is final for this
+  artifact.
+- PASS would NOT constitute a validated result under validation_discipline
+  (single in-sample full-tape screen, no walk-forward, no year-sign gate);
+  any Phase 2 requires a new pre-declared SPEC meeting the standard
+  discipline (>= 150 trades, year-by-year sign agreement, gates before runs).
+- Known optimism, declared up front: entry fills at the breaking bar's
+  extreme (source-faithful E-XTM) and same-bar TP fills are best-case
+  executions on an M1 bar-close reconstruction; the exit-mix / same-bar /
+  holding character statistics are computed precisely so a hollow pass of
+  the #52/#53 kind is detectable from the report.

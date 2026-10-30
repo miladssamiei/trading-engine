@@ -1,0 +1,86 @@
+HYPOTHESIS 91: XAUUSD 21-DAY TIME-SERIES MOMENTUM, MONDAY-THURSDAY HOLD
+Declared 2026-09-25 before any H91 evaluator or H91 return run.
+Null/FAIL is a complete deliverable. No account orders.
+
+RATIONALE
+Moskowitz, Ooi and Pedersen (Journal of Financial Economics 2012)
+document time-series momentum across futures including gold. Their
+paper does not establish that this four-day CFD adaptation is profitable.
+https://doi.org/10.1016/j.jfineco.2011.11.003
+This is a distinct weekly trend exposure, not a re-run of H90 Keltner,
+H57 Donchian or H30 macro-conditioning.
+
+SOURCE AND CLOCK
+Use only verified Dukascopy XAUUSD BID M1 at
+data/results/xauusd_onboarding/xauusdtick_m1.csv, SHA256
+a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f.
+M1 epoch seconds UTC. Convert to America/New_York. Daily trading date
+is NY date of M1 open plus eight hours, as in frozen H30. Daily OHLC
+uses only real M1 bars; no synthetic prices or forward fill. A trading
+day's close is its last actual M1 close. ATR20 uses Wilder smoothing
+of daily true range with 20 observations; no signal until 21 prior
+daily closes and ATR20 are available.
+
+SIGNAL AND ONE WEEKLY POSITION
+For each NY Monday with at least one M1 quote in [00:00,00:05), use
+only the latest fully completed daily bar before Monday 00:00 NY.
+Require that bar's trading date is the preceding Thursday or Friday,
+so stale earlier prices cannot drive a signal. If its close exceeds
+the close 21 completed trading days earlier, LONG. If below, SHORT.
+If equal or prerequisites absent, no trade. Enter at the first real
+M1 open in Monday [00:00,00:05): long at BID+0.41 synthetic ASK,
+short at BID. Exactly one entry per calendar week. No re-entry.
+
+EXIT AND COVERAGE
+Initial stop distance is 2*the preceding completed daily ATR20,
+measured from executable entry. Long stop is entry minus distance;
+short stop is entry plus distance. From entry M1 onward, test stop
+gap at executable open first, then touch at that M1 BID low (long)
+or BID high+0.41 (short); stop fills at worse gap open or stop level.
+Same-minute stop takes precedence. No trailing stop or profit target.
+If no stop, exit at the first real M1 open in Thursday NY
+[14:00,14:15). If no such M1 exists, mark UNRESOLVED; never carry to
+Friday/weekend or use a synthetic close. If the tape ends before the
+required exit, mark UNRESOLVED. Skip a Monday with no real entry
+minute and log its coverage. If a trade would open after the tape's
+last complete Thursday, exclude that incomplete week and log it.
+
+ECONOMICS AND BENCHMARK
+Per-ounce USD gross is direction*(executable exit-entry), with
+long exit on BID and short exit on synthetic ASK=BID+0.41.
+Commission is 0.000007*entry plus 0.000007*exit per ounce, using
+FTMO's published current metal rate; actual target fees require
+account reconciliation. Base net deducts that commission, zero
+swap per owner instruction. Stress net deducts a further 0.41
+spread plus 0.25 slippage per round trip (0.66 in total).
+Report a matched-week always-LONG Monday-to-Thursday benchmark
+without a stop, on exactly the same executed weeks, with identical
+base and stress cost formulas. This tests whether the momentum
+direction adds value to a gold long exposure; benchmark has no
+prop-pass gate and is descriptive only. No news blackout.
+
+SPLITS, STATISTICS AND STOP RULE
+2020-23 calibration is descriptive; 2024 through tape end is gated
+OOS, though the tape has been seen by prior studies and is not true
+unseen forward validation. Report all trades, missed and unresolved
+weeks, annual base/stress totals, mean and median hold, sides, and
+5-week circular moving-block bootstrap P(mean stressed net<=0),
+10000 draws, numpy default_rng(20261002). No alternate momentum,
+ATR, entry, exit or side variants are tested for this artifact.
+Any Phase-1 gate failure is FINAL_FAIL and leaves the challenge gate
+NOT_RUN. If Phase 1 passes, freeze a new Phase-2 SPEC/GATE before a
+0.5%/1% fixed-risk EUR10000 two-stage 90-calendar-day replay with
+native EURUSD conversion, floating daily equity, 10%/5% targets,
+four trading days per stage, 5% daily and 10% overall loss limits.
+Only a genuinely unseen forward confirmation with at least 150
+trades and year-sign agreement can qualify as a verified strategy.
+
+VERBATIM GATES
+G-WT1: At least 100 fully resolved executed 2024-2026 weeks, zero unresolved exits and every entry and exit backed by a real source M1 bar before Friday.
+G-WT2: Strictly positive mean 2024-2026 stressed net gold units per trade after 0.41 executable spread, current metal commission and an additional 0.66 spread/slippage stress.
+G-WT3: Five-week circular moving-block bootstrap P(mean stressed net <= 0) at most 0.05, 10000 draws and seed 20261002.
+G-WT4: Strictly positive 2024, 2025 and partial-2026 stressed net gold totals separately.
+G-WT5: If Phase 1 passes, a separately frozen two-stage EUR10000 90-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts in one fixed risk row.
+G-WT6: Source hash, completed-day signals, real M1 fills, same-week exits, zero swap and fixed predeclared costs are verified with no account orders.
+
+All six gates must pass; Phase-1 PASS is not a verified system.

@@ -1,0 +1,6 @@
+G1: Each engine requires at least 150 closed scored trades entered from 2020 through the available 2026 tape.
+G2: Each engine requires positive net expectancy after the 0.03 spread floor and modeled swap.
+G3: Each engine requires unannualized per-trade net Sharpe > 0.
+G4: Each engine requires MBB P(mean net <= 0) <= 0.05 with 10000 resamples, block length 5, seed 20261028.
+G5: Each engine requires no negative net entry-cohort total in any full calendar year 2020-2025; partial 2026 is disclosed, not gated.
+G6: Overall oil transfer passes Phase 1 only if the full-span source qualifies and both engines pass G1-G5; any unavailable source makes the overall verdict DATA BLOCKED.

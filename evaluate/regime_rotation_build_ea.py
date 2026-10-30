@@ -1,0 +1,333 @@
+# -*- coding: utf-8 -*-
+"""
+regime_rotation_build_ea.py - deterministic builder for the Phase-2
+RegimeController EA (hypothesis #13, SPEC_REGIME_ROTATION section 6).
+
+Transforms the FROZEN child sources (ea/ORB_Strategy.mq5,
+ea/SP2L_SpikeGap.mq5) into prefixed embed modules with three precise
+entry-gates inserted, then writes the master EA body + gated/ungated
+wrappers. Children's strategy logic, parameters, exits, and lot sizing
+are UNCHANGED (only symbol prefixes, output filenames, and the entry
+gates required by the SPEC).
+
+Gates (block NEW entries only; existing positions manage via the
+child's own unaltered exit logic - matches the offline open-date-keyed
+model exactly):
+  ORB:  the PlaceOrders() call site.
+  SP2L: DetectSetup arming + the PlaceMarketEntry call site.
+
+Outputs (repo ea/ + terminal MQL5\\Experts copy):
+  embed/orb_child.mqh, embed/sp2l_child.mqh,
+  RegimeController_body.mq5, RegimeController.mq5 (gated),
+  RegimeControllerUngated.mq5
+"""
+
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+REPO = Path(r"C:\Users\Milad\Desktop\RR")
+EA = REPO / "ea"
+TERM_EA = Path(r"C:\Users\Milad\AppData\Roaming\MetaQuotes\Terminal"
+               r"\D0E8209F77C8CF37AD8BF550E51FF075\MQL5\Experts")
+
+TYPES = ("int", "void", "bool", "double", "string", "datetime",
+         "long", "ulong", "uint", "CTrade")
+
+
+def collect_symbols(src):
+    funcs, globs, inputs, structs = set(), set(), set(), set()
+    for line in src.splitlines():
+        m = re.match(r"^(%s)\s+([A-Za-z_]\w*)\s*\(" % "|".join(TYPES), line)
+        if m:
+            funcs.add(m.group(2))
+        m = re.match(r"^[A-Za-z_]\w*\s+(g_[A-Za-z0-9_]+)", line)
+        if m:
+            globs.add(m.group(1))
+        m = re.match(r"^input\s+\w+\s+([A-Za-z_]\w*)", line)
+        if m:
+            inputs.add(m.group(1))
+        m = re.match(r"^struct\s+([A-Za-z_]\w*)", line)
+        if m:
+            structs.add(m.group(1))
+    return funcs, globs, inputs, structs
+
+
+def transform(src_path, prefix, out_trades_name, keep_days_name):
+    src = src_path.read_text(encoding="utf-8", errors="replace")
+    funcs, globs, inputs, structs = collect_symbols(src)
+    names = funcs | globs | inputs | structs | {
+        "OnInit", "OnTick", "OnDeinit", "OnTradeTransaction"}
+    out = []
+    for line in src.splitlines():
+        s = line.strip()
+        if s.startswith("#property") or s.startswith("#include"):
+            continue
+        out.append(line)
+    text = "\n".join(out)
+    for name in sorted(names, key=len, reverse=True):
+        text = re.sub(r"\b%s\b" % re.escape(name), prefix + name, text)
+    # per-child output filenames (logging only; validated day files keep names)
+    text = text.replace('"trades.csv"', '"%s"' % out_trades_name)
+    return text
+
+
+def gate_orb(text):
+    anchor = ("      else\n         ORB_PlaceOrders();")
+    repl = ("      else if(RegimeAllowORB())\n         ORB_PlaceOrders();")
+    if anchor not in text:
+        raise SystemExit("ORB gate anchor not found")
+    return text.replace(anchor, repl)
+
+
+def gate_sp2l(text):
+    # block NEW entries only: gate DetectSetup arming and PlaceMarketEntry
+    a1 = "      int d = SP2L_DetectSetup(uTime);"
+    r1 = "      int d = (RegimeAllowSP2L() ? SP2L_DetectSetup(uTime) : 0);"
+    a2 = ("         SP2L_g_pendActive = false;              // consumed by the entry\n"
+          "         SP2L_PlaceMarketEntry(dir, setupT);\n"
+          "         holding = true;                    // block detection this event")
+    r2 = ("         SP2L_g_pendActive = false;              // consumed by the entry\n"
+          "         if(RegimeAllowSP2L())\n"
+          "            SP2L_PlaceMarketEntry(dir, setupT);\n"
+          "         holding = true;                    // block detection this event")
+    for a, r in ((a1, r1), (a2, r2)):
+        if a not in text:
+            raise SystemExit("SP2L gate anchor not found: %r" % a[:40])
+        text = text.replace(a, r)
+    return text
+
+
+BODY = r"""//+------------------------------------------------------------------+
+//| RegimeController_body.mq5 (generated body; see wrappers)         |
+//| Phase-2 master EA for SPEC_REGIME_ROTATION (hypothesis #13).     |
+//| Embeds faithful, prefixed copies of the frozen ORB and SP2L      |
+//| children; adds causal monthly D1 regime labels (US500.c) and the |
+//| pre-declared Arm P gating. REGIME_UNGATED=1 forces all children  |
+//| enabled (reproduction mode; must reproduce child trade sets).    |
+//+------------------------------------------------------------------+
+#include <Trade\Trade.mqh>
+#include "embed/orb_child.mqh"
+#include "embed/sp2l_child.mqh"
+
+input string InpD1Symbol = "US500.c";   // D1 label source (SPEC section 3)
+
+// ---- label parameters (SPEC_REGIME_ROTATION, fixed) ----
+#define RC_EMA_PERIOD   200
+#define RC_VOL_WIN      20
+#define RC_MED_WIN      252
+#define RC_BAND_PCT     1.0
+
+string   g_label = "";
+int      g_labelMonth = 0;
+double   g_trendRel = 0.0, g_vol20 = 0.0, g_volMed = 0.0;
+int      g_lastNyDate = 0;
+bool     g_d1ProbeLogged = false;
+
+bool RegimeAllowORB()   { return (REGIME_UNGATED == 1) || (g_label == "UP-CALM"   || g_label == "DOWN-CALM"); }
+bool RegimeAllowSP2L()  { return (REGIME_UNGATED == 1) || (g_label == "UP-VOL"    || g_label == "DOWN-VOL");  }
+
+//+------------------------------------------------------------------+
+//| Causal monthly label from US500.c D1 (SPEC section 3)            |
+//| Cutoff = UTC midnight of the month's FIRST CALENDAR DAY: bars    |
+//| strictly before it only (the month's own first trading day's bar |
+//| is EXCLUDED - the corrected cutoff; see Phase-1 report).         |
+//+------------------------------------------------------------------+
+bool ComputeMonthLabel(const datetime nowUtc)
+{
+   MqlDateTime dt;
+   TimeToStruct(nowUtc, dt);
+   dt.day = 1; dt.hour = 0; dt.min = 0; dt.sec = 0;
+   datetime cutoff = StructToTime(dt);          // UTC midnight, 1st of month
+
+   int need = RC_MED_WIN + RC_VOL_WIN + 40;
+   MqlRates r[];
+   int n = CopyRates(InpD1Symbol, PERIOD_D1,
+                     cutoff - (datetime)(need * 2 * 86400), cutoff - 1, r);
+   if(!g_d1ProbeLogged)
+   {
+      PrintFormat("RC D1 probe: symbol=%s bars=%d (need %d) last=%s",
+                  InpD1Symbol, n, RC_MED_WIN + RC_VOL_WIN + 2,
+                  n > 0 ? TimeToString(r[n-1].time, TIME_DATE) : "n/a");
+      g_d1ProbeLogged = true;
+   }
+   if(n < RC_MED_WIN + RC_VOL_WIN + 2)
+   {
+      PrintFormat("RC LABEL FAIL: only %d D1 bars before %s", n,
+                  TimeToString(cutoff, TIME_DATE));
+      return false;
+   }
+   // EMA over all available closes (ewm adjust=False equivalent;
+   // 6.5y history in the terminal DB, converged for 2021+)
+   double ema = r[0].close;
+   double k = 2.0 / (RC_EMA_PERIOD + 1.0);
+   for(int i = 1; i < n; i++)
+      ema += k * (r[i].close - ema);
+   // vol20 series (annualized %, ddof=1)
+   int last = n - 1;
+   double v[];
+   ArrayResize(v, n);
+   ArrayInitialize(v, 0.0);
+   for(int i = RC_VOL_WIN; i < n; i++)
+   {
+      double s1 = 0.0, s2 = 0.0;
+      for(int j = i - RC_VOL_WIN + 1; j <= i; j++)
+      {
+         double lr = MathLog(r[j].close / r[j-1].close);
+         s1 += lr; s2 += lr * lr;
+      }
+      double m = s1 / RC_VOL_WIN;
+      v[i] = MathSqrt(MathMax(0.0, (s2 - RC_VOL_WIN * m * m)
+                              / (RC_VOL_WIN - 1)) * 252.0) * 100.0;
+   }
+   g_vol20 = v[last];
+   // trailing median of vol20 over the MED_WIN values strictly before last
+   double win[];
+   ArrayResize(win, RC_MED_WIN);
+   for(int i = 0; i < RC_MED_WIN; i++)
+      win[i] = v[last - RC_MED_WIN + i];
+   ArraySort(win);
+   g_volMed = 0.5 * (win[RC_MED_WIN/2 - 1] + win[RC_MED_WIN/2]);
+   g_trendRel = (r[last].close / ema - 1.0) * 100.0;
+
+   if(MathAbs(g_trendRel) < RC_BAND_PCT)      g_label = "RANGE";
+   else if(g_trendRel >= RC_BAND_PCT)         g_label = (g_vol20 <= g_volMed ? "UP-CALM"   : "UP-VOL");
+   else                                       g_label = (g_vol20 <= g_volMed ? "DOWN-CALM" : "DOWN-VOL");
+   MqlDateTime ld;
+   TimeToStruct(nowUtc, ld);
+   g_labelMonth = ld.year * 100 + ld.mon;
+   return true;
+}
+
+void UpdateRegime(const datetime nowUtc)
+{
+   MqlDateTime dt;
+   TimeToStruct(nowUtc, dt);
+   int ym = dt.year * 100 + dt.mon;
+   if(ym != g_labelMonth)
+      if(!ComputeMonthLabel(nowUtc))
+      {
+         g_label = "";            // label unavailable -> fail safe: no trading
+         g_labelMonth = ym;
+      }
+}
+
+void LogRegimeDay(const int nyDate)
+{
+   int h = FileOpen("regime_days.csv",
+                    FILE_READ | FILE_WRITE | FILE_TXT | FILE_ANSI);
+   if(h == INVALID_HANDLE)
+      return;
+   FileSeek(h, 0, SEEK_END);
+   FileWrite(h, StringFormat("%d;%s;%.3f;%.2f;%.2f;%d;%d",
+            nyDate, g_label, g_trendRel, g_vol20, g_volMed,
+            RegimeAllowORB() ? 1 : 0, RegimeAllowSP2L() ? 1 : 0));
+   FileClose(h);
+}
+
+//+------------------------------------------------------------------+
+int OnInit()
+{
+   if(ORB_OnInit() != INIT_SUCCEEDED) return INIT_FAILED;
+   if(SP2L_OnInit() != INIT_SUCCEEDED) return INIT_FAILED;
+   int h = FileOpen("regime_days.csv", FILE_WRITE | FILE_TXT | FILE_ANSI);
+   if(h != INVALID_HANDLE)
+   {
+      FileWrite(h, "ny_date;label;trend_rel;vol20;vol_med;orb_on;sp2l_on");
+      FileClose(h);
+   }
+   PrintFormat("RC init: gating=%s d1=%s magicORB=%I64d magicSP2L=%I64d",
+               REGIME_UNGATED == 1 ? "OFF (reproduction)" : "ARM P",
+               InpD1Symbol, ORB_InpMagicNumber, SP2L_InpMagicNumber);
+   return INIT_SUCCEEDED;
+}
+
+void OnDeinit(const int reason)
+{
+   ORB_OnDeinit(reason);
+   SP2L_OnDeinit(reason);
+}
+
+void OnTick()
+{
+   datetime now = TimeCurrent();          // UTC on US500-tick (verified)
+   UpdateRegime(now);
+   int nd = ORB_NyDateOf(now);
+   if(nd != g_lastNyDate && nd > 0)
+   {
+      g_lastNyDate = nd;
+      LogRegimeDay(nd);
+   }
+   ORB_OnTick();
+   SP2L_OnTick();
+}
+
+void OnTradeTransaction(const MqlTradeTransaction &trans,
+                        const MqlTradeRequest &request,
+                        const MqlTradeResult &result)
+{
+   ORB_OnTradeTransaction(trans, request, result);
+   SP2L_OnTradeTransaction(trans, request, result);
+}
+//+------------------------------------------------------------------+
+"""
+
+
+def main():
+    (EA / "embed").mkdir(exist_ok=True)
+    orb = transform(EA / "ORB_Strategy.mq5", "ORB_", "orb_trades.csv",
+                    "orb_days.csv")
+    orb = gate_orb(orb)
+    sp2l = transform(EA / "SP2L_SpikeGap.mq5", "SP2L_", "sp2l_trades.csv",
+                     "sp2l_days.csv")
+    sp2l = gate_sp2l(sp2l)
+    (EA / "embed" / "orb_child.mqh").write_text(orb, encoding="utf-8")
+    (EA / "embed" / "sp2l_child.mqh").write_text(sp2l, encoding="utf-8")
+    (EA / "RegimeController_body.mq5").write_text(BODY, encoding="utf-8")
+    (EA / "RegimeController.mq5").write_text(
+        "//+------------------------------------------------------------------+\n"
+        "//| RegimeController.mq5 - Arm P gating ON (Phase-2 primary)        |\n"
+        "//| Generated from the frozen children by                          |\n"
+        "//| evaluate/regime_rotation_build_ea.py - do not hand-edit.       |\n"
+        "//+------------------------------------------------------------------+\n"
+        "#define REGIME_UNGATED 0\n"
+        '#include "RegimeController_body.mq5"\n', encoding="utf-8")
+    (EA / "RegimeControllerUngated.mq5").write_text(
+        "//+------------------------------------------------------------------+\n"
+        "//| RegimeControllerUngated.mq5 - gating OFF (reproduction check)   |\n"
+        "//| Both children always enabled; must reproduce their validated    |\n"
+        "//| trade sets exactly (GATE: automatic F-fail otherwise).          |\n"
+        "//+------------------------------------------------------------------+\n"
+        "#define REGIME_UNGATED 1\n"
+        '#include "RegimeController_body.mq5"\n', encoding="utf-8")
+    print("wrote embeds + body + wrappers")
+
+    # sync to terminal Experts
+    dst = TERM_EA / "RegimeRotation"
+    if dst.exists():
+        shutil.rmtree(dst)
+    dst.mkdir(parents=True)
+    for f in ("RegimeController.mq5", "RegimeControllerUngated.mq5",
+              "RegimeController_body.mq5"):
+        shutil.copy2(EA / f, dst / f)
+    (dst / "embed").mkdir()
+    shutil.copy2(EA / "embed" / "orb_child.mqh", dst / "embed" / "orb_child.mqh")
+    shutil.copy2(EA / "embed" / "sp2l_child.mqh", dst / "embed" / "sp2l_child.mqh")
+    print("synced to", dst)
+
+    # compile both
+    for f in ("RegimeController.mq5", "RegimeControllerUngated.mq5"):
+        log = dst / (f + ".log")
+        r = subprocess.run([r"C:\Program Files\MetaTrader 5\metaeditor64.exe",
+                            "/compile:%s" % (dst / f), "/Log:%s" % log],
+                           capture_output=True, timeout=180)
+        txt = log.read_text(encoding="utf-16-le", errors="replace") \
+            if log.exists() else "(no log)"
+        print("compile %s -> rc=%s\n%s" % (f, r.returncode, txt))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

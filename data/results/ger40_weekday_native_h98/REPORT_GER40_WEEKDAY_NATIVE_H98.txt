@@ -1,0 +1,10 @@
+H98 NATIVE GER40 WEEKDAY HOLD - FINAL_FAIL
+Connected FTMO-Demo tick-derived M1 variable Ask/Bid; no orders.
+Source/SPEC/GATE/script SHA256: 6d2b52f613467a8bb2e60d322ac10acaf08188f272e4d344c0d3f40f3fcb4582 / 0afa52eec8f68ebb41c1ccbdbc678c4d12a5cc6d00aaede445647c38c03f7e1c / 13dd8e7c75e5ff9812b569fab6c15c886b51b04599d0bb7044d1e8c002f0b50f / 2d75c0eba362be46b08e9651bb6ef30eff632183c264993f13a16421c07b3e9d
+All/evaluation trades/unresolved: (215, 125, 0)
+Coverage/exits: {"EXECUTED": 215, "KNOWN_CLOSURE_SKIP": 13, "NO_MONDAY_CASH_OPEN": 13, "NO_PRIOR_ATR": 5, "INCOMPLETE_TAPE_WEEK": 1} / {"THURSDAY_FLAT": 109, "STOP": 14, "STOP_GAP": 2}
+Entry spread: {"median": 3.4900000000016007, "p90": 6.25}
+Evaluation stressed mean/total/mean R/bootstrap P: (12.35741336969865, 1544.6766712123313, 0.028906669146051348, 0.3444)
+Annual: {"2024": {"n": 44, "base_sum": -684.6944837340598, "stress_sum": -1019.09448373406}, "2025": {"n": 46, "base_sum": 1526.3419412283984, "stress_sum": 1176.7419412283984}, "2026": {"n": 35, "base_sum": 1653.0292137179931, "stress_sum": 1387.0292137179927}}
+Gates: {"G-GE1": true, "G-GE2": true, "G-GE3": false, "G-GE4": false, "G-GE5": "NOT_RUN", "G-GE6": true}
+Native M1 stop paths still need exact tick-order and EUR equity Phase 2.

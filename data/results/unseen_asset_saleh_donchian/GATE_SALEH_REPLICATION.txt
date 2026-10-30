@@ -1,0 +1,36 @@
+GATE_SALEH_REPLICATION.txt - HYPOTHESIS #58 PHASE 1 GATES (frozen 2026-09-24,
+BEFORE the Phase 1 script ran; verbatim extraction from
+SPEC_SALEH_REPLICATION.txt section 7)
+
+Population: per instrument (BTCUSD, ETHUSD, USTECH - virgin tapes
+data/results/virgin_assets/*_m1.csv, full tape each), all executed trades of
+its single pre-declared machine pass. Mechanics frozen verbatim from #57:
+4H Supertrend(10,3.0) anchor, 1H Donchian(20) breakout entries at the 1H open,
+ADX14 >= 20, 4xATR(14) initial stop + close-based 4xATR trailing stop, no TP,
+cost floor embedded in fills (BTCUSD 15.0 u / ETHUSD 2.0 u / USTECH 1.0 pt,
+Ask = Bid + C). Net PnL per trade in native units as defined in SPEC
+section 5.
+
+Gates evaluated INDEPENDENTLY per instrument on its FULL tape:
+
+G-SALREP1: Total executed trades >= 30.
+
+G-SALREP2: Net Sharpe Ratio > 0.
+           Net Sharpe = mean(trade Net PnL) / std(trade Net PnL, ddof=1),
+           event-indexed per trade, not annualized.
+
+G-SALREP3: Moving-block bootstrap P(mean Net PnL <= 0) <= 0.20.
+           10,000 resamples, block = 5 trades, seed 20261006.
+           Algorithm: n = trade count; per resample draw ceil(n/5) block
+           starts uniformly from {0..n-5}, concatenate the 5-trade blocks,
+           truncate to n, take the mean; P = fraction of the 10,000
+           resample means <= 0. (If n < 5, P is undefined and G-SALREP3 is
+           scored FAIL.)
+
+VERDICT RULE: an instrument PASSES iff G-SALREP1 AND G-SALREP2 AND
+G-SALREP3 all PASS for that instrument. OVERALL PASS only if ALL THREE
+instruments pass. Any instrument FAIL -> that instrument's FAIL is final
+for this artifact; no re-runs. CAL [2020..2023] / OOS [2024..present]
+blocks are reporting only and never gate. A PASS (instrument or overall)
+is not a validated result under validation_discipline and does not
+authorize Phase 2.

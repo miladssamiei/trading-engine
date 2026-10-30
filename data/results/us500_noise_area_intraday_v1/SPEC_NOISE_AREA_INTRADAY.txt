@@ -1,0 +1,104 @@
+HYPOTHESIS 71: US500 PRICE-ONLY NOISE-AREA INTRADAY MOMENTUM
+Declared 2026-09-25 before this hypothesis's code or Phase-1 run.
+
+1. SOURCE AND DISTINCT MECHANISM
+Zarattini, Aziz and Barbon, Beat the Market: An Effective Intraday
+Momentum Strategy for S&P500 ETF (SPY), first version 2024, author
+PDF https://concretumgroup.com/wp-content/uploads/2026/02/Beat-the-Market.pdf
+sections 3 and 4: prior-14-session time-of-day absolute return defines
+an intraday noise area; at HH:00/HH:30 the first price outside a band
+signals continuation, with opposite-band crossover and daily close
+exits. Test its published BASE price-only opposite-band version on
+US500-tick CFD cash-session BID bars. Do not import the paper's
+later VWAP/volume variant, because US500 tick-count is not traded
+share volume. Do not use its volatility-based dynamic size, any VIX
+filter, threshold search, side filter, stop tightening or timing
+variant. This is distinct from the repo's ORB and last-half-hour
+closing momentum tests. The 2024+ tape has been seen in many studies;
+historical PASS would remain selected evidence requiring fresh forward
+confirmation. No existing frozen study is altered.
+
+2. DATA, CLOCK AND CAUSAL SIGNAL
+Input only data/results/orb_2021_present/us500tick_m5.csv, SHA256
+a8ee68f1a0010a1be9704c0d59fd5382aa798846cdae4d519b799ae21ec66c2d;
+M5 is built directly from verified real imported ticks. Epoch UTC to
+America/New_York wall time. Cash [09:30,16:00), a cash day iff a real
+09:30 M5 bar exists; require a real 15:55 M5 bar to trade that day.
+Today's Open is the real 09:30 M5 BID open; previous Close is the
+previous valid cash day's final real 15:55 M5 BID close. At each NY
+clock H in {10:00,10:30,...,15:30}, use ONLY the preceding real M5
+bar ending at H, i.e. 09:55 at 10:00, to determine the BID signal;
+execute at the real M5 bar OPEN stamped H. If either bar is absent,
+skip that clock and count it. For each of the previous 14 valid cash
+days d-k, require the real preceding M5 bar at the identical H and
+that day's real 09:30 M5 open; otherwise skip that current clock.
+sigma(H)=mean of 14 absolute [(prior_day_preH_BID_close /
+prior_day_0930_BID_open)-1] values. Upper(H)=max(today_open,
+previous_close)*(1+sigma(H)); Lower(H)=min(today_open,
+previous_close)*(1-sigma(H)). All inputs known before H. A signal
+is +1 if today's real pre-H BID close > Upper; -1 if < Lower;
+otherwise 0. Equality is inside the band. This pre-H sampling is the
+causal interpretation of the paper's half-hour decisions; do not
+execute using an unfinished H bar or a same-minute final price.
+
+3. POSITION STATE, EXIT AND COST
+Start every NY date flat. At H, flat +1 signal -> BUY at H bar
+ASK = BID open +0.51; flat -1 -> SELL at H BID open. One position
+max. Long remains open until a sampled -1 opposite-band signal;
+short remains until +1. At opposite signal close old and enter new
+opposite at the same H bar open, each trade charged its own 0.51
+round-trip spread. Same-side and neutral signals hold. Every open
+position force exits at real 15:55 M5 BID close for long or
+ASK=BID+0.51 for short, before 16:00 NY. No overnight financing.
+All entries/exits on same NY date, max hold <6 hours. Initial
+planned-stop risk for later R diagnostic: BUY entry Ask minus Lower
+at entry H, SELL Upper at entry H plus 0.51 minus entry Bid.
+This is a sampled decision stop rather than an exchange stop;
+actual gap and intrabar adverse excursions may exceed planned risk.
+Report gross BID-point move and fixed-spread net = gross -0.51;
+extra cost stress = net -0.51 (total 1.02). M5 bar opens and final
+closes are optimistic execution proxies, not real Bid/Ask fills.
+
+4. SPLIT, INFERENCE AND SPEED
+2021-2023 entry dates descriptive calibration; 2024-01-01 through
+2026-04-30 gated historical block. Report funnel, trade/date counts,
+gross, net, extra-cost stress, long/short totals, year totals,
+median/p90 holds, max drawdown and initial-risk R distribution.
+Bootstrap gated New York dates with replacement 10000 times, seed
+20261008, carrying all trades from each date; report P(mean net<=0)
+and descriptive 95% quantiles.
+The owner's practical constraint is a first $10k FTMO 2-Step Swing
+Challenge in less than 8-9 months. Use 180 calendar days as the
+predeclared practical threshold. Only if the economic gates pass,
+simulate every NY entry-date start with complete 180-day follow-up.
+Risk per trade = fixed $100 = 1% of initial balance divided by
+positive initial risk distance, fractional notional assumed.
+Use quote-net proxy R; daily balance resets in Europe/Prague,
+first $11000 closed balance after >=4 distinct Prague entry dates
+passes; <9000 or <prior-midnight balance -500 on trade close fails.
+This close-only check ignores intra-trade floating equity and is
+optimistic. No policy or actual-account authorization is inferred.
+Report pass/breach/timeout rates across all eligible starts.
+
+5. VERBATIM PHASE-1 GATES
+G-NA1: At least 150 executed gated trades on at least 150 distinct New York entry dates.
+G-NA2: Strictly positive gated mean extra-cost-stress net US500 points per trade.
+G-NA3: Date-bootstrap P(mean fixed-spread net <= 0) at most 0.05, 10000 resamples, seed 20261008.
+G-NA4: Strictly positive fixed-spread net US500 point totals in each complete gated year 2024 and 2025.
+G-NA5: Every executed trade exits on its New York entry date before 16:00 and has positive initial planned-stop risk distance.
+G-NA6: In the gated 180-day Challenge proxy at 1% planned risk, at least 70% of eligible starts pass and at most 10% breach a close-based floor.
+All six required for Phase-1 PASS. A FAIL is final for this exact
+artifact; no post-hoc side, stop, time, size, 14-day-window or
+cost adjustment. If G-NA1..5 FAIL, G-NA6 is not used to rescue the
+rule; its diagnostic rate can still be reported when computable.
+
+6. STOP RULE, PHASE 2, HONESTY
+Write script, trades, funnel, run metadata and REPORT under this
+study directory after this SPEC and verbatim GATE have been saved.
+Write REPORT even on FAIL. Do not overwrite any frozen document.
+On FAIL do not run an MT5 execution tester for this rule. A PASS
+allows only a new frozen Model=4 native US500 tick-order execution
+SPEC/GATE, with actual variable Bid/Ask, signal/stop reconciliation,
+FTMO symbol economics and full floating-equity challenge replay.
+Later unseen forward dates are still required after extensive prior
+research. Phase-1 PASS alone is not a validated live edge.

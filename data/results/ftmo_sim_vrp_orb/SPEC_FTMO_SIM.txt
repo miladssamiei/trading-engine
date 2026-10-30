@@ -1,0 +1,70 @@
+SPEC: FTMO CHALLENGE MONTE CARLO ON VRP-ORB ARM A (HYPOTHESIS #37)
+Declared: 2026-09-23, before any code for this study existed.
+
+0. CONTEXT AND STATUS
+  - Input artifact: data/results/orb_vrp_filter/ (Hypothesis #31, Phase-1 overall
+    verdict FAIL: G-VRP3 win-rate gate failed even though Arm A carried the
+    concentrated net edge, n=171, win 51.5%, avg net 2.651 pt, net Sharpe 1.56).
+  - This study does NOT re-litigate #31. It measures account-level challenge
+    economics of trading the Arm A R-multiple distribution under FTMO Phase-1
+    style constraints. Arm A conditioning is IN-SAMPLE selection on the same
+    trades being resampled; every pass rate below inherits that optimism.
+
+1. MECHANISM
+  1.1 Population: the 171 filter_arm=A rows of
+      data/results/orb_vrp_filter/orb_vrp_filtered_trades.csv, column net
+      (points; net = gross - 0.51 pt spread, no swap; intraday ORB trades).
+  1.2 Standardization: mean_loss = |mean(net_j for net_j < 0)| (average
+      magnitude of losing trades). R_multiplier_j = net_j / mean_loss for every
+      trade, so the average loser = -1.0R exactly.
+  1.3 Challenge rules (FTMO Phase-1 style, simplified, frozen):
+      Starting balance $10,000.
+      Profit target: equity >= $10,800 -> PASS.
+      Max total loss: equity <= $9,000 -> FAIL (max loss).
+      Max daily loss simplification: any single simulated trade with dollar PnL
+      <= -$500 (a one-trade drop >= 5% of the starting balance) -> FAIL (daily
+      loss breach). Real FTMO daily loss is measured against prior-day balance
+      per calendar day; this study deliberately uses the simpler single-trade
+      rule as tasked. One simulation step = one trade, so no multi-trade
+      same-step combination ever arises.
+  1.4 Sizing: trade PnL = R_multiplier * (risk_pct * $10,000). Risk grid:
+      0.25%, 0.50%, 0.75%, 1.00%, 1.50%, 2.00%.
+  1.5 Monte Carlo: per risk level, 10,000 independent challenges; each step
+      draws one trade uniformly WITH REPLACEMENT from the 171-trade population.
+      Draws are iid: no serial correlation, no regime conditioning, no calendar
+      time or trade-frequency modeling.
+  1.6 Halt priority per step, first match wins: PASS (equity >= $10,800);
+      FAIL max loss (equity <= $9,000); FAIL daily breach (trade PnL <= -$500).
+      Safety cap: a challenge still unresolved after 100,000 trades is recorded
+      UNRESOLVED (expected count zero; must be reported if nonzero).
+
+2. GATES (frozen verbatim in GATE_FTMO_SIM.txt)
+  G-F1 data integrity: exactly 171 trades loaded; net column present; at least
+      one losing trade; mean_loss > 0.
+  G-F2 termination integrity: for every risk level, all 10,000 challenges end
+      in a classified outcome {PASS, MAX_LOSS, DAILY_BREACH, UNRESOLVED} and
+      UNRESOLVED count = 0.
+  G-F3 reporting completeness: report table covers all six risk levels with
+      pass / max-loss / daily-breach rates summing to 100% per row, plus
+      median trades-to-pass among PASS runs.
+
+3. DELIVERABLES
+  - evaluate/ftmo_sim_vrp_orb.py, run with project python (reinforce_rl env).
+  - data/results/ftmo_sim_vrp_orb/{SPEC,GATE}_FTMO_SIM.txt (frozen before code).
+  - data/results/ftmo_sim_vrp_orb/REPORT_FTMO_SIM.txt and run_meta.json.
+  - PROGRESS.md entry as Hypothesis #37.
+
+4. HONESTY AND ANTI-LEAK RULES
+  - This is a descriptive account-economics measurement, NOT an edge test: no
+    PASS/FAIL verdict is attached to the strategy itself; #31's FAIL stands.
+  - The R population comes from in-sample conditioning (Arm A selected on the
+    same data it is drawn from); pass rates are optimistic by construction.
+  - iid with-replacement draws ignore clustering/regime dependence of ORB PnL
+    and trade arrival (~1-2 signals/week historically; challenge duration in
+    calendar time is NOT simulated).
+  - No parameter search beyond the declared risk grid; RNG seed fixed
+    (20260923) before runs; all six risk levels reported regardless of result.
+  - Optimal-risk identification rule (frozen): the risk level with the maximum
+    pass rate, ties broken toward the lower risk. Survival commentary must
+    reference the max-loss and daily-breach columns and the R-distance to the
+    $9,000 floor, not the pass rate alone.

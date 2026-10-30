@@ -1,0 +1,92 @@
+HYPOTHESIS 84: US500 PREVIOUS-DAY CASH-RANGE ASYMMETRY INTRADAY REVERSAL
+Declared 2026-09-25 before evaluation code or any rule return calculation.
+
+1. Source and novel mechanism
+Francesco Valenti, 'Intraday Price Asymmetry and Next-Day Intraday
+Returns in the S&P 500' (SSRN 6074846, posted 2026-02-02), reports a
+contrarian relation between an SPY daily open/high/low range measure
+and next-day intraday return. Source abstract:
+https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6074846
+The full PDF is not accessible through the web tool, so the exact
+normalization and this US500 09:35-to-13:00 trade are our predeclared
+transfer inference, not a claimed reproduction. The paper is
+descriptive, and this target is a different CFD feed. Distinct from
+H81's same-day overnight-gap first-half-hour fade and H59's same-day
+cash-close momentum. Prior failures remain frozen.
+
+2. Verified price source and clock
+Read only data/results/orb_2021_present/us500tick_m5.csv, epoch UTC
+Bid M5 bars, hash-recorded, converted to America/New_York wall time.
+A previous cash date has an exact 09:30 M5 bar and at least 60 real
+cash M5 bars through the exact 15:55 bar. Its O = 09:30 M5 open,
+H = maximum real cash M5 high from 09:30..15:55, L = minimum low,
+C = 15:55 M5 close. A current eligible date is the next distinct
+cash date with exact 09:35 entry-bar open, exact 12:55 exit bar and
+all 41 M5 bar slots from 09:35 through 12:55 real/unique. Current
+date eligibility is determined retrospectively for reporting, but
+missing future bars after an entry produce UNRESOLVED, not skipped
+signals; only previous-date completeness and 09:35 bar availability
+may suppress an entry causally. This early-afternoon flat time avoids
+NYSE 13:00 early-close days and overnight financing.
+
+3. Fully fixed signal and execution screen
+Previous-day asymmetry A = (H + L - 2*O)/(H-L), require H>L.
+If A<0, BUY; if A>0, SELL; A=0 skip. Previous-day H/L/O are known
+before current entry. One position per current NY cash date.
+Enter at the actual 09:35 M5 BID open; BUY pays BID+0.51, SELL gets
+BID. Stop distance D=0.5*(previous H-L), fixed before entry and
+strictly positive. BUY stop threshold BID <= entry BID-D; SELL stop
+threshold ASK >= entry BID+0.51+D. Scan real M5 bars from entry
+09:35 through 12:55 in timestamp order, using stop-first if the
+entry bar itself touches. At a BUY stop fill min(stop BID threshold,
+current BID open); at SELL stop fill max(stop ASK threshold,current
+BID open+0.51). If no stop by the exact 12:55 bar, close at its BID
+close for BUY or BID close+0.51 for SELL. A missing 12:55 bar after
+entry is UNRESOLVED, marks the last earlier real bar only as a
+diagnostic and fails the coverage gate. No take-profit, re-entry,
+intraday regime filter, calendar filter or parameter search.
+
+4. Economics and challenge model
+Pnl in index points: BUY exit BID - entry ASK; SELL entry BID - exit
+ASK. This embeds 0.51 point round-trip fixed spread. Separately
+subtract another 0.51 point from each trade for stress. No swap for
+same-day exits. Exact FTMO US500.cash contract, variable Bid/Ask,
+size-tier fills, slippage and EUR conversion require later evidence.
+Use prior-day H/L as known inputs only; do not omit losing days based
+on current session data. Group by NY entry date. Report 2021-23
+descriptive calibration and 2024-04-30 2026 gated historical test,
+all year/side totals, net/stress means, p10/p50/p90, win rate,
+stop counts, maximal bar-path adverse R, and realized R using D.
+Bootstrap gated NY dates with replacement, 10000 resamples seed
+20260925; report P(mean base net<=0) and 95% interval.
+
+Replay every gated NY trade-date start with complete 90-calendar-day
+follow-up at fixed 1.0% planned initial risk per trade on EUR10,000,
+no compounding, using extra-stressed realized and worst full-bar
+floating R. Passing paid 2-Step Stage 1 = equity EUR11,000 after
+at least four trading dates; daily floor = prior Prague-midnight
+realized balance minus EUR500; static floor EUR9000. Same-day breach
+voids pass. Report PASS/BREACH/TIMEOUT and median days-to-pass.
+Also report descriptive 14-calendar-day EUR10,500 Free Trial pace
+under the same limits and minimum two dates, but do not use it to
+rescue failed paid-Challenge economics. Fractional size and stable
+EUR/USD conversion make this an optimistic proxy, not FTMO execution.
+
+5. Frozen Phase-1 gates (verbatim in GATE file)
+G-PA1: At least 150 gated executed-or-marked trades on 150 distinct NY dates, and zero unresolved exits after an entry.
+G-PA2: Mean gated extra-0.51-stressed net index points per trade strictly positive.
+G-PA3: NY-date bootstrap P(mean base net <= 0) at most 0.01, 10000 resamples, seed 20260925.
+G-PA4: Base net total strictly positive in complete gated 2024 and 2025.
+G-PA5: At least 150 fully observed rolling 90-calendar-day paid-Challenge starts, pass rate at least 0.70 and floating-equity breach rate at most 0.10 at fixed 1.0% planned risk.
+G-PA6: Every resolved entry/exit is same NY date, initial stop D>0, source is unique chronological real BID M5, and there is no missing in-position bar before exit.
+All six must PASS, any FAIL is final for this artifact. No post-hoc
+sign, horizon, stop, date, risk or cost variant rescues a FAIL.
+
+6. Outputs and advancement
+Write SPEC then verbatim GATE before code/run; hash inputs and
+SPEC/GATE. Save signals/trades, rolling outcomes, summary,
+run metadata and immutable REPORT even on FAIL. A Phase-1 PASS only
+permits a separately predeclared FTMO-native real Bid/Ask tick and
+Model=4 execution test, then independent forward confirmation. No
+orders on the user's account. Old tape exposure means this 2024+
+check is historical replication, never virgin live proof.

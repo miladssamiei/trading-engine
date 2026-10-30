@@ -1,0 +1,14 @@
+GATE FILE - HYPOTHESIS #45 (vrp_orb_oos)
+Frozen 2026-09-23 BEFORE the Phase-1 script ran. Verbatim gate extraction
+from SPEC_VRP_OOS.txt section 7. Evaluated on the OOS block
+(ny_date >= 2024-01-01) ONLY. Never edited after the run.
+
+G-OOS1: Total executed trades in OOS >= 40.
+
+G-OOS2: Net Sharpe Ratio in OOS > 0.
+
+G-OOS3: Day-block bootstrap (10,000 resamples, seed 20260924)
+        P(mean Net PnL <= 0) <= 0.20 on the OOS trades.
+
+VERDICT RULE: PASS only if G-OOS1 AND G-OOS2 AND G-OOS3 all PASS.
+Any FAIL is final for this artifact; corrections require a new study name.

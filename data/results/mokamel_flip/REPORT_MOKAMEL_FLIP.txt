@@ -1,0 +1,188 @@
+REPORT — MOKAMEL FLIP (HYPOTHESIS #16), STAGE A: SIGNAL QUALITY
+================================================================
+Date: 2026-09-03. Verdict at the top: GATE A1 = PASS (all three
+clauses). Stage B (R:R + money machine) has NOT been started; per the
+study protocol it requires explicit confirmation before running.
+
+Q1-Q5 RESOLUTIONS THIS STUDY RUNS UNDER (frozen in the SPEC/GATE)
+- Q1 Instrument: US500-tick ONLY. The presenter's claim that the
+  pattern works only on Dow Jones (US30/DJI) is treated as untested
+  folklore; this test is OUTSIDE the pattern's claimed domain. A
+  Stage-A pass on US500 is therefore a genuinely interesting finding,
+  not a confirmation of the source; a failure would have been
+  consistent with the presenter's own claim. Either way the domain
+  claim is addressed here explicitly, as the SPEC requires.
+- Q2 Exits: literal 40.00/80.00 index points, sole binding exit
+  (Stage B; not touched in this task). Q3 Day-close: 3 total TPs or
+  3 total SLs (symmetric). Q4 Indecision filter: trigger-candle
+  body/range < 0.10, an INTERPRETATION (no number given in the
+  source). Q5 Window: NY wall [570, 870), derived with the project's
+  DST-aware machinery anchored at the verified cash open.
+- Every numeric claim in the source video (win rate, 40/80
+  stop/target, profitability, DJI-only domain) remains UNVERIFIED;
+  nothing from the video was used as a measured fact anywhere in
+  Stage A.
+
+WHAT WAS BUILT AND VERIFIED BEFORE THE FULL RUN
+- evaluate/mokamel_flip_state_machine.py: the SPEC section 3 state
+  machine as an isolated module (T1-T6 candle-close transitions,
+  P1-P7 M1 flip phase), one row per in-window M5 candle written to
+  base_candle_state_log.csv (81,369 rows, full 2021-01..2026-04 tape,
+  1,370 cash days).
+- Manual hand-verification on the pre-selected week 2023-03-06..
+  2023-03-10 (selection declared before any results were seen):
+  every transition type re-derived by hand from OHLC, plus two entry
+  events re-derived bar-by-bar from the raw M1 tape (probe ordering,
+  I-9 same-bar guard, level fills). ZERO disagreements.
+  Details: manual_verification_note.txt.
+- ATR14 statement (per the Stage-A task requirement): ATR14 is Wilder
+  on the CONTINUOUS M5 tape — no per-session reset, overnight bars
+  feed it, seeded at dataset start, first 200 M5 bars excluded
+  (warmup). This was already frozen in SPEC 2.3; it is the same
+  series the state machine's M5 candles come from. No new
+  interpretation was needed (no new open questions arose during
+  implementation; one iteration bug — DataFrame-vs-dict iteration —
+  was fixed and the stage re-run in full, SPEC/GATE untouched).
+
+STAGE A RESULTS (exit-free, direction-native MFE/MAE, 60-min M1 walk,
+E-XTM first-bar convention; t in {0.50, 0.75, 1.00} x ATR14(trigger);
+e = (MFE-MAE)/ATR14; day-block bootstrap 10,000 draws, seed 20260903)
+
+Population funnel: 3,227 raw flip entries (2.36/day) -> 3,224
+eligible (warmup/universe) -> 2,988 BINDING (indecision filter
+excluded 236 = 7.3%), across 1,238 distinct days.
+
+GATE A1, clause by clause (binding population):
+  (i)   n = 2,988 >= 150 ......................... PASS
+  (ii)  count(MFE>=t) > count(MAE>=t) at EVERY
+        threshold: 0.50x: 2,440 > 2,415; 0.75x: 2,159 > 2,070;
+        1.00x: 1,903 > 1,804 ..................... PASS
+  (iii) day-block bootstrap P(mean(e)<=0) = 0.0144
+        <= 0.20 .................................. PASS
+  AGGREGATE: PASS -> Stage B is unlocked (not started).
+
+Descriptive statistics:
+- mean e = +0.0884 ATR; median e = +0.1086 ATR.
+- In points (context): median ATR14(trigger) = 4.78 pts; mean
+  (MFE-MAE) = +0.42 pts per signal over the 60-minute walk. NOTE:
+  this gross excursion differential is BELOW the project's confirmed
+  ~0.5-pt real-tick cost floor — the classic configuration in which
+  a pattern shows directional tendency yet cannot survive realistic
+  execution costs. Stage B exists to measure exactly this; the ATR-
+  normalized Stage-A gates (the pre-declared binding criterion) pass.
+- Descriptive %-of-price thresholds (non-gating): MFE>MAE at all
+  three (0.10%: 1,812>1,742; 0.15%: 1,365>1,290; 0.20%:
+  1,046>988).
+- Yearly binding signal counts are even: 2021: 541, 2022: 619,
+  2023: 564, 2024: 546, 2025: 548, 2026 (Jan-Apr): 170.
+
+TRANSPARENCY FINDINGS (descriptive, non-gating, reported because they
+materially qualify the PASS)
+1. UNFILTERED POPULATION FAILS CLAUSE (ii): without the indecision
+   filter the t=0.50x count inverts (2,608 < 2,639) and clause (ii)
+   fails (p_boot 0.0947 would still pass). The filter was frozen in
+   the SPEC/GATE before any run (Q4), so this is not tuning — but the
+   edge is concentrated in the filtered population, and the pass
+   depends on a pre-declared interpretation of an unquantified course
+   rule. Flagged per the honesty rules.
+2. DIRECTION ASYMMETRY: SHORTS n=1,467, mean e = +0.276; LONGS
+   n=1,521, mean e = -0.092. The entire positive excursion edge is
+   the SHORT side; long flips are negative on average. No gate covers
+   direction; Stage B will show what the symmetric machine does with
+   this.
+3. I-9 CONSERVATIVE BIAS: the same-M1-bar probe+breach guard
+   suppressed 518 would-be flips = 13.8% of candidates. Moderate, not
+   extreme; offline signal counts are conservative by that fraction
+   (Model=4 at Stage D would resolve intra-bar order).
+4. Mechanism tallies: 35,958 P7 events (level breach WITHOUT a prior
+   opposite-side probe) versus 3,745 probe-then-breach flips — the
+   probe-first requirement eliminates ~90% of raw level breaches;
+   this is the pattern's actual selectivity. 530 pendings died at the
+   window end; 0 orphan entry bars (data edges clean).
+
+ARTIFACTS (data/results/mokamel_flip/)
+SPEC_MOKAMEL_FLIP.txt, GATE_MOKAMEL_FLIP.txt (untouched), 
+base_candle_state_log.csv (full state-machine trace), signals.csv
+(3,227 entries with flags, ATR14, MFE/MAE, e), stage_a_stats.json,
+manual_verification_note.txt, this report. Scripts:
+evaluate/mokamel_flip_state_machine.py (module, --days dump mode),
+evaluate/mokamel_flip_stage_a.py.
+
+STATUS: Stage A PASS. STOPPED HERE by design — Stage B (literal
+40/80 pt exit arm + aggressive/conservative money machine + unit
+ring) requires explicit confirmation before it is run, per the
+project convention against silently cascading through stages.
+
+
+STAGE B — LITERAL 40/80 EXIT ARM + MONEY MACHINE + UNIT RING (2026-09-03)
+=========================================================================
+Verdict at the top: GATE B1 = PASS on the binding arm (clause (i)
+expectancy_after_cost +0.2121 pts > 0; clause (iii) n = 1,355 >= 150;
+clause (ii) vacuous by the Q2 resolution as pre-declared). Stage C
+(walk-forward C1-C3) is NOT started; per protocol it requires explicit
+confirmation.
+
+Run details: evaluate/mokamel_flip_stage_b.py, signals = the SPEC 6.1
+population (3,224 eligible; 3 ineligible warmup/universe signals
+excluded after a first pass had included them — fix disclosed, full
+re-run, SPEC/GATE untouched). Exits on the M1 tape with the standard
+conventions; validation invariants asserted per trade.
+
+BINDING ARM 40.00/80.00 pt (2.5 lots = 1% risk on $10,000):
+- n = 1,355 trades; win rate 47.97% after cost; gross expectancy
+  +0.7221 pts/trade; expectancy_after_cost +0.2121 pts (0.51 pt
+  binding; +0.1221 at the 0.80 legacy cost).
+- Sharpe 0.1269; maxDD 23.29% of the $10,000 base; total net
+  +$718.63 over 2021-01..2026-04.
+- Yearly net $: 2021 +819, 2022 +847, 2023 +297, 2024 +253,
+  2025 -1,849, 2026 +351.
+
+UNIT RING (1:2 shape preserved, NON-BINDING, promotion forbidden):
+  20/40: n=1,521, exp_net +0.9122, Sharpe 0.7447, maxDD 18.84%
+  30/60: n=1,396, exp_net +0.4976, Sharpe 0.3230, maxDD 21.89%
+  50/100: n=1,330, exp_net +0.6812, Sharpe 0.3916, maxDD 15.72%
+  60/120: n=1,327, exp_net +0.4488, Sharpe 0.2453, maxDD 15.14%
+All five arms positive after cost — the pass is not knife-edge to the
+pip-conversion unit (0.5x..1.5x all positive), which was the ring's
+declared purpose. Reported as context only.
+
+MONEY-MACHINE DIAGNOSTICS (binding arm):
+- 1,268 AGGRESSIVE entries, 87 CONSERVATIVE entries (70 conservative
+  signals skipped: no confirming close); 88 filter-exit trades
+  (entered, then closed at the trigger candle's close per I-10);
+  1,799 signals skipped for occupancy (hours-long holds block most
+  of the stream).
+- Exit reasons: time_exit 1,059 (78%!), stop_loss 181, stop_gap 1,
+  target 26, filter_exit 88. The 80-pt target is almost never reached;
+  the binding arm is effectively an enter-on-flip, hold-to-15:55
+  drift capture, not the video's 1:2 R:R structure.
+- THE DAY-CLOSE RULE NEVER FIRES: 0 days closed by 3 total wins or
+  3 total losses (level resolutions are too rare to reach 3 of
+  either). The video's aggressive/conservative machinery is therefore
+  nearly inert at this exit scale: the money management the course
+  emphasizes contributes almost nothing under the 40/80 reading.
+
+CRITICAL HONESTY FLAG — THE PASS IS CARRIED BY 2021: net over the
+walk-forward window 2022-01..2026-04 is -$101 (2022 +847, 2023 +297,
+2024 +253, 2025 -1,849, 2026 +351); the entire positive Stage-B
+expectancy comes from the 2021 burn-in year (+$819). 2025 is deeply
+negative in EVERY arm (binding -1,849; best ring -835), consistent
+with this project's repeatedly documented 2025 regime damage to
+intraday strategies (ORB, SP2L, VWAP MR all degraded or failed in
+2025). Stage C evaluates exactly the 2022+ window with C2's
+year-consistency clause; on these numbers C1/C3 (Sharpe/expectancy >
+0 on 2022+) and C2 would FAIL unless the occupancy/day-machine
+interaction shifts small amounts. This is stated here, before Stage C
+runs, so the outcome cannot be presented as a surprise either way.
+
+Gross expectancy note: +0.72 pts/trade is ABOVE the ~0.5 pt confirmed
+cost floor (the intraday_cost_floor_rule) — unlike every scalping
+candidate, because trades hold for hours rather than minutes. The
+edge, if real, is a drift-capture edge, not a scalping edge.
+
+Artifacts: matrix_master.csv (5 arms, scalping-screen schema),
+trades_all_arms.csv (per-trade ledger), yearly_breakdown.csv,
+stage_b_stats.json (gate clauses + money-machine tallies).
+
+STATUS: Stage B PASS. STOPPED — Stage C (no-selection walk-forward,
+C1-C3 on 2022-01..2026-04) awaits explicit confirmation.

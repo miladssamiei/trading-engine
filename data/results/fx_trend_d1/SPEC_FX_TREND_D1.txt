@@ -1,0 +1,82 @@
+SPEC: EURUSD D1 TREND FOLLOWING - PHASE 1 SIGNAL QUALITY SCREEN (HYPOTHESIS #42)
+Declared: 2026-09-23, before any code for this study existed.
+
+0. CONTEXT
+  - First EURUSD D1 (daily-horizon) study; prior EURUSD work (#34/#35/#36/#38)
+    was intraday. Classic Donchian-20 breakout with Wilder-ATR trailing stop
+    (trend-following archetype at the daily horizon). Null result
+    pre-accepted as a complete deliverable.
+
+1. DATA
+  1.1 Tape: data/results/eurusd_onboarding/eurusdtick_d1.csv (1,748 D1 bars,
+      2020-01-02 .. 2026-09-18, strict Forex (D-1 17:00, D 17:00] ET close
+      convention, verified onboarding artifact). Sorted chronologically by
+      date; pips convention 1 pip = 0.00010.
+
+2. STATE MACHINE (CAUSAL INDICATORS)
+  2.1 Donchian-20 at day t: max High and min Low over the STRICTLY PRIOR 20
+      bars [t-20, t-1]; day t is never included (no lookahead).
+  2.2 ATR: classic Wilder recursion. TR_i = max(H_i - L_i, |H_i - C_{i-1}|,
+      |L_i - C_{i-1}|), TR_1 = H_1 - L_1; ATR_14 = mean(TR_1..TR_14);
+      ATR_i = (13*ATR_{i-1} + TR_i)/14 for i > 14. ATR_i is the value
+      through completed bar i (causal).
+  2.3 Warmup: signals armed from bar index 21 onward (21-day warmup per
+      tasking; covers the 20-bar Donchian and the 14-bar ATR seed).
+
+3. SIGNAL GENERATION (MOMENTUM BREAKOUT)
+  3.1 LONG: Close_t > DonchianHigh_t. SHORT: Close_t < DonchianLow_t.
+  3.2 Execution cap: at most ONE open trade at a time; signals firing while
+      a trade is open are ignored (counted in the funnel, no queueing);
+      while flat, the first signal triggers entry at the Open of day t+1
+      (no t+1 bar -> no-entry drop).
+  3.3 Initial stop: LONG SL = entry_open - 2.0*ATR_t; SHORT SL =
+      entry_open + 2.0*ATR_t, with ATR_t the signal day's completed-ATR
+      (known before the t+1 open).
+
+4. EXCURSION WALK AND RISK MANAGEMENT
+  4.1 From entry day E (entry at open): at each walk day i's close, ratchet
+      the stop - LONG: SL = max(prev SL, C_i - 2.0*ATR_i); SHORT:
+      SL = min(prev SL, C_i + 2.0*ATR_i). The first ratchet happens at E's
+      close on top of the initial stop.
+  4.2 Exit check on the FOLLOWING day j: LONG exits if L_j <= SL at the SL
+      price; SHORT exits if H_j >= SL at the SL price. HONEST-FILL RULE
+      (documented deviation from the tasking letter): if day j OPENS beyond
+      the stop (O_j < SL long / O_j > SL short), fill at O_j (gap-through),
+      consistent with the #40 gold convention. Exit day flag STOP / STOP_GAP.
+  4.3 EOD: a trade whose stop is never hit by data end is force-closed at
+      the last bar's close (flag EOD).
+  4.4 MFE/MAE in pips over walk days E..exit day inclusive (entry-day
+      extremes included; the exit day's full bar included as the standard
+      OHLC approximation - intraday exit timing is not observable from D1).
+      Gross exit PnL pips = direction * (exit - entry) * 10000. Pre-cost;
+      the verified 0.3-pip London/NY overlap median spread floor is
+      reported alongside, never netted.
+
+5. GATES (frozen verbatim in GATE_FX_TREND_D1.txt)
+  G-FX1 total executed signals >= 30.
+  G-FX2 aggregate mean MFE > mean MAE (strict, pips).
+  G-FX3 day-block bootstrap (10,000 resamples, block=5 trades, seed
+      20260924) P(mean Gross PnL <= 0) <= 0.20.
+  Operationalization of G-FX3 (frozen here): the tasking's "day-block
+  bootstrap, block=5 trades" is internally mixed; implemented as a
+  moving-block bootstrap over the EXECUTED-TRADE sequence - draw
+  k = ceil(n/5) blocks of 5 consecutive trades with replacement
+  (resampled length k*5 >= n, not trimmed), pooled mean gross PnL per
+  resample, P(mean <= 0) over 10,000 resamples, rng seed 20260924.
+
+6. DELIVERABLES
+  - evaluate/fx_trend_d1_phase1.py, run with project python.
+  - data/results/fx_trend_d1/{SPEC,GATE}_FX_TREND_D1.txt (frozen before any
+    code).
+  - data/results/fx_trend_d1/REPORT_FX_TREND_D1_PHASE1.txt,
+    fx_trend_d1_signals.csv, run_meta.json.
+  - PROGRESS.md entry as Hypothesis #42.
+
+7. HONESTY AND ANTI-LEAK RULES
+  - Causality: Donchian strictly prior; ATR through completed bars only;
+    entries at next-day printed opens; stops move only at completed closes.
+  - No parameter search: window 20, ATR 14, multiple 2.0, single-position
+    cap are frozen archetype values.
+  - MFE/MAE include the exit day's full bar (D1 approximation) - stated,
+    not silently assumed.
+  - Null result is final for this artifact; verdicts quote frozen gates only.

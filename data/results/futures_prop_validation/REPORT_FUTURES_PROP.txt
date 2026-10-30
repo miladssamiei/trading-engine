@@ -1,0 +1,78 @@
+FUTURES PROP VALIDATION PHASE 1 - REPORT
+VERDICT: FAIL
+Bid-only CFD proxy tapes with owner-supplied CME cost floors; no native CME futures data or account-dollar sizing.
+Net Sharpe is unannualized per trade. Guard is per position with distance 6 x entry ATR.
+
+GC / A_KC | 2020-01-01T23:00:00+00:00 to 2026-09-01T20:59:00+00:00 | 2337538 M1 bars
+  Trades 191; net expectancy 7.367971 price units/trade; net total 1407.2824; Net Sharpe 0.09831; MBB p 0.0588; gate PASS
+  Normal stops 180 (initial 2, trailed 178); PROP_LIQUIDATION 11; normal:prop ratio 16.364:1; END 0
+  Candidates 1708; occupancy shadow 1435; cooldown shadow 15; no-real-bar skip 67
+  CFD-to-CME transaction floor saving 0.2800 per trade, 53.4800 total price units (not swap)
+  Annual entry-cohort net: 2020: 21 trades / 97.911, 2021: 26 trades / 2.181, 2022: 33 trades / -107.711, 2023: 32 trades / 77.270, 2024: 30 trades / 39.123, 2025: 31 trades / 429.368, 2026: 18 trades / 869.142
+
+GC / B_DONCHIAN | 2020-01-01T23:00:00+00:00 to 2026-09-01T20:59:00+00:00 | 2337538 M1 bars
+  Trades 563; net expectancy 5.147954 price units/trade; net total 2898.2980; Net Sharpe 0.12501; MBB p 0.0006; gate PASS
+  Normal stops 497 (initial 62, trailed 435); PROP_LIQUIDATION 65; normal:prop ratio 7.646:1; END 1
+  Candidates 2514; occupancy shadow 1893; cooldown shadow 58; no-real-bar skip 0
+  CFD-to-CME transaction floor saving 0.2800 per trade, 157.6400 total price units (not swap)
+  Annual entry-cohort net: 2020: 72 trades / 549.390, 2021: 85 trades / 17.864, 2022: 92 trades / 99.479, 2023: 87 trades / -2.248, 2024: 94 trades / -142.142, 2025: 85 trades / 731.745, 2026: 48 trades / 1644.210
+
+NQ / A_KC | 2020-01-01T00:00:00+00:00 to 2026-09-23T23:59:00+00:00 | 2936100 M1 bars
+  Trades 241; net expectancy -3.728381 price units/trade; net total -898.5397; Net Sharpe -0.01369; MBB p 0.6256; gate FAIL
+  Normal stops 232 (initial 4, trailed 228); PROP_LIQUIDATION 8; normal:prop ratio 29.000:1; END 1
+  Candidates 2085; occupancy shadow 1816; cooldown shadow 7; no-real-bar skip 21
+  CFD-to-CME transaction floor saving 0.6100 per trade, 147.0100 total price units (not swap)
+  Annual entry-cohort net: 2020: 30 trades / -74.102, 2021: 36 trades / -677.464, 2022: 44 trades / -1914.200, 2023: 32 trades / 1276.051, 2024: 34 trades / 2915.552, 2025: 37 trades / 171.003, 2026: 28 trades / -2595.380
+
+NQ / B_DONCHIAN | 2020-01-01T00:00:00+00:00 to 2026-09-23T23:59:00+00:00 | 2936100 M1 bars
+  Trades 894; net expectancy 0.207223 price units/trade; net total 185.2575; Net Sharpe 0.00095; MBB p 0.5163; gate FAIL
+  Normal stops 723 (initial 120, trailed 603); PROP_LIQUIDATION 171; normal:prop ratio 4.228:1; END 0
+  Candidates 3786; occupancy shadow 2623; cooldown shadow 269; no-real-bar skip 0
+  CFD-to-CME transaction floor saving 0.6100 per trade, 545.3400 total price units (not swap)
+  Annual entry-cohort net: 2020: 127 trades / -460.930, 2021: 123 trades / 875.478, 2022: 138 trades / 1411.861, 2023: 140 trades / -893.558, 2024: 131 trades / 4726.426, 2025: 130 trades / -721.193, 2026: 105 trades / -4752.826
+
+ES / A_KC | 2021-01-03T23:00:00+00:00 to 2026-04-30T23:59:00+00:00 | 1791504 M1 bars
+  Trades 167; net expectancy 0.282162 price units/trade; net total 47.1210; Net Sharpe 0.00425; MBB p 0.5055; gate FAIL
+  Normal stops 160 (initial 0, trailed 160); PROP_LIQUIDATION 7; normal:prop ratio 22.857:1; END 0
+  Candidates 1418; occupancy shadow 1172; cooldown shadow 3; no-real-bar skip 76
+  CFD-to-CME transaction floor saving 0.2100 per trade, 35.0700 total price units (not swap)
+  Annual entry-cohort net: 2021: 23 trades / -199.105, 2022: 39 trades / -172.688, 2023: 30 trades / 178.838, 2024: 33 trades / 259.662, 2025: 29 trades / 394.881, 2026: 13 trades / -414.467
+
+ES / B_DONCHIAN | 2021-01-03T23:00:00+00:00 to 2026-04-30T23:59:00+00:00 | 1791504 M1 bars
+  Trades 548; net expectancy -0.215047 price units/trade; net total -117.8457; Net Sharpe -0.00403; MBB p 0.5376; gate FAIL
+  Normal stops 504 (initial 55, trailed 449); PROP_LIQUIDATION 43; normal:prop ratio 11.721:1; END 1
+  Candidates 2639; occupancy shadow 2052; cooldown shadow 39; no-real-bar skip 0
+  CFD-to-CME transaction floor saving 0.2100 per trade, 115.0800 total price units (not swap)
+  Annual entry-cohort net: 2021: 92 trades / 371.004, 2022: 108 trades / 291.860, 2023: 107 trades / -251.905, 2024: 108 trades / 175.842, 2025: 97 trades / -112.060, 2026: 36 trades / -592.587
+
+BTC / A_KC | 2020-01-01T00:00:00+00:00 to 2026-09-23T23:59:00+00:00 | 3260989 M1 bars
+  Trades 184; net expectancy 242.960889 price units/trade; net total 44704.8036; Net Sharpe 0.07818; MBB p 0.1017; gate PASS
+  Normal stops 162 (initial 1, trailed 161); PROP_LIQUIDATION 22; normal:prop ratio 7.364:1; END 0
+  Candidates 1487; occupancy shadow 1228; cooldown shadow 57; no-real-bar skip 18
+  CFD-to-CME transaction floor saving 9.0000 per trade, 1656.0000 total price units (not swap)
+  Annual entry-cohort net: 2020: 29 trades / 8526.178, 2021: 26 trades / 3624.034, 2022: 21 trades / 8954.370, 2023: 27 trades / 11662.304, 2024: 28 trades / 21924.621, 2025: 31 trades / -13445.734, 2026: 22 trades / 3459.031
+
+BTC / B_DONCHIAN | 2020-01-01T00:00:00+00:00 to 2026-09-23T23:59:00+00:00 | 3260989 M1 bars
+  Trades 646; net expectancy -12.413730 price units/trade; net total -8019.2697; Net Sharpe -0.00569; MBB p 0.5829; gate FAIL
+  Normal stops 543 (initial 77, trailed 466); PROP_LIQUIDATION 103; normal:prop ratio 5.272:1; END 0
+  Candidates 2388; occupancy shadow 1659; cooldown shadow 83; no-real-bar skip 0
+  CFD-to-CME transaction floor saving 9.0000 per trade, 5814.0000 total price units (not swap)
+  Annual entry-cohort net: 2020: 107 trades / 6095.368, 2021: 99 trades / 2006.755, 2022: 95 trades / -7615.276, 2023: 90 trades / -2933.651, 2024: 95 trades / 14566.914, 2025: 97 trades / -16386.574, 2026: 63 trades / -3752.807
+
+ETH / A_KC | 2020-01-01T00:00:00+00:00 to 2026-09-23T23:59:00+00:00 | 3375260 M1 bars
+  Trades 176; net expectancy 12.709275 price units/trade; net total 2236.8323; Net Sharpe 0.07532; MBB p 0.1440; gate PASS
+  Normal stops 159 (initial 1, trailed 158); PROP_LIQUIDATION 17; normal:prop ratio 9.353:1; END 0
+  Candidates 1478; occupancy shadow 1237; cooldown shadow 47; no-real-bar skip 18
+  CFD-to-CME transaction floor saving 1.2000 per trade, 211.2000 total price units (not swap)
+  Annual entry-cohort net: 2020: 22 trades / 221.007, 2021: 25 trades / 97.109, 2022: 26 trades / 794.992, 2023: 27 trades / 208.528, 2024: 30 trades / -299.373, 2025: 27 trades / 985.776, 2026: 19 trades / 228.793
+
+ETH / B_DONCHIAN | 2020-01-01T00:00:00+00:00 to 2026-09-23T23:59:00+00:00 | 3375260 M1 bars
+  Trades 631; net expectancy 5.495871 price units/trade; net total 3467.8947; Net Sharpe 0.03825; MBB p 0.1273; gate PASS
+  Normal stops 524 (initial 67, trailed 457); PROP_LIQUIDATION 107; normal:prop ratio 4.897:1; END 0
+  Candidates 2386; occupancy shadow 1691; cooldown shadow 64; no-real-bar skip 0
+  CFD-to-CME transaction floor saving 1.2000 per trade, 757.2000 total price units (not swap)
+  Annual entry-cohort net: 2020: 97 trades / 162.875, 2021: 98 trades / 497.013, 2022: 88 trades / 1121.124, 2023: 96 trades / -258.923, 2024: 96 trades / 1055.418, 2025: 94 trades / 1913.460, 2026: 62 trades / -1023.071
+
+TOTAL SWAP FRICTION SAVED VS CFD BASELINE: N/A. The five historical CFD studies do not define comparable overnight swap schedules or contract multipliers. Futures swap is set to zero here; a numeric saving would be fabricated.
+Total modeled round-trip transaction-floor saving across all ten independent runs: 9492.0200 native price units (heterogeneous assets; not a monetary sum).
+This retrospective proxy study has no CME contract rolls, real bid/ask execution, account-wide trailing floor, or walk-forward confirmation. No row constitutes a live-ready result.

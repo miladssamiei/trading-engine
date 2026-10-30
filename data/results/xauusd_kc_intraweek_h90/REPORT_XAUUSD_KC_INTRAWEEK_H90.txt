@@ -1,0 +1,11 @@
+H90 CORRECTED-SOURCE GOLD KC FRIDAY-FLAT - FINAL_FAIL
+Dukascopy BID M1 proxy; user-stated zero swap; news holds allowed. No account orders.
+Frozen source/SPEC/GATE SHA256: a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f / 38d217d29cdcb8c33e5a187fc018cd761acbff51506fe11c66eabeb2ad5457fc / 3d2dad0f5d636ab08d36ec8bf4f373de004bcdb4a9f5a53ba119fc67f624f4d0
+Rows/flat synthetic hours/4h bars: (2337538, 19450, 14611)
+All/OOS trades/unresolved: (249, 102, 60)
+Coverage: {'NONWEEKDAY_OR_LATE_FRIDAY': 631, 'EXECUTED': 249, 'UNRESOLVED_FRIDAY': 60, 'NO_REAL_ENTRY': 12}
+OOS base/stress mean/stress total: (8.372016890799042, 7.712016890799045, 786.6257228615026)
+OOS MBB P(nonpositive): 0.097
+Annual: {"2024": {"n": 39, "stress_sum": -30.020448524775247}, "2025": {"n": 39, "stress_sum": 483.83052061837583}, "2026": {"n": 24, "stress_sum": 332.8156507679016}}
+Gates: {"G-IW1": false, "G-IW2": true, "G-IW3": false, "G-IW4": false, "G-IW5": "NOT_RUN", "G-IW6": false}
+This historical screen uses exposed data and is not independent forward confirmation.

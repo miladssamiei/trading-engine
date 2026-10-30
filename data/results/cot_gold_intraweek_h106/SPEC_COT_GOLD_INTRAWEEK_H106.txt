@@ -1,0 +1,121 @@
+HYPOTHESIS 106: CFTC PRODUCER POSITION CHANGE, GOLD MONDAY TO THURSDAY
+Declared 2026-09-26 before H106 evaluator code or gold returns joined
+to the CFTC signal. A null result is complete. Prior SPEC/GATE/REPORT
+files remain immutable. No account orders are part of this study.
+
+TARGET AND MECHANISM
+The target is the EUR10,000 FTMO 2-Step Swing account. It charges or
+pays swaps, allows news trading and weekend/overnight holds, and has
+5% maximum daily and 10% maximum total floating-equity loss rules.
+The connected FTMO-Demo Free Trial is only a quote/specification proxy.
+Peer-reviewed panel research including gold found that commercial
+net-position increases predict higher next-week commodity returns.
+Gold producers/merchants hedge physical exposure and may supply
+liquidity to trend-following managed money. This is a transfer
+hypothesis, not a claim that the panel result survives FTMO costs.
+
+SOURCES AND TIME OF KNOWLEDGE
+Use only CFTC Disaggregated Futures Only GOLD - COMMODITY EXCHANGE INC.
+contract 088691 from the four official annual text ZIPs in
+data/raw/cftc_gold_cot. Their 2023/2024/2025/2026 SHA256 hashes are
+9FE75DBA0256819D476BB0D01F9E8E5AC6EC2C4390F609A7E3259E85796B79CE,
+5E40F60993120D26C116AB347BEAF93702F5DA60C7BDCCBBEE43CB3D0A91D01A,
+17AC2FEF1B53303D01E486BBF5768A4E062308A3C34A2970871F3EAB89829CBC,
+CA88B14A88386BA250E4C48FA786162566EFEDB3FD5D63C5E87DC49A9DBD39DA.
+Use report date, producer/merchant/processor/user long and short
+positions All, and prior report Open_Interest_All. Do not use CFTC
+Tuesday report date as publication time. Ordinary report availability
+is Friday after the US close; first permitted signal entry is the
+following Monday 09:30 New York. Exclude report dates 2023-01-31
+through 2023-03-14, 2025-01-07, and 2025-09-30 through 2026-01-13,
+all inclusive, due the CFTC's documented publication interruptions.
+If a further documented late release is found before any return run,
+freeze a source-only addendum and exclude it, never backdate it.
+The prior report for a delta may be an excluded report only if it was
+actually published by the current signal's Friday. Missing prior
+report, nonpositive open interest, duplicate contract/date or an
+unresolved publication date means no signal and a source failure.
+
+Use the immutable verified Dukascopy gold BID M1 file
+data/results/xauusd_onboarding/xauusdtick_m1.csv, SHA256
+A8C4C1D6551D27F3796F8D9B88D332172C41C76C151844E759492837152E7B1F.
+Its native end is 2026-09-01. Do not append later chunks. Epoch
+seconds are UTC; convert to America/New_York with zoneinfo. Only
+2023-01-01 through the source end is gated; 2026 is partial.
+
+FROZEN SIGNAL AND EXECUTION PROXY
+For each eligible Tuesday report t, net producer positions N_t equal
+Prod_Merc_Positions_Long_All minus Prod_Merc_Positions_Short_All.
+Q_t=(N_t-N_previous)/Open_Interest_All_previous. Q_t>0 means LONG
+XAUUSD; Q_t<0 means SHORT. Q_t=0 means no trade. No percentile,
+threshold, VIX, gold-price trend, stop, weekday or sign optimization
+is permitted after seeing returns. One candidate position per week.
+Skip a week if its Thursday is US Thanksgiving Day, July 4, January
+1 or December 25, including observed Thursday market closures. All
+other weeks require a real Monday 09:30 NY M1 open in [09:30,09:31)
+and a real Thursday 15:55 NY M1 open in [15:55,15:56). Missing entry
+or required exit is unresolved coverage, never filled synthetically.
+Entry LONG at BID M1 open plus 0.41 gold units; SHORT at BID open.
+Set a hard initial stop 1.5% adverse from executed entry price:
+LONG stop on BID at ASK entry*(1-0.015); SHORT stop on ASK at BID
+entry*(1+0.015). For stop checking, synthetic ASK equals BID+0.41
+at every M1. Scan every real M1 from entry through the scheduled
+Thursday exit. A touched stop fills at the stop or, if the first
+quote of that minute is worse, at that adverse first quote. A stop
+in the scheduled exit minute takes priority. If no stop, exit at
+Thursday 15:55 BID for LONG or ASK for SHORT. Force flat by Thursday;
+no weekend position. Source minutes absent inside a hold are counted
+and reported; a gap over 30 consecutive minutes while the market
+normally trades fails source integrity for that trade. Do not infer
+unobserved stop behavior during such gaps.
+
+COSTS AND RISK PROXY
+Base net gold units per ounce use the entry/exit synthetic BID/ASK,
+FTMO current-snapshot POINTS swap for each crossed broker rollover
+and commission 0.0007% of entry plus exit notional per side. At
+declaration, long swap is -0.83 gold units per normal overnight,
+short swap -0.083; Wednesday is triple. The planned unstopped
+Monday-to-Thursday hold crosses Monday, Tuesday and Wednesday
+rollovers, equivalent to five normal nights. Charge only rollovers
+actually crossed if stopped early. Apply a further 0.41 gold units
+per ounce round trip to every trade for stressed net. Use the 2026
+commission rate even before its 2025-09-29 introduction, an adverse
+historical assumption. Current swap fields are scenarios, not
+historical postings; report both pre-swap and charged results and
+never call the former executable. No financing convention may be
+chosen after returns. Any positive Phase 1 remains provisional until
+FTMO-native Bid/Ask ticks, actual historical cost sensitivity and
+account-level EUR conversion are reconciled in a new Phase 2 SPEC.
+
+INFERENCE AND STOP RULE
+Report source coverage, signed signal counts, net/stressed gold units,
+year totals for complete 2023/2024/2025 and partial 2026, 5-week
+moving-block bootstrap P(mean stressed net<=0) with 10000 draws,
+seed 20260926, and compare with an unconditional Monday-to-Thursday
+long at the same cost stack. Block by chronological calendar week;
+all skipped/unresolved weeks remain on the roster. Gated economic
+sample includes resolved 2023-26 trades only. No parameter fitting,
+alternative sign, post-hoc holiday deletion or post-hoc sample start.
+If any Phase-1 gate fails, write FINAL_FAIL REPORT and stop before
+FTMO-native quote replay or prop simulation. If all Phase-1 gates
+pass, predeclare a separate native-tick/FTMO-account Phase 2 SPEC and
+GATE before any Phase-2 code or runs. Historical Phase 1 on an
+already viewed gold tape is exploratory even when it passes. A
+verified system additionally requires actual FTMO Bid/Ask fills,
+swap/commission/EUR/margin accounting, separate 10%+5% stages,
+floating daily and total floors, and genuinely unseen confirmation.
+
+GATES
+G-H106-1: At least 150 resolved gated trades; at least 97% of planned non-excluded weeks have required real Monday entry and Thursday exit quotes, and no retained trade has a normal-hours M1 gap over 30 consecutive minutes.
+G-H106-2: Stressed mean net gold units per ounce is strictly positive and the 5-calendar-week moving-block bootstrap P(mean stressed net<=0) is at most 0.05.
+G-H106-3: Stressed net gold-unit totals are strictly positive in each complete gated year 2023, 2024 and 2025; partial 2026 is reported but not a gate.
+G-H106-4: The stressed gold-unit mean exceeds an unconditional Monday-to-Thursday long under the same costs by strictly more than zero, with 5-week block-bootstrap P(mean paired difference<=0) at most 0.05.
+G-H106-5: If G-H106-1 through G-H106-4 pass, a separately frozen Phase-2 FTMO-native Bid/Ask, paid-swap, EUR floating-equity and two-stage 180-day challenge replay must pass its own predeclared gates before any paid-account recommendation; otherwise NOT_RUN.
+
+PRIMARY SOURCES
+https://www.cftc.gov/MarketReports/CommitmentsofTraders/HistoricalCompressed/index.htm
+https://www.cftc.gov/MarketReports/CommitmentsofTraders/HistoricalSpecialAnnouncements/index.htm
+https://publicreporting.cftc.gov/stories/s/COT-Help/p2fg-u73y/
+https://www.nature.com/articles/s41599-025-04795-y
+https://ftmo.com/en/trading-objectives/
+https://ftmo.com/en/blog/trading-updates/trading-update-25-sep-2025/

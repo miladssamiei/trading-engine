@@ -1,0 +1,93 @@
+HYPOTHESIS 81: US500 OVERNIGHT GAP TO FIRST-HALF-HOUR REVERSAL
+Declared 2026-09-25 before this hypothesis's code or Phase-1 run.
+
+1. MECHANISM AND SCOPE
+Iwanaga and Sakemoto, Does overnight return predict the first half-hour
+return for U.S. market indices?, North American Journal of Economics
+and Finance 86 (September 2026), article 102707,
+https://doi.org/10.1016/j.najef.2026.102707, report a negative relation
+between overnight SPY return and the next first-half-hour return. They
+also report that the relation weakened after the 2010s. This study
+tests one deliberately simple high-gap CFD translation, not their
+exact ETF investment strategy or a claimed CFD replication. It is
+distinct from prior US500 ORB, noise-area momentum and closing-drift
+studies. Prior US500 test years have been seen by this project, so even
+a PASS is selected historical evidence, not untouched out-of-sample
+or live proof. A null result is a complete deliverable.
+
+2. SOURCE AND CLOCK
+Only verified native-tick-derived BID M5 input
+data/results/orb_2021_present/us500tick_m5.csv, SHA256
+a8ee68f1a0010a1be9704c0d59fd5382aa798846cdae4d519b799ae21ec66c2d.
+Epoch seconds UTC to America/New_York wall time with DST. A valid cash
+date has one real 09:30 M5 bar and one real 15:55 M5 bar. Cash close is
+the latter bar's BID close. Gap on date d is today's real 09:30 BID
+open minus the immediately preceding valid cash date's 15:55 BID close.
+Require all six real M5 bars 09:30..09:55 and a real 10:00 M5 bar for
+the trade. Reject duplicate clock bars, nonfinite/nonpositive prices,
+or impossible OHLC. Holidays and missing bars do not get synthetic
+fills. Prior valid cash dates, not calendar days, define rolling inputs.
+
+3. SIGNAL, STOP, EXIT AND COST
+At the 09:30 NY open, use the 20 preceding valid cash dates only.
+Threshold is their median absolute overnight cash gap. Trade if
+abs(today gap) is strictly greater than this threshold and gap is
+nonzero. Gap up => SELL; gap down => BUY. If any prior gap required for
+the 20-date window is unavailable, skip. Initial stop distance D is
+the median of the same 20 prior dates' first-half-hour real M5
+high-max minus low-min across 09:30..09:55. Require each of those 20
+prior dates to have all six real bars and D>0. No parameter search,
+volatility regime, weekday, news or side filter.
+
+Enter at today's 09:30 BID open (BUY ASK modeled as BID+0.51). Long
+stop is entry BID-D; short stop is entry BID+D-0.51, triggered by
+ASK= BID+0.51 reaching entry BID+D. Examine each real M5 bar including
+the entry bar. On a stop, fill at the worse of stop level or that
+bar's open, accounting for an adverse gap; SELL exit ASK adds 0.51.
+No TP, trailing stop, re-entry or same-day second trade. If still
+open, exit at the 10:00 real BID open (SELL exit ASK=BID+0.51). Report
+gross directional BID points; net after 0.51 total round-trip spread;
+stress net after another 0.51. One position max; no financing.
+M5 OHLC cannot establish actual order fill, variable spread or intra-
+bar gap path. A historical PASS only licenses a separately declared
+Model=4 real-tick order study and actual FTMO-feed validation.
+
+4. PARTITION, INFERENCE AND CHALLENGE PACE
+2021-2023 is descriptive; 2024-01-01 through 2026-04-30 gated. Use
+10,000 NY-date bootstrap resamples of gated net mean, seed 20261016.
+Report both complete 2024 and 2025 net totals. Separately simulate
+every gated entry date with a complete next 180 calendar days. Each
+trade's fixed dollar planned risk is $100 (1% of initial $10,000):
+position units=$100/D, fractional lots assumed. Actual stopped loss
+can exceed $100 from a gap. No compounding. At each trade, track worst
+M5 BID low for BUY or worst BID high+0.51 for SELL before exit,
+translated to floating equity. Start $10,000, static equity floor
+$9,000, and daily equity floor=prior Prague-midnight balance-$500.
+Pass at first closed balance >=$11,000 after >=4 distinct Prague entry
+days, provided floors never breached first. An eligible start must
+have 180 calendar days of source follow-up before 2026-04-30. Report
+pass, breach, timeout counts; this remains an optimistic CFD/FTMO
+proxy because fractional lots and actual FTMO feed/margin/fills are
+unknown. The 180-day horizon operationalizes the owner's desire not
+to wait 8-9 months. It is a research screen, not a firm rule.
+
+5. VERBATIM PHASE-1 GATES
+G-OG1: At least 150 executed gated trades on at least 150 distinct New York cash dates with complete real entry, path and exit M5 bars.
+G-OG2: Strictly positive gated mean US500 points per trade after the 0.51 spread proxy and an additional 0.51 cost stress.
+G-OG3: New York date bootstrap P(mean base 0.51-cost net <= 0) at most 0.01, 10000 resamples, seed 20261016.
+G-OG4: Strictly positive base 0.51-cost net US500 point totals in each complete gated calendar year 2024 and 2025.
+G-OG5: Every executed trade is same-New-York-day, enters at 09:30, exits no later than 10:00, and has a strictly positive causal initial stop distance.
+G-OG6: In the gated 180-calendar-day first-Challenge proxy at fixed 1% planned risk, at least 70% of eligible starts pass and at most 10% breach an equity floor.
+All six required for Phase-1 PASS; a FAIL is final for this exact
+artifact. G-OG6 is a pace diagnostic if economic gates fail, not a
+way to rescue them. No post-hoc threshold, timing, side, stop, size
+or year change to this artifact.
+
+6. STOP RULE AND OUTPUTS
+Save all eligible-date signals/skips, trade CSV, source hash, annual
+statistics, bootstrap, pace tally, metadata and immutable REPORT.
+If any gate fails, do not run MT5 Phase 2 for this rule. On PASS,
+freeze a separate Model=4 real-tick execution SPEC/GATE before EA or
+tester work, then require FTMO account costs and floating-risk proof.
+Append SPEC/GATE, run and verdict stages to PROGRESS.md. Never alter
+any existing frozen SPEC/GATE/REPORT.

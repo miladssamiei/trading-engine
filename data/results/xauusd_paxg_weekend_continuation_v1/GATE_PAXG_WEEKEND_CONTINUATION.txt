@@ -1,0 +1,4 @@
+G-PW1: At least 150 executed gated 2023-2026 Sundays, each with a causal nonzero PAXG signal and exact 18:30/23:30 real XAUUSD BID bars.
+G-PW2: The gated mean net gold units remain strictly positive after the base 0.41 spread proxy and an additional 0.41 execution stress.
+G-PW3: The 10000-resample Sunday-date bootstrap P(mean base net <= 0) is at most 0.05 with seed 20261010.
+G-PW4: Base 0.41-cost net gold-unit totals are strictly positive in each complete gated year 2023, 2024 and 2025.

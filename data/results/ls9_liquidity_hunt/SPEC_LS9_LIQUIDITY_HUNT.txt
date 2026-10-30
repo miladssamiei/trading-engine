@@ -1,0 +1,124 @@
+SPEC_LS9_LIQUIDITY_HUNT
+Study dir: data/results/ls9_liquidity_hunt/
+Pre-declared: 2026-09-21, BEFORE any script for this study exists.
+Hypothesis number: #29 (owner-tasked; mechanical interpretation of the LS7/LS9
+"Liquidity Hunt" video rules; Phase-1 MFE/MAE signal-quality screen ONLY - the
+intraday pattern families closed_signal_families list is NOT reopened by this
+screen; a PASS here only records descriptive excursion statistics).
+
+SECTION 0. SCOPE AND STATUS
+
+0.1 This is a Phase-1 signal-quality measurement (MFE/MAE excursion study) of
+a video-specified setup: liquidity-sweep candles at prior swing highs/lows on
+the USA30 M15 tape. No trade simulation, no costs, no walk-forward, no Phase
+2 authorization. Null results are complete deliverables.
+0.2 downstream_model_allowed=false, live_execution_allowed=false regardless
+of verdict. USA30 carries the 2.28 pt verified RT spread; any future
+execution study must clear it - this screen measures raw excursions only.
+
+SECTION 1. DATA SOURCING AND PREPARATION
+
+1.1 Tape: data/results/usa30_onboarding/usa30tick_m5.csv (verified Dukascopy
+USA30 M5, epoch-UTC). Window: STRICTLY 2025-07-01 00:00 UTC .. 2026-09-01
+00:00 UTC (the 100%-covered onboarding-audit window). The runner verifies
+first/last bar inside the window and reports bar counts.
+1.2 Aggregation M5 -> M15: epoch floor to 900 s buckets; open = first,
+high = max, low = min, close = last of the bucket's M5 bars. Buckets with no
+M5 bars do not exist (no gap filling); buckets with 1-2 bars are kept and
+their count distribution is reported. Bars sorted, duplicate epochs dropped.
+1.3 Session (video: 12:00-19:45 Iran Time; Iran is permanently UTC+3:30):
+setup candles are evaluated only if the M15 bar OPEN time is within
+[08:30, 16:15) UTC. Swing tracking and ATR run on the FULL continuous M15
+tape (all hours).
+1.4 ATR: 14-period Wilder ATR on the M15 tape: TR[0] = high-low;
+ATR[13] = mean(TR[0..13]); ATR[i] = (13*ATR[i-1] + TR[i]) / 14. The signal
+bar t uses ATR through bar t inclusive (normalization only).
+
+SECTION 2. STATE MACHINE - SWING HIGHS AND LOWS
+
+2.1 Definitions (strict inequalities; a doji Close == Open is NEITHER green
+nor red and breaks both patterns): bar is green if Close > Open, red if
+Close < Open.
+2.2 A Swing High forms at bar i when bar i-1 is green and bar i is red;
+level = max(High[i-1], High[i]). A Swing Low forms at bar i when bar i-1 is
+red and bar i is green; level = min(Low[i-1], Low[i]).
+2.3 Invalidation (breakout): a Swing High is invalid once any subsequent
+bar CLOSES strictly above its level; a Swing Low once any bar CLOSES
+strictly below its level. Invalidation is checked from bar i+1 onward
+(bar i's own close cannot exceed its level by construction).
+2.4 Tracking and ORDER OF OPERATIONS at each bar i: (a) FIRST evaluate the
+trigger with the swing lists as valid at the close of bar i-1 (a level must
+be intact when price returns to it - the LS candle's own close can break
+the level AFTER the sweep is counted); (b) THEN update the lists with bar
+i: append swings formed at i, remove swings invalidated by Close[i], trim
+each side to the 3 MOST RECENTLY FORMED valid swings.
+2.5 The swept swing must be strictly previously established: it is in the
+bar-(i-1) list, i.e. formed at a bar < i. The LS candle itself is never its
+own swept swing.
+
+SECTION 3. THE LS SETUP CANDLE (TRIGGER)
+
+At each session bar t compute Body = abs(Close-Open), UpperWick =
+High - max(Close,Open), LowerWick = min(Close,Open) - Low.
+3.1 Bearish (short signal): UpperWick > Body AND UpperWick > LowerWick AND
+LowerWick <= 7*Body AND High[t] >= level of at least one valid Swing High
+in the tracked 3-list.
+3.2 Bullish (long signal): LowerWick > Body AND LowerWick > UpperWick AND
+UpperWick <= 7*Body AND Low[t] <= level of at least one valid Swing Low in
+the tracked 3-list.
+3.3 The two shapes are mutually exclusive (wick dominance). One signal per
+bar at most. Recorded per signal: swept level (most recently formed swept
+swing), number of swept levels, direction, ATR14[t].
+
+SECTION 4. EXCURSION WALK (MFE/MAE)
+
+4.1 Entry price = exact Open of bar t+1.
+4.2 Walk forward over M15 bars j from t+1 while OpenTime[j] < 20:00 UTC of
+the signal's UTC date (16:00 NY-class end-of-day). The 19:45 bar (closing
+20:00) is included; the 20:00 bar is not.
+4.3 Long: MFE = max(High[j]) - entry; MAE = entry - min(Low[j]). Short:
+MFE = entry - min(Low[j]); MAE = max(High[j]) - entry. All in raw points,
+then normalized: MFE_atr = MFE / ATR14[t], MAE_atr = MAE / ATR14[t].
+4.4 Signals whose entry bar opens at/after 20:00 UTC of the signal date, or
+with no walkable bars (tape edge), are dropped from the analysis set and
+counted in the funnel (they have no excursion by construction).
+
+SECTION 5. GATES (verbatim in GATE_LS9_LIQUIDITY_HUNT.txt)
+
+G-A1 SAMPLE SIZE: total excursion-valid signals >= 150.
+G-A2 EXCURSION EDGE: for every threshold tau in {0.5, 0.75, 1.0} ATR and
+for the aggregate set AND each direction separately:
+mean(max(MFE_atr - tau, 0)) > mean(max(MAE_atr - tau, 0)).
+(9 comparisons; all must hold.)
+G-A3 DAY-BLOCK BOOTSTRAP: 10,000 resamples (numpy default_rng(20260921))
+of UTC-date blocks with replacement over the aggregate signal set; the
+fraction of resamples with mean(MFE_atr - MAE_atr) <= 0 must be <= 0.20.
+OVERALL: PASS iff G-A1..G-A3 all PASS. PASS is a descriptive screen pass
+ONLY (in-sample, single window, no costs, no walk-forward); FAIL is final
+for this artifact.
+
+SECTION 6. HONESTY RULES
+
+6.1 MFE and MAE are NOT simultaneously achievable (no exit logic exists);
+raw excursions overstate any tradable edge. USA30's 2.28 pt RT spread is
+NOT subtracted anywhere in this screen.
+6.2 All mechanical choices are declared: doji handling (2.1), trigger-then-
+update order (2.4), 3-swing recency cap, strict inequalities, the [08:30,
+16:15) UTC session, the 20:00 UTC walk bound, dropped no-walk signals (4.4).
+6.3 Single window (2025-07..2026-08), in-sample, no multiple-testing
+correction beyond the declared grid; no re-opening of closed families; no
+live or downstream authorization.
+
+SECTION 7. ARTIFACTS (data/results/ls9_liquidity_hunt/)
+
+  SPEC_LS9_LIQUIDITY_HUNT.txt / GATE_LS9_LIQUIDITY_HUNT.txt (frozen before code)
+  ls9_phase1_signals.csv        (every signal: time, dir, entry, ATR14,
+                                 swept level/count, walk bars, MFE/MAE pts
+                                 and ATR-normalized, UTC date)
+  REPORT_LS9_PHASE1.txt         (funnel: bars -> swings -> LS candles ->
+                                 session signals -> excursion-valid signals;
+                                 raw point and ATR-normalized MFE/MAE tables;
+                                 threshold table; bootstrap; gates)
+  run_meta.json                 (machine-readable summary)
+
+END OF SPEC. FROZEN 2026-09-21.

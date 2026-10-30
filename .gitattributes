@@ -1,0 +1,3 @@
+# Preserve research-source and frozen-record bytes across platforms.
+# Several MQL5 sources use UTF-16; manifests validate exact file hashes.
+* -text

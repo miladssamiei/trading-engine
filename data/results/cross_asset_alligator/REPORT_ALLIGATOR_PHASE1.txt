@@ -1,0 +1,88 @@
+REPORT - HYPOTHESIS #49: ALLIGATORAI TREND STRATEGY (4h anchor / 1h execution / fixed 1:1 ATR bracket)
+Generated: 2026-09-23T22:02:48.177655+00:00  |  OVERALL VERDICT: FAIL
+Mechanics: 1h Alligator(5/8/13, shifts 3/5/8, SMMA of median) alignment + close vs Lips, 4h Alligator
+alignment + close vs 4h EMA100, momentum gate ADX(14)>30 + CMO(14)>+/-20 + StochRSI_K(14,14,3) beyond
+80/20; entry at 1h signal-bar open; fixed bracket SL/TP = +/-2.0*ATR1h(t-1) (1:1); honest gap fills;
+worst-case same-bar default to SL; continuous forward-filled 1h/4h grid per SPEC_ALLIGATOR.txt.
+
+=== US500 (cost floor 0.51 points RT) ===
+1. DATA: 1791504 M1 rows -> 46633 1h bars (15251 synthetic = 32.7%) / 11659 4h bars, 2021-01-03 18:00:00 .. 2026-04-30 19:00:00
+   tape sha256 29ad8f8b25b43be4...
+2. FUNNEL: armed bars=35754  1h-trend L/S=11883/8039
+   +4h-trend L/S=6861/3084  +momentum (candidates) L/S=374/175
+   ignored-while-open=549  EXECUTED=224
+3. NET ECONOMICS (points): mean=-1.760/trade  median=8.404  total=-394.3  win=52.2%  Net Sharpe=-1.063
+   excursion asymmetry: mean MFE=17.91 vs mean MAE=21.15  (MFE/MAE=0.85)
+   sides: LONG: n=149 mean=1.11  SHORT: n=75 mean=-7.45
+   exit mix: {'TP': 116, 'SL': 106, 'TP_GAP': 1, 'SL_GAP': 1}
+   year-by-year net:
+      2021: n=  39  total=     -42.9  mean=  -1.101
+      2022: n=  34  total=    -141.9  mean=  -4.173
+      2023: n=  51  total=     171.9  mean=   3.370
+      2024: n=  45  total=     -64.8  mean=  -1.440
+      2025: n=  44  total=    -150.6  mean=  -3.423
+      2026: n=  11  total=    -166.0  mean= -15.087
+4. GATES (independent, frozen in GATE_ALLIGATOR.txt):
+   G-ALI1 executed >= 30          :   224          -> PASS
+   G-ALI2 Net Sharpe > 0           :    -1.063    -> FAIL
+   G-ALI3 MBB P(mean<=0) <= 0.20   :    0.8356    -> FAIL  (block=5, 10000 resamples, seed 20260927)
+   US500 VERDICT: FAIL
+
+=== EURUSD (cost floor 0.3 pips RT) ===
+1. DATA: 2490896 M1 rows -> 58847 1h bars (17098 synthetic = 29.1%) / 14713 4h bars, 2020-01-01 17:00:00 .. 2026-09-18 16:00:00
+   tape sha256 e578692f3b02d985...
+2. FUNNEL: armed bars=45957  1h-trend L/S=11687/12801
+   +4h-trend L/S=5714/6258  +momentum (candidates) L/S=268/250
+   ignored-while-open=518  EXECUTED=229
+3. NET ECONOMICS (pips): mean=-0.067/trade  median=10.140  total=-15.3  win=50.2%  Net Sharpe=-0.034
+   excursion asymmetry: mean MFE=26.01 vs mean MAE=24.01  (MFE/MAE=1.08)
+   sides: LONG: n=116 mean=-2.74  SHORT: n=113 mean=2.68
+   exit mix: {'TP': 114, 'SL': 112, 'SL_GAP': 2, 'TP_GAP': 1}
+   year-by-year net:
+      2020: n=  39  total=     -77.1  mean=  -1.977
+      2021: n=  30  total=      44.3  mean=   1.476
+      2022: n=  38  total=     167.8  mean=   4.416
+      2023: n=  33  total=    -140.0  mean=  -4.242
+      2024: n=  33  total=     -24.3  mean=  -0.735
+      2025: n=  32  total=      34.5  mean=   1.077
+      2026: n=  24  total=     -20.5  mean=  -0.854
+4. GATES (independent, frozen in GATE_ALLIGATOR.txt):
+   G-ALI1 executed >= 30          :   229          -> PASS
+   G-ALI2 Net Sharpe > 0           :    -0.034    -> FAIL
+   G-ALI3 MBB P(mean<=0) <= 0.20   :    0.5269    -> FAIL  (block=5, 10000 resamples, seed 20260927)
+   EURUSD VERDICT: FAIL
+
+=== XAUUSD (cost floor 0.41 price units RT) ===
+1. DATA: 2337538 M1 rows -> 58438 1h bars (19450 synthetic = 33.3%) / 14611 4h bars, 2020-01-01 18:00:00 .. 2026-09-01 16:00:00
+   tape sha256 a8c4c1d6551d27f3...
+2. FUNNEL: armed bars=44905  1h-trend L/S=13688/10472
+   +4h-trend L/S=7543/4489  +momentum (candidates) L/S=428/241
+   ignored-while-open=669  EXECUTED=265
+3. NET ECONOMICS (price units): mean=0.477/trade  median=3.629  total=126.3  win=50.6%  Net Sharpe=0.328
+   excursion asymmetry: mean MFE=15.10 vs mean MAE=15.84  (MFE/MAE=0.95)
+   sides: LONG: n=175 mean=1.01  SHORT: n=90 mean=-0.56
+   exit mix: {'TP': 131, 'SL': 131, 'TP_GAP': 3}
+   year-by-year net:
+      2020: n=  44  total=     -11.6  mean=  -0.264
+      2021: n=  30  total=     -80.3  mean=  -2.675
+      2022: n=  37  total=     -33.8  mean=  -0.915
+      2023: n=  38  total=     -30.3  mean=  -0.798
+      2024: n=  36  total=    -128.3  mean=  -3.563
+      2025: n=  44  total=     230.9  mean=   5.247
+      2026: n=  36  total=     179.7  mean=   4.993
+4. GATES (independent, frozen in GATE_ALLIGATOR.txt):
+   G-ALI1 executed >= 30          :   265          -> PASS
+   G-ALI2 Net Sharpe > 0           :     0.328    -> PASS
+   G-ALI3 MBB P(mean<=0) <= 0.20   :    0.4543    -> FAIL  (block=5, 10000 resamples, seed 20260927)
+   XAUUSD VERDICT: FAIL
+
+OVERALL VERDICT: FAIL (requires all three instruments to pass G-ALI1..G-ALI3 independently)
+
+HONESTY NOTES
+- Continuous forward-fill convention: synthetic flat bars fill no-tick minutes, maintenance breaks, holidays
+  and weekends; CMO/StochRSI go undefined on flat windows (killing weekend signals), SMMA flattens toward the
+  last close, and Wilder ATR/ADX decay across long gaps - declared consequences of the continuity convention
+  (SPEC 2.2/9.3), not post-hoc fixes.
+- Single pre-declared parameterization (owner-supplied); no optimization, no re-runs; sides, years and
+  instruments reported as run. Phase-1 screen is in-sample by construction; MFE/MAE are exploratory
+  descriptors, never results. Phase 2 (MT5 execution) only on overall PASS; any FAIL is final here.

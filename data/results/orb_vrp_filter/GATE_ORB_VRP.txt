@@ -1,0 +1,15 @@
+GATE FILE: VRP-CONDITIONED ORB - PHASE 1
+Frozen 2026-09-21 BEFORE evaluate/orb_vrp_filter_phase1.py existed.
+
+G-VRP1: At least one positive VRP filter arm (A, B, or C) retains >= 100 trades.
+
+G-VRP2: The best passing arm's Net Sharpe Ratio is strictly > the Baseline ORB Net Sharpe Ratio.
+
+G-VRP3: The best passing arm's Win Rate is strictly > the Baseline ORB Win Rate.
+
+Pre-declared mechanical interpretation (frozen together with the gates):
+- Passing arm = arm in {A, B, C} with >= 100 joined trades; Arm D (bottom-50% inverted control) is never a passing arm.
+- Best passing arm = qualifying arm with the highest Net Sharpe (mean(net)/std(ddof=1)*sqrt(252) on the per-trade net series, net = gross - 0.51 pt); ties broken toward the larger trade count.
+- Baseline = the inner-join ORB book over the joined timeframe (2022-01-04..2026-04-22); the warmup-matched baseline (same dates as the arms, post-252-day warmup) is reported descriptively only.
+- Win Rate = share of trades with net > 0.
+- OVERALL PHASE-1 PASS = G-VRP1 AND G-VRP2 AND G-VRP3.

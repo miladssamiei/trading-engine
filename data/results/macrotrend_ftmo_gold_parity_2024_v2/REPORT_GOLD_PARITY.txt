@@ -1,0 +1,18 @@
+FTMO GOLD EA VS INDEPENDENT PYTHON PARITY AUDIT
+Gate verdict: FAIL
+G1 broker H1 and tester snapshots: PASS; 16181 H1 bars 2024-01-02 01:00:00 to 2026-09-24 23:00:00
+G4 exact tick entry and stop-exit parity: UNTESTED (broker M1/tick history incomplete)
+Scope: 2024 Python signal baseline; 2025-2026 v1.01 Gold A and B tester comparison.
+Journal events are matched to their enclosing server H1 candle.
+
+Engine A: 2024 Python signals 194; 2025-26 raw Python signals 440; MT5 OPEN 23; min-lot skips 265; ratchets 324.
+  Unmatched or wrong-stop OPEN 0; unmatched skips 0; ratchet mismatches 0; G2/G3 PASS.
+Engine B: 2024 Python signals 392; 2025-26 raw Python signals 764; MT5 OPEN 106; min-lot skips 248; ratchets 836.
+  Unmatched or wrong-stop OPEN 0; unmatched skips 0; ratchet mismatches 1; G2/G3 FAIL.
+
+Total event divergences: 1
+  B 2025-04-07 04:00:00 RATCHET: logged SL=3034.29, predicted SL=3034.31; CS	0	18:37:15.600	MacroTrendEnsemble_FTMO (XAUUSD,H1)	2025.04.07 04:00:00   MTE: ratcheted ticket=54 SL 3047.60000000 -> 3034.29000000
+
+Interpretation: Raw Python signals include occupied/broker-blocked cases; compare logged OPEN and volume skips to raw signals, not raw signal count to trade count.
+The tester journal reported discarded real ticks due M1 price mismatch. This audit cannot validate actual fill prices, intraminute stops, PnL, or live profitability.
+No historical SPEC/GATE/REPORT was edited. Input snapshot hashes are in audit_metadata.json.

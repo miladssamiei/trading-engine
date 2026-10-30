@@ -1,0 +1,6 @@
+G-HV1: At least 150 gated signals and executed/marked trades on at least 150 distinct London dates, zero missing next-bar entries after a signal and zero unresolved exits.
+G-HV2: Strictly positive mean extra-0.41-cost-stressed net gold units per gated trade.
+G-HV3: London-date bootstrap P(mean base net <= 0) at most 0.05, 10000 samples, seed 20260927.
+G-HV4: Strictly positive base net gold-unit totals in each gated year 2025 and partial 2026.
+G-HV5: At least 150 fully observed rolling paid 90-calendar-day starts and one predeclared risk row with pass rate at least 0.70 and breach rate at most 0.10.
+G-HV6: Every executed trade is flat on its entry Europe/Prague date, with positive entry-stop distance, target above entry Ask, and verified immutable native target-broker source hash/clock/coverage.

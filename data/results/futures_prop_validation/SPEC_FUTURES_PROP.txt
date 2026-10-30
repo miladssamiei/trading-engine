@@ -1,0 +1,67 @@
+FUTURES PROP VALIDATION PHASE 1 - PREDECLARED SPEC
+Date: 2026-09-26. New diagnostic study; historical H54/H55/H57/H58 records remain frozen.
+
+DATA: Use the existing bid-only M1 proxy tapes: XAUUSD -> GC, USTECH -> NQ,
+US500-tick -> ES, BTCUSD -> BTC, ETHUSD -> ETH. All available rows are used.
+The ES tape begins 2021-01-03 and ends 2026-04-30; the others begin in 2020.
+These are not CME futures market data. Contract rolls, basis, actual CME
+bid/ask, commission posting and fill queue cannot be reconstructed.
+
+COSTS: Exact owner-supplied round-turn floors, in native price units, embedded
+once in fills: GC 0.13, NQ 0.39, ES 0.30, BTC 6.0, ETH 0.8. Long entry is
+bid-proxy open + cost and exit bid; short entry is bid-proxy open and exit is
+bid-proxy exit + cost. Overnight swap is zero. One unit of price exposure per
+instrument; no dollar or contract-size claim is made.
+
+ENGINE A: H54/H55 KC mechanics on each tape: continuous epoch 1H grid with
+fieldwise forward fill, NY wall 4H execution buckets and 17:00 NY D1 anchors.
+Prior 4H close breaks EMA29 +/- 2.77 Wilder ATR29; last strictly completed D1
+close is above/below EMA50. Enter next 4H open. Initial stop is entry minus/
+plus max(abs(entry - prior EMA29), 1.5 * prior ATR29). At each completed 4H
+close, after exit checks, ratchet to current EMA29. One position per engine.
+
+ENGINE B: H57/H58 mechanics: continuous epoch 1H execution grid and NY wall 4H
+anchor grid, both starting at first real bucket and fieldwise forward filled.
+Prior 1H close breaks Donchian20 from t-2; last completed 4H Supertrend(10,3)
+agrees; prior ADX14 >= 20. Enter next REAL 1H open. Initial stop is open
+minus/plus 4 * prior 1H ATR14. After each completed REAL 1H close, ratchet
+to close minus/plus 4 * current ATR14. No entry or ratchet on filled 1H bars.
+
+EXECUTION: Only real M1 minutes can execute. Stops use the same bid/ask proxy
+and adverse gap rules as the parent SPECs. Stop checks occur on M1 bars at
+the standing higher-timeframe stop level; higher-timeframe ratchets happen
+only after the relevant completed bar. On an M1 bar, stop touch takes priority
+over a prop-close breach because the unknown intraminute high/low order cannot
+be recovered. Entry-bar stops are possible. Last open position exits at last
+M1 close. Signals during occupancy or cooldown are discarded. No re-entry in
+the higher-timeframe bar containing an exit.
+
+PROP GUARD: For each position separately, entry equity = zero net PnL and
+Peak_Open_Equity tracks the maximum marked-to-market net open PnL using every
+M1 favorable high/low. The frozen liquidation distance for that position is
+6.0 * Entry_ATR (prior completed execution ATR; ATR29 for A, ATR14 for B).
+At every M1 close, if open net PnL <= Peak_Open_Equity - distance, liquidate
+at that M1 close as PROP_LIQUIDATION. Its exit starts a 24-hour UTC cooldown;
+signals until exit_epoch+86400 inclusive are shadowed. A and B run separately;
+each mapped asset runs separately. This is a per-position proxy to the named
+prop rule, not an account-wide Apex dollar threshold. The user-specified
+ATR distance is in price units and cannot represent account dollars without
+contract size and sizing rules.
+
+STATISTICS AND GATE: For each asset and engine independently, report all
+executed full-tape trades, mean net price-unit expectancy, per-trade Net
+Sharpe = mean/std(ddof=1) (unannualized), and moving-block bootstrap
+P(mean net <= 0): 10,000 resamples, 5-trade blocks, seed 20260926. The
+predeclared gate requires >=30 trades, Net Sharpe > 0 and MBB p <= 0.20.
+Overall PASS requires all ten asset-engine rows pass. CAL 2020-23/OOS 2024+
+and annual results are diagnostics, not gates. No optimization or variant
+selection. A FAIL is final for this artifact. A PASS is still a proxy,
+in-sample result and does not authorize live trading.
+
+REPORT: Include stop versus prop exit counts and ratio, net expectancy,
+coverage and annual signs. The historical CFD floors are GC .41, NQ 1.0,
+ES .51, BTC 15, ETH 2. Their difference from the new floors is a transaction
+cost saving, not a swap saving. Historical swap schedules for all five
+products are not defined in the source studies; total swap friction saved is
+not identifiable and must be reported as N/A, never conflated with cost
+floor savings. Save a trade ledger and run metadata. SPEC/GATE are immutable.

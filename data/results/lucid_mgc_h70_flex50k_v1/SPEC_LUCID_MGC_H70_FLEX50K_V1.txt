@@ -1,0 +1,71 @@
+LUCID MICRO GOLD H70 50K FLEX - PREDECLARED TRANSFER SPEC
+Date: 2026-09-26. Written before this evaluator or its output.
+
+OBJECTIVE AND STATUS
+Diagnose whether the frozen H70 same-day gold signal has sufficient dollar
+pace at 1 or 2 MGC contracts for a hypothetical Lucid 50K Flex evaluation.
+This is a retrospective CFD-to-futures transfer, not a new validated signal,
+CME backtest, account recommendation or correction to H70's immutable FAIL.
+
+FROZEN SIGNAL AND DATA
+H70 uses a completed NY-wall 4H Supertrend(10,3), 1H Donchian(20) breakout,
+Wilder ADX14>=20, an initial/trailing 4xATR14 stop, and a 15:59 New York
+same-day flat order. Use the 321 2024-01 through 2026-09 native Dukascopy
+gold Bid/Ask quote-path rows in the frozen
+data/results/xauusd_saleh_floating_pace_audit_v1/native_worst_trades.csv.
+Require exactly the same 321 rows as the H70 15:59 quote trade ledger.
+One 2024-02-14 required exit is UNRESOLVED_EXIT_MARK; do not assign it a
+tradeable fill. Any rolling window that includes this row is INVALID_SOURCE,
+not a pass, breach or timeout. The unresolved exit fails coverage G1 for the
+overall artifact. All exits must be same NY weekday before 16:45 NY.
+
+FUTURES COST AND CONTRACT SCENARIOS
+Lucid 50K Flex: $50,000 start, $53,000 profit target, $2,000 EOD trailing
+loss locked at $50,100 once EOD balance exceeds $52,100, 50% largest positive
+day/account profit consistency, no optional DLL, 40-micro max. MGC = 10 troy
+ounces, $0.10/oz tick, Lucid listed commission $0.80/side. One-tick spread
+plus both commissions = $2.60/contract = 0.26 gold units per MGC round trip.
+No exchange fee beyond Lucid's listed commission and no slippage is assumed.
+This is an unobserved cost floor.
+
+Run the entire fixed grid, no row selection as proof:
+  1 MGC, midpoint gross - 0.26 gold units (floor)
+  2 MGC, midpoint gross - 0.26 gold units (floor)
+  1 MGC, native CFD quote net - 0.26 - 0.41 gold units (double-spread stress)
+  2 MGC, native CFD quote net - 0.26 - 0.41 gold units (double-spread stress)
+The stressed rows intentionally pay the historical CFD spread plus a full
+MGC spread/commission floor and H70's extra 0.41 cost. They are stress
+diagnostics, not plausible exact futures fill reconstructions. The floor rows
+assume spot midpoint movement transfers to GC, unverified because futures
+basis and contract rolls differ.
+
+FLOATING PATH AND BREACH
+Use the already recorded per-trade worst_float_net_units from native CFD
+quotes as a conservative floating path proxy. Floor scenario worst proxy is
+worst_float_net_units - 0.26, even though its realized PnL uses midpoint
+gross; stressed worst proxy is worst_float_net_units - 0.26 - 0.41.
+For each row, clamp worst proxy at or below realized net price units.
+Convert by $10 per gold unit per MGC times contract count. Check whether
+balance plus this worst proxy reaches the active MLL before adding realized
+P/L. If yes, mark BREACH_FLOAT, even if the stop later recovers. Also test
+closed balance at or below the MLL. At each NY day boundary, update the EOD
+balance high-water mark and MLL. No margin, queue, rejection or actual CME
+intraminute path is available. The historical worst quote may differ from a
+futures fill path; mark this explicitly.
+
+ROLLING STARTS AND PASS
+Use every unique entry day with a complete [start,start+180 days) horizon
+ending no later than the last entry day, chronological, each resetting the
+50K account. Source-invalid windows are counted separately and never as a
+pass. Pass at first closed trade with balance >=$53,000 and largest positive
+daily closed P/L divided by current total profit <=50%. Breach overrides a
+same-trade pass. Otherwise timeout at 180 days. Report 2024/2025/full and
+2026 partial annual dollars, total dollars, n/trade, and pass/breach/timeout/
+invalid counts, with all four rows. No trade or purchase is authorized.
+
+EVIDENCE STANDARD
+GATES_LUCID_MGC_H70_FLEX50K_V1.txt is a verbatim extraction of the gates,
+frozen before evaluator execution. A favorable arithmetic row cannot repair
+the 2024 missing exit, point-in-time CME source absence, exposed historical
+selection, or missing Lucid forward fills. H70's prior quote FAIL remains
+final for that artifact.

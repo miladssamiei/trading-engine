@@ -1,0 +1,77 @@
+GATE_TICK_MODEL_REVALIDATION_CHILDREN
+Gates for the standalone Model=4 revalidation of ORB and SP2L
+(two independent execution-layer re-measurements; not new hypotheses)
+
+Status: written 2026-09-02 before any script. Verbatim extraction of
+every O and S gate in SPEC_TICK_MODEL_REVALIDATION_CHILDREN sections
+3 and 4. Nothing here may be relaxed after revalidation output
+exists.
+
+    Part 1 - ORB revalidation gates
+
+O1. Reconciliation agreement between the Model=4 MT5 run and the SAME
+Python reference, at the SAME standard used originally: >= 90%
+trade-level full agreement (entry <= 1.5 pts, exit <= 1.5 pts, exit
+time <= 15 min, mapped reason equal), every residual classified, zero
+unexplained residuals tolerated without a class label.
+(Original Model=0 reference point: 93.1% = 416/447.)
+
+O2. Trade count and net PnL reported explicitly against BOTH the
+Python reference (442 trades, +531.13) AND the original Model=0 MT5
+result (447 trades, +470.67, Sharpe 0.337, maxDD 5.13%), with the
+magnitude of change (percentage change in net PnL, Sharpe, maxDD)
+stated honestly. DESCRIPTIVE - no pass/fail threshold; the result
+becomes ORB's new real-tick reference baseline.
+
+O3. Does ORB under Model=4 still beat its own buy-and-hold comparison
+on the real tape? Sharpe and return/DD reported side by side for
+ORB-Model-4 vs BH recomputed on the real-tick tape (the verified M5
+export derived from the same Custom-base real ticks the tester
+replays). DESCRIPTIVE - no pass/fail threshold; reported plainly.
+
+    Part 2 - SP2L revalidation gates
+
+S1. Reconciliation agreement between the Model=4 MT5 run and the
+Python reference at the same standard (original: 89.7% = 1,144/1,275
+matched): report the new percentage and whether the documented
+"two-tapes" residual class (~10% knife-edge OHLC-inequality trades)
+SHRINKS, persists, or is replaced by a different residual class under
+Model=4. Threshold: >= 85%; a materially worse agreement is itself a
+finding and is reported as such, never hidden by a lowered bar.
+
+S2. Net PnL, Sharpe, and maxDD reported explicitly against the
+original Model=0 MT5 result (1,343 trades, +281.84, Sharpe 0.275
+common-universe, maxDD 4.17%), magnitude of change stated honestly.
+DESCRIPTIVE - no pass/fail threshold.
+
+S3. Does SP2L's net expectancy per trade remain economically
+distinguishable from realistic costs under Model=4's real variable
+spread, re-measured specifically over SP2L's own entry windows (the
+validated 09:30-15:30 NY session)? Explicit numbers required:
+per-trade net expectancy vs per-trade real spread cost, against the
+project's 0.8 pt round-trip / 0.41 pt assumptions. If the real spread
+over SP2L's windows is higher than assumed, state explicitly whether
+the prior honesty note ("net expectancy of the order of transaction
+costs") gets WORSE. Verdict stated plainly.
+
+Year-by-year net PnL recomputed for both strategies (2021-2025 full
+years, 2026 partial) with specific attention to SP2L's 2025 (documented
+bad year under Model=0): does 2025 remain negative, improve, or worsen
+under real ticks?
+
+    Honesty and continuity rules
+
+    - Re-measurements of ALREADY-VALIDATED hypotheses' execution
+      layer; no renumbering; ORB/SP2L EAs, SPECs, GATEs, REPORTs and
+      RECONCILEs untouched.
+    - The full-range Model=4 probe (P1/P2 PASS) is reused, not
+      repeated.
+    - If real ticks make either strategy's Sharpe negative or
+      economically dead, this is reported in full with the same
+      directness as every null result in this project.
+    - VWAP MR, meta-coordinator, calendar-effects, and meta-labeling
+      Model=4 revalidations remain OUT OF SCOPE (separate future
+      work). No downstream SPEC is re-run or re-adjudicated here;
+      the combined-implications section only flags stale-vs-robust.
+
+END OF GATE_TICK_MODEL_REVALIDATION_CHILDREN

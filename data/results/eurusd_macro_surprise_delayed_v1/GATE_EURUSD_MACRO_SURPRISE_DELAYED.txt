@@ -1,0 +1,4 @@
+G-EMS1: At least 150 executed trades on distinct 2022-2026 NY event dates.
+G-EMS2: Strictly positive mean extra-cost stress net pips per trade in the gated block.
+G-EMS3: Date-bootstrap P(mean executable quote net <= 0) at most 0.05, 10,000 resamples, seed 20261002.
+G-EMS4: Strictly positive executable quote-net total pips in each complete gated year 2022, 2023, 2024, and 2025.

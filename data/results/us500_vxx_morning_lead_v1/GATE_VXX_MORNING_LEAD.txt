@@ -1,0 +1,4 @@
+G-VL1: At least 150 executed 2024-2026 distinct cash dates with all three real VXX signal bars and exact real 09:45/10:45 US500 BID M5 bars.
+G-VL2: The gated mean net US500 points is strictly positive after the 0.51 spread proxy and an additional 0.51 execution cost.
+G-VL3: The 10000-resample cash-date bootstrap P(mean base net <= 0) is at most 0.01 with seed 20261012.
+G-VL4: Base 0.51-cost net point totals are strictly positive in complete gated years 2024 and 2025.

@@ -1,0 +1,91 @@
+HYPOTHESIS 65: EURUSD FIRST-MINUTE U.S.-NEWS RESPONSE LEADS GOLD
+Declared 2026-09-25 before this study's code or Phase-1 run.
+
+1. MECHANISM AND SEPARATION FROM PRIOR STUDIES
+At scheduled U.S. macro releases, EURUSD gives a fast observable
+directional read on the U.S.-dollar component of the information.
+If gold incorporates that common dollar component more slowly,
+EURUSD's first-minute direction could predict gold's later return.
+EURUSD up implies a weaker dollar and BUY XAUUSD; EURUSD down
+implies a stronger dollar and SELL XAUUSD. This cross-market
+lead-lag signal differs from Hypothesis 63, which followed gold's
+own first-minute response, and Hypothesis 64, which used unverified
+actual-minus-forecast data. Both earlier FAILs remain final. No
+same-day gold price feature sets direction. There is one fixed
+signal, entry, exit, and event universe; no threshold search.
+
+2. EVENT ROSTER AND SOURCE PROVENANCE
+Use the immutable public FRED-derived event JSON at data/results/
+xauusd_macro_reaction_follow_v1/fred-us-macro-events-source.json,
+sha256 b9d8a2256ecc61fda3f68efbc243b407db5b19b0f2288c44f827d03854861201.
+Select only PAYEMS, CPIAUCNS, PPIACO, RSAFS records where
+releaseDateApproximate=false and createdAt UTC converts exactly
+to 08:30 America/New_York. These identify dates only; do not read
+actual, forecast, surprise, or later revisions. Deduplicate
+simultaneous families to one trade per NY date. The calendar source
+has not been reconciled date by date to official BLS/Census records;
+any positive result is provisional until that audit. No event is
+selected by return, surprise sign, impact, or spread.
+
+3. VERIFIED TICK TAPES AND CAUSAL SIGNAL
+EURUSD source: C:/Users/Milad/download/
+eurusd-tick-2020-01-01-2026-09-20.csv (timestamp,askPrice,bidPrice),
+whose hash and monotonic/quote integrity are frozen in
+data/results/eurusd_onboarding/onboarding_stats.json.
+XAUUSD sources are the four raw Bid/Ask tick CSVs and hashes in
+data/results/xauusd_onboarding/onboarding_stats.json.
+Use raw UTC epoch milliseconds for both instruments; NY timezone
+only determines scheduled 08:30 release instant and trade date.
+For the EURUSD signal take the last valid quote strictly before
+08:30:00, at most 10 seconds old, and the last valid quote strictly
+before 08:31:00, at most 10 seconds old. EURUSD midpoint is
+(Bid+Ask)/2. Direction is sign(reaction mid - pre-release mid).
+Skip zero or missing signal. Neither signal quote can occur at or
+after 08:31:00. Log both exact signal timestamps and prices.
+
+4. GOLD EXECUTION AND ECONOMICS
+At 08:31:05..08:31:10 inclusive, enter on the first valid gold
+quote: BUY at Ask for EURUSD-up, SELL at Bid for EURUSD-down.
+Exit on the first valid gold quote at 08:45:00..08:45:10
+inclusive: long at Bid, short at Ask. Skip and log a missing
+entry/exit quote. No stop, target, retry, holiday subset, or
+overnight position. Gold gross midpoint-reference move is
+direction*(exitMid-entryMid). Executable net is exitBid-entryAsk
+for long or entryBid-exitAsk for short. Extra-cost stress net is
+executable net minus 0.41 gold unit on the SAME trades. Actual
+Bid/Ask spread is already charged in executable net. One unit
+equals a $1/oz gold move; no swap or compounding. First-quote
+fills omit live latency, impact, and rejected orders.
+
+5. PARTITION AND UNCERTAINTY
+NY dates 2020-2021 are descriptive calibration. Dates 2022-01-01
+through the source-roster end in April 2026 form the gated
+historical block, with 2026 partial. The price tapes and release
+dates have been available in this project, so a PASS is not virgin
+out-of-sample evidence. Report all date/source/quote skips,
+trade count, gross/quote/stress means and totals, entry/exit
+spreads, win rate, drawdown, year and release-family breakdowns,
+and hold time. Resample gated entry dates with replacement
+10,000 times, seed 20261001, retaining all trades per date;
+report one-sided P(mean executable net <=0) and descriptive
+95% quantiles.
+
+6. GATES, FROZEN BEFORE PHASE 1
+G-EXL1: At least 150 executed trades on distinct 2022-2026 release dates.
+G-EXL2: Strictly positive mean extra-cost stress net per gold trade in the gated block.
+G-EXL3: Date-bootstrap P(mean executable quote net <= 0) at most 0.05, 10,000 resamples, seed 20261001.
+G-EXL4: Strictly positive executable quote-net total in each complete gated year 2022, 2023, 2024, and 2025.
+Overall Phase-1 PASS requires every gate. Otherwise FAIL is final
+for this artifact. No post-hoc side inversion, family, year,
+reaction-size threshold, entry delay, or exit-window adjustment.
+
+7. STOP RULE AND ARTIFACTS
+On FAIL, no MT5 tester. On PASS, separately freeze an official
+calendar and cross-feed clock qualification plus a Model=4
+two-symbol execution SPEC/GATE before tester work. Require
+native Bid/Ask order-state reconciliation, >=150 trades, year
+sign agreement, and positive net expectancy. A Phase-1 PASS
+alone cannot be called a validated trading system. Save this
+SPEC, verbatim GATE, source hashes, event roster, quote trades,
+metadata, and REPORT regardless of outcome. Never edit frozen
+historical SPEC/GATE/REPORT records.

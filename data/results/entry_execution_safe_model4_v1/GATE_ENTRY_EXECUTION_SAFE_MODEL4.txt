@@ -1,0 +1,14 @@
+I-S1: Both immediate parent EA SHA-256 hashes are recorded before implementation and remain unchanged after all work; corrections exist only in new versioned EA artifacts.
+I-S2: Static and manual diff review confirms that all inputs and strategy behavior named in the frozen-behavior constraint are unchanged outside approved corrections A-C.
+I-C1: Both new sources compile fresh with zero errors and zero warnings, and source/executable/compiler-log hashes are archived.
+I-M1: All 12 yearly batches use Model=4 and their logs explicitly evidence generation based on real ticks.
+I-M2: All 12 batches log Test passed, end flat, and produce attributable, parseable trade/day exports plus hashed config, logs, outputs, and a nonempty evidence report.
+I-O1: Every ORB market entry in the crossed-level branch and every executable SP2L market-entry candidate has a parseable ENTRY_SAFE_SEND record whose request price equals the logged side-correct quote normalized to the 0.01 tick grid.
+I-O2: Across all 12 logs, every submitted ENTRY_SAFE_SEND request is accepted and there are zero market-entry TRADE_RETCODE_INVALID_PRICE, TRADE_RETCODE_INVALID_STOPS, other unsuccessful market-entry retcodes, or terminal Invalid price/Invalid stops market-entry messages.
+I-P1: Every SP2L candidate reaching PlaceMarketEntry has exactly one parseable ENTRY_SAFE_PREFLIGHT record with complete quote and constraint fields; a request is submitted only when executable=1.
+I-P2: The known 2025-12-29 SP2L SELL candidate is logged executable=0 because SL=6906.70 is not strictly above ask=6906.755 plus minimum distance, produces no ENTRY_SAFE_SEND record, and remains entered=1, entries=0 in the day export.
+I-A1: SP2L day/trade accounting retains its parent meanings: entered counts entry-decision candidates, entries counts successful fills, entries never exceeds entered, and preflight rejections create no trade row or fill count.
+I-E1: Both stitched streams have zero later-New-York-date closes, zero negative-duration trades, and zero entries on the frozen 45-date nonstandard-session list.
+I-E2: Existing close safety remains intact: all close-helper attempts are accepted, all exit reasons obey SL/TP priority, and every batch deinitializes with owned_positions=0.
+I-R1: The final audit archives complete provenance and descriptive immediate-parent-versus-new comparisons without selecting or altering the correction based on performance.
+I-FINAL: PASS only if I-S1, I-S2, I-C1, I-M1, I-M2, I-O1, I-O2, I-P1, I-P2, I-A1, I-E1, I-E2, and I-R1 all PASS. Otherwise FAIL. In either case downstream_model_allowed=false and live_execution_allowed=false.

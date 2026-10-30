@@ -1,0 +1,174 @@
+REVALIDATION_REPORT
+Tick-model revalidation verdict: full-range Model=4 real-tick probe and
+the regime-rotation Phase-2 re-reconciliation under Model=4
+(data-fidelity re-measurement of hypothesis #13's execution layer)
+
+Status: written 2026-09-02 after the pre-declared runs, per
+SPEC_TICK_MODEL_REVALIDATION.txt and GATE_TICK_MODEL_REVALIDATION.txt
+(P1-P2, G1-G2, R1 extracted before any script ran).
+
+VERDICT IN ONE LINE: P1 PASS, P2 PASS; G1 FAIL, G2 FAIL, R1 STILL
+DISAGREES (same value as Model=0). The regime-rotation controller
+(Arm P) REMAINS NOT VALIDATED - and the execution gap WIDENED under
+real ticks. The original Model=0 FAIL verdict stands, unchanged; this
+report sits alongside it as a separate, dated re-measurement.
+
+------------------------------------------------------------------------
+1. PART 1 - FULL-RANGE MODEL=4 PROBE: P1 PASS, P2 PASS
+
+Single continuous batch (no chunking needed): ORB_TickProbe
+(unmodified), US500-tick, M5, Model=4, 2021-01-01..2026-04-30.
+  - "load 503.72 Mb of tick data to synchronize in 0:00:32.766"
+  - "history ticks synchronized from 2021.01.03 to 2026.04.30"
+  - "real ticks begin from 2021.01.03 00:00:00"
+  - "generating based on real ticks"
+  - 96,122,449 ticks, 364,051 bars, 82.9 s wall.
+
+P1 PASS: real ticks from the first tick date of the tape through the
+end; zero synthetic fallback anywhere in the range.
+
+P2 PASS: independent .tkc sum (first-ever tabulation; mt5 API
+copy_ticks_range per month over the 64 monthly Custom-base .tkc
+files, method verified against the documented 2,184-tick
+diag_20240419 window) = 96,219,507. Tester count 96,122,449.
+Delta = 97,058 ticks = 0.101% <= 1% (month-boundary edge effects).
+
+Real-tick spread (honest, higher than the synthetic tape's constant):
+median 0.516 / mean 0.537 full-range; yearly medians 0.514 (2021,
+2022, 2023, 2024, 2025) and 0.653 (2026 partial) vs the Model=0
+constant 0.41 pt. See spread_comparison.csv.
+
+------------------------------------------------------------------------
+2. PART 2 - REGIME ROTATION PHASE 2 UNDER MODEL=4: G1 FAIL, G2 FAIL
+
+All 18 batches re-run with the ONLY change Model=0 -> Model=4 (same
+EA binaries, same offline reference, same windows incl. gated
+2-month overlaps, same extract/compare arithmetic, tolerances NOT
+relaxed). All 18 passed; every batch logged "generating based on
+real ticks".
+
+2.1 Headline numbers (same offline Arm P reference as the original):
+
+                      offline ref   Model=0 (orig)  Model=4 (this)
+  Sharpe                0.720          0.628           0.343
+  max drawdown          1.80%          2.73%           4.98%
+  net                   +852.02        +750.83         +448.06
+  gated ORB trades        -             229             222
+  gated SP2L trades       -             664             657
+  missing universe days   -              0               0
+
+2.2 G1 FAIL (both clauses, worse than Model=0):
+  |dSharpe| = 0.377 > 0.15      (Model=0 was 0.092, PASS)
+  |dDDrel|  = 1.761 > 0.20      (Model=0 was 0.512, FAIL)
+Under the real-tick tape the executed controller degrades FURTHER
+from the offline reference than it did on the synthetic tape. The
+Model=0 near-miss (only the DD clause failing, Sharpe within 0.092)
+was flattered by the synthetic tape's fills.
+
+2.3 G2 FAIL (same failure site as Model=0):
+  - month schedule: 64 months, 1 mismatch (98.4% >= 95% - this
+    clause PASSES): 2025-05, offline RANGE (flat) vs tester DOWN-VOL
+    (SP2L enabled).
+  - disabled-child trades under the OFFLINE schedule: 30 (all SP2L,
+    May 2025; Model=0 had 31) - clause FAILS.
+  - MT5-flag self-consistency: 0 violations; every trade attributed
+    to exactly one child; gated subset of ungated: OK for both
+    children (222<=437 ORB, 657<=1349 SP2L, 0 only-gated).
+  - ungated reproduction vs the validated (Model=0) trade sets: NOT
+    exact - ORB 437 vs 447 (399 key matches), SP2L 1,349 vs 1,343
+    (1,242 key matches); ungated nets +114.91 vs +470.67 (ORB) and
+    +139.21 vs +281.84 (SP2L). Under the gate text (reproduction
+    "applies unchanged") this is an automatic G2 failure; under the
+    clause-only reading the disabled-child clause fails regardless.
+    This is a STRUCTURAL consequence of the tape change, not an
+    embedding defect: the children themselves produce materially
+    different trade sets on real ticks (see section 4).
+
+2.4 R1 (reported gate): 2025-05 label STILL DISAGREES, with the
+IDENTICAL value to Model=0: tester trend_rel = -1.023 (DOWN-VOL) vs
+offline -0.982 (RANGE) - the same 0.041pp EMA200-distance
+discrepancy at the +-1.0% band. The label comes from the tester's
+US500.c D1 history (its local cache, byte-identical files to the
+original Model=0 runs), so the cause is tick-model-INDEPENDENT:
+a secondary-symbol D1 source difference, exactly as diagnosed
+originally. Model=4 did not and could not fix it.
+
+------------------------------------------------------------------------
+3. WHAT THE REAL-TICK TAPE CHANGED (honest decomposition)
+
+  - Children's own executed results shrink on real ticks: ungated
+    ORB +114.91 (vs +470.67 validated under Model=0) and ungated
+    SP2L +139.21 (vs +281.84). Roughly 8-9% of trades differ by
+    entry/exit key (ORB 38+48 of ~486, SP2L 107+101 of ~1450): the
+    real tape's wicks and variable spread trigger (and miss) fills
+    the synthetic M1-derived stream handled differently - the
+    diag_20240419 TP class, now in bulk.
+  - Real median spread 0.516 vs the synthetic constant 0.41: with
+    ~880 gated round trips, ~0.1-0.2 pt extra per round trip is a
+    material, honestly-reported cost drag (~100-180 pts of the
+    -303 pt net gap vs Model=0); the remainder is different tick
+    paths at stops/targets.
+  - The 2025-05 label flip persists (D1 source), and its May-2025
+    SP2L trades are now WORSE on the real tape (the disabled-child
+    clause count dropped 31 -> 30 but the DD damage grew with the
+    generally wider real-tick outcomes).
+
+Conclusion: the controller's offline Phase-1 quality (0.720) does
+not survive real-tick execution on this platform AT ALL levels -
+tick path, spread, and the unchanged D1 label source. It remains
+NOT validated, exactly as the original verdict, with a now
+real-tick-grounded and LARGER G1 failure.
+
+------------------------------------------------------------------------
+4. CONTINUITY AND OUT-OF-SCOPE (binding)
+
+  - This is a re-measurement of hypothesis #13's execution layer,
+    not a new hypothesis; no renumbering. SPEC_REGIME_ROTATION,
+    GATE_REGIME_ROTATION, REPORT_REGIME_ROTATION, and
+    REPORT_REGIME_ROTATION_PHASE2 (the Model=0 FAIL verdict) are
+    untouched and remain accurate records.
+  - OUT OF SCOPE (each requires its OWN separately pre-declared
+    Model=4 re-reconciliation before any verdict can be revisited):
+    ORB, SP2L, VWAP MR, meta-coordinator, calendar effects,
+    meta-labeling. NOTE: the ungated-reproduction evidence above
+    shows the children's Model=0-validated trade sets themselves do
+    not survive the real-tick tape - those revalidations are now
+    more important, not less.
+  - Partial-failure rule: not triggered (P1/P2 passed for the whole
+    range).
+  - Procedural notes (documented deviations/observations during the
+    batch runs, none affecting data content):
+      a) The tester's per-batch US500.c data revalidation against
+         the server took 8-50 minutes on the degraded network
+         (2026-08-30/31 evenings). Mitigated by refreshing the
+         tester-side US500.c history cache mtimes so the tester
+         served its LOCAL cache - byte-identical content (file
+         sizes unchanged; the same cache the original Model=0 runs
+         used; D1 probe outputs match).
+      b) The tester's US500.c server tick sync has no pre-2023 data
+         (requests stall then return nothing; 2023-2026 cached
+         quickly once). US500.c ticks are irrelevant to this EA
+         (labels are D1-bar based).
+      c) One batch (ungated_m1/2021) was killed mid-sync by a
+         session interruption and re-run cleanly; all 18 metas show
+         test_passed=true with real ticks.
+
+------------------------------------------------------------------------
+5. ARTIFACTS (data/results/tick_model_revalidation/)
+
+  SPEC_TICK_MODEL_REVALIDATION.txt
+  GATE_TICK_MODEL_REVALIDATION.txt
+  probe_fullrange_model4.csv          per-batch probe sync/tick logs
+  tkc_monthly_counts.csv              64-month .tkc counts (P2 sum)
+  spread_comparison.csv               0.41 synthetic vs measured real
+  regime_rotation_model4_ensemble.csv MT5 ensemble daily PnL (M4)
+  regime_rotation_model4_regime_days.csv tester regime log (M4)
+  phase2_model4/                      18 batch outputs + extracted
+                                      daily/trade series +
+                                      phase2_model4_mt5_stats.json
+  REVALIDATION_REPORT.txt             this document
+  Scripts: evaluate/regime_rotation_phase2/reval_probe_fullrange.py,
+  reval_tkc_count.py, reval_run_batches.py, reval_extract.py,
+  reval_compare.py (gate arithmetic verbatim from the originals).
+
+END OF REVALIDATION_REPORT

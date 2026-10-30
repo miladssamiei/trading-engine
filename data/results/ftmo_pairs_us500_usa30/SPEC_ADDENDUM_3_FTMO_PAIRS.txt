@@ -1,0 +1,55 @@
+SPEC_ADDENDUM_3_FTMO_PAIRS (new file; SPEC_FTMO_PAIRS.txt and ADDENDA 1-2
+are NOT edited)
+Study dir: data/results/ftmo_pairs_us500_usa30/
+Pre-declared: 2026-09-16, BEFORE any run using the mechanism described here.
+
+SECTION A. WHY A THIRD ADDENDUM
+
+A.1 ADDENDUM 1 substituted the Dow leg with a USA30Duk custom symbol fed by
+the verified Dukascopy USA30 M5 tape; ADDENDUM 2 attempted a terminal-level
+build. Execution attempts on 2026-09-13..16 established that no headless
+build path exists on this installation:
+  - CustomSymbolCreate inside a tester agent: error 4014 (not allowed).
+  - A terminal SERVICE (Usa30DukService.mq5) does not auto-start on first
+    deployment; there is no CLI/service state path to start it headless.
+  - A start-config [Charts] Template= launch opens no chart when the
+    restored workspace is empty (tester-mode sessions leave zero charts),
+    and profile-patched charts are not restored either.
+A.2 Broker Dow data depth probed via the MetaTrader5 API on 2026-09-16:
+  DJ30.c -> 933 D1 bars 2022-11-21..2026-07-01; DJ30.ecn -> 7 D1 bars;
+  USA30.c / USA30.ecn -> not selectable. No broker Dow history covers the
+  six pair trades entered 2021-03..2022-09 (57% of study gross).
+
+SECTION B. FINAL EXECUTION DESIGN (pre-declared before use)
+
+B.1 HYBRID REAL/VIRTUAL LEGS:
+  - US500.c leg: REAL tester market orders (Model=0 fills, grid-normalized
+    prices, real tester swap recorded then overridden to 0 in analysis).
+  - Dow leg: VIRTUAL position inside the EA, priced bar-close from the
+    same restamped tape (usa30_m5_eet.csv, EET wall clock, looked up at
+    each US500.c tick), $1 per index point per lot EXACTLY as the original
+    #19 study, lots30 = the exact recorded ratio x FixedLots (no volume
+    grid: there is no real symbol to constrain it), and the verified
+    2.28-pt USA30 median round-trip spread charged via half-spread entry/
+    exit adjustment (1.14 per side) on every virtual fill.
+B.2 FTMO guard: the in-EA limit checks operate on TOTAL equity =
+  AccountInfoDouble(ACCOUNT_EQUITY) + virtual Dow floating PnL, and on
+  TOTAL balance = ACCOUNT_BALANCE + realized virtual cash, so the daily
+  5% anchor, the static $9,000 floor and the target-stop all aggregate
+  both legs (the tasking's "guard natively aggregates floating PnL" is
+  preserved through the virtual leg being included in every check).
+  PG_Breach/PG_CloseEverything still flatten the REAL leg on breach; the
+  virtual leg is closed at the breach-instant tape price.
+B.3 Output: ftmo_pairs_trades.csv keeps the frozen column set; ticket30=0,
+  and leg30_mode="virtual_dukascopy" marks the synthesized leg. The Dow
+  prices/PnL in the CSV are the tape-synthesized effective fills.
+
+SECTION C. WHAT DOES NOT CHANGE
+
+C.1 The 18-trade list, lots30 ratios, arming convention (+1 day, D1-close
+proxy), gates G-P1..G-P4, FTMO parameters, the Python swap-free override,
+the multiplier sweep [1.0, 30.0], and all honesty rules are unchanged.
+Setup-EA/service/template sources are archived in the study dir as
+dead-end evidence; their deployed binaries are removed from the terminal.
+
+END OF ADDENDUM 3. FROZEN 2026-09-16 BEFORE the run using it.

@@ -1,0 +1,52 @@
+XAUUSD SALEH FROZEN-TRADE FLOATING-EQUITY PACE AUDIT V1
+Declared 2026-09-25 before this audit's path-scan and calculation code.
+
+PURPOSE
+Replace the prior optimistic close-only risk check with an actual
+native-quote worst-floating mark on every frozen 2024+ Hypothesis 70
+trade. This is a diagnostic of one failed quote-execution artifact,
+not a new strategy, a retest of its signal, or an authorization to
+trade. The prior 15:59 replay remains FINAL FAIL from one unresolved
+exit. Its last-quote mark is retained and labeled non-executable.
+
+FROZEN INPUTS
+Use the exact native_quote_trades.csv from
+data/results/xauusd_saleh_intraday_real_quotes_close1559_v1/, SHA256
+17d0f1fc14c716c9cc428c6c4283bc13528ce28c4e1853ad4715de00df34107c.
+Only 2024+ rows, no trade omission, side/clock/stop/exit change or
+reconstructed hypothetical fill. Native Bid/Ask tick files and SHA256
+are exactly the four files in data/results/xauusd_onboarding/
+onboarding_stats.json; verify all four whole-file hashes and strictly
+increasing epoch-ms timestamps before use. For each trade, capture
+every valid source tick with entry_ms<=timestamp<=exit_ms inclusive;
+long worst floating quote net is min(Bid)-entry Ask; short is entry
+Bid-max(Ask). An unresolved exit remains included using its original
+last-quote mark. No minute OHLC proxy, fixed spread or synthetic tick.
+
+ACCOUNT REPLAY
+Start $10,000 on every distinct 2024+ NY trade date with a full
+180-calendar-day follow-up before the tape's last NY date. Include
+trades on start date through day before start+180. For fixed planned
+risks of 0.1%, 0.5%, 1%, 1.5%, and 2% of initial balance per trade,
+divide dollar risk by initial stop distance from the frozen trade
+entry/SL. Fractional size and exact risk-dollar conversion are assumed.
+At each Prague date, set daily floor to prior-midnight closed balance
+minus $500; static floor is $9,000. Check the worst intratrade equity
+mark against both floors before booking the frozen quote-net close.
+Check closed equity likewise. Breach takes priority over pass. A pass
+requires closed balance >=$11,000 after at least four distinct Prague
+entry dates. Report starts, pass, breach, timeout, pass-time median,
+and compare against the old close-only summary. The result remains an
+optimistic upper bound on actual FTMO execution because first-quote
+fills, fractional lots, margin, broker feed, rejection and the one
+unresolved exit are not resolved. No after-the-fact risk-grid rescue.
+
+VERBATIM AUDIT GATES
+G-FP1: All 321 frozen 2024+ quote-trade intervals have at least one exact valid native Bid/Ask tick, all source hashes match, and no trade row is omitted.
+G-FP2: For every audited trade, the native worst-floating net is no greater than its frozen realized quote-net and no greater than its frozen initial planned stop-distance gain.
+G-FP3: At some frozen risk no greater than 2%, at least 70% of eligible 180-day starts pass and at most 10% breach using native worst-floating equity marks.
+G-FP4: The prior 15:59 native-quote execution artifact has a full PASS with zero unresolved exits.
+All gates must pass to advance this candidate; G-FP4 is expected to
+fail under the frozen source. This audit cannot reopen that source's
+FAIL or authorize Model=4 testing. Write REPORT even on FAIL, append
+PROGRESS, never edit an existing SPEC/GATE/REPORT.

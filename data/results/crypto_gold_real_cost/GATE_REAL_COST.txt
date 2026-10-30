@@ -1,0 +1,6 @@
+G1: Each of the six asset x engine cells requires at least 50 closed scored trades.
+G2: Each of the six asset x engine cells requires positive mean net R after spread, commission and swap.
+G3: The pooled closed-trade series requires positive mean net R and positive unannualized net R Sharpe.
+G4: The pooled chronological moving-block bootstrap P(mean net R <= 0) must be <= 0.05 using 10000 resamples, block length 10, seed 20261025.
+G5: All three sources and six ledgers must pass chronology, cost-once, positive initial-risk and financing-count integrity checks.
+G6: Overall Phase 1 passes only if G1-G5 all pass; any unavailable or invalid source makes the verdict DATA BLOCKED.

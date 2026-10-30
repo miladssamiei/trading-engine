@@ -1,0 +1,15 @@
+GATE FILE - HYPOTHESIS #51 (xauusd_kc_oos)
+Frozen 2026-09-23 BEFORE the Phase-1 script ran. Verbatim gate extraction
+from SPEC_XAUUSD_OOS.txt section 6. Never edited after the run.
+Gates are evaluated ONLY on the OOS block (entries 2024-01-01 .. present).
+
+G-OOS1: Total executed trades in OOS >= 30.
+
+G-OOS2: Net Sharpe Ratio in OOS > 0.
+
+G-OOS3: Moving-block bootstrap (10,000 resamples, block=5 trades,
+        seed 20260929) P(mean Net PnL <= 0) <= 0.20 on the OOS trades.
+
+VERDICT RULE: PASS only if G-OOS1 AND G-OOS2 AND G-OOS3 all PASS. Any FAIL
+is final for this artifact; corrections or re-measurements require a new
+study name.

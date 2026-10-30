@@ -1,0 +1,83 @@
+HYPOTHESIS 104: FTMO XAGUSD LONG-TREND TWICE-WEEKLY HOLD
+Declared 2026-09-26 before H104 evaluator code or silver trade returns.
+Null/FAIL is complete. No account orders.
+
+MECHANISM AND SOURCE
+Hypothesis: a rising 20-cash-day silver trend can persist across two
+weekday holds; the shorter Wednesday-Thursday leg avoids weekend risk.
+This is an inference to test, not established short-horizon evidence.
+Use only native FTMO-Demo XAGUSD Bid/Ask M1 created from native ticks
+at data/results/xagusd_weekday_source_qualification/
+xagusd_ftmo_native_m1_2023_2026.csv, SHA256
+c73194dba207ff8a71fd7adce4b60ed40dce60c954dd01991ace981aff153f9c.
+Source report: 45/45 clean months, 279/286 2024+ endpoint pairs.
+No filled minutes, synthetic quotes, Dukascopy proxy or order book.
+Epoch seconds are UTC; wall-clock rule uses America/New_York.
+
+FEATURES, ENTRY AND EXIT
+Eligible cash day has real 09:30 and 15:55 M1. Its high and low are
+max/min real Bid M1 within [09:30,16:00) NY; close is 15:55 Bid close.
+Daily true range=max(high-low, abs(high-previous eligible close),
+abs(low-previous eligible close)). For each planned Monday09:30 and
+Wednesday09:30 entry, use only the last 21 completed eligible cash
+days strictly before entry, with latest no more than 4 calendar days
+old. Long signal iff latest close > close 20 eligible days earlier.
+ATR20 is arithmetic mean of the last 20 completed true ranges;
+all 20 must be finite. No short, optimization, or re-entry.
+Monday long exits Wednesday09:25 NY; Wednesday long exits
+Thursday15:55 NY. Entries use first real minute ASK open exactly at
+entry wall time. Scheduled exits use real minute BID open exactly at
+exit wall time. Pair is eligible only if both endpoints exist; if a
+signaled exit becomes unavailable, count UNRESOLVED and FAIL gate.
+There is no overlap. Open long has fixed stop at entry ASK minus
+1.5*prior ATR20. Starting in entry M1 through minute strictly before
+scheduled exit, if Bid open<=stop fill at Bid open, else if Bid low
+<=stop fill at stop. This is an M1 stop proxy, not tick-confirmed fill.
+No target or trailing adjustment. If no stop, use scheduled BID open.
+Any missing real M1 within the hold is retained as a data gap;
+stops cannot be certified through gaps, so report gaps and FAIL
+source/execution gate if any signaled trade has an interior minute
+missing during normal XAGUSD open hours. Exclude exchange closures,
+but do not synthesize quotes at their boundaries.
+
+COSTS AND EVALUATION
+Native ASK entry and BID exit include actual historical spread.
+Charge current connected FTMO Swing XAGUSD snapshot POINTS long
+swap -19.25 points, point 0.001 silver unit, triple Wednesday;
+count each modeled broker midnight strictly inside trade, Europe/
+Athens GMT+2 plus European DST. This is a cost scenario, since no
+historical swap-posting series has been obtained. Charge metal
+commission at 0.0007% notional on each side for all years, even
+before the broker's published September 2025 metals-fee change.
+An additional 0.060 silver-unit round-trip adverse execution stress
+is deducted from every trade. No financing benefit, rebates or
+compounding. Per-ounce net=(BID exit-ASK entry)+snapshot swap-
+two-side commission; stressed net=net-0.060. Report actual Bid/Ask
+spread and per-year cost components. Dollar conversion is 5000oz/
+lot; minimum lot 0.01. EUR conversion, margin and floating equity
+belong to a separate Phase 2, if Phase 1 passes.
+
+SPLIT AND STOP RULE
+2023 descriptive only; all 2024, 2025 and through 2026-09-25 are
+untouched gated dates. Report all planned, source-covered, eligible,
+signaled, stopped, resolved and unresolved rows, and each year sum.
+Circular 5-week moving-block bootstrap of ordered OOS stressed
+trade returns, 10000 draws, default_rng(20261004); report
+P(mean<=0). No parameter or model-family change after this SPEC.
+Phase 1 FAIL is final; Phase 2 NOT_RUN. A Phase 1 pass only licenses
+a separately predeclared native-tick and EUR-account full two-stage
+180-calendar-day prop replay with 10%/5% targets, daily 5% and
+overall 10% equity loss limits, and minimum four trading days per
+stage, plus at least 150 genuinely unseen forward trades. It is not
+a verified live system.
+
+VERBATIM GATES
+G-H104-1: At least 150 fully resolved 2024-2026 signaled XAGUSD trades, zero unresolved signaled exits, and zero unaccounted normal-hours M1 gaps along those holds.
+G-H104-2: Strictly positive 2024-2026 mean stressed silver units per ounce after actual native spread, current long-swap snapshot, two-side metal commission and extra 0.060 execution stress.
+G-H104-3: Five-week circular moving-block bootstrap P(mean stressed silver units <= 0) at most 0.05 using 10000 draws and seed 20261004.
+G-H104-4: Strictly positive stressed silver-unit sums separately in full 2024, full 2025 and partial 2026.
+G-H104-5: The exact native M1 source hash, prior completed features, real ASK/BID fills and costs reconcile; no orders or hindsight substitutions.
+G-H104-6: After Phase 1 passes, a separately frozen EUR10000 FTMO Swing two-stage 180-calendar-day replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts in one fixed risk row; at least 150 genuinely unseen forward trades are required for verified status.
+
+All gates are required. No Phase 1 pass or historical replay alone
+is a recommendation to trade.

@@ -1,0 +1,66 @@
+ZERO-EDGE MAX AGGRESSION - US500 HISTORICAL MONTE CARLO - 2026-10-02
+FROZEN SCENARIO RESULT; NOT A VALIDATED TRADING EDGE OR FIRM PAYOUT FORECAST
+
+Source: data\results\vwap_2021_2026\us500tick_m1.csv
+Tape: 2021-01-03 23:00:00+00:00 through 2026-04-30 23:59:00+00:00
+Real M1 bars: 1,791,504; eligible [09:30,15:30) NY minutes: 485,650
+Source SHA256: 29ad8f8b25b43be43a87c4ac39575c3cd280d557661c31f8e691990949087453
+Evaluation seed: 20261002; funded seed: 20261003; paths per arm: 10,000; attempts cap: 200
+Account USD50,000; pass +3000; static fail -2000; 50 lots = USD50/point.
+Executable-entry brackets: SL40/TP30 points; cost0.51 = USD25.50 embedded once.
+Nominal target gain1500; nominal stop loss2000; adverse gaps can lose more.
+
+THEORETICAL COMPARISON
+Quoted two-consecutive-win pass: 32.653061% (quoted 32.65%).
+Matched repeat-to-static-boundary zero-cost pass: 40.831517%.
+Reason: after a win then a loss, equity is -500 and remains alive; two wins is not the only passing path.
+Theoretical zero-cost trade win: 57.142857% (quoted 57.14%).
+Idealized spread-only trade win: 56.414286%; matched account pass: 39.744731%.
+Theoretical probabilities assume driftless continuous price, no gaps and no M1 collisions.
+
+EVALUATION MATRIX (all probabilities use 10,000 purchased evaluations)
+Arm                     Pass  Fail Censored   Pass lower/upper       Trade win   Closed trades   Mean/trade
+REAL_COST_CLOSED         3911  6083        6   39.11%/39.17%     56.0178%         22,882 $     -47.59
+  95% Wilson conditional MC interval: 38.16%..40.07%; resolved-only pass 39.1335%; median trades/pass 2.
+  Stops 10,064; targets 12,818; collisions 2; adverse gaps 545; NY-date-crossing trades 15,112; max gain $1500.00; worst loss $-5726.00.
+ZERO_COST_CLOSED         4017  5977        6   40.17%/40.23%     56.7555%         23,011 $     -21.66
+  95% Wilson conditional MC interval: 39.21%..41.13%; resolved-only pass 40.1941%; median trades/pass 2.
+  Stops 9,951; targets 13,060; collisions 2; adverse gaps 565; NY-date-crossing trades 15,178; max gain $1500.00; worst loss $-5700.50.
+REAL_COST_INTRABAR       3821  6176        3   38.21%/38.24%     55.2015%         21,311 $     -47.14
+  95% Wilson conditional MC interval: 37.26%..39.17%; resolved-only pass 38.2215%; median trades/pass 2.
+  Stops 9,547; targets 11,764; collisions 1; adverse gaps 518; NY-date-crossing trades 13,436; max gain $1500.00; worst loss $-5726.00.
+
+PRIMARY COMPARISONS
+Real-cost pass versus quoted 32.65%: +6.4600 percentage points.
+Real-cost pass versus matched 40.83151672%: -1.7215 percentage points.
+Real-cost trade win versus theoretical57.142857%: -1.1250 percentage points.
+Historical spread impact (paired schedules): -1.0600 percentage points in pass rate.
+Paired pass-difference conditional MC standard error: 0.1062 percentage points.
+
+ECONOMICS: USD80 fee, not refunded; payout=80% of USD2000=USD1600
+Arm                     EV if every pass pays       Joint first-payout probability     EV including funded target
+REAL_COST_CLOSED        $  545.76..$546.72            15.57%..15.64% $           169.12..$170.24
+  Independent funded stage: +2000/-2000, same brackets/risk model; funded pass among evaluation passes 39.81%; joint payouts 1,557/10,000.
+REAL_COST_INTRABAR      $  531.36..$531.84            17.65%..17.69% $           202.40..$203.04
+  Independent funded stage: +2000/-2000, same brackets/risk model; funded pass among evaluation passes 46.19%; joint payouts 1,765/10,000.
+
+GATE VERDICT: PASS FOR SCENARIO INTEGRITY ONLY
+G1: The source passes chronology, OHLC and NY RTH entry validation, and its SHA256 and actual date range are recorded.
+G2: Every closed trade obeys its executable-side bracket, pessimistic collision and adverse gap rules; gross-minus-net equals the single modeled cost, and no trade profit exceeds 1500.
+G3: Every arm has exactly 10,000 evaluations with PASS/FAIL/CENSORED outcomes; all absorbed paths respect their account boundary, have no trade after absorption, and the EV identities reconcile.
+G4: A point pass probability without censoring bounds is admissible only if its arm has zero censored paths; otherwise report both lower and upper bounds and label the estimate censored.
+G5: Compare the primary repeat-until-static-boundary simulation to its matching Markov baseline; retain 32.65% as a two-consecutive-win comparator and disclose the rule difference. Exact broker execution, firm-specific compliance and funded withdrawal certainty remain unvalidated.
+
+LIMITS
+Primary checks account limits after CLOSED trades, so floating equity may breach -2000 before recovery.
+Intrabar arm applies remaining account stop/target distance; M1 stop-first ordering is conservative but cannot recover tick order.
+Historical M1 BID proxy is real recorded bars, not variable bid/ask tick validation. Spread is fixed by the request.
+Minute-weighted IID resampling repeats historical opportunities and destroys chronology/dependence across trades.
+Monte Carlo intervals measure seeded sampling precision conditional on this tape, not uncertainty about future performance.
+No swaps, additional commission, slippage, margin checks, trailing firm drawdown or extra payout/consistency restrictions.
+Some trades hold overnight. The 1500 trade cap satisfies only the supplied cap, not every possible firm's consistency calculation.
+The conditional EV assumes every evaluation pass pays; the funded EV models an additional target, not actual withdrawal eligibility.
+Censored outcomes are unresolved, not losses; lower/upper probability and EV bounds are shown even when equal.
+No performance-validation gate or purchase recommendation is inferred from this simulation.
+
+Artifacts: summary.csv, metadata.json, paths_*.csv, trades_*.csv, frozen SPEC/GATE and this REPORT.

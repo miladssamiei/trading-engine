@@ -1,0 +1,111 @@
+GATE_REGIME_ROTATION
+Slow regime-rotation gates for hypothesis #13 (monthly ORB/SP2L
+controller)
+
+Status: written 2026-08-29 before any Phase-1 script. This file is a
+verbatim extraction of all R and G gates in sections 6 and 7 of
+SPEC_REGIME_ROTATION. Nothing here may be relaxed after rotation
+output exists. Any new gate is exploratory and labeled.
+
+------------------------------------------------------------------------
+PHASE 1 GATES (OFFLINE REGIME-ROTATION QUALITY)
+
+These gates apply separately to each arm (P and Q). An arm passes
+Phase 1 only if ALL R-gates hold.
+
+R1. Sharpe dominance
+    Compute ensemble daily PnL over the common 1,369-day ORB
+    session-day universe, zero-filled, and Sharpe as mean divided by
+    standard deviation (ddof=1) times sqrt(252).
+    Gate:
+        Sharpe > 0
+        AND Sharpe strictly greater than Sharpe of every child (with
+            two children this means > max(0.337, 0.275))
+        AND Sharpe strictly greater than the best static portfolio
+            Sharpe (> 0.420).
+
+R2. Drawdown bound
+    Compute true max drawdown of the ensemble cumulative PnL curve at
+    the 2.00-lot book size.
+    Gate: ensemble max drawdown <= 11.29 percent (equal to 1.10 x the
+    worst child's drawdown at 2 lots, 10.26 percent).
+
+R3. Activity floor
+    Gate: number of days with at least one trade in the ensemble
+    >= 150.
+
+R4. Year shape and 2025 stress case
+    Over full years 2021-2025:
+    - At least 4 of 5 years net positive.
+    - No single year contributes more than 60 percent of total net
+      PnL.
+    - 2025 stress case: ensemble 2025 net must be >= 0 OR strictly
+      better than every baseline's 2025 net; i.e. > -228.03 points,
+      the best baseline 2025.
+    2026 is partial; it is reported only and does not count toward the
+    4-of-5 rule.
+
+PHASE 1 PASS CONDITION
+    An arm passes Phase 1 if R1, R2, R3, and R4 all hold for that arm.
+    Rotation moves to Phase 2 only if at least one arm (P or Q) passes
+    all R-gates.
+    If both arms fail, the project must stop at REPORT_REGIME_ROTATION:
+    no Phase 2 code, no EA, no mapping changes.
+
+------------------------------------------------------------------------
+PHASE 2 GATES (MT5 IMPLEMENTATION), ONLY ON PHASE-1 PASS
+
+These gates apply to the single RegimeController EA implementing the
+passing arm.
+
+G1. Consistency between offline and MT5 rotation
+    Run the RegimeController EA in MT5 over the same window
+    (2021-01..2026-04) in Model=0 batch mode, computing labels
+    internally from D1 and applying the same mapping and weights.
+    Gate:
+        MT5 ensemble Sharpe is within +/- 0.15 (absolute difference) of
+        the offline Phase-1 Sharpe for the same arm.
+        AND MT5 ensemble max drawdown is within +/- 20 percent
+        (relative difference) of the offline Phase-1 max drawdown.
+    These tolerances are sized by the documented SP2L cross-tape
+    residuals, not chosen loosely.
+
+G2. Execution integrity
+    Gate: all of the following must hold over the test window:
+    - Zero trades on any day by a child that is disabled under the
+      offline mapping for that day's regime.
+    - The MT5 month-decision schedule (which families are enabled per
+      month) matches the offline reference for at least 95 percent of
+      months; every mismatch must be classified and explained.
+    - Every trade is attributed to exactly one child via magic
+      numbers; there are no unattributed trades.
+
+PHASE 2 PASS CONDITION
+    The RegimeController is validated only if both G1 and G2 hold for
+    the passing arm.
+    If G-gates fail, the regime-rotation controller is rejected;
+    children remain individually as validated and no live regime
+    controller may be deployed under this SPEC.
+
+------------------------------------------------------------------------
+STOP AND HONESTY RULES
+
+    Child EAs remain frozen: no entry, exit, lot, or parameter changes
+    are allowed under this SPEC in Phase 1 or Phase 2.
+
+    Labels, thresholds, mappings, arms, and gates are fixed before any
+    rotation metric is computed. Any variant added after viewing
+    results must be labeled EXPLORATORY and cannot rescue a failed arm.
+
+    Mapping inversion or reassignment after seeing results is
+    forbidden (anti-swap rule). Per-regime child P&L cannot be used to
+    redesign the mapping.
+
+    If Phase 1 fails R-gates for both arms, no Phase 2 scripts or EAs
+    may be written. REPORT_REGIME_ROTATION is the final deliverable.
+
+    If Phase 2 fails G-gates, the RegimeController cannot be used in
+    production; any further work on it is exploratory and cannot
+    change the failed verdict.
+
+END OF GATE_REGIME_ROTATION

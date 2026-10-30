@@ -1,0 +1,33 @@
+REPORT: EURUSD D1 TREND FOLLOWING - PHASE 1 (HYPOTHESIS #42)
+Generated: 2026-09-23 18:37:28  |  script: evaluate/fx_trend_d1_phase1.py
+SPEC/GATE: data/results/fx_trend_d1/{SPEC,GATE}_FX_TREND_D1.txt (frozen before code)
+
+VERDICT: FAIL   (G-FX1=True, G-FX2=True, G-FX3=False)
+
+1. FUNNEL
+   D1 bars 1748 (20200102 .. 20260918); warmup 21; armed bars 1727
+   breakout signals: LONG 35 / SHORT 36; ignored while open: 161
+   EXECUTED TRADES: 71 (EOD force-closes 1)
+   by signal year: 2020=9, 2021=10, 2022=12, 2023=11, 2024=11, 2025=11, 2026=7
+   exit mix: {'STOP': 66, 'STOP_GAP': 4, 'EOD': 1}
+
+2. AGGREGATE EXCURSIONS AND GROSS EDGE (pips, pre-cost)
+   n=71  MFE 173.1 vs MAE 97.2  (medians 137.4 / 76.3)  MFE>MAE share 63.4%
+   gross PnL/trade -6.2 pips (median -33.7, total -439, win 42.3%)
+   avg winner +121.0 vs avg loser -99.2 pips -> payoff ratio 1.22
+   time in trade: mean 14.1 / median 12 bars
+   LONG: n=35 win 40%  gross -1.7  MFE 186.1 vs MAE 104.4
+   SHORT: n=36 win 44%  gross -10.5  MFE 160.5 vs MAE 90.2
+   vs verified 0.3-pip overlap median floor: mean gross does NOT clear the floor
+
+3. GATES (frozen verbatim in GATE file)
+   G-FX1 >= 30 executed: 71 -> True
+   G-FX2 mean MFE > mean MAE (strict): 173.1 vs 97.2 -> True
+   G-FX3 block-bootstrap P(mean gross <= 0) <= 0.20: 0.8367 -> False
+   OVERALL PHASE-1: FAIL
+
+4. NOTES AND CAVEATS
+   - Pre-cost Bid-tape screen; 0.3-pip floor reported alongside, never netted.
+   - MFE/MAE include the exit day's full bar (D1 approximation); gap-through stops fill at open.
+   - Frozen archetype parameters (Donchian 20 / ATR 14 / 2.0x multiple / single position); no search.
+   - Null result is final for this artifact.

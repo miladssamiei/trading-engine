@@ -1,0 +1,35 @@
+REPORT: XAUUSD COMEX-CLOSE HEDGING MOMENTUM, HYPOTHESIS 60
+Generated UTC: 2026-09-24T23:02:43.542705+00:00    PHASE-1 VERDICT: FAIL
+Single predeclared rule: sign(prior 13:25 close to current 12:55 close), enter 13:00 open, exit 13:25 close.
+Source: Baltussen et al. (2021), https://academicweb.nd.edu/~zda/intramom.pdf
+Source paper studies GC futures through 2020; this is a transfer test on an XAUUSD CFD Bid-bar export.
+
+DATA: 467633 M5 bars; 1697 session days; 1628 executed; skips {'no_prior_session_close': 30, 'missing_required_bar': 39, 'signal_tie': 0}.
+CALIBRATION 2020-2023 (diagnostic): {"double_cost_mean_pt": -0.8188472803347328, "gross_mean_pt": 0.001152719665267303, "max_drawdown_pt": 440.2930000000104, "n": 956, "net_mean_pt": -0.4088472803347327, "net_median_pt": -0.42850000000001726, "net_std_pt": 2.4033578006642182, "net_total_pt": -390.8580000000045, "win_rate": 0.4006276150627615}
+TEST 2024-2026 (gated): {"double_cost_mean_pt": -0.9924776785714268, "gross_mean_pt": -0.17247767857142685, "max_drawdown_pt": 425.7239999999989, "n": 672, "net_mean_pt": -0.5824776785714267, "net_median_pt": -0.3365000000000327, "net_std_pt": 7.283963377335334, "net_total_pt": -391.42499999999876, "win_rate": 0.45089285714285715}
+TEST BOOTSTRAP: {"ci_95_high": -0.015677343749986788, "ci_95_low": -1.1151575148809565, "p_mean_le_zero": 0.9778}
+YEARLY:
+  2020: {"double_cost_mean_pt": -0.8098333333333371, "gross_mean_pt": 0.010166666666662874, "max_drawdown_pt": 141.72400000000079, "n": 246, "net_mean_pt": -0.3998333333333372, "net_median_pt": -0.5140000000000418, "net_std_pt": 3.1614290892560866, "net_total_pt": -98.35900000000095, "win_rate": 0.4146341463414634}
+  2021: {"double_cost_mean_pt": -0.809342857142865, "gross_mean_pt": 0.010657142857134929, "max_drawdown_pt": 116.49100000000156, "n": 245, "net_mean_pt": -0.3993428571428651, "net_median_pt": -0.35000000000005455, "net_std_pt": 1.7500603867801434, "net_total_pt": -97.83900000000195, "win_rate": 0.3836734693877551}
+  2022: {"double_cost_mean_pt": -0.7457235023041522, "gross_mean_pt": 0.07427649769584806, "max_drawdown_pt": 103.7930000000013, "n": 217, "net_mean_pt": -0.335723502304152, "net_median_pt": -0.48500000000004545, "net_std_pt": 2.0841469293682477, "net_total_pt": -72.85200000000098, "win_rate": 0.4147465437788018}
+  2023: {"double_cost_mean_pt": -0.9011612903225833, "gross_mean_pt": -0.08116129032258311, "max_drawdown_pt": 131.03100000000038, "n": 248, "net_mean_pt": -0.49116129032258316, "net_median_pt": -0.43850000000000816, "net_std_pt": 2.3629228516881184, "net_total_pt": -121.80800000000062, "win_rate": 0.3911290322580645}
+  2024: {"double_cost_mean_pt": -0.6167548638132352, "gross_mean_pt": 0.20324513618676482, "max_drawdown_pt": 59.32900000000133, "n": 257, "net_mean_pt": -0.2067548638132353, "net_median_pt": -0.4199999999997635, "net_std_pt": 3.0892301665147706, "net_total_pt": -53.136000000001474, "win_rate": 0.4280155642023346}
+  2025: {"double_cost_mean_pt": -0.6292168674698847, "gross_mean_pt": 0.19078313253011545, "max_drawdown_pt": 110.90600000000201, "n": 249, "net_mean_pt": -0.2192168674698846, "net_median_pt": -0.009999999999909026, "net_std_pt": 4.648963400018775, "net_total_pt": -54.585000000001266, "win_rate": 0.4979919678714859}
+  2026: {"double_cost_mean_pt": -2.119060240963832, "gross_mean_pt": -1.299060240963832, "max_drawdown_pt": 425.7239999999974, "n": 166, "net_mean_pt": -1.7090602409638316, "net_median_pt": -1.6950000000000818, "net_std_pt": 12.914110192225985, "net_total_pt": -283.70399999999603, "win_rate": 0.41566265060240964}
+TEST BY DIRECTION (descriptive, no side selection):
+  LONG: {"double_cost_mean_pt": -1.3972909090909005, "gross_mean_pt": -0.5772909090909004, "max_drawdown_pt": 383.23699999999724, "n": 385, "net_mean_pt": -0.9872909090909004, "net_median_pt": -0.5269999999997343, "net_std_pt": 5.223845250541949, "net_total_pt": -380.1069999999967, "win_rate": 0.4103896103896104}
+  SHORT: {"double_cost_mean_pt": -0.4494355400696937, "gross_mean_pt": 0.37056445993030596, "max_drawdown_pt": 205.53600000000142, "n": 287, "net_mean_pt": -0.03943554006969372, "net_median_pt": 0.05600000000034927, "net_std_pt": 9.344630345586479, "net_total_pt": -11.318000000002097, "win_rate": 0.5052264808362369}
+GATES:
+  G-GH1: PASS
+  G-GH2: FAIL
+  G-GH3: FAIL
+  G-GH4: FAIL
+OVERALL PHASE-1: FAIL
+
+HONESTY: The 2024-2026 test is a fixed historical partition, but other project studies
+have exposed this tape. M5 Bid opens/closes are fill proxies; only a median spread
+is charged, so variable spread, slippage, market impact, and MT5 order execution
+remain unmeasured. No swap applies because each position ends before 13:30 ET.
+A PASS here alone would not validate a deployable system. A FAIL is final for
+this artifact; no post-hoc side, threshold, or time-window adjustment is allowed.
+SPEC/GATE were frozen before code and before this run.

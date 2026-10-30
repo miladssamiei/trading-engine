@@ -1,0 +1,90 @@
+REPORT — SCALPING / CLASSICAL TECHNICAL-INDICATOR SCREENING FUNNEL (Hypothesis #14)
+US500-tick, 2021-01-03 .. 2026-04-30. Written 2026-09-03, after the full
+funnel completed. Readable without opening any CSV.
+
+VERDICT: NULL RESULT — ZERO SURVIVORS. 50 pattern+filter combinations
+entered the pre-declared funnel; 45 failed the Stage-A signal-quality
+gate, the 5 survivors all failed the Stage-B R:R grid gate (not one of
+their 80 grid cells was both positive after the 0.51 pt real-spread cost
+AND strict-neighborhood stable). Stage C (walk-forward) therefore had no
+candidates and Stage D (MT5 Model=4 execution check) was not run — both
+outcomes are exactly what the SPEC pre-declared for an empty survivor
+set. No classical scalping/indicator pattern in this universe is a
+candidate for further consideration on this instrument. Model=0 was used
+nowhere; in fact no MT5 tester run happened at all.
+
+THE FUNNEL (all 50 fates in funnel_master.csv, nothing pruned):
+- Stage A (exit-free, direction-native MFE/MAE at 0.5/0.75/1.0 x ATR14,
+  day-block bootstrap p<=0.20, n>=150, entries restricted to the
+  pre-declared [08:00,11:30) NY liquid window): 45/50 DROP-A.
+  PASS: P1b (EMA8/21 cross on M5) with ALL FOUR filter arms F0/F1/F2/F3
+  (n 2,481-3,052, p_boot 0.000) and P5_F3 (RSI divergence + combined
+  RSI/MACD filter; n=904, p_boot 0.008). The count condition
+  (MFE>MAE at EVERY threshold) was the binding failure for most
+  drop-outs (e.g., P7 stoch divergence had mean_e up to +0.62 ATR yet
+  MAE dominated at one threshold; breakouts P4a-d and pin/engulfing
+  P2/P3 were pure noise, p_boot 0.23-1.00).
+- Stage B (16-cell stop/target ATR grid, SP2L/Bollinger bar-path rules,
+  SL-first ambiguity, 0.51 pt cost): all 5 combos DROP-B. Best cell of
+  the entire study: P1b_F0 at stop 1.0 / target 3.0 x ATR — gross
+  expectancy +0.236 pts/trade (win rate 26.0%, Sharpe net of cost
+  -0.69), i.e. after-cost -0.274 pts/trade. The 80-cell matrix
+  (matrix_master.csv) shows EVERY cell of every Stage-B combination
+  negative after the binding 0.51 pt cost (and worse under the legacy
+  0.8 pt). Strict neighborhood never became binding: no cell even
+  reached positive after cost.
+
+THE ECONOMICS (the single sentence version): the best classical-pattern
+gross edge found (+0.24 pts/trade) is less than half the confirmed real
+median spread (0.51 pts) — the same "expectancy smaller than
+transaction costs" lesson the SP2L/ORB children revalidation delivered,
+now shown for the whole classical scalping family up front, at a
+fraction of the MT5 compute.
+
+MULTIPLE-TESTING LEDGER (pre-declared in the GATE): 50 tests at Stage A
+with alpha 0.20 imply ~10 chance passes; 5 observed — fewer than chance
+alone would produce, and none survived the cost-aware grid. The two
+patterns that did pass Stage A passed with wide margins (p_boot 0.000,
+n>2,400), which is why they were allowed their Stage-B grid; their
+failure is economic (costs), not statistical noise.
+
+SESSION DEPENDENCE (descriptive, stage_a_descriptive.csv): for both
+Stage-A passers the direction-native excursion edge lives inside the
+liquid window and disappears or inverts overnight (P1b mean e: +0.092
+pre-open 08:00-09:30, +0.106 at the open 09:30-11:30, +0.039 late cash,
++0.012/−0.013 evening/overnight). The pre-declared session restriction
+was therefore the right sampling frame — but no window made any pattern
+net-positive after costs.
+
+IMPLEMENTATION-BUG DISCLOSURE (honesty rule): the first Stage-A run
+contained a sign error making RSI==100 everywhere; it produced zero P5
+signals and degenerate F1/F3 filter arms. The bug was caught by the
+zero-signal audit BEFORE any verdict was recorded, fixed, and the whole
+funnel re-run with added degeneracy assertions. Gates, thresholds and
+the SPEC were never touched; only funnel_master.csv / matrix_master.csv
+regenerated. The final numbers above are from the corrected run.
+
+WHAT WOULD HAVE COME NEXT (not run, by protocol): Stage-C walk-forward
+(52-cell MM-expanded space, half-year folds 2022H1..2026H1, occupancy,
+trailing-expectancy cell selection) and Stage-D MT5 Model=4
+reconciliation (D1 Sharpe +/-0.15, D2 >=85% trade agreement) apply only
+to Stage-B survivors; with none, both stages are vacuous and their
+artifacts (stage_c_survivors.csv, stage_d_reconciliation.csv) ship as
+header-only files.
+
+DOWNSTREAM GUIDANCE: do not re-run any P1-P8 pattern/filter arm on this
+instrument/timeframe without a genuinely new pre-declared mechanism
+(new SPEC). The economics statement to carry forward: on US500-tick
+with a 0.51 pt real spread, an intraday pattern needs gross expectancy
+above ~0.5 pts/trade before anything else (execution, walk-forward,
+regime) is even worth measuring — none of the classical patterns came
+close.
+
+ARTIFACTS: data/results/scalping_screen/ — SPEC_SCALPING_SCREEN.txt,
+GATE_SCALPING_SCREEN.txt (both written before any code), funnel_master.csv
+(50 rows, PASS/DROP-A/DROP-B with reasons), matrix_master.csv + matrix_P1.csv
++ matrix_P5.csv (all 80 Stage-B cells), stage_a_descriptive.csv,
+signals/ (per-combination signal files for the 5 Stage-B combos),
+stage_ab_stats.json, stage_c_survivors.csv / stage_d_reconciliation.csv
+(header-only, vacuous stages), this report. Script:
+evaluate/scalping_screen_stage_ab.py (reinforce_rl python).

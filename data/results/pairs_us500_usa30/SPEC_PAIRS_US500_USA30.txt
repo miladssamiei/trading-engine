@@ -1,0 +1,52 @@
+SPEC_PAIRS_US500_USA30: Rolling cointegration pairs trade, US500 vs USA30
+Study dir: data/results/pairs_us500_usa30/
+Pre-declared: 2026-09-10.
+Lineage: Path C execution-infrastructure era. Daily-horizon relative-value study on a NEW instrument pair (US500/USA30 index CFDs), not intraday pattern mining on the US500 tape. Hypothesis #19.
+
+SECTION 1. DATA SOURCING AND ALIGNMENT
+
+1.1 US500 leg: data/results/momentum_multihorizon/us500c_d1.csv (broker US500.c D1 closes, epoch UTC timestamps; UTC calendar date = NY cash date).
+1.2 USA30 leg: data/results/usa30_onboarding/usa30tick_m1.csv (64.7M M1 bars, epoch UTC) aggregated to daily closes using the standard project convention: the close of the LAST M1 bar whose America/New_York wall time is prior to 16:00 NY on that NY calendar date.
+1.3 Join the two daily close series on NY cash date (inner join). Drop any date where either asset is missing. Expected overlap window: 2020-01 to 2026-04 (actual span reported; the D1 spine has since been refreshed and may extend the overlap - the actual intersection governs and is documented in the report).
+
+SECTION 2. ROLLING COINTEGRATION AND HEDGE RATIO (LOG-OLS MODEL)
+
+2.1 Lookback window L = 252 trading days.
+2.2 For each day t, regress the US500 log price on the USA30 log price over the window [t-L, t-1]:
+    ln(P_US500) = alpha_t + beta_t * ln(P_USA30) + epsilon
+2.3 Out-of-sample spread for day t:
+    s_t = ln(P_US500,t) - (beta_t * ln(P_USA30,t) + alpha_t)
+2.4 Z-score: z_t = s_t / sigma_epsilon_t, where sigma_epsilon_t is the standard deviation of the in-window regression residuals of window [t-L, t-1].
+
+SECTION 3. EXECUTION LOGIC (END-OF-DAY)
+
+3.1 Entry Short Spread: if z_t >= 2.0 -> short US500 (1.0 unit) and long USA30 (beta_t units) at the day-t close.
+3.2 Entry Long Spread: if z_t <= -2.0 -> long US500 (1.0 unit) and short USA30 (beta_t units) at the day-t close.
+3.3 Exit: close all positions when z_t crosses 0 (mean reversion; short spread exits at z_t <= 0, long spread at z_t >= 0), or at hard stop |z_t| >= 4.0 (divergence breakdown). End-of-data forced exit flagged END.
+3.4 State machine: only one active spread position at a time. No pyramiding. Entry evaluated only on bars where the position was flat at the open of the bar.
+
+SECTION 4. COST MODELING AND SIZING
+
+4.1 Notional scaling: base position is 1.0 lot of US500. The USA30 leg lot size is 1.0 * beta_t * (P_US500,t / P_USA30,t) at entry (dollar-neutral scaled by hedge ratio). Leg lots frozen at entry until exit.
+4.2 Spreads: subtract the confirmed median spreads on every transaction: US500 = 0.51 pts, USA30 = 2.28 pts (per side; a round trip pays each leg spread twice). Point-to-dollar conversion via terminal trade_tick_value/trade_tick_size where available, else $1/pt/lot documented fallback.
+4.3 Financing (swap): US500 documented convention: long -20 pt/night, short +2 pt/night, Wednesday holds incur 5x calendar nights; nights charged for each calendar date in (entry_date, exit_date]. USA30: query MetaTrader5.symbol_info("USA30.c") in the script for exact swap_long/swap_short; Wednesday 5x assumed identical (documented assumption). If the terminal connection fails, output NET-OF-SPREAD metrics and explicitly flag the missing USA30 swap variable.
+
+SECTION 5. GATES (evaluated in order; all three reported regardless)
+
+G-P1 Structural Mean Reversion: ADF p-value of the 252-day rolling spread series (in-window regression residuals) < 0.05 on at least 40% of rolling windows.
+G-P2 Gross Economic Edge: gross expectancy (mean total points captured across both legs per trade, before costs) > 0.
+G-P3 Net Viability: annualized NET Sharpe (after 0.51/2.28 spreads and both instrument swaps, zero-filled daily MTM series, mean/std(ddof=1) * sqrt(252)) > 0.
+
+Overall verdict PASS iff G-P1 and G-P2 and G-P3 all pass. Null result is a complete deliverable.
+
+SECTION 6. ARTIFACTS
+
+data/results/pairs_us500_usa30/SPEC_PAIRS_US500_USA30.txt (this file, pre-declared)
+data/results/pairs_us500_usa30/GATE_PAIRS_US500_USA30.txt (verbatim gates, pre-declared)
+evaluate/pairs_us500_usa30.py (implementation)
+data/results/pairs_us500_usa30/pairs_trades.csv
+data/results/pairs_us500_usa30/REPORT_PAIRS_US500_USA30.txt (verdict regardless of outcome)
+
+Honesty rules: no parameter search after first run; constants exactly as pre-declared above; rolling regression uses ONLY data strictly before day t (the spread s_t is out-of-sample by construction); swaps and spreads applied on every trade with no exemptions; END exits are real losses/gains, flagged.
+
+END OF SPEC.

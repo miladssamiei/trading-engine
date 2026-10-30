@@ -1,0 +1,37 @@
+REPORT - HYPOTHESIS #46: EURUSD D1 TREND HARVEST (DONCHIAN 20 + 1.5xATR SL / +2R TP)
+Generated: 2026-09-23T19:07:31.281331+00:00  |  Verdict: FAIL
+
+1. DATA INTEGRITY
+   Tape: 1748 D1 bars 2020-01-02..2026-09-18 (sha256 71ac1e30973092bf...)
+   Indicators: Donchian 20 strictly prior; Wilder ATR(14) strictly prior; armed from index 21
+
+2. FUNNEL
+   armed days=1727  signals: long=47 short=46 total=93
+   ignored while open=139  EXECUTED=93  void(last bar)=0
+
+3. GROSS PERFORMANCE (pips; costs excluded per SPEC 5)
+   trades=93  mean=-7.608 pips  total=-707.5  win=31.2%
+   avg win=223.5 pips (n=29)  avg loss=-112.3 pips (n=64)
+   R multiples: mean=-0.076  median=-1.000  avg ATR=75.0 pips  avg hold=10.8 bars
+   sides={'LONG': 47, 'SHORT': 46}
+   exit mix (level): {'TP': 28, 'SL': 64, 'FORCED': 1}   granular: {'SL': 64, 'TP': 28, 'FORCED_EOD': 1}
+
+4. YEAR-BY-YEAR GROSS (sign inspection, SPEC 7.3)
+   2020: n= 15  total=    175.2 pips  mean= 11.683
+   2021: n= 13  total=   -147.5 pips  mean=-11.345
+   2022: n= 14  total=    297.1 pips  mean= 21.224
+   2023: n= 12  total=   -293.8 pips  mean=-24.481
+   2024: n= 14  total=   -381.7 pips  mean=-27.263
+   2025: n= 14  total=   -534.0 pips  mean=-38.144
+   2026: n= 11  total=    177.1 pips  mean= 16.097
+
+5. GATES (frozen in GATE_FX_HARVEST_D1.txt)
+   G-FXH1 executed >= 30                :   93      -> PASS
+   G-FXH2 mean gross > 0 (strict, pips) :   -7.608 -> FAIL
+   G-FXH3 MBB P(mean<=0) <= 0.20        :   0.8266 -> FAIL  (block=5, 10000 resamples, seed 20260925)
+   VERDICT: FAIL
+
+6. HONESTY NOTES
+   Gross-only accounting per owner designation (verified EURUSD floor ~0.3 pip RT).
+   Lineage: #42 (same signal family, trailing exit) FAILED; this fixed-harvest variant is a
+   pre-declared new mechanic, single run, no parameter search. Null result is final here.

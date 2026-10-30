@@ -1,0 +1,63 @@
+H106 CFTC PRODUCER POSITION GOLD INTRAWEEK - FINAL_FAIL
+{
+  "verdict": "FINAL_FAIL",
+  "spec_sha256": "B8D55653DA9636947409CD9626DF578E44C424722832197B1ECA2DAD78C5D696",
+  "gate_sha256": "0DA5395807ED0EADFB958AE4987C337B2CB7A258F9F93096AD834FF55551357A",
+  "price_sha256": "A8C4C1D6551D27F3796F8D9B88D332172C41C76C151844E759492837152E7B1F",
+  "cftc_zip_sha256": {
+    "2023": "9FE75DBA0256819D476BB0D01F9E8E5AC6EC2C4390F609A7E3259E85796B79CE",
+    "2024": "5E40F60993120D26C116AB347BEAF93702F5DA60C7BDCCBBEE43CB3D0A91D01A",
+    "2025": "17AC2FEF1B53303D01E486BBF5768A4E062308A3C34A2970871F3EAB89829CBC",
+    "2026": "CA88B14A88386BA250E4C48FA786162566EFEDB3FD5D63C5E87DC49A9DBD39DA"
+  },
+  "price_last_ny_date": "2026-09-01",
+  "roster_status": {
+    "EXECUTED": 124,
+    "ABNORMAL_NORMAL_HOURS_GAP": 33,
+    "EXCLUDED_PUBLICATION_DELAY": 24,
+    "NO_REAL_ENTRY": 3,
+    "PREDECLARED_THURSDAY_HOLIDAY": 3,
+    "NO_REAL_EXIT": 2,
+    "NO_VALID_PRIOR_REPORT": 1
+  },
+  "planned_nonexcluded": 162,
+  "resolved_trades": 124,
+  "coverage": 0.7654320987654321,
+  "long_count": 65,
+  "short_count": 59,
+  "base_mean": -7.421407415829291,
+  "stress_mean": -7.831407415829292,
+  "benchmark_stress_mean": -1.262537815264299,
+  "paired_stress_mean": -6.568869600564993,
+  "p_nonpositive_stress_mean_5_calendar_week_block": 0.9676,
+  "p_nonpositive_paired_difference_5_calendar_week_block": 0.9079,
+  "annual": {
+    "2023": {
+      "n": 30,
+      "stress_sum": -59.63208516685209
+    },
+    "2024": {
+      "n": 40,
+      "stress_sum": -110.16982588361162
+    },
+    "2025": {
+      "n": 33,
+      "stress_sum": -234.8420891963593
+    },
+    "2026": {
+      "n": 21,
+      "stress_sum": -566.450519316009
+    }
+  },
+  "gates": {
+    "G-H106-1": false,
+    "G-H106-2": false,
+    "G-H106-3": false,
+    "G-H106-4": false,
+    "G-H106-5": "NOT_RUN"
+  },
+  "trades_sha256": "83F8E9BC7B3206C792D2D3F65335C3E336F7CDD2BCD1AF5B3F3C07B6B8BC5FC7",
+  "coverage_roster_sha256": "4EFC0C45FBA4348E98F238A5A358A8D8F28755F83233433C494DC1286191BC91",
+  "phase2": "NOT_RUN"
+}
+Dukascopy synthetic spread and current FTMO swap snapshot are exploratory proxy costs. No native FTMO execution, historical swap posting or account order.

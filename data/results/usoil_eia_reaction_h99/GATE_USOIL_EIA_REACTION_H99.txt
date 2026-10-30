@@ -1,0 +1,6 @@
+G-OI1: At least 140 fully resolved 2023-2026 Wednesday regular-release USOIL trades on distinct NY dates, zero unresolved required entry or exit quotes, and native real Bid/Ask tick fills only.
+G-OI2: Strictly positive 2023-2026 mean stressed USOIL price units per trade after actual variable Bid/Ask spread and another 0.12 price units stress.
+G-OI3: Five-week circular moving-block bootstrap P(mean stressed USOIL price units <= 0) at most 0.05 using 10000 draws and seed 20261009.
+G-OI4: Strictly positive stressed USOIL price-unit totals separately in complete 2023, 2024, 2025 and partial 2026.
+G-OI5: If Phase 1 passes, a separately frozen exact-native EUR10000 two-stage 180-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts at fixed 2% initial risk.
+G-OI6: Source hashes, official regular-release clock and fixed known-holiday exclusions, causal signal, actual executable tick stops, full same-day exit, commission/slippage stress and no account orders are verified.

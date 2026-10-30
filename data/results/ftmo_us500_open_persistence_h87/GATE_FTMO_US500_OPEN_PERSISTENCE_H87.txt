@@ -1,0 +1,6 @@
+G-OP1: At least 150 executed 2025-2026 FTMO-native US500.cash real-Bid/Ask trades on 150 distinct NY dates, with zero unresolved post-entry exits, zero unknown conversion quotes, and no source-mismatch day used.
+G-OP2: Strictly positive mean EUR net/trade in one fixed risk row after actual Bid/Ask and conversion plus additional 0.51-point spread and 0.25-point slippage stresses.
+G-OP3: NY-date bootstrap P(mean stressed EUR net/trade <= 0) at most 0.05 with 10000 draws and seed 20260929 in the same fixed risk row.
+G-OP4: Strictly positive stressed EUR net totals in complete 2025 and partial 2026 in the same qualifying risk row.
+G-OP5: At least 150 fully observed rolling paid 90-calendar-day starts, with pass rate at least 0.70 and floating-equity breach rate at most 0.10 in the same qualifying risk row.
+G-OP6: All trades use only causal completed opening quotes, exact observed Bid/Ask execution, positive tick-grid stop distance, same NY/Prague date flat, and frozen source/configuration with no account orders.

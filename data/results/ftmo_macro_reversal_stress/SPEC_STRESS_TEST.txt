@@ -1,0 +1,126 @@
+SPEC_STRESS_TEST
+Study dir: data/results/ftmo_macro_reversal_stress/
+Pre-declared: 2026-09-21, BEFORE any script for this study exists.
+Hypothesis number: #26 (owner-tasked; post-Path-C descriptive lane; statistical
+stress sibling of ftmo_macro_reversal #23, which itself replays the frozen
+short_term_reversal g2 OOS list).
+
+SECTION 0. SCOPE, PREMISE, AND STATUS
+
+0.1 Premise: ftmo_macro_reversal (#23) showed the swap-free macro short-term
+reversal counterfactual passes FTMO Phase 1 at FixedLots = 3.0 from a January
+2021 challenge start (pass 2021-04-01, 63 trading days, peak daily loss 4.61%,
+max trailing DD 6.18%) - a SINGLE-PATH result. This study quantifies how much
+of that pass is luck: (A) start-date luck via rolling fresh challenges on
+every trade date, and (B) sequencing luck via 10,000 Monte Carlo shuffles of
+the trade list. Same frozen trades, same economics, no new signals.
+
+0.2 This is NOT new strategy research and NOT an FTMO qualification
+(ftmo10k_qualification_v1 stays INCOMPLETE). The short_term_reversal G-R2 FAIL
+verdict stands untouched. downstream_model_allowed=false,
+live_execution_allowed=false regardless of verdict.
+
+SECTION 1. DATA AND ECONOMICS (frozen inputs, unmodified)
+
+1.1 Trade list: data/results/short_term_reversal/g2_trades.csv, exactly 458
+rows (entry,exit,signal,gross_pt,financing_pt,net_pt), 2021-01-04..
+2026-04-23, signal in {+1,-1}. Verified fact: net_pt = gross_pt -
+financing_pt - 0.51 (the 0.51 pt verified median RT spread is already inside
+net_pt).
+1.2 SWAP-FREE OVERRIDE: per-trade PnL points = gross_pt - 0.51 (spread kept,
+financing -21,250 pts dropped, swap = 0.00). Verified total: +2,467.60 pts
+over 458 trades. Dollars: $1.0000 per index point per lot (the recorded #23
+economics) x FixedLots = 3.0 (the conservative passing lot of #23).
+1.3 D1 marks: data/results/momentum_multihorizon/us500c_d1.csv (3,146 rows
+2014-06..2026-08, server-date OHLC). All 916 trade dates verified present.
+1.4 Execution model (D1-close proxy, #23 convention): entry at the D1 close
+of the entry date; realized PnL on the exit date is the FROZEN CSV value
+(gross_pt - 0.51), never reconstructed; floating marks on intermediate days
+use signal x (close_d - entry_close); worst floating per exposed day uses the
+D1 adverse extreme (low_d for +1, high_d for -1) - pessimistic. Exposure days
+are entry+1 .. exit (the entry day itself has no exposure: entry is at the
+close); the exit day's adverse extreme is counted BEFORE the close (declared
+pessimism). A reconstruction audit (signal x (close_exit - close_entry) vs
+gross_pt) is reported; it does not feed the simulation.
+1.5 FTMO Phase-1 economics: initial $10,000; target +8% = $10,800 (judged on
+D1-close equity); Max Daily Loss = 5.0% of the prior server-day 00:00
+REALIZED balance anchor (frozen #23/#24 convention; approximates FTMO's
+fixed $500 at start and is slightly looser than fixed-$500 at grown balances
+- declared deviation); Max Loss = static $9,000 floor on worst floating
+equity. A breach on the pass date voids the pass (pessimistic same-day
+rule). Failure attribution: FLOOR if worst floating <= $9,000, else DAILY
+(floor takes precedence when both trigger the same day).
+
+SECTION 2. STRESS TEST A - ROLLING CHALLENGE START DATES
+
+2.1 Start dates: EVERY g2 trade entry date from 2021-01-01 through
+2025-12-31 (later entries exist into 2026-04 but are not start candidates
+per tasking; they remain usable as forward trade sequence).
+2.2 Per start date s: fresh $10,000; day-1 anchor = $10,000; trade sequence =
+trades with entry >= s in original order on the real D1 calendar; simulate
+forward; stop at PASS (first D1-close equity >= $10,800 with no breach that
+same or earlier day) or FAIL (first breach day); UNRESOLVED if neither
+before tape end.
+2.3 Metrics: Rolling Start Pass Rate (primary = passes / all start dates;
+resolved-only also reported), Average + Median Days to Pass (trading days
+from s to pass day), failure split DAILY vs FLOOR (%), unresolved count,
+per-entry-year pass rates, median/p95 peak drawdown of passing runs.
+
+SECTION 3. STRESS TEST B - MONTE CARLO SEQUENCING (10,000 shuffles)
+
+3.1 Generator: numpy default_rng(20260921), 10,000 uniform random
+permutations of the 458-trade list.
+3.2 Sequencing convention (declared): trades are re-sequenced BACK-TO-BACK
+on consecutive D1-grid trading days; trade j occupies its original holding
+span (exit_idx - entry_idx, min 1) with entry at its block's first day
+close, floating exposure on the following span days carrying the trade's
+ORIGINAL daily adverse/close path relative to its original entry close, and
+realization at the block's last day close; the next trade starts the
+following grid day. Per-trade risk structure is preserved; cross-trade
+chronology (and the original calendar's overlap/timing) is deliberately
+destroyed. This is a sequencing study, not a calendar simulation.
+3.3 Same stop rules as Test A from a fresh $10,000 (day-1 anchor $10,000);
+UNRESOLVED if the shuffled list ends before pass/breach.
+3.4 Metrics: Monte Carlo Pass Rate (primary = passes / 10,000; resolved-only
+also), Median Peak Drawdown, 95th-percentile Peak Drawdown, where Peak
+Drawdown = max peak-to-trough of the worst-path equity series (D1-close
+equity with intraday adverse extremes folded in), in % of peak.
+
+SECTION 4. GATES (verbatim in GATE_STRESS_TEST.txt)
+
+G-T1 DATA INTEGRITY: both inputs load; exactly 458 trades; all entry/exit
+dates present in the D1 grid; swap-free point total equals 2,467.60 within
+0.01; economics $1/pt/lot with the 0.51 pt spread retained per trade.
+G-T2 ROLLING COVERAGE: every qualifying start date (2021-01..2025-12 trade
+entry dates) simulated exactly once; pass + fail + unresolved counts equal
+the start-date count.
+G-T3 ROLLING ROBUSTNESS: rolling-start pass rate over RESOLVED runs >= 50%.
+G-T4 MONTE-CARLO ROBUSTNESS: MC pass rate over RESOLVED runs >= 50% AND
+95th-percentile peak drawdown < 10.0%.
+OVERALL: PASS iff G-T1..G-T4 all PASS. FAIL is a complete, final answer:
+the #23 FixedLots=3.0 pass is start-luck/sequencing fragile.
+
+SECTION 5. HONESTY RULES
+
+5.1 The g2 trade list is frozen; no trade, date, direction, or PnL is edited.
+Realized PnL comes from the CSV; D1 paths only create floating marks.
+5.2 Pessimistic conventions: D1 adverse extremes for worst floating; exit-day
+extreme counted before the close; same-day breach voids a pass; unresolved
+runs are non-passes in the primary rates.
+5.3 The % -of-anchor daily convention vs FTMO's fixed $500, the Model=0
+offline fills vs #23 EA fills (median -0.30 pt drift), and the MC block
+sequencing convention are declared limitations, not hidden choices.
+5.4 No claim of FTMO qualification; no re-opening of the short_term_reversal
+FAIL; the single-path #23 verdict is context, not evidence here.
+
+SECTION 6. ARTIFACTS (data/results/ftmo_macro_reversal_stress/)
+
+  SPEC_STRESS_TEST.txt / GATE_STRESS_TEST.txt   (frozen before code)
+  REPORT_STRESS_TEST.txt                        (pass rates, days-to-pass,
+                                               drawdown distributions,
+                                               failure attribution, gates)
+  stress_test_distributions.png                 (days-to-pass + peak-DD
+                                               histograms)
+  run_meta.json                                 (machine-readable summary)
+
+END OF SPEC. FROZEN 2026-09-21.

@@ -1,0 +1,4 @@
+G-PF1: Both frozen trade-ledger SHA256 hashes and the H94 coverage SHA256 match, with at least 50 clean fully observed 180-day Monday starts after excluding the three predeclared unresolved-native windows.
+G-PF2: Equal-risk combined stressed R totals are strictly positive in complete 2024, complete 2025 and partial 2026, and both child legs have positive pooled stressed R over 2024-2026.
+G-PF3: At least one predeclared fixed gold-risk row (1%, 1.5% or 2%) with US100 at 2% has >=70% full two-stage close-only passes and <=10% close-only breaches across the same clean rolling starts.
+G-PF4: The source gaps and exposed-history status are disclosed, no unresolved return is imputed, no child record is modified and no account order is placed.

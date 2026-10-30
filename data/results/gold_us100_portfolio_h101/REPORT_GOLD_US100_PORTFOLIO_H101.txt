@@ -1,0 +1,92 @@
+H101 EXPOSED GOLD H70 + US100 H94 CLOSE-ONLY PORTFOLIO PREFLIGHT
+{
+  "source_sha256": {
+    "data\\results\\xauusd_saleh_intraday_real_quotes_close1559_v1\\native_quote_trades.csv": "17d0f1fc14c716c9cc428c6c4283bc13528ce28c4e1853ad4715de00df34107c",
+    "data\\results\\us100_weekday_hold_h94\\trades.csv": "5cf3b14bab33e0f6bfff79fbff2a5793f33822981273bb35376c1cb2a75e51e1",
+    "data\\results\\us100_weekday_hold_h94\\coverage.csv": "28251f94667e33fe498c01ef4803f438bbe7dc962fd1192a20fc1feb8190891d"
+  },
+  "source_gaps": [
+    "2024-02-14",
+    "2025-12-22",
+    "2025-12-29"
+  ],
+  "candidate_starts": 114,
+  "clean_starts": 80,
+  "excluded_starts": 34,
+  "ledger_rows": 459,
+  "annual": {
+    "2024-GOLD": {
+      "sum_r": 0.615697601769821,
+      "n": 128
+    },
+    "2024-US100": {
+      "sum_r": 3.703098782281319,
+      "n": 53
+    },
+    "2025-GOLD": {
+      "sum_r": 14.251856240431417,
+      "n": 123
+    },
+    "2025-US100": {
+      "sum_r": 6.894232864194578,
+      "n": 52
+    },
+    "2026-GOLD": {
+      "sum_r": 7.597554204696858,
+      "n": 69
+    },
+    "2026-US100": {
+      "sum_r": 2.44993376997141,
+      "n": 34
+    }
+  },
+  "combined_year_r": {
+    "2024": 4.31879638405114,
+    "2025": 21.146089104625993,
+    "2026": 10.047487974668268
+  },
+  "child_pooled_r": {
+    "GOLD": 22.465108046898095,
+    "US100": 13.047265416447306
+  },
+  "summary": [
+    {
+      "gold_risk_eur": 100,
+      "starts": 80,
+      "pass": 24,
+      "breach": 0,
+      "timeout": 56,
+      "pass_rate": 0.3,
+      "breach_rate": 0.0,
+      "median_pass_days": 145.0
+    },
+    {
+      "gold_risk_eur": 150,
+      "starts": 80,
+      "pass": 48,
+      "breach": 5,
+      "timeout": 27,
+      "pass_rate": 0.6,
+      "breach_rate": 0.0625,
+      "median_pass_days": 133.0
+    },
+    {
+      "gold_risk_eur": 200,
+      "starts": 80,
+      "pass": 51,
+      "breach": 19,
+      "timeout": 10,
+      "pass_rate": 0.6375,
+      "breach_rate": 0.2375,
+      "median_pass_days": 122.0
+    }
+  ],
+  "gates": {
+    "G-PF1": true,
+    "G-PF2": true,
+    "G-PF3": false,
+    "G-PF4": true
+  },
+  "verdict": "FINAL_FAIL"
+}
+This excludes all windows with known native quote gaps; full floating equity, concurrent position handling, daily-loss resets, native US100 ticks, EUR conversion and forward validation remain unproven. No account order.

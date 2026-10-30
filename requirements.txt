@@ -1,0 +1,2 @@
+# Installable core plus offline tests. Optional research/MT5 extras: see README.
+-e .[dev]

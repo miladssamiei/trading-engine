@@ -1,0 +1,72 @@
+HYPOTHESIS 80: VXX FIRST 15 CASH MINUTES -> NEXT-HOUR US500 RETURN
+Declared 2026-09-25 after read-only FirstRate source-coverage audit
+and before any H80 trade/evaluation code or Phase-1 run.
+
+MECHANISM, RELATION TO PRIOR WORK, AND LIMITS
+Sung (2014), https://ir.lib.ncu.edu.tw/handle/987654321/65376,
+and Tapiero (2015),
+https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2674086,
+report VIX-to-S&P intraday lead-lag/information, not CFD profit.
+VXX is a short-term VIX futures ETN, not the VIX spot index, so
+transfer of those findings is uncertain. Hypothesis 76's frozen
+Dukascopy VXX source was empty and its source verdict INCOMPLETE;
+this is a new named source and fixed rule. H78/H79 tested direct
+spot VIX and failed; VXX's futures information is different, but
+testing it after those failures raises multiple-testing concern.
+Null is expected and is a complete deliverable. No VIX/VXX
+combination, threshold, inversion or clock search is permitted.
+
+SOURCE AND SIGNAL KNOWN BEFORE ENTRY
+Use original FirstRate Data free VXX minute zip at
+data/results/project_status/vxx_frd_source_probe/
+VXX_1min_sample_firstratedata.zip, SHA256
+ce49f06c3fb0cae20457df6a65bba209cd1f675819123816f46af84a90748da5.
+Provider: https://firstratedata.com/free-intraday-data.
+It contains VXX_1min_firstratedata.csv with 121604 data lines
+from 2022-09-30 through 2023-09-29; timestamps are New York
+wall time per provider. Require 15 distinct real minute bars
+09:30..09:44 inclusive on a NY cash date, each with positive
+OHLC values and traded volume. Reject duplicate/invalid times.
+Signal is sign of 09:44 bar close minus 09:30 bar open, known at
+09:45. If VXX rose, SELL US500; if VXX fell, BUY; zero skips.
+ETN reverse splits, venue reporting and vendor adjustments are
+source limitations; within-session direction is the only signal.
+
+US500 PHASE-1 BID PROXY AND COSTS
+Use the verified US500-tick real-tick-derived BID M5 CSV at
+data/results/orb_2021_present/us500tick_m5.csv, SHA256
+a8ee68f1a0010a1be9704c0d59fd5382aa798846cdae4d519b799ae21ec66c2d.
+Convert UTC epoch seconds to America/New_York. Require real
+09:30 cash-open, 09:45 entry and 10:45 exit M5 bars. Enter at
+09:45 BID open and exit at 10:45 BID open, one same-day trade.
+Gross points = direction times exit-minus-entry BID. Base net
+subtracts the owner's 0.51-point round-trip spread proxy; stress
+subtracts another 0.51 point. No stop, target, alternative fill,
+overnight hold, session filter or source substitution. Fixed-spread
+BID opens omit actual order execution and account floating loss.
+
+SAMPLE AND STATISTICS
+Describe 2022-09-30 through 2022-12-31 without tuning. Gate
+every eligible 2023-01-01 through 2023-09-29 cash date. Report
+source coverage/skips, trade count by quarter and side, gross,
+base and stressed point mean/sum, win rate. Bootstrap gated NY
+cash dates with replacement 10000 times, seed 20261016, report
+P(mean base net<=0). Because this is the 80th historical hypothesis,
+require p<=0.01 and positive Q1/Q2/Q3 totals. Old 2023-only
+source cannot establish 2024-26 year agreement even if it passes.
+
+GATES FROZEN BEFORE PHASE 1
+G-VF1: At least 150 executed distinct 2023-01-01 through 2023-09-29 NY cash dates, each with 15 exact valid 09:30..09:44 VXX M1 bars and real 09:30/09:45/10:45 US500 BID M5 bars.
+G-VF2: Gated mean net US500 points remains strictly positive after the 0.51 spread proxy and an additional 0.51 execution stress.
+G-VF3: The 10000-resample cash-date bootstrap P(mean base net <= 0) is at most 0.01 with seed 20261016.
+G-VF4: Base 0.51-cost net US500 point totals are strictly positive in each 2023 calendar quarter Q1, Q2 and Q3.
+All four gates must PASS; otherwise Phase-1 FAIL final. A PASS
+only justifies acquiring independent 2024-26 VXX history and a
+new frozen native Model=4/FTMO pace study; it does not validate
+a tradeable system. No post-hoc sign, time or threshold rescue.
+All prior SPEC/GATE/REPORT artifacts remain untouched.
+
+OUTPUTS
+Keep the original zip in source_probe and save signal/trade CSV,
+run metadata and immutable REPORT under this study directory.
+Append SPEC/GATE, run and verdict stages to PROGRESS.md.

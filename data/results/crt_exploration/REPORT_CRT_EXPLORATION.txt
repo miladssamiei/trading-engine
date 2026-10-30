@@ -1,0 +1,63 @@
+REPORT -- CRT (CANDLE RANGE THEORY) MODEL 1 SIGNAL-QUALITY EXPLORATION, PHASE 1
+Run 2026-09-09 by evaluate/crt_exploration_phase1.py per SPEC_CRT_EXPLORATION.txt / GATE_CRT_EXPLORATION.txt
+(pre-declared before the data loop).
+
+STATUS: POST-TERMINATION EXPLORATORY. This study officially violates the Path C termination rule pre-declared in
+SPEC_SHORT_TERM_REVERSAL. Regardless of the verdicts below, no EA, no Phase 2, no parameter work and no re-test may
+follow from it. The gates grade raw signal quality only.
+
+1. DATA AND CONSTRUCTS
+   M5 bars: 364330  range 2021-01-03 .. 2026-04-30 (US500-tick, verified export)
+   15m candles aggregated: 121486
+   days in tape: 1656
+   cash days (09:30 bar exists): 1370
+   eligible days (cash AND >= 24/48 reference bars): 1370
+   cash days skipped for short reference block: 0
+   reference-block M5 bar count (cash days): min 41, p25 48.0, median 48.0, p75 48.0, max 48
+
+2. FUNNEL (per side; S mirrored)
+   side   arm-days  trig-days  trig-ev  cutoff  gap  atr-drop  signals
+   long        626        474      668      314   30          0      324
+   short       754        609      888      441   35          0      412
+   combined signals: 736  (days with both sides fired: 13)
+
+3. POPULATION STATISTICS (points unless stated)
+   ALL    n= 736  meanMFE 16.041  meanMAE 16.041  mean(MFE-MAE) 0.001  med(MFE-MAE) -0.485  meanMFE/ATR 1.882  meanMAE/ATR 1.884
+   long   n= 324  meanMFE 18.178  meanMAE 19.409  mean(MFE-MAE) -1.231  med(MFE-MAE) 0.514  meanMFE/ATR 2.002  meanMAE/ATR 2.122
+   short  n= 412  meanMFE 14.360  meanMAE 13.391  mean(MFE-MAE) 0.969  med(MFE-MAE) -1.541  meanMFE/ATR 1.788  meanMAE/ATR 1.697
+   yearly breakdown of (MFE-MAE), informational:
+     2021: n= 127  mean -0.430  median -1.203
+     2022: n= 148  mean -1.752  median -6.377
+     2023: n= 133  mean 1.594  median 0.109
+     2024: n= 148  mean 1.990  median 1.144
+     2025: n= 136  mean -1.480  median -1.244
+     2026: n=  44  mean 0.204  median 4.111
+
+4. GATE EVALUATION (GATE_CRT_EXPLORATION.txt, frozen)
+   G-C1 SAMPLE SIZE: total signals 736 vs >= 150 -> PASS
+   G-C2(i) mean(MFE) 16.041 > mean(MAE) 16.041 -> PASS [ATR-scaled: 1.882 vs 1.884, non-binding]
+   G-C2(ii) threshold dominance (count MFE >= t*ATR vs count MAE >= t*ATR):
+     t=0.50: MFE  580  MAE  585  -> FAIL
+     t=0.75: MFE  508  MAE  526  -> FAIL
+     t=1.00: MFE  441  MAE  460  -> FAIL
+   G-C2(iii) day-block bootstrap P(mean(MFE-MAE) <= 0) = 0.6471 over 723 day-means, 10000 draws, seed 20260909 vs <= 0.20 -> FAIL
+     [ATR-normalized variant P = 0.6778, non-binding]
+   G-C2 GROSS EDGE (i AND ii AND iii) -> FAIL
+
+5. INFORMATIONAL COST CHECK vs TRANSACTION-COST FLOOR
+   raw point expectancy proxy mean(MFE - MAE) = 0.001 pt
+   0.001 pt < 0.51 pt confirmed real-tick median round-trip spread floor ->
+   FLAG: ECONOMICALLY DEAD BEFORE COSTS. The excursion proxy does not clear the spread floor, before any
+   slippage, financing or execution considerations.
+
+6. HONESTY NOTES
+   - One long + one short sample per day maximum; first valid trigger per side (SPEC 3.4).
+   - ATR14 uses Candle 2's close (last completed candle at decision); excursions walk the finer M5 tape;
+     no lookahead past the entry decision anywhere.
+   - Single frozen configuration; no parameter was tuned and no alternative was tried after seeing numbers.
+   - No MT5/tick-model involvement; offline Python on the verified M5 export only.
+   - Post-termination exploratory artifact: FAIL verdicts are final; a PASS would still license nothing.
+
+PHASE 1 VERDICT: FAIL (G-C1 PASS, G-C2 FAIL). Post-termination exploratory;
+TRANSITION TO PATH C: RESEARCH EXHAUSTED remains the governing state of this program; this artifact does not
+reopen it.

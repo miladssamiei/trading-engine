@@ -1,0 +1,212 @@
+SPEC_FTMO_HYBRID_LONG
+Study dir: data/results/ftmo_hybrid_long/
+Pre-declared: 2026-09-16, BEFORE any EA code, ini, or orchestrator script exists.
+Hypothesis number: #25 (owner-tasked; continues the post-Path-C descriptive lane;
+sibling of ftmo_macro_reversal #23 and ftmo_pairs_us500_usa30 #24, same pipeline
+discipline). Owner label: "ATR Band-Touch Long Strategy under FTMO $10k Swap-Free".
+
+SECTION 0. SCOPE, PREMISE, AND STATUS
+
+0.1 Premise (swap-free): the youtube_hybrid_scalping study (#22) measured the
+ATR(14) lower-band limit-touch Long model (Close[i-1] - 3.1*ATR[i-1] band touch,
+fill at band, TP +2.0 ATR / SL -1.5 ATR, pessimistic same-bar stop-first
+collision, 09:30 opening candle excluded, single position) on the verified
+US500 M5 tape: 1,326 frozen trades, 2021-01-04..2026-04-30, net expectancy
++2.7941 pt/trade at $1/pt/lot, win rate 74.96%, with long holds carrying NO
+swap in that model (the study's declared limitation). This study asks the
+NARROW counterfactual: on an FTMO $10,000 Phase-1 Challenge account that is
+SWAP-FREE (swap forced to 0.00 on every trade), does the EXACT, ALREADY-
+GENERATED, UNMODIFIED US500/Long trade list reach the +8% profit target
+($10,800) before breaching the 5% daily or 10% max loss limits, at some
+FixedLots multiplier in [1.0, 30.0], and which multiplier passes fastest?
+
+0.2 This is NOT new strategy research: no signal, band, ATR multiple, or exit
+is created or tuned. The trade list is replayed as-is with market orders at
+the recorded signal timestamps. The #22 descriptive status (single full-sample
+in-sample measurement, no walk-forward confirmation) stands untouched.
+
+0.3 This is NOT an FTMO qualification: ftmo10k_qualification_v1 remains
+INCOMPLETE. FTMO rule numbers (5% daily, 10% max, +8% target, swap-free) are
+the owner-stated challenge parameters, simulated. downstream_model_allowed=
+false and live_execution_allowed=false regardless of verdict.
+
+SECTION 1. SIGNAL SUBSET AND EXECUTION PIPELINE (single-symbol Signal-Reader EA)
+
+1.1 Frozen input: data/results/youtube_hybrid_scalping/hybrid_scalp_trades.csv
+filtered to instrument == "US500" AND model == "Long" -> 1,326 rows.
+Pre-declared, pre-verified subset facts (the runner re-verifies and aborts on
+mismatch): entries chronologically sorted; 1,306 rows carry exit_time ==
+entry_time (same-bar TP/SL resolution), 20 rows exit_time > entry_time
+(hold min 300 s / median 3,600 s / max 22,200 s), 0 rows exit < entry;
+zero position overlaps; minimum gap between consecutive entries 300 s;
+exit_reason split 994 target / 332 stop; pnl_net_pts total +3,704.92.
+Direction: long only.
+
+1.2 Staging: the orchestrator restamps the subset's UTC epochs (entry_time,
+exit_time) to Europe/Athens wall clock (broker-clock class; documented
+<= 1 h DST-rule skew vs the actual broker clock; same convention as #24's
+tape restamp, and the #24 restamp bug is avoided by tz_localize(None) BEFORE
+the int64 cast) and writes a 5-column hybrid_scalp_trades.csv
+(instrument,model,dir,entry_time,exit_time) to Common\Files. All EA file I/O
+uses FILE_COMMON (build 6182 tester-agent sandboxes do not serve pre-staged
+reads from agent MQL5\Files).
+
+1.3 New EA ea/HybridLong_FTMO.mq5 (chart symbol US500.c):
+   - OnInit parses the staged FILE_COMMON CSV; keeps only rows with
+     instrument == "US500" and model == "Long"; rows with exit < entry are
+     skipped and counted; the signal array is verified sorted by entry.
+   - ENTRY: market buy of FixedLots at the first tester tick with
+     TimeCurrent() >= entry_time (Athens wall epoch).
+   - EXIT TIMESTAMP RULE (pre-declared resolution of frozen M5 bar labels):
+     the exit is armed at exit_time + 300 s (the labeled exit bar's
+     completion) and fills at the first tick at/after it. Rationale: 1,306 of
+     1,326 rows carry exit_time == entry_time because the offline model
+     resolved TP/SL inside the entry bar; a literal close-at-exit_time would
+     close the position at the same instant it opens (degenerate, zero
+     economic content). Bar-completion exit is the non-degenerate reading of
+     the frozen labels; the induced fill drift vs the offline band/TP/SL
+     limit fills is QUANTIFIED in the report, not hidden.
+   - Market orders only: explicit grid-normalized (2-digit) prices, deviation
+     20, magic 26091601, volume normalized to SYMBOL_VOLUME_STEP (floor).
+     Single position at all times (the frozen list has zero overlaps and the
+     +300 s arming creates zero collisions - pre-verified). Signals whose
+     armed window fully passed while the EA is flat are consumed and counted
+     as skipped; a failed open consumes the signal (no retry churn - #24
+     lesson).
+   - Per-tick MAE/MFE sampling of the open position (POSITION_PROFIT +
+     POSITION_SWAP) is recorded per trade: worst/best floating evidence for
+     the daily-loss audit.
+   - Input InpProfitTargetUSD (default 10800): once REALIZED balance >=
+     target the EA opens no new trades (Phase-1 pass semantics; an open trade
+     completes).
+   - OnDeinit writes (FILE_COMMON) ftmo_hybrid_long_trades.csv: ticket,
+     entry_time, exit_time, direction, lots, open_price, close_price, raw
+     profit, swap, commission, mae_usd, mfe_usd, close reason
+     (signal/target_stop_breach/guard_flatten/open_at_end), tick_value,
+     tick_size, point; plus ftmo_hybrid_long_status.csv (initial equity,
+     final balance/equity, target_reached, breached, breach_reason,
+     signals_total, signals_next, trades_executed, last_time).
+
+1.4 PropFirmGuard integration (Include/PropFirmGuard.mqh, unmodified frozen
+deploy infrastructure): identical to #23 SPEC 1.2 / #24 SPEC 1.2 - PG_Init
+registration, PG_IsBreached latch, PG_Breach/PG_CloseEverything panic
+flatten, EOD-anchor protocol reused; the LIMIT CHECKS are the FTMO Challenge
+values implemented in-EA because the include's compile-time 3.5%/8.0%
+constants cannot be re-parameterized post-inclusion (declared deviation):
+   - DAILY: (most-recent server-day 00:00 latched balance - floating
+     equity) / latched balance >= 5.0% -> PG_Breach("FTMO_DAILY_DRAWDOWN").
+   - MAX LOSS: floating equity <= initial equity * 0.90 (static $9,000
+     floor) -> PG_Breach("FTMO_MAX_LOSS").
+   - ACCOUNT_EQUITY natively aggregates the open position's floating PnL.
+
+SECTION 2. TESTER PROTOCOL
+
+2.1 configs/tester_FTMO_HybridLong.ini generated by the orchestrator:
+    Expert=HybridLong_FTMO, Symbol=US500.c, Period=M5, Model=0 (every tick
+    from M1 bars of the chart symbol; constant synthetic spread), FromDate=
+    2021-01-01, ToDate=2026-05-01 (covers the full trade span plus the +300 s
+    exit arming), Deposit=10000, Currency=USD, Leverage=100, VisualMode=0,
+    ReplaceReport=1, ShutdownTerminal=1, Report=<study>/tester_report_<label>.xml.
+    Inputs via MQL5\Profiles\Tester\<label>.set (FixedLots, target, magic).
+2.2 Headless batch via subprocess, generous timeout (>= 7200 s); terminal64
+    and metatester64 killed before/after; the tester aggregate log at
+    <terminal-data>\Tester\logs is read as a delta and archived; EA outputs
+    are collected from Common\Files (fresh by mtime).
+2.3 REFERENCE RUN at FixedLots=1.0 (max-information run: every multiplier
+    M >= 1.0 accumulates dollar PnL monotonically faster than the 1.0 run,
+    so trades executed up to the 1.0-lot pass date - or tape end if it never
+    passes - cover the whole [1.0, 30.0] sweep).
+2.4 CONFIRMATION RUN at the sweep-selected optimal multiplier.
+
+SECTION 3. PYTHON ANALYSIS (evaluate/ftmo_hybrid_long_test.py)
+
+3.1 CRITICAL SWAP OVERRIDE: the tester applies broker default swaps; the
+    analysis FORCES swap = 0.00 on every trade: pnl_sf = raw DEAL_PROFIT -
+    commission. The tester-charged swap total is reported alongside as the
+    documented delta.
+3.2 Equity simulation from $10,000 on the EA event grid (server-clock
+    timestamps from the EA output):
+    - Realized balance: cumulative pnl_sf of closed trades.
+    - PASS EVENT: the first close-event equity >= $10,800 (realized-balance
+      semantics, matching the EA target-stop input).
+    - Worst-case floating per trade: the EA-recorded tick-sampled mae_usd;
+      worst-case event equity = balance-before-trade + mae_usd. Pessimistic
+      convention: the full-hold MAE is attributed to EVERY server day the
+      trade intersects.
+    - FTMO daily loss per server day d: anchor(d) = realized balance latched
+      at d's 00:00 (the prior day's midnight balance) = 10000 + sum of pnl_sf
+      closed strictly before d; breach iff (anchor - worst floating
+      equity in d) / anchor >= 5.0%.
+    - Static floor: worst-case floating equity must stay > $9,000 at all
+      times.
+    - Max trailing drawdown (reported metric): max peak-to-trough decline of
+      close-event equity, % of peak.
+3.3 Multiplier sweep M in {1.0, 1.5, ..., 30.0} (step 0.5): per-trade dollar
+    PnL and MAE scale linearly in M (recorded economics $1.0000 per index
+    point per lot; commission, if any, scales too). M passes iff it reaches
+    close-event equity >= $10,800 with NO daily-loss breach and the $9,000
+    floor respected up to AND INCLUDING its own pass date (pessimistic
+    same-day rule: a breach on the pass date voids the pass). Optimal M =
+    earliest pass date (trading days from the first signal); ties broken
+    toward the smaller multiplier.
+3.4 Cross-checks: executed-vs-armed count; per-trade EA fill PnL vs the
+    offline pnl_net_pts * $1/pt/lot and EA open price vs the offline band
+    entry_price (median/mean/total drift); per-year table at the optimal M.
+
+SECTION 4. GATES (verbatim in GATE_FTMO_HYBRID_LONG.txt)
+
+G-H1 EXECUTION INTEGRITY: EA compiles 0 errors/0 warnings; the reference
+tester run completes (tester log shows generation + Test passed; fresh
+ftmo_hybrid_long_trades.csv collected from Common\Files); executed trades
+>= 95% of the signals armed before the EA target-stop (or tape end); every
+executed trade has both an open and a close fill recorded.
+G-H2 SWAP-FREE OVERRIDE AUDIT: every trade's analysis PnL has swap forced to
+0.00; the tester-charged swap total is reported; no trade dropped.
+G-H3 FTMO PHASE-1 FEASIBILITY: at least one M in [1.0, 30.0] (step 0.5)
+reaches close-event equity >= $10,800 with, up to and including its pass
+date, no 5% daily-loss breach (worst-floating audit per 3.2) and worst-case
+equity strictly above $9,000.
+G-H4 CONFIRMATION RUN: a second tester run at the optimal M shows realized
+balance reaching >= $10,800 (within two trades of the Python pass point)
+with no EA guard breach before the pass.
+OVERALL: PASS iff G-H1..G-H4 all PASS. G-H3 FAIL (no feasible multiplier) is
+a complete, final answer: the swap-free ATR band-touch long counterfactual
+does not pass Phase 1.
+
+SECTION 5. HONESTY RULES
+
+5.1 The youtube_hybrid_scalp trades list is frozen; ANY modification of
+    entries, directions, timing, or PnL voids the study. Fills land on real
+    tester ticks; no fill is edited.
+5.2 Pessimistic conventions: full-hold MAE attributed to every intersected
+    day; static $9,000 floor on worst-case floating equity; daily anchor is
+    the prior day's midnight realized balance; breach on the pass date
+    voids the pass.
+5.3 Model=0 constant synthetic spread underestimates the real US500 spread
+    (~0.41 vs ~0.51 median). MAE/MFE are sampled at Model=0 tick
+    granularity, not true tick extremes. The Athens restamp carries <= 1 h
+    DST-rule skew vs the broker clock at fill instants.
+5.4 Time-based market exits do NOT replicate the offline band/TP/SL limit
+    fills (the offline fills are idealized: band-price entry, exact TP/SL
+    exits). The fill-vs-model drift is reported; a materially degraded
+    executed expectancy is a finding, not a bug.
+5.5 No claim of FTMO qualification, no live authorization, no change to the
+    #22 descriptive verdict. The comparison to #23/#24 in the report is
+    descriptive scaling/risk context only.
+
+SECTION 6. ARTIFACTS (data/results/ftmo_hybrid_long/)
+
+  SPEC_FTMO_HYBRID_LONG.txt / GATE_FTMO_HYBRID_LONG.txt  (frozen before code)
+  compile/                                    (EA source, .ex5, compile log)
+  ini/ + batches/<label>/                     (generated configs, tester log
+                                              deltas, EA outputs, reports)
+  ftmo_hybrid_long_trades.csv / ftmo_hybrid_long_status.csv (archived EA
+                                              outputs at reference/optimal)
+  ftmo_hybrid_long_equity_curve.png           (equity + drawdown at optimal)
+  REPORT_FTMO_HYBRID_LONG.txt                 (verdicts, optimal lot, pass
+                                              date, peak FTMO daily loss,
+                                              max trailing DD, win rate,
+                                              sweep table, per-year table)
+  run_meta.json                               (machine-readable summary)
+
+END OF SPEC. FROZEN 2026-09-16.

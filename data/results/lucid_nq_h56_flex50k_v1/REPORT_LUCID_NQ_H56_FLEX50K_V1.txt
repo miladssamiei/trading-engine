@@ -1,0 +1,38 @@
+LUCID NQ H56 50K FLEX - ACCOUNT TRANSFER REPORT
+OVERALL VERDICT: NO GO
+2026-09-26. Frozen USTECH bid-M1 proxy; not native CME NQ or Lucid fills.
+Source rows 447, complete 180-day rolling entry-day starts 277.
+G1 same-day weekday before 16:45 NY: PASS.
+G2 >=50 complete starts: PASS.
+G5 native CME NQ price/quote and Lucid forward fills: FAIL (unavailable).
+Assumed one-tick spread, listed Lucid commissions and zero slippage are floors.
+Pretrade structural risk-reserve check is conservative but not a floating tick replay.
+The signal's M1-extreme entry is optimistic. No contract rolls or historical spread.
+Historical full-tape and rolling starts overlap; none is unseen forward validation.
+
+2_NQ_1tick: 2 x $20/point, cost 0.425 + extra 0.0 index points
+  Full-ledger mean $52.35/trade; sum $23402.08; annual $ {'2024': 2374.32, '2025': 4419.2, '2026': 2587.96}
+  180d starts: pass 54/277, breach 13/277, timeout 210/277
+  G3 FAIL; G4 PASS; diagnostic FAIL.
+
+4_NQ_1tick: 4 x $20/point, cost 0.425 + extra 0.0 index points
+  Full-ledger mean $104.71/trade; sum $46804.16; annual $ {'2024': 4748.64, '2025': 8838.4, '2026': 5175.92}
+  180d starts: pass 158/277, breach 109/277, timeout 10/277
+  G3 FAIL; G4 PASS; diagnostic FAIL.
+
+2_NQ_2tick_plus_0p5: 2 x $20/point, cost 0.675 + extra 0.5 index points
+  Full-ledger mean $22.35/trade; sum $9992.08; annual $ {'2024': 94.32, '2025': 2949.2, '2026': 1807.96}
+  180d starts: pass 12/277, breach 78/277, timeout 187/277
+  G3 FAIL; G4 PASS; diagnostic FAIL.
+
+4_NQ_2tick_plus_0p5: 4 x $20/point, cost 0.675 + extra 0.5 index points
+  Full-ledger mean $44.71/trade; sum $19984.16; annual $ {'2024': 188.64, '2025': 5898.4, '2026': 3615.92}
+  180d starts: pass 74/277, breach 190/277, timeout 13/277
+  G3 FAIL; G4 PASS; diagnostic FAIL.
+
+References:
+https://support.lucidtrading.com/en/articles/12945790-lucidflex-evaluation-account
+https://support.lucidtrading.com/en/articles/12945815-lucidflex-drawdown
+https://support.lucidtrading.com/en/articles/12945805-lucidflex-consistency-percentage
+https://support.lucidtrading.com/en/articles/11404729-allowed-trading-times
+https://support.lucidtrading.com/en/articles/11508978-approved-products-and-commissions

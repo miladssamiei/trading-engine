@@ -1,0 +1,6 @@
+G-ON1: At least 520 fully resolved 2024-2026 US100 overnight trades on distinct NY entry dates, zero unresolved required exits in that period, and all selected source windows are real M1 bars.
+G-ON2: Strictly positive 2024-2026 mean stressed US100 points per trade after 1.50 synthetic entry spread and another 2.50 points stress.
+G-ON3: Twenty-trade circular moving-block bootstrap P(mean stressed US100 points <= 0) at most 0.05 using 10000 draws and seed 20261010.
+G-ON4: Strictly positive stressed US100 point totals separately in complete 2024, complete 2025 and partial 2026.
+G-ON5: If Phase 1 passes, a separately frozen native exact-tick EUR10000 two-stage 180-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts at fixed 2% initial risk.
+G-ON6: Frozen BID source hash, causal prior completed cash ATR20, known Good Friday-eve exclusion, gap-aware real-M1 BID stop, weekday-only overnight flatting, fixed cost stress, and no account orders are verified.

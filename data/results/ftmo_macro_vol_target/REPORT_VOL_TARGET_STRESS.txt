@@ -1,0 +1,69 @@
+REPORT_VOL_TARGET_STRESS
+Generated: 2026-09-21T20:20:20
+
+PREMISE: #26 stressed the #23 swap-free macro short-term reversal replay at FIXED
+3.0 lots: rolling pass 53.60%, MC pass 47.31%, p95 peak DD 10.62% - fragile. This
+study tests the classic VOLATILITY-TARGETING sizing overlay on the SAME frozen
+458-trade list (no signal change): DynamicLots = clip(1.0 x TargetVol / RV20,
+0.5, 15.0), RV20 = annualized stdev of the 20 daily log returns ending at the
+entry day (ddof=0, observable at the entry close), lots frozen per trade at their
+historical entry-day value. NOT new signal research; the short_term_reversal
+G-R2 FAIL stands; not an FTMO qualification; flags false.
+
+ECONOMICS: 458 trades; swap-free (gross_pt - 0.51) x $1/pt/lot x DynamicLots;
+swap-free point total +2467.60 pts. RV20 at trade entries: min 5.5% / median 13.4% / max 49.8%.
+FTMO rules and pessimistic conventions identical to #26 (adverse D1 extremes,
+prior-day balance anchor at 5.0%, static $9,000 floor, pass on D1-close equity,
+same-day breach voids).
+
+TARGETVOL SWEEP (base path = challenge starting at the first trade, 2021-01-04)
+ TV%    outcome         end  days  peakDD%  peakDly% lots_mean lots_min lots_max  @floor   @cap
+  10       PASS         238   238     1.84      1.93      0.82     0.50     1.82   15.3%   0.0%
+  15       PASS         205   205     2.72      2.84      1.21     0.50     2.74    2.4%   0.0%
+  20       PASS         120   120     3.19      2.81      1.61     0.50     3.65    1.5%   0.0%
+  25       PASS          81    81     3.80      3.08      2.01     0.50     4.56    0.0%   0.0%
+  30       PASS          71    71     4.52      3.67      2.41     0.60     5.47    0.0%   0.0%
+  40       PASS          66    66     5.93      4.82      3.21     0.80     7.30    0.0%   0.0%
+OPTIMAL TargetVol = 40% (earliest base-path pass 2021-04-05 in 66 trading days; ties toward smaller TV)
+
+TEST A - ROLLING CHALLENGE STARTS at TargetVol 40%
+  start dates simulated: 431
+  Rolling Start Pass Rate: 52.67% of all starts (227/431); 52.67% of resolved (227/431)
+  Average Days to Pass: 33.8 trading days (median 29)
+  Failures: 204 -> 5% Daily Loss 127 (62.3%) | 10% Max Loss floor 77 (37.7%)
+  Unresolved: 0 (0.0%)
+  Peak drawdown of passing runs: median 3.36%, p95 9.13%
+  Pass rate by entry year:
+    2021: starts  87  pass  47 ( 54.0%)  fail  40  unres   0
+    2022: starts  86  pass  64 ( 74.4%)  fail  22  unres   0
+    2023: starts  86  pass  48 ( 55.8%)  fail  38  unres   0
+    2024: starts  86  pass  16 ( 18.6%)  fail  70  unres   0
+    2025: starts  86  pass  52 ( 60.5%)  fail  34  unres   0
+
+TEST B - MONTE CARLO SEQUENCING at TargetVol 40% (10,000 shuffles, seed 20260921)
+  Monte Carlo Pass Rate: 50.05% of all runs (5005/10000); 50.05% of resolved (5005/10000)
+  Failures: 4995 -> daily 3600 | floor 1395; unresolved 0
+  Median Peak Drawdown: 4.85%   95th Percentile Peak Drawdown: 10.97%
+  Median days-to-pass (passing runs): 34 trading days
+
+COMPARISON vs #26 (FixedLots 3.0, frozen run_meta.json, identical conventions and seed):
+  metric                              #26 fixed 3.0 #28 vol-target
+  rolling pass rate (resolved)               53.60%         52.67%
+  rolling avg days to pass                     42.4           33.8
+  MC pass rate (resolved)                    47.31%         50.05%
+  MC p95 peak drawdown                       10.62%         10.97%
+  MC median peak drawdown                     4.71%          4.85%
+
+GATES
+G-V1 DATA/VOL INTEGRITY: 458 trades, dates aligned, swap-free total +2467.60, RV20 at all entries (min 5.5%), lots in [0.80, 7.30] within [0.5, 15.0], coverage 227+204+0=431 -> PASS
+G-V2 ROLLING PASS RATE: resolved pass rate 52.67% >= 50% -> PASS
+G-V3 MONTE-CARLO ROBUSTNESS: resolved pass rate 50.05% >= 50% AND p95 peak DD 10.97% < 10.0% -> FAIL
+OVERALL VERDICT: FAIL - volatility targeting does not make the replay robust
+
+CAVEATS: RV20 is close-to-close (no intraday vol); lots clamped hard at
+0.5/15.0; worst floating via D1 adverse extremes (pessimistic); daily limit
+is 5% of the prior-day balance anchor vs FTMO's fixed $500; MC blocks are a
+sequencing device, not a calendar simulation; sizing overlays multiply
+frozen trade PnL and cannot repair a negative-expectancy or fragile signal -
+the #26/#28 family measures FTMO pass robustness only; unresolved runs are
+non-passes in the primary rates.

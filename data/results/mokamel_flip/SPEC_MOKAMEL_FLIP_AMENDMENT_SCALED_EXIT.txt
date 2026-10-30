@@ -1,0 +1,139 @@
+SPEC AMENDMENT 1 — MOKAMEL FLIP SCALED-EXIT ARMS (US500-NATIVE ADOPTION)
+=========================================================================
+Hypothesis #16, amendment to SPEC_MOKAMEL_FLIP.txt / GATE_MOKAMEL_FLIP.txt
+(frozen 2026-09-03). Written 2026-09-03 AFTER Stage B, BEFORE any scaled
+Stage-B re-run. The original SPEC and GATE files are historical records
+and are NOT modified by this amendment; this file references them by
+name and adds exactly what its title says — nothing else reopens.
+
+MOTIVATION (the flaw being addressed)
+The literal 40/80-point binding arm was calibrated for Dow Jones'
+price level (the presenter's instrument; roughly 7-9x US500's level
+over 2021-2026, per the task brief that commissioned this amendment).
+Stage B showed the direct symptom: 78% of trades (1,059/1,355) exit
+at the 15:55 forced exit, only 26 ever reach the 80-pt target, and
+the day-close rule never fires. This amendment derives a properly
+scaled stop/target pair from FIXED, EXTERNAL, NON-PERFORMANCE-BASED
+anchors and tests it under the identical Stage-B protocol.
+
+DOW DATA SOURCING DECISION (open question resolved 2026-09-03)
+No Dow Jones / US30 / DJI data exists in this project: the MT5
+terminal bases hold only EURUSD, GBPUSD, US500.c, USDCHF, USDJPY,
+XAUUSD (broker) and US500-tick / USA500_Tick (custom); the data tree
+contains no US30/DJI series (config.py / ExportM1Data.mq5 mentions
+are legacy plumbing around a symbol that was never exported). Task
+owner decision: ADOPT THE NUMBERS FOR US500 — derive the scaled
+exits from US500's own validated data plus the public price-level
+knowledge already stated in the commissioning brief. No Dow series
+is sourced; no Dow tick/bar data is fabricated. Rigor flag: the
+price-level anchor is task-brief-stated public knowledge, which is a
+LOWER-RIGOR anchor than this project's usual measured-and-reconciled
+data; the volatility anchor is US500-native and fully measured. Both
+are declared here before any scaled run.
+
+WHAT DOES NOT CHANGE
+- Stage A (signal quality, GATE A1 PASS) is untouched and is NOT
+  re-run; it does not depend on stop/target values.
+- The original binding 40/80 arm's Stage B result stands as recorded
+  (complete, valid, null-leaning: the literal video numbers largely
+  fail to engage US500's actual range).
+- The unit ring {20/40, 30/60, 50/100, 60/120} remains non-binding,
+  non-promotable context. It is NOT the source of the new values: the
+  derived 5-pt stop lies OUTSIDE the ring's value space (ring stops
+  are 20-60 pt). No ring cell is promoted or informed by this
+  amendment. The Stage-B ring numbers were acknowledged only as the
+  SYMPTOM motivating the amendment (as pre-stated in the brief), not
+  as a selection criterion.
+
+THE TWO DERIVATION METHODS (both pre-registered, neither chosen by
+performance; both computed and reported even though they converge)
+
+METHOD 1 — PRICE-LEVEL RATIO (public-anchor variant):
+Dow/US500 price ratio anchor R_price = 8.0, the MIDPOINT of the
+7-9x band stated in the commissioning brief (the least-informative
+choice inside the stated bounds; no Dow series is used).
+  stop_M1 = 40 / R_price = 5.00 pt
+  target_M1 = 80 / R_price = 10.00 pt
+Untested, non-binding sensitivity context only: the 7x and 9x band
+edges give 5.7 -> 5.5 and 4.4 -> 4.5 pt stops under the rounding rule
+below; they are NOT run as arms (no third method, no band mining).
+
+METHOD 2 — VOLATILITY ANCHOR (US500-native ATR):
+  stop_M2 = 1.0 x median(ATR14(M5) at trigger candles, Stage-A
+           binding population) = 1.0 x 4.782 = 4.782 pt
+  target_M2 = 2 x rounded stop (shape rule below) = 10.00 pt
+The 1.0x multiple is the canonical "one typical five-minute bar of
+movement" volatility stop, fixed here BEFORE any scaled run; the
+4.782 median is a volatility statistic (not a performance statistic)
+already cited in the commissioning brief. Method 2 is the US500-native
+replacement of the brief's Dow-ATR-ratio method, which is unavailable
+without Dow bar data (stated plainly, not substituted silently).
+
+ROUNDING RULE (both methods): round the STOP to the nearest 0.5 pt,
+then set TARGET = 2 x rounded stop (preserves the video's 1:2 shape
+exactly). stop_M1 5.00 -> 5.0; stop_M2 4.782 -> 5.0 (nearest 0.5).
+CONVERGENCE: both methods land on STOP 5.0 pt / TARGET 10.0 pt.
+The two arms are therefore numerically identical; they are still
+reported as two separately-labeled arms (their derivation chains are
+independent evidence, and convergence is itself the evidence the
+brief asked for). No tie-break, no choice to make.
+
+TESTING PROTOCOL (identical to the original Stage B in every respect
+except the stop/target distances)
+- Population: the SPEC 6.1 signal set (3,224 eligible).
+- Money machine: SPEC section 5 verbatim (aggressive/conservative
+  I-6 mode logic, Q3 day-close 3-total/3-total, I-10 neutrality,
+  occupancy, filter exits).
+- Exits: M1-tape walk, first-crossing, SL-first same-bar ambiguity,
+  gap fills at open, 15:55-bar-open forced exit, no overnight;
+  validation invariants asserted per trade.
+- Sizing: lots = $100 risk / stop = 100 / 5.0 = 20.0 lots on the
+  fixed $10,000 base, no compounding (I-11 generalized).
+- Costs: 0.51 pt binding per round trip, 0.80 pt informational.
+- Window: full 2021-01..2026-04, in-sample Stage-B context.
+
+GATE B1-AMENDED (applied identically to each scaled arm, separately):
+  (i) expectancy_after_cost > 0 (0.51 pt cost);
+  (ii) n_trades >= 150;
+  (iii) exit-reason sanity: share of trades exiting at the forced
+        15:55 exit (reason "time_exit") < 60%. The original arm's 78%
+        is the mismatch symptom; a properly scaled arm must show the
+        pattern's stops/targets engaging. filter_exit trades count in
+        the denominator but not the numerator (they are a distinct,
+        pre-declared exit class).
+If BOTH scaled arms fail clause (iii), that is strong evidence the
+mismatch is not explained by simple price/volatility scaling, and NO
+third ad hoc scaling will be attempted — the amendment says so and
+stops.
+
+HONESTY AND ANTI-LEAK RULES (in addition to the original SPEC's)
+- Both derivation anchors were fixed before any scaled Stage-B
+  number existed. No third method may be introduced after seeing
+  results; neither method may be preferred retroactively.
+- This amendment does not reopen the original 40/80 result.
+- The M1 anchor's lower rigor (brief-stated public band, not
+  measured Dow data) is flagged here and in the report.
+- A null result for the scaled arms is a complete, expected,
+  valuable deliverable. Given the known economics (0.51 pt cost on a
+  5-pt stop = 10% of risk per trade; the scalping-screen family died
+  at exactly this scale), a clause-(i) failure is a likely outcome
+  and will be reported plainly if it occurs.
+
+ARTIFACTS (data/results/mokamel_flip/, new files only)
+SPEC_MOKAMEL_FLIP_AMENDMENT_SCALED_EXIT.txt (this file),
+GATE_MOKAMEL_FLIP_AMENDMENT_SCALED_EXIT.txt (verbatim clause
+extraction, written before any script runs),
+dow_us500_ratio_derivation.csv (the anchors, the arithmetic, and the
+ATR14(trigger) distribution for auditability — with the explicit
+statement that no Dow series exists),
+matrix_scaled_arms.csv (both scaled arms, matrix_master schema),
+REPORT_MOKAMEL_FLIP_SCALED_EXIT.txt (states whether the 78%
+time-exit symptom is resolved; verdicts clause by clause).
+Script: evaluate/mokamel_flip_stage_b_scaled.py (reuses the original
+Stage-B simulate/metrics machinery unchanged).
+PROGRESS.md hooks: "mokamel flip - scaled-exit amendment: Dow data
+sourcing decision", "mokamel flip - scaled-exit derivation (Methods 1
+and 2)", "mokamel flip - scaled-exit Stage B re-run and verdict".
+
+END OF AMENDMENT 1 — frozen 2026-09-03, before any scaled-arm code
+was written.

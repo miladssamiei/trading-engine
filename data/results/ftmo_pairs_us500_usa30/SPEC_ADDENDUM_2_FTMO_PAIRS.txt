@@ -1,0 +1,42 @@
+SPEC_ADDENDUM_2_FTMO_PAIRS (new file; SPEC_FTMO_PAIRS.txt and
+SPEC_ADDENDUM_FTMO_PAIRS.txt are NOT edited)
+Study dir: data/results/ftmo_pairs_us500_usa30/
+Pre-declared: 2026-09-15, BEFORE any run using the mechanism described here.
+
+SECTION A. WHY A SECOND ADDENDUM
+
+A.1 ADDENDUM 1 pre-declared the Dow-leg substitution (custom symbol
+"USA30Duk" fed from the verified Dukascopy USA30 M5 tape, EET wall clock,
+$1/pt/lot, spread 2.28) and stated the symbol would be built by the EA
+inside the tester agent. Execution attempts on 2026-09-13..15 established:
+  - CustomSymbolCreate inside a Strategy Tester agent returns error 4014
+    ("function not allowed for call") - custom symbols CANNOT be created
+    in tester agents.
+  - A terminal SERVICE (Usa30DukService.mq5, deployed to MQL5\Services)
+    does NOT auto-start on first deployment (services only restart if they
+    were running in a previous session); no headless first-start path
+    exists for services.
+
+SECTION B. FINAL BUILD MECHANISM (pre-declared before use)
+
+B.1 USA30Duk is built at TERMINAL level by a one-shot setup EXPERT
+(ea/Usa30SetupEA.mq5): the orchestrator writes a chart template
+(usa30setup.tpl, MQL5\Profiles\Templates) that attaches the setup EA to a
+US500.c chart via the terminal start-config [Charts] Template= section
+(the repo's documented live-preset pattern), launches the terminal once
+bare, the EA's OnInit builds/imports USA30Duk exactly as described in
+ADDENDUM 1 (CustomSymbolCreate + CustomRatesReplace from
+usa30_m5_eet.csv in the common folder), writes a DONE/FAILED marker to
+usa30duk_status.txt, and on the ONESHOT command file closes the terminal.
+The tester runs then synchronize USA30Duk from the terminal's Custom base
+exactly like the proven US500-tick flow; the trading EA (Pairs_FTMO.mq5)
+only verifies presence/coverage (CopyRates) and refuses to start if the
+symbol is missing.
+
+B.2 Everything else (trade list, ratios, gates G-P1..G-P4, FTMO
+parameters, swap-free override, sweep, honesty rules) is unchanged from
+SPEC_FTMO_PAIRS.txt and ADDENDUM 1. The Usa30DukService source is
+retained as evidence of the dead end; its .ex5 is removed from
+MQL5\Services after the successful setup-EA build.
+
+END OF ADDENDUM 2. FROZEN 2026-09-15 BEFORE the run using it.

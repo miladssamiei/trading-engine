@@ -1,0 +1,26 @@
+CONNORS RSI(2) PLUS BOLLINGER INDICES - PHASE 1 REPORT
+Frozen two-asset M15 signal / completed H1 trend / exact next M1 entry proxy.
+Retrospective BID-only tapes, fixed round-trip cost floors, no swap/slippage.
+MBB P(mean net <= 0): 10000 moving-block draws, block 5, seed 20261010.
+Unannualized Sharpe is mean net trade PnL / sample SD of net trade PnL.
+OVERALL G5: FAIL
+
+ASSET   COST TRADES WIN%  TP  SL TIME GROSS/TRADE NET/TRADE NET TOTAL SHARPE MBB P GATE
+US500   0.55 2418   39.66 581 1312525  -0.200833   -0.750833  -1815.514 -0.05880.9969FAIL
+USTECH  1.66 3003   41.79 761 1551691  0.674860    -0.985140  -2958.375 -0.01700.8242FAIL
+
+DETAILS
+US500: 1,791,504 M1 rows from 2021-01-03 23:00:00+00:00 through 2026-04-30 23:59:00+00:00; 121,486 observed M15 buckets; input SHA256 29ad8f8b25b43be43a87c4ac39575c3cd280d557661c31f8e691990949087453
+  Gate {'G1': True, 'G2': False, 'G3': False, 'G4': False}; signal funnel {'raw_signals': 3313, 'no_exact_next_m1': 0, 'shadowed': 895, 'target_not_favorable': 0, 'invalid_risk': 0, 'time_stop_delayed': 69}; open_end 0
+  Entry-cohort annual count/net {'2021': {'trades': 433, 'net': -371.2275766211005}, '2022': {'trades': 442, 'net': -554.3575932642552}, '2023': {'trades': 460, 'net': -157.35744166782797}, '2024': {'trades': 489, 'net': -283.1402615584275}, '2025': {'trades': 464, 'net': -236.89251489422077}, '2026': {'trades': 130, 'net': -212.53878171633005}}
+  Ledger C:\Users\Milad\Desktop\RR\data\results\connors_rsi2\trades_US500.csv
+USTECH: 2,936,100 M1 rows from 2020-01-01 00:00:00+00:00 through 2026-09-23 23:59:00+00:00; 195,744 observed M15 buckets; input SHA256 152f9c995b370e5391cb7da99b64a8002ceee5e52cc68899ddca409ac7e15e39
+  Gate {'G1': True, 'G2': False, 'G3': False, 'G4': False}; signal funnel {'raw_signals': 11414, 'no_exact_next_m1': 0, 'shadowed': 1064, 'target_not_favorable': 7347, 'invalid_risk': 0, 'time_stop_delayed': 15}; open_end 0
+  Entry-cohort annual count/net {'2020': {'trades': 438, 'net': -77.3623579402838}, '2021': {'trades': 457, 'net': -867.5007843607764}, '2022': {'trades': 429, 'net': -258.02625511310544}, '2023': {'trades': 463, 'net': -1145.8326794687728}, '2024': {'trades': 481, 'net': 482.86809662218366}, '2025': {'trades': 457, 'net': -576.510061519748}, '2026': {'trades': 278, 'net': -516.0111713207007}}
+  Ledger C:\Users\Milad\Desktop\RR\data\results\connors_rsi2\trades_USTECH.csv
+
+INTERPRETATION LIMITS
+USTECH tick_volume=0 on all rows is an onboarding schema placeholder, not proof that all its recorded OHLC bars are empty.
+The time stop uses the first observed M1 open at or after the 120-minute deadline; market closures can delay it. Delays are counted above.
+BID M1 OHLC cannot measure actual ASK paths, intraminute ordering or broker fill priority. Fixed cost and zero swap are scenario assumptions.
+These retrospective proxy histories have been researched previously; a Phase 1 pass would need separately predeclared execution/forward validation.

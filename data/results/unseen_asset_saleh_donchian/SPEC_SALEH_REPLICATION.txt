@@ -1,0 +1,152 @@
+SPEC_SALEH_REPLICATION.txt - HYPOTHESIS #58: SALEH 4H/1H DONCHIAN SUPERTREND -
+UNSEEN-ASSET CROSS-ASSET REPLICATION PHASE 1
+Written 2026-09-24, BEFORE any Phase 1 code for this hypothesis ran. Gates are
+extracted verbatim into GATE_SALEH_REPLICATION.txt, also frozen before the run.
+
+0. PROVENANCE AND RELATION TO PRIOR STUDIES
+
+This study replicates the #57 mechanics VERBATIM ("Saleh Donchian": 4H
+Supertrend(10, 3.0) direction anchor, 1H Donchian(20) breakout entries at the
+1H open, Wilder ADX14 >= 20 filter, 4xATR(14) initial stop, close-based 4xATR
+trailing stop, no TP) on the three virgin tapes onboarding-frozen for #54:
+BTCUSD, ETHUSD (data/results/virgin_assets/), and USTECH - tapes never touched
+by any Donchian/Supertrend-anchor family before this hypothesis. Relation to
+#54/#55: same tapes, DIFFERENT mechanism (KC EMA/ATR breakout with EMA-riding
+stop vs Donchian-channel trigger + Supertrend anchor + ATR trail); the only
+shared content is the data onboarding and the cost floors. The #57
+execution-1 defect lesson is applied by construction: both grids start at
+their first REAL bucket so no leading-NaN row can poison the Supertrend band
+recursion. No parameter was tuned on any tape; #57's frozen values are reused
+unchanged. The cost floors are the frozen owner estimates from the virgin
+onboarding (the M1 BID exports carry no ask side): BTCUSD 15.0 u, ETHUSD
+2.0 u, USTECH 1.0 pt, all round-trip.
+
+1. DATA
+
+Tapes: data/results/virgin_assets/btc_m1.csv (3,260,989 bars),
+eth_m1.csv (3,375,260), ustech_m1.csv (2,936,100), all 2020-01-01 00:00 ..
+2026-09-23 23:59 UTC, columns time,open,high,low,close,tick_volume (volume a
+schema placeholder, never read); time = bar-OPEN epoch seconds UTC; prices
+are bid-side. Timezone America/New_York (DST-aware) for all wall-clock
+bucketing and calendar keys. Full tape per instrument, single pass. CAL
+[2020-01-01..2023-12-31] vs OOS [2024-01-01..present] split by NY entry date
+is REPORTING ONLY (gates are on the full tapes, section 7). Integrity was
+verified in the #54 onboarding; not re-verified here.
+
+2. MULTI-TIMEFRAME AGGREGATION (CONTINUOUS FILL GRIDS, #57 VERBATIM)
+
+1H execution bars: epoch top-of-hour 3600s slots (time // 3600; identical to
+NY wall-clock hours since the NY UTC offset is whole hours). Each real slot
+aggregates its M1 bars: open = first, high = max, low = min, close = last.
+4H anchor bars: NY wall-clock buckets [00:00-04:00), [04:00-08:00),
+[08:00-12:00), [12:00-16:00), [16:00-20:00), [20:00-24:00), keyed by NY
+calendar date; fall-back repeated wall hours merge; spring-forward skipped
+wall hours have no M1 bars. Both grids are enumerated continuously over
+their full key range and missing bars are forward-filled PER FIELD from the
+previous bar (#47-#53 convention). A grid bar with >= 1 underlying M1 bar is
+REAL; a forward-filled bar is a FILL bar. Both grids START at their first
+REAL bucket (the #57 execution-1 defect fix; no leading-NaN rows exist).
+Indicators are computed on the continuous grids (FILL bars included).
+Execution touches only REAL bars: entries, stop checks, and trailing
+ratchets occur on REAL 1H bars only. Crypto tapes trade weekends (few FILL
+bars); USTECH has weekend closures (FILL bars carry state through them).
+
+3. INDICATORS (ALL CAUSAL, ON COMPLETED BARS ONLY, #57 VERBATIM)
+
+- 4H Supertrend(10, 3.0) on the continuous 4H grid: Wilder ATR(10) (TR ewm
+  alpha = 1/10); basic bands hl2 +/- 3.0 * ATR; standard final-band
+  recursion (upper falls or resets when prior close crosses above it; lower
+  rises or resets when prior close crosses below it); line = lower band
+  while bullish, upper band while bearish; seed: first grid bar bearish.
+  Trend BULLISH if 4H close > line, BEARISH if 4H close < line.
+- 1H Donchian(20): Upper(t) = highest high of bars t-19..t; Lower(t) =
+  lowest low of bars t-19..t (min_periods = 20; FILL bars participate).
+- 1H ADX(14): source-exact Wilder ADX (#56/#57 implementation).
+- 1H ATR(14): Wilder ATR (TR ewm alpha = 1/14).
+
+4. SIGNAL GENERATION (EVALUATED AT THE OPEN OF EACH REAL 1H BAR t)
+
+Mapped 4H anchor = the wall bucket PRECEDING the bucket containing t on the
+continuous 4H grid (the last one strictly completed before t's open).
+
+LONG signal (all required): close(t-1) > Donchian Upper(t-2); mapped anchor
+BULLISH; ADX14(t-1) >= 20.0 (finite); bar t REAL; ATR14(t-1) finite.
+SHORT signal: exact mirror (close(t-1) < Donchian Lower(t-2); anchor
+BEARISH). Entry = open price of 1H bar t. LONG and SHORT cannot fire on the
+same bar. Signals on FILL bars are skipped, not queued. Max 1 open trade per
+instrument: while a trade is open all its signals are shadowed; the machine
+resumes at the first signal bar strictly AFTER the exit bar (a signal at the
+exit bar itself is shadowed too). No cross-instrument interaction.
+
+5. EXECUTION, STOPS, AND EXITS (SPREAD-AWARE, #56/#57 ARCHITECTURE)
+
+Cost floor C per instrument (BTCUSD 15.0, ETHUSD 2.0, USTECH 1.0), applied
+as Ask = Bid + C everywhere; PnL in native price units (BTC u / ETH u /
+USTECH pt); 1.0 lot; no USD conversion (contract multipliers are not
+declared for these CFDs). No TP: exits are the trailing stop, the initial
+stop, or tape end. Worst-case same-bar priority: the stop is checked on the
+entry bar itself. Honest gap fills: a bar OPENING beyond the stop fills at
+its open (adverse), otherwise at the level.
+
+LONG: entry executes at Ask = open(t) + C.
+  Initial SL (bid level) = open(t) - 4.0 * ATR14(t-1).
+  Stop on BID: exit when low(j) <= SL, fill = min(SL, open(j)).
+  Trailing: after each REAL bar's stop check, SL = max(SL, close(j) -
+  4.0 * ATR14(j)); never loosens.
+SHORT: entry executes at Bid = open(t).
+  Initial SL (ask-trigger level) = open(t) + 4.0 * ATR14(t-1).
+  Stop on ASK: exit when high(j) >= SL - C, fill (ask) =
+  max(SL, open(j) + C).
+  Trailing: SL = min(SL, close(j) + 4.0 * ATR14(j)).
+A trade open at the tape end exits at the last bar close (END): long at bid
+close, short at ask = close + C.
+
+Net PnL per trade embeds the full C round-trip in the fills; algebraically
+identical to Gross Exit PnL (bid-to-bid) minus C. Initial-stop loss is
+-(4*ATR + C) for longs and exactly -(4*ATR) for shorts (the #56/#57
+long/short asymmetry, implemented literally).
+
+6. COST-SENSITIVITY DECLARATION
+
+The three cost floors are frozen OWNER ESTIMATES from the virgin onboarding
+(no ask side exists in the M1 BID exports; declared there and never changed).
+One cost model per instrument, applied inside the fills; no sweep, no
+ablation. Gross-vs-net means are reported per instrument so the floor's share
+is visible; if an instrument's gross mean is positive but below the floor
+magnitude, that verdict is flagged as inside the floor-uncertainty band
+(the #54 convention).
+
+7. STATISTICS AND GATES
+
+Population: per instrument, all executed trades of its single machine pass,
+chronological. Net PnL per trade in native units (section 5). Win =
+Net PnL > 0. Profit factor = sum(wins) / abs(sum(losses)). Net Sharpe =
+mean(trade Net PnL) / std(trade Net PnL, ddof=1), event-indexed per trade,
+NOT annualized. Moving-block bootstrap PER INSTRUMENT with seed 20261006:
+n = trade count; per resample draw ceil(n/5) block starts uniformly from
+{0..n-5}, concatenate the 5-trade blocks, truncate to n, take the mean;
+10,000 resamples; P = fraction of resample means <= 0. GATES, evaluated
+INDEPENDENTLY per instrument on its FULL tape: GATE_SALEH_REPLICATION.txt
+(G-SALREP1 trades >= 30; G-SALREP2 Net Sharpe > 0; G-SALREP3 P <= 0.20).
+CAL/OOS blocks and per-year tables are reporting only; CAL -> OOS Sharpe
+movement is reported explicitly per instrument.
+
+8. HONESTY / STOP RULES
+
+- ONE pre-declared configuration per instrument (#57 frozen values, verbatim
+  mechanics); no variant, parameter, or cost floor runs before the verdict;
+  no re-run after the verdict except a documented mechanical defect fix
+  (re-declared under a new name).
+- Null results are complete, expected deliverables; any instrument FAIL is
+  final for that instrument's artifact.
+- An instrument PASS is an in-sample full-tape first-touch replication, NOT
+  a validated result under validation_discipline; OVERALL PASS would NOT
+  authorize Phase 2 without a NEW pre-declared SPEC meeting the standard
+  discipline (>= 150 trades, year-by-year sign agreement, gates before
+  runs).
+- Known optimism, declared (inherited from #57): bar-open entries and
+  level-touch stop fills are best-case executions on an H1 bar
+  reconstruction; the exit-mix / holding / trailed-vs-initial statistics are
+  computed so hollow passes are detectable. Additional #58-specific caveat:
+  the cost floors are owner estimates; verdicts with |gross mean| < floor
+  are flagged as inside the floor-uncertainty band.

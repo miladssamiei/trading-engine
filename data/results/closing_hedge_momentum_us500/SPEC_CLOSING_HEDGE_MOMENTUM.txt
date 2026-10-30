@@ -1,0 +1,74 @@
+HYPOTHESIS 59: US500 CASH-CLOSE HEDGING MOMENTUM
+Declared 2026-09-25 before strategy code or any Phase-1 run.
+
+1. MECHANISM AND PROVENANCE
+The move from the previous cash close to 15:30 New York time may predict
+the 15:30-16:00 move because options dealers and leveraged funds rebalance
+near the underlying equity-market close. The precise rest-of-day to last-
+half-hour relationship and a hedging-demand mechanism are documented by
+Baltussen, Da, Lammers, and Martens, Journal of Financial Economics 142
+(2021) 377-403, https://academicweb.nd.edu/~zda/intramom.pdf . Their
+evidence is from exchange futures through 2020, not this broker's CFD in
+2021-2026. This is a predeclared transfer test, not a replication claim.
+The prior project intraday multi-horizon test predicted the next 90 minutes
+at all M5 bars; it did not test the fixed 15:30-16:00 hedging interval.
+No parameters, windows, direction arms, or exit rules will be selected
+after seeing outcomes. Only this single unconditional rule is gated.
+
+2. DATA AND CLOCK
+Use the verified Bid OHLC M5 tape at
+data/results/orb_2021_present/us500tick_m5.csv. Epoch seconds are UTC;
+convert to America/New_York for cash-day and wall-time keys, respecting
+DST. A cash day requires a printed 09:30 bar. A usable trade day also
+requires exact printed 15:25, 15:30, 15:35, 15:40, 15:45, 15:50, and
+15:55 M5 bars. The prior cash day's exact 15:55 close must exist; do
+not substitute an older available day's close if the immediately prior
+cash day lacks its 15:55 bar. Skip missing/early-close days and record
+each reason. The latest tape date is 2026-04-30. No server D1 label is
+needed. Do not construct M15 from M1.
+
+3. CAUSAL SIGNAL AND EXECUTION
+At 15:30 ET, compare the just-completed 15:25 M5 close with the prior
+cash day's 15:55 M5 close. Higher means LONG; lower means SHORT; exact
+ties mean no trade. Enter one lot at the 15:30 M5 Bid open, exit at the
+15:55 M5 Bid close, and force flat before 16:00. No stop, target,
+intraday re-entry, position overlap, leverage change, or overnight hold.
+Signal values are known before entry. The 15:30 open is a bar proxy for
+an immediately sent market order, not a verified executable fill.
+Gross directional points = direction * (exit Bid - entry Bid).
+Base net points = gross - 0.51 per round trip; double-cost stress net
+= gross - 1.02. The 0.51 figure is the project's verified US500 real-
+tick median spread, not a fill guarantee. Additional slippage/market
+impact is absent from both calculations; no swap applies to same-day
+positions. Report gross, both net conventions, wins, and drawdown.
+
+4. PARTITION AND INFERENCE
+Calendar 2021-01-01 through 2023-12-31 is diagnostic calibration;
+calendar 2024-01-01 through 2026-04-30 is the frozen test block. All
+dates use New York cash dates. No filter or parameter is fitted in the
+calibration block. This historical test block has been visible in other
+project studies and is not virgin data; it is a fixed temporal check of
+this previously untested rule. The 2026 year is partial. Compute the
+one-sided probability P(mean base net <= 0) by resampling test-block
+cash dates with replacement 10,000 times, seed 20260925; there is at
+most one trade per date, so each day is a block. Report the empirical
+2.5% and 97.5% bootstrap quantiles as descriptive intervals. Report
+yearly results for every year, including the partial 2026 year.
+
+5. GATES, FROZEN BEFORE PHASE 1
+G-CH1: At least 150 executed trades in the 2024-2026 test block.
+G-CH2: Test-block mean net points under double 1.02-point cost is strictly greater than zero.
+G-CH3: Test-block bootstrap P(mean base net <= 0) is at most 0.05, using 10,000 date-block resamples and seed 20260925.
+G-CH4: Each complete test-block calendar year, 2024 and 2025, has strictly positive total base net points.
+Overall Phase-1 PASS requires all four gates. A FAIL is final for this
+artifact; report it regardless. No alternative cost threshold, direction
+subset, time window, or entry threshold can rescue a failure here.
+
+6. STOP AND HONESTY RULES
+Phase 2 MT5 Model=4 execution may be proposed only on Phase-1 PASS,
+under a separately frozen execution SPEC and GATE. An offline PASS is
+not a validated or deployable result: project confirmation still needs
+real-tick fill reconciliation, positive expectancy, at least 150
+trades, and year-sign agreement. No MT5 run is part of this Phase 1.
+Freeze this SPEC, its verbatim GATE extraction, code, trade CSV, run
+metadata, and REPORT. Never edit historical SPEC/GATE/REPORT results.

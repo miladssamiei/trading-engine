@@ -1,0 +1,164 @@
+HYPOTHESIS #53 SPEC: DAILY RANGE SWEEP & INVERSION FAIR VALUE GAP (1h execution / D1 17:00 ET anchor)
+Study ID: cross_asset_pdh_pdl_ifvg
+Date frozen: 2026-09-24, before any evaluation code was written or run.
+Status: frozen. Corrections or re-measurements require a NEW study name.
+Lineage: sixth cross-asset study (#47-#52 were momentum/pullback paradigms).
+This study tests a liquidity-sweep + displacement-inversion mechanism
+(SMC/ICT flavored): price sweeps the prior day high (low), then a 1h close
+penetrates the far side of the most recent opposite-side 1h fair value gap
+(the "inversion" FVG); enter against the sweep, stopped at the sweep
+extreme, targeting the opposite prior-day bound. No liquidity-sweep or FVG
+family exists in the closed-families list - this is a new pre-declared
+mechanism, not a re-run of any closed study. The mechanic has NO free
+numeric parameters (all levels are structural: PDH, PDL, sweep extreme,
+FVG boundary); it is owner-supplied and frozen as given; no parameter
+search, one run per instrument.
+
+1. DATA
+1.1 Tapes (verified M1, epoch-UTC time, columns time,open,high,low,close,
+    tick_volume; sorted ascending defensively before aggregation):
+    - US500 : data/results/vwap_2021_2026/us500tick_m1.csv  (points; cost floor 0.51)
+    - EURUSD: data/results/eurusd_onboarding/eurusdtick_m1.csv (pips, 1 pip = 0.0001; cost floor 0.3)
+    - XAUUSD: data/results/xauusd_onboarding/xauusdtick_m1.csv (price units; cost floor 0.41)
+1.2 Timezone America/New_York (EST/EDT) for all wall-time logic.
+1.3 Cost floors are round-trip, subtracted once per trade from gross.
+
+2. MULTI-TIMEFRAME AGGREGATION
+2.1 1h bars: M1 epochs floored to 3600s slots; open=first, high=max, low=min,
+    close=last, volume=sum per slot. NY wall 1h boundaries align exactly
+    with the epoch-3600 grid (NY UTC offset is always whole hours).
+2.2 Continuity: the 1h series is reindexed to the FULL continuous 3600s grid
+    from first to last slot; missing bars are forward-filled with OHLC = prior
+    close, volume = 0 (synthetic flat bars). This fills no-tick minutes,
+    maintenance breaks, holidays and weekends alike.
+2.3 D1 anchor bars: NY WALL buckets [17:00 -> next day 17:00) built from the
+    continuous 1h grid (session key = wall - ((wall - 17h) mod 24h)); a D1
+    bar's OHLC aggregates every 1h bar in its wall window and COMPLETES at
+    its closing 17:00 ET boundary. Because synthetic flat bars carry the
+    last real close, D1 High/Low are always real-tape extremes. DST
+    transition wall-days span 23 or 25 real hours; buckets stay contiguous.
+2.4 Alignment: both series derive from the same continuous 1h grid. For a 1h
+    bar t, the most recently completed D1 bar is the bucket strictly before
+    the wall session containing t - never the session containing t itself;
+    no daily-close lookahead is possible at any 1h evaluation.
+
+3. STATE MACHINE (causal levels and liquidity tracking)
+3.1 Daily levels: let S(w) be the [17:00,17:00) wall session containing bar
+    t. PDH = High and PDL = Low of the D1 bar keyed S-24h (the most
+    recently completed D1 bar at every moment of session S). Constant
+    within S. If the S-24h bucket does not exist (tape warm-up), the session
+    is inert (no sweeps, no signals).
+3.2 Fair value gaps, 1h, strictly completed bars. Detection at index t
+    (becomes known at the OPEN of t) uses bars t-3, t-2, t-1:
+    - Bullish FVG detected iff Low(t-1) > High(t-3), strict; gap
+      [High(t-3), Low(t-1)]; its "bottom" = High(t-3) (candle-1 High).
+    - Bearish FVG detected iff High(t-1) < Low(t-3), strict; gap
+      [High(t-1), Low(t-3)]; its "top" = Low(t-3) (candle-1 Low).
+    Most-recent-wins continuous tracking: at the open of bar t the active
+    levels are those of the latest detection index <= t. FVGs do NOT reset
+    daily and have NO staleness or invalidation rule: a gap persists until
+    replaced by a newer same-side gap, even after price has closed through
+    it (the signal IS such a close-through). Declared mechanic, not an
+    oversight. Self-consistency note: a bullish gap detected at t itself
+    can never satisfy the short condition below, since Close(t-1) >=
+    Low(t-1) > High(t-3).
+3.3 Sweep state, reset at each 17:00 session boundary. After each completed
+    1h bar i of session S (with valid PDH/PDL):
+    - Swept_PDH = OR over completed bars of S of (High > PDH), strict;
+    - Swept_PDL = OR over completed bars of S of (Low < PDL), strict;
+    - Sweep_High = highest High recorded since Swept_PDH became True today
+      (equivalently: the running max High over bars with High > PDH since
+      first trigger - later bars with High <= PDH < Sweep_High cannot
+      change it);
+    - Sweep_Low = lowest Low recorded since Swept_PDL became True today.
+    Bars before any trigger leave Sweep_High/Sweep_Low undefined.
+3.4 For the signal at the open of bar t only bars strictly before t count:
+    if t opens a new session, the sweep state is empty and no signal is
+    possible at t.
+
+4. SIGNAL GENERATION (evaluated at the open of 1h bar t, state as of t-1)
+4.1 SHORT: Swept_PDH true AND Close(t-1) < bottom of the most recent
+    bullish FVG (i.e. Close(t-1) < High of FVG candle-1).
+4.2 LONG: Swept_PDL true AND Close(t-1) > top of the most recent bearish
+    FVG (i.e. Close(t-1) > Low of FVG candle-1).
+4.3 Execution cap: max ONE open trade per instrument. Trades occupy
+    [entry_bar, exit_bar] inclusive; signals while a trade is open are
+    counted (ignored-while-open) and not acted on; after an exit at bar j
+    the next entry can occur at the open of bar j+1.
+4.4 Entry: Open(t), market, no restrictions on wall hour (no session-time
+    filter - signals may fire in any hour, including outside liquid NY
+    windows; a declared consequence of the 17:00-anchored session logic).
+4.5 Funnel counting: candidates = bars with a true signal (regardless of
+    position state); executed = trades taken; ignored-while-open counted.
+
+5. EXCURSION WALK AND BRACKET EXIT
+5.1 Fixed structural bracket, no trailing, levels frozen at signal time:
+    - SHORT: SL = Sweep_High (signal-time value), TP = PDL.
+    - LONG: SL = Sweep_Low, TP = PDH.
+    (Structurally SL > TP-side ordering is guaranteed: for shorts
+    Sweep_High > PDH > PDL; for longs Sweep_Low < PDL < PDH.)
+5.2 The ENTRY bar participates with honest entry-gap handling first, then
+    worst-case intrabar ordering (SL before TP). Short case (long
+    mirrored): if Open(t) >= SL -> exit at Open(t), reason SL_GAP (entry
+    already beyond the stop; gross 0, cost paid); elif Open(t) <= TP ->
+    exit at Open(t), reason TP_GAP; elif High(t) >= SL -> exit at SL,
+    reason SL; elif Low(t) <= TP -> exit at TP, reason TP.
+5.3 Subsequent bars j > t (short case; long mirrored), checks in order:
+    a) Open(j) >= SL -> exit at Open(j), reason SL_GAP (honest fill);
+    b) Open(j) <= TP -> exit at Open(j), reason TP_GAP (honest fill);
+    c) High(j) >= SL -> exit at SL, reason SL (worst-case default when
+       both levels are touched in the same bar);
+    d) Low(j) <= TP -> exit at TP, reason TP.
+5.4 If no level is hit by the final 1h bar, exit at that bar's close,
+    reason FORCED_EOD, included in results.
+5.5 Per-trade record includes MFE/MAE excursions over [entry_bar..exit_bar]
+    (long MFE = max High - entry, MAE = entry - min Low; short mirrored),
+    in instrument units, descriptive only. R multiple =
+    side*(Exit-Entry)/|Entry-SL| (undefined if the risk distance is 0).
+
+6. ECONOMICS
+6.1 Gross = side*(Exit - Entry) in instrument units: points for US500 and
+    XAUUSD, pips (x10,000) for EURUSD. Net = Gross - cost floor (0.51 /
+    0.3 / 0.41 respectively), one round trip per trade.
+6.2 Net Sharpe (per-trade convention): mean(Net)/std(Net, ddof=1) * sqrt(252)
+    over executed trades of the instrument.
+
+7. PHASE 1 GATES (applied INDEPENDENTLY to each instrument; frozen verbatim in
+   GATE_PDH_IFVG.txt)
+    G-SMC1: Total executed signals >= 30.
+    G-SMC2: Net Sharpe Ratio > 0.
+    G-SMC3: Moving-block bootstrap (10,000 resamples, block=5 trades,
+           seed 20261001) P(mean Net PnL <= 0) <= 0.20.
+    VERDICT RULE: an instrument PASSES only if G-SMC1 AND G-SMC2 AND G-SMC3
+    all PASS. OVERALL verdict PASS only if ALL THREE instruments PASS. Any
+    FAIL is final for this artifact; corrections require a new study name.
+    Null results are complete, expected deliverables.
+
+8. OUTPUTS (data/results/cross_asset_pdh_pdl_ifvg/)
+    SPEC_PDH_IFVG.txt (this file), GATE_PDH_IFVG.txt (written before the
+    run), REPORT_PDH_IFVG_PHASE1.txt (funnel, net expectancy, win rate,
+    exit mix, yearly), pdh_ifvg_signals.csv (all instruments, asset
+    column, full level context), run_meta.json (sha256 lineage of tapes
+    and script, funnel, gates, verdict).
+
+9. HONESTY / ANTI-LEAK RULES
+9.1 Signals use only strictly completed state: Close(t-1), sweep flags and
+    extremes as of the end of bar t-1, FVG detection over bars t-3..t-1,
+    PDH/PDL from D1 buckets completed at or before the open of t. No
+    same-bar indicator leakage; exits have no intrabar lookahead beyond
+    the worst-case same-bar default; gap fills at the open.
+9.2 Single frozen parameterization (structural levels only); no
+    optimization, no re-runs, no post-hoc filtering; sides, years and
+    instruments reported separately. No FVG staleness limit, no sweep
+    recency limit, no session-time filter - all absences are declared
+    mechanics, not oversights to be patched after seeing results.
+9.3 CONSEQUENCE OF 2.2, declared honestly: synthetic flat bars carry the
+    last real close, so a flat close CAN satisfy a close-through condition
+    and carried highs/lows extend sweeps only within the carried range
+    (never beyond real extremes); entries on synthetic bars fill at the
+    carried price and the walk resumes at the real reopen with honest gap
+    fills. Accepted under the declared continuity convention; no
+    bar-skipping fix is applied.
+9.4 Phase 2 (MT5 execution) only on overall PASS; in-sample character of
+    this screen acknowledged; MFE/MAE are exploratory descriptors, never
+    results.

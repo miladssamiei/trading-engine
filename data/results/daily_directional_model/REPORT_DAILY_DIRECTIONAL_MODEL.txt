@@ -1,0 +1,58 @@
+features: 1112 rows x 5 cols (2022-01-04..2026-04-30)
+group sizes: [186, 186, 185, 185, 185, 185]
+[h=1] target valid rows: 1111 (dropped 1)
+  h=1: 5/15 paths done (last IC enet=-0.0281 lgbm=-0.0866)
+  h=1: 10/15 paths done (last IC enet=0.0260 lgbm=-0.0918)
+  h=1: 15/15 paths done (last IC enet=nan lgbm=-0.0112)
+[h=2] target valid rows: 1110 (dropped 2)
+  h=2: 5/15 paths done (last IC enet=-0.0260 lgbm=-0.1088)
+  h=2: 10/15 paths done (last IC enet=nan lgbm=-0.0780)
+  h=2: 15/15 paths done (last IC enet=-0.0584 lgbm=-0.1088)
+[h=3] target valid rows: 1109 (dropped 3)
+  h=3: 5/15 paths done (last IC enet=-0.0354 lgbm=-0.1395)
+  h=3: 10/15 paths done (last IC enet=nan lgbm=-0.0869)
+  h=3: 15/15 paths done (last IC enet=-0.0604 lgbm=-0.1001)
+[h=5] target valid rows: 1107 (dropped 5)
+  h=5: 5/15 paths done (last IC enet=-0.0591 lgbm=-0.1179)
+  h=5: 10/15 paths done (last IC enet=-0.0587 lgbm=-0.0884)
+  h=5: 15/15 paths done (last IC enet=-0.1384 lgbm=-0.0992)
+--- mean OOS IC per configuration ---
+           mean     std  count   t_stat
+model h                                
+enet  1 -0.0283  0.0389     10  -2.3000
+      2 -0.0224  0.0543     11  -1.3674
+      3 -0.0370  0.0693     12  -1.8528
+      5 -0.0858  0.0840     12  -3.5393
+lgbm  1 -0.0647  0.0360     15  -6.9679
+      2 -0.0843  0.0312     15 -10.4546
+      3 -0.1025  0.0610     15  -6.5053
+      5 -0.1029  0.0660     15  -6.0428
+G-M1 minimum IC floor (>= 0.025) ...
+  enet h=1: mean IC=-0.0283 t=-2.300 -> fail
+  enet h=2: mean IC=-0.0224 t=-1.367 -> fail
+  enet h=3: mean IC=-0.0370 t=-1.853 -> fail
+  enet h=5: mean IC=-0.0858 t=-3.539 -> fail
+  lgbm h=1: mean IC=-0.0647 t=-6.968 -> fail
+  lgbm h=2: mean IC=-0.0843 t=-10.455 -> fail
+  lgbm h=3: mean IC=-0.1025 t=-6.505 -> fail
+  lgbm h=5: mean IC=-0.1029 t=-6.043 -> fail
+
+REPORT_DAILY_DIRECTIONAL_MODEL
+run: 2026-09-08T19:43:24.843267+00:00
+CPCV: N=6 groups (np.array_split), 15 paths, purge [g_start-h, g_end+h] + embargo 11 rows per test group; the same purge+embargo applies to the inner LOGO folds of Model A. Model A: train-fold standardization, inner LOGO on mean Spearman IC over the pre-declared alpha/l1_ratio grid. Model B: LightGBM 4.6.0, max_depth=3, min_data_in_leaf=ceil(5% n_train), feature_fraction=0.8, 200 trees, lr=0.05, seed 42, no search. Financing: -20/+2 pt per night, Wednesday-night starts x5, spread 0.51 pt round trip.
+
+mean OOS IC per configuration (15 CPCV paths):
+            mean      std  count    t_stat
+model h                                   
+enet  1 -0.02829  0.03889     10  -2.29996
+      2 -0.02238  0.05428     11  -1.36737
+      3 -0.03705  0.06927     12  -1.85276
+      5 -0.08578  0.08396     12  -3.53934
+lgbm  1 -0.06472  0.03598     15  -6.96790
+      2 -0.08433  0.03124     15 -10.45459
+      3 -0.10253  0.06104     15  -6.50533
+      5 -0.10293  0.06597     15  -6.04285
+
+G-M1: FAIL - no configuration reached mean OOS IC >= 0.025.
+Per SPEC 5.1 the study STOPS here: the features contain no tradable directional edge. G-M2/G-M3 not evaluated.
+VERDICT: FAIL (complete null deliverable).

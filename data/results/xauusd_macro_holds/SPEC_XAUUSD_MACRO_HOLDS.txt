@@ -1,0 +1,59 @@
+SPEC: XAUUSD MACRO-CONDITIONED HOLDS (HYPOTHESIS #30)
+Frozen: 2026-09-21, BEFORE any Phase-1 code existed.
+Role: mechanical interpretation of the Option E literature-grounded edge review, feeding the Option A daily/swing-horizon lane on the XAUUSD-tick tape.
+Script (to exist only after this freeze): evaluate/xauusd_macro_holds_phase1.py
+Phase: 1 only - offline Python signal-quality / strategy screen. Phase 2 (MT5 execution) only on a Phase-1 pass, with these frozen parameters.
+
+1. MECHANISM AND LITERATURE BASIS
+- Erb & Harvey (2013), The Golden Dilemma: gold's long-horizon returns are conditioned primarily by real interest rates (negative relation) and the trade-weighted dollar (negative relation). This study makes that relation mechanical: hold gold LONG when both macro drivers have improved (falling real yields, weakening dollar) but gold itself has lagged (anti-momentum); hold SHORT when both drivers have deteriorated but gold has run (anti-momentum on the short side).
+- The 2022-2024 central-bank-flow regime (record official-sector buying) is documented to have weakened the real-yield/gold relation; Phase 1 therefore REPORTS (never gates on) the 2022-2024 sub-window separately.
+
+2. DATA
+- Price: data/results/xauusd_onboarding/xauusdtick_m5.csv (epoch-seconds UTC bar open times; 385,483,125 source ticks, 0 monotonic violations, provenance sha256 in onboarding_stats.json).
+- D1 aggregation (fixed, pre-declared): America/New_York; trading day d takes all M5 bars whose bar open time lies in [d-1 16:00 ET, d 16:00 ET); D1 close = last such bar's close (normally the 15:55 bar, i.e. the 16:00 ET New York close); open/high/low from the same group. Implementation: day label = NY date of (bar open time + 8 hours).
+- Macro: FRED series DFII10 (10-Year TIPS constant-maturity real yield) and DTWEXBGS (trade-weighted broad dollar index), downloaded from FRED's public CSV endpoint (fredgraph.csv, no API key required), observation start 2015-01-01, cached verbatim to data/results/xauusd_macro_holds/fred_raw_<ID>.csv.
+
+3. CAUSALITY (ZERO-LOOKAHEAD) RULES
+- Publication shift s -> s+1 (strict): a signal dated d may only use the most recent FRED observation dated strictly BEFORE d (backward as-of join with exact matches disallowed). A value observed on day s is therefore first usable at the s+1 close.
+- Staleness cap: a joined macro observation older than 10 calendar days at the signal date makes the feature unavailable (no signal) - this covers holiday gaps and prevents a discontinued series from emitting frozen features forever.
+- DTWEXBGS caveat (documented, accepted): the broad dollar index is itself published with a lag; s->s+1 is a lower bound on its true availability delay. Flagged as known optimism on the dollar leg, not silently assumed away.
+- All conditioning features are computed only from information available at the signal close; forward prices enter only the fixed-horizon PnL.
+
+4. FEATURES
+- Delta_21(X) = X[i] - X[i-21] over each FRED series' own observation index (missing-value rows excluded from the index; both endpoints must be present).
+- Return_21(gold) = D1close[d] / D1close[d-21] - 1 over the gold D1 index.
+
+5. SIGNALS (formed at the D1 close of day d)
+- LONG (macro tailwinds + gold lagging): Delta_21(DFII10) < 0 AND Delta_21(DTWEXBGS) < 0 AND Return_21(XAUUSD) < 0.
+- SHORT (macro headwinds + gold leading): Delta_21(DFII10) > 0 AND Delta_21(DTWEXBGS) > 0 AND Return_21(XAUUSD) > 0.
+- Strict inequalities; any zero component forms no signal; the two setups are mutually exclusive by construction.
+
+6. HOLDING PERIODS AND ECONOMICS ($/oz on 1-oz notional; no compounding)
+- Fixed horizons h = 5 and h = 21 D1 bars: entry at D1 close(d), exit at D1 close(d+h). A signal is executed for horizon h only if the full forward window exists; truncated windows are excluded from expectancy and counted in the funnel.
+- gross_pts = dir * (exit_close - entry_close).
+- Spread: $0.41/oz round trip (full-tape real-tick median from the onboarding audit; the binding cost floor).
+- Overnight swap drag proxy (institutional contango logic - standard short credit / long debit): carry_day = entry_close * 3.50% / 252; a long held h trading days PAYS h * carry_day, a short RECEIVES it. No Wednesday-x3 markup (documented simplification; affects both directions only through held days).
+- net_pts = gross_pts - 0.41 - dir * carry_day * h.
+- Excursion walk (descriptive only, non-gating): MFE/MAE over the M5 tape from the bars after the entry bar through the exit bar, signed by direction, for each horizon. MAE may read positive if price never traded adversely below/above the entry after the entry bar.
+
+7. PHASE-1 GATES (verbatim in GATE_XAUUSD_MACRO_HOLDS.txt)
+- G-X1: Total executed signals >= 150.
+- G-X2: Gross expectancy at h=5 or h=21 >= $0.82 (2.0x the $0.41 binding cost floor) to ensure survivability against spread + swap.
+- G-X3: Block-bootstrap (10,000 iterations, seed 20260921) P(mean net profit <= 0) <= 0.20.
+
+8. MECHANICAL INTERPRETATIONS PRE-DECLARED
+- Executed signal (per horizon) = signal date whose h-day forward window completes; G-X1 uses the h=5 executed count; the h=21 expectancy uses its own complete-window subset (counts reported for both).
+- G-X2 is evaluated per horizon on the gross $/oz mean; PASS if either horizon clears $0.82.
+- G-X3 is evaluated per horizon on the net $/oz per-signal series; circular moving-block bootstrap over the time-ordered series, block length = h, 10,000 draws, numpy default_rng(20260921); PASS if P(mean net <= 0) <= 0.20.
+- OVERALL PHASE-1 PASS = G-X1 AND (there exists h in {5, 21} with G-X2(h) AND G-X3(h)).
+
+9. HONESTY / ANTI-LEAK / STOP RULES
+- No parameter sweep anywhere: thresholds are sign-only and frozen here; horizons are the two pre-declared ones.
+- The 2022-2024 breakdown is descriptive reporting, never a gated sub-selection.
+- A null result (any gate FAIL) is a complete, expected deliverable and ends this artifact.
+- If a FRED series terminates early, the funnel and report must show its effective end; no substitution series may be introduced after seeing results.
+- Failures do not reopen closed signal families; this is a new macro-conditioned daily-horizon family.
+
+10. ARTIFACTS
+- data/results/xauusd_macro_holds/: SPEC_XAUUSD_MACRO_HOLDS.txt (this file), GATE_XAUUSD_MACRO_HOLDS.txt, REPORT_XAUUSD_MACRO_HOLDS.txt, xauusd_macro_signals.csv, fred_raw_DFII10.csv, fred_raw_DTWEXBGS.csv, run_meta.json.
+- Script: evaluate/xauusd_macro_holds_phase1.py (written only after SPEC and GATE were frozen).

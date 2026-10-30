@@ -1,0 +1,39 @@
+GATE — MOKAMEL FLIP SCALED-EXIT AMENDMENT. Verbatim extraction of every
+gate declared in SPEC_MOKAMEL_FLIP_AMENDMENT_SCALED_EXIT.txt (written
+2026-09-03, BEFORE any scaled-arm script ran). The original
+GATE_MOKAMEL_FLIP.txt is untouched and remains binding for everything
+it covers. Nothing here may be re-negotiated after numbers are seen. A
+gate clause that cannot be evaluated counts as FAIL.
+
+SCALED ARMS (both stop/target pairs identical after the pre-declared
+rounding rule — stop to nearest 0.5 pt, target = 2 x stop):
+  scaled_M1_price_5_10 : stop 5.0 / target 10.0 (price-level anchor
+                         R_price = 8.0, midpoint of the brief's 7-9x)
+  scaled_M2_vol_5_10   : stop 5.0 / target 10.0 (1.0 x median
+                         ATR14(M5) at triggers = 4.782 -> 5.0)
+Both tested with the ORIGINAL Stage-B protocol unchanged (population,
+money machine, costs 0.51 pt binding, invariants, sizing lots =
+100/stop = 20.0).
+
+GATE B1-AMENDED (applied identically to each scaled arm, separately;
+ALL clauses required per arm):
+  (i) expectancy_after_cost > 0 (0.51 pt cost);
+  (ii) n_trades >= 150;
+  (iii) exit-reason sanity: time_exit share < 60% of the arm's
+        trades (forced 15:55 exits; filter_exit counts in the
+        denominator, not the numerator).
+  ANY clause failing => that arm FAILS; documented reason.
+
+IF BOTH ARMS FAIL CLAUSE (iii): the mismatch is not explained by
+simple price/volatility scaling; NO third ad hoc scaling may be
+attempted; the amendment stops and reports that conclusion plainly.
+
+FROZEN ANCHORS (may not be re-negotiated): R_price = 8.0 (brief's
+7-9x midpoint, public knowledge, LOWER-RIGOR anchor, flagged); ATR
+multiple = 1.0 (one typical M5 bar); median ATR14(trigger) = 4.782
+over the Stage-A binding population; rounding nearest 0.5 pt with
+1:2 shape preserved; lots = 20.0; band edges 7x/9x are untested
+context only. Neither method may be preferred retroactively based on
+performance; the original 40/80 binding result is not reopened; the
+unit ring remains non-binding and was not the source of these values
+(5-pt stop lies outside the ring's 20-60 pt space).

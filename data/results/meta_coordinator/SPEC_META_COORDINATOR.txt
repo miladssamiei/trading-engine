@@ -1,0 +1,305 @@
+SPEC_META_COORDINATOR
+Meta-coordinator EA on US500: causal day-level ensemble of validated
+native strategies (hypothesis #12, project hypothesis numbering)
+
+Status: SPEC written 2026-08-29 BEFORE any code or run. The companion
+GATE_META_COORDINATOR (artifact list, section 7) must be created as a
+verbatim extraction of every E and F gate in sections 4 and 5 BEFORE
+any Phase-1 script runs. Nothing here may change after ensemble output
+exists; additions are exploratory and labeled.
+
+------------------------------------------------------------------------
+1. GOAL, MECHANISM, DISTINCTNESS
+
+The coordinator combines already-validated native EAs into one
+meta-strategy. Each child EA stays UNCHANGED as a signal/exit
+generator; the coordinator decides, once per trading day, whether each
+child may trade and at what weight. The question: can simple, causal,
+pre-declared ensemble rules produce more stable performance than any
+single component or than static combination?
+
+Distinctness, explicitly:
+
+  - NOT a new raw-tape pattern. No price-pattern edge is invented or
+    searched here; all edges are inherited from child strategies.
+    The coordinator never reads tick or bar data.
+  - NOT a CAIRO-style ML ensemble. No model is trained, no fitting, no
+    checkpoint bridge; coordination uses fixed rules over daily child
+    aggregates (trailing Sharpe gating, conflict veto, risk caps).
+  - NOT exit re-optimization. Exits live inside each child and may not
+    be altered by the coordinator or by this SPEC. A child whose exit
+    proves inadequate is handled in its own SPEC, never here.
+
+Prior result this SPEC must confront honestly: the static combination
+of these same two children was ALREADY tested
+(data/results/portfolio_orb_sp2l/, 2026-08-27): diversification real
+(Sharpe 0.337 -> 0.420 at 1+1 lots) but NOT compelling - 2023 = 77.5%
+of combined profit, both legs lost 2025 together, all portfolios
+bottomed the same week, recommendation was ORB alone. The coordinator
+differs by adding CAUSAL DAY-LEVEL GATING on top. Its burden is
+therefore heavier than "beat the children": the gated ensemble must
+also beat the UNGATED static combinations (its own baselines) before
+it justifies existence. A null result is expected to be a live
+possibility and is a complete deliverable.
+
+------------------------------------------------------------------------
+2. INPUTS AND DATA
+
+Instrument: US500 only (US500-tick / US500.c mapping, unchanged).
+Extension to XAUUSD or other symbols is OUT OF SCOPE for all gates and
+is not pre-declared.
+
+Eligible children - the admission rule is strict and mechanical:
+a child must have (i) a native MQL5 EA, (ii) a completed
+Python-vs-MT5 reconciliation with zero unexplained residuals, and
+(iii) a walk-forward pass of its own S-gates (positive net expectancy
+and Sharpe, >= 150 trades, temporal concentration pass). As of this
+SPEC exactly TWO strategies qualify:
+
+  CHILD 1 - ORB (opening range breakout)
+    EA: ea/ORB_Strategy.mq5. Stream: MT5 net-of-spread trades
+    data/results/orb_2021_present/mt5_trades.csv (447 trades,
+    +470.67 pts, Sharpe 0.337, maxDD 5.13% at 1 lot).
+  CHILD 2 - SP2L spike/gap
+    EA: ea/SP2L_SpikeGap.mq5 (frozen by project rule - see section 6).
+    Stream: MT5 net trades
+    data/results/sp2l_2021_2026/mt5_trades.csv (1,343 trades,
+    +281.84 pts, Sharpe 0.275 on the common day universe, maxDD 416.71
+    pts at 1 lot). Its documented fragility (tester-tape sensitivity;
+    XAUUSD point-convention band) TRAVELS WITH IT into every ensemble
+    statement.
+
+Explicitly NOT eligible (fail their own gates, no validated EA):
+VWAP mean reversion (edge < costs), VWAP trend-pullback (Step-3 G3
+fail), H1/H2, H2-morning, FVG, Bollinger MR, session transfer, both
+momentum studies. If any strategy passes its own gates later, it may
+be added ONLY via a pre-declared amendment to this SPEC, never
+mid-analysis.
+
+Data granularity: the coordinator operates on DAILY aggregates of
+child trades - PnL_i(d), trade count, net direction exposure -
+zero-filled over the common day universe (the ORB session-day universe
+from the portfolio study, 1,369 days, 2021-01..2026-04). It never sees
+intraday prices. Execution remains intraday inside the children;
+coordination is defined at day level only, using information available
+BEFORE the day's session open (cash-day boundary = the decision
+point; all trailing statistics use days strictly before d).
+
+------------------------------------------------------------------------
+3. CORE VARIABLES AND META-RULES (complete set; nothing else)
+
+Variables (all causal, computed once per day d before the open):
+
+  PnL_i(d)     child i's net-of-spread daily PnL (points, $1/pt/lot),
+               zero-filled on the common universe.
+  S_i(d; T)    trailing Sharpe of child i over the T = 126 cash days
+               strictly before d (mean/std ddof=1 x sqrt(252), on
+               zero-filled days).
+  DD_i(d; T)   trailing drawdown of child i's cumulative PnL over the
+               same window, in % of the $10,000 base.
+  SIG_i(d)     signal presence: child i has >= 1 trade on day d
+               (known from the child's own backtest stream offline;
+               in MT5 from the child's pending signals at the day
+               boundary - section 5).
+  DIR_i(d)     child i's net direction exposure on day d: +1 if net
+               long (long PnL weight larger), -1 if net short, 0 if
+               flat or perfectly balanced.
+
+META-RULES (fixed; three rules):
+
+  R1 - ACTIVATION GATING. Child i is allowed to trade on day d iff
+       S_i(d; 126) > 0 AND DD_i(d; 126) < 8% of base. During the first
+       126 cash days of the tape (burn-in, 2021 H1+H2) NO child is
+       gated - each trades at its baseline weight - because trailing
+       statistics do not yet exist. (Project burn-in convention: 2021
+       absorbs the warm-up.)
+
+  R2 - CONFLICT VETO (two-child instantiation). If both children trade
+       on day d (after R1) with OPPOSITE net directions
+       (DIR_1 x DIR_2 = -1), BOTH are blocked that day: the book has
+       no net directional information and only doubles cost exposure.
+       Days with one child trading, or both trading the same net
+       direction, pass through. NOTE ON THE GENERAL FORM: with only
+       two children, a literal "trade only when >= 2 agree" rule would
+       leave a degenerate sample; the conflict-veto is the declared
+       two-child instantiation. If a third child ever joins, the
+       literal >= 2-agreement rule becomes a pre-declared exploratory
+       variant - not a rescue.
+
+  R3 - RISK CAPS. Per-child weight never exceeds 1.00 lot (children
+       run exactly as validated); total concurrent exposure never
+       exceeds 2.00 lots; total book size each day = sum of allowed
+       weights (constant 2.00 lots when both children are active, so
+       results are comparable with the static portfolio baselines).
+       With two children R3 is structurally inert (1 + 1 = 2) - it
+       exists for future children and is verified, not tuned.
+
+WEIGHTING ARMS (not rules; both run and both report):
+
+  A - EQUAL NOTIONAL: w_i = 1.00 lot per allowed child (the static
+      S1 baseline plus gating).
+  B - CAUSAL EQUAL RISK: w_i(d) proportional to 1 / sigma_i(d; 126)
+      (trailing daily-PnL std), normalized so allowed weights sum to
+      the number of allowed children, each capped at 1.00 lot
+      (R3). The static (full-sample) version of this was portfolio
+      S2; Arm B makes it causal.
+
+No other rules, weights, or windows may be introduced after Phase-1
+output exists. T = 126 and the 8% drawdown bound are fixed here and
+are not searched.
+
+------------------------------------------------------------------------
+4. PHASE 1 - OFFLINE ENSEMBLE QUALITY (existing CSVs only; no MT5)
+
+Procedure: replay the common day universe chronologically. Before each
+day d, compute S_i, DD_i, sigma_i causally; apply R1 to both children;
+determine SIG_i/DIR_i from the children's own MT5 streams; apply R2;
+assign weights per arm A/B; ensemble PnL(d) = sum over allowed
+children of w_i(d) x PnL_i(d). Every blocked child-day is tallied
+(why: R1-negative-Sharpe, R1-drawdown, R2-conflict).
+
+Metrics per arm: Sharpe (sqrt(252), ddof=1, zero-filled common
+universe), total net, max drawdown from the true cumulative curve,
+win rate (days), days with >= 1 trade, per-child contribution (net and
+blocked-day counts), correlation of ensemble daily PnL vs each child
+and vs the ungated static combinations S1/S2/S3 of the portfolio
+study.
+
+Comparators (all at the same 2.00-lot total book where applicable):
+each child alone (ORB, SP2L); the ungated static combinations
+(portfolio S1 equal-notional, S2 equal-risk, S3 ORB-75/SP2L-25 risk);
+buy-and-hold ex-financing (documented benchmark row, reuse, no
+recompute).
+
+PHASE 1 GATES (E1-E4; all must hold for at least one arm):
+
+  E1  Ensemble Sharpe > 0 AND strictly greater than EVERY child's
+      Sharpe (with two children this means > max(0.337, 0.275)) AND
+      strictly greater than the corresponding ungated static arm
+      (A beats S1's 0.420; B beats S2's 0.418).
+  E2  Ensemble max drawdown (true curve, 2.00-lot book) <= 1.10 x
+      the worst child's drawdown at the same book size
+      (worst = max(2 x 5.13%, 2 x 4.17%) = 10.26%; bound 11.29%).
+  E3  Days with at least one trade >= 150.
+  E4  At least 4 of 5 full years (2021-2025) net positive AND no
+      single year > 60% of total net PnL. 2026 partial: reported only.
+
+PASS = E1-E4 for arm A or B -> Phase 2. Both arms fail -> STOP at
+REPORT_META_COORDINATOR; no MT5 work, no EA. Honest stop-and-report is
+a complete deliverable.
+
+------------------------------------------------------------------------
+5. PHASE 2 - MT5 EXECUTION DESIGN (only if Phase 1 passes)
+
+Implementation model: ONE master EA on one chart ("MetaCoordinator"),
+embedding faithful copies of each child's signal/exit logic as
+internal modules with their validated parameters unchanged. The
+frozen ea/SP2L_SpikeGap.mq5 file itself is never edited (project
+do-not-modify rule); the copy lives inside the master EA. Alternative
+models (multiple EAs + inter-EA communication, chart events) are
+rejected: single-EA embedding avoids the communication/permission bug
+class entirely.
+
+MT5 constraints: one EA per chart; one magic number per child family
+(MAGIC_BASE + i) so every position attributes to its child; trades.csv
+logging in the collector-compatible schema with a child-strategy
+column; the coordinator's own daily decision log (allowed/blocked/
+weights/trailing stats) written to a coordinator_days.csv.
+
+Coordination in MT5: identical meta-rules, but trailing statistics
+S_i, DD_i, sigma_i are computed from the terminal's OWN closed-trade
+history (deal history filtered by child magic), not from Python files;
+the same T = 126 and 8% bound; decisions at the cash-day boundary
+before the first child may trade. Day-boundary and DST handling reuse
+the existing session helper conventions (ORB/SP2L code base).
+
+Reconciliation: full Python-vs-MT5 pass per the established standard -
+the Python reference reproduces the OFFLINE Phase-1 ensemble exactly
+(gating decisions included); MT5 runs in Model=0 yearly batches over
+2021-2026-04; every Python/MT5 divergence classified (entry/exit
+level, timing, count) with the documented tester-tape residual class
+expected for the SP2L child (~10% trade-set differences, knife-edge
+OHLC inequalities - classify, don't chase). An additional master-vs-
+child integrity check: with gating disabled, the embedded child
+modules must reproduce each child's own validated trade set exactly.
+
+PHASE 2 GATES:
+
+  F1  Consistency: MT5 ensemble Sharpe within 0.15 (absolute) and MT5
+      max drawdown within 20% (relative) of the offline Phase-1
+      numbers over the same window. (Tolerances sized by the SP2L
+      child's documented cross-tape residuals, not chosen loosely.)
+  F2  Execution integrity: zero double-fills attributable to the
+      coordinator; 100% of trades attributed to exactly one child;
+      R3 caps never violated on any day (verifiable from
+      coordinator_days.csv vs positions); gating decisions in MT5
+      match the Python reference on >= 95% of days, every mismatch
+      classified.
+
+F-gate failure -> the ensemble is NOT validated; null report; the
+children remain individually as they are.
+
+------------------------------------------------------------------------
+6. HONESTY AND ANTI-LEAK RULES
+
+  - No child's exits, entries, or parameters are altered by this SPEC
+    or by the coordinator. The SP2L EA file stays frozen; embedding a
+    copy is not modifying it, and the copy must reproduce the
+    original's trades exactly (F-gate check).
+  - All rules, windows, weights, and gates are declared BEFORE any
+    ensemble computation. Post-hoc variants are labeled EXPLORATORY,
+    cannot rescue a failed gate, and cannot be promoted silently.
+  - Trailing statistics are strictly causal (days strictly before d;
+    the 126-day burn-in is absorbed in 2021, which reports no gated
+    result and is excluded from nothing else).
+  - Correlations near the children are expected by construction (the
+    ensemble CONTAINS the children); the informative comparisons are
+    vs the ungated static combinations, and any claim of "new
+    robustness" must survive the 2025 joint-loss year specifically
+    (the known failure mode of this pair).
+  - A null result (ensemble not demonstrably better than children and
+    static baselines) is a complete deliverable: SPEC, GATE, Phase-1
+    stats, report.
+
+------------------------------------------------------------------------
+7. ARTIFACTS AND LOGGING (data/results/meta_coordinator/)
+
+  SPEC_META_COORDINATOR.txt        this document (before any code)
+  GATE_META_COORDINATOR.txt        verbatim E/F gate extraction
+                                   (before any code)
+  child_streams.csv                normalized child daily PnL on the
+                                   common universe (reuse/extend of
+                                   the portfolio study's
+                                   combined_daily_pnl.csv)
+  ensemble_daily_pnl.csv           per-arm gated ensemble daily PnL
+                                   + gating decision columns
+  yearly_breakdown.csv             per-arm yearly net and gate rows
+  contributions.csv                per-child net contribution,
+                                   blocked days by rule
+  phase1_stats.json                all metrics, comparators, gates
+  REPORT_META_COORDINATOR.txt      Phase-1 verdict, regardless of
+                                   outcome
+  phase2/ artifacts (only on pass): master EA source
+                                   (ea/MetaCoordinator.mq5),
+                                   Python reference, reconciliation
+                                   CSVs/logs, coordinator_days.csv
+
+PROGRESS.md hooks (append per stage, current style):
+  "meta coordinator - SPEC/GATE pre-declared",
+  "meta coordinator - Phase 1 run",
+  "meta coordinator - Phase 1 verdict",
+  and on pass: "meta coordinator - MT5 execution design",
+  "meta coordinator - reconciliation verdict".
+
+------------------------------------------------------------------------
+8. SCOPE NOTES
+
+One instrument (US500 CFD), one tape window (2021-01..2026-04), two
+eligible children today. The ensemble cannot manufacture an edge the
+children lack; it can only reweight their existing streams causally.
+The static-combination prior (portfolio_orb_sp2l: real but not
+compelling diversification, 2025 joint loss) is the bar the coordinator
+must clear, and the 2025 joint-loss year is the specific stress case
+every passing claim must address.
+
+END OF SPEC_META_COORDINATOR

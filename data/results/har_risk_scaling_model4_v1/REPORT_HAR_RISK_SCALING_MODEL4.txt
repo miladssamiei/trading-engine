@@ -1,0 +1,68 @@
+REPORT_HAR_RISK_SCALING_MODEL4
+Hypothesis #21
+Generated 2026-09-11 after the frozen Phase-1 run and final implementation audit.
+SPEC: SPEC_HAR_RISK_SCALING_MODEL4.txt
+GATE: GATE_HAR_RISK_SCALING_MODEL4.txt
+
+OVERALL VERDICT
+
+FAIL at the pre-model data gates. The causal HAR model, exposure multipliers, economic comparison, bootstrap and sealed 2025-2026 overlay holdout were not evaluated. This is a complete null/ineligible deliverable under the frozen stop rules. It does not change any historical ORB, SP2L, portfolio, meta-coordinator or tick-model verdict. downstream_model_allowed=false and live_execution_allowed=false.
+
+RESEARCH QUESTION
+
+The study attempted the risk-only finding in institutional-ml-trading-research.md: a volatility forecast may improve sizing without predicting direction. The frozen design would have applied a common 0.25-to-1.00 deleveraging multiplier to a fixed 0.50 ORB plus 0.50 SP2L book using a causal expanding HAR forecast of next-session realized variance. It contained no side prediction, signal change, threshold search or EA/tester run.
+
+WHAT FAILED BEFORE MODEL FITTING
+
+V-D1 failed because the frozen Model=4 child exports are not an all-intraday portfolio under the SPEC's required New York-date definition. ORB has 54 of 437 trades whose recorded close is on a later New York civil date. Some span weekends or multiple days; the longest inspected example lasted 11508 minutes. SP2L has one overnight trade, opened 2025-07-04 and closed 2025-07-07. SP2L also has 133 rows whose open and close share the same exported minute. The implementation audit correctly treats those as potentially valid sub-minute trades because tester timestamps have minute precision; they are not negative-duration errors.
+
+The trade counts and PnL totals otherwise reproduced: ORB 437 and +114.91; SP2L 1349 and +138.65. All four input SHA-256 values matched on independent recheck. The existing common-day rule produced 1369 eligible dates, first eligible 2021-01-05 and last 2026-04-30; the source day file itself begins 2021-01-04 with a zero-information row. The literal V-D1 date condition and the same-day-trade clause therefore are not both satisfied.
+
+V-D2 failed because the SPEC required at least 70 M5 cash bars on every eligible validation day. Thirty-three dates through 2024 had fewer: one date had 30 bars, one had 33, twenty-five had 42 and six had 45. These dates are predominantly U.S. holidays or shortened sessions, but the threshold and common-day universe were frozen before the run; they cannot be relaxed after observing the failure. The validation-prefix RV file contains 1028 rows only through 2024 and lists the failed dates. No 2025-2026 RV outcomes or overlay results are written by the corrected final run.
+
+The first implementation run had treated equal-minute SP2L timestamps as non-positive duration and wrote full-period RV rows. Before this REPORT, the implementation was corrected without changing the frozen result: equality is now accepted at minute resolution, detailed violation counts are recorded, the stop reason names both failed gates, and failure writes only the through-2024 RV prefix. No HAR fit or overlay score was calculated in either run. Because validation already contains disqualifying days and ORB overnight trades, the verdict remains FAIL.
+
+GATE VERDICTS
+
+V-I1 PASS. SPEC was written before implementation and result computation. GATE contains the ten V-/H- lines in exact order and verbatim. Existing historical SPEC/GATE/REPORT files and frozen EAs were untouched.
+
+V-D1 FAIL. Hashes, trade counts and PnL totals reproduced, but 54 ORB trades and one SP2L trade close on a later New York date. The eligible common universe begins 2021-01-05 rather than the literal 2021-01-04 endpoint named in V-D1. A same-day failure is final under the gate.
+
+V-D2 FAIL. Thirty-three validation-prefix cash dates contain fewer than the frozen minimum of 70 M5 bars. Because this alone disproves the every-day clause, the HAR prefix-invariance test was not run.
+
+V-F1 NOT EVALUATED. No HAR forecasts were fitted, so QLIKE, Spearman and forecast-quintile separation do not exist.
+
+V-E1 NOT EVALUATED. No validation multipliers or portfolio PnL were produced.
+
+V-E2 NOT EVALUATED. No block bootstrap or year-concentration measurement was produced.
+
+V-C1 NOT EVALUATED. No 1.5x or 2.0x resized cost scenario was produced.
+
+V-FINAL FAIL. V-D1 and V-D2 failed. Per the frozen rule, later validation gates cannot activate and no threshold/data rescue is permitted in this artifact.
+
+H-1 NOT OPENED. The 2025-01-01 through 2026-04-30 overlay holdout was not scored. No holdout files exist.
+
+H-2 SATISFIED AS AN HONESTY LIMIT. Continuous sizing, the custom Model=4 tape and unresolved FTMO volume/tick/fill evidence prohibit EA work, FTMO deployment or a profitability claim. downstream_model_allowed=false and live_execution_allowed=false.
+
+ARTIFACTS AND VERIFICATION
+
+- evaluate/har_risk_scaling_model4_v1.py implements the data gates, causal RV/HAR utilities, sizing, cost and inference functions, with a fail-closed Phase-1 runner.
+- tests/test_har_risk_scaling_model4_v1.py contains six tests for RV path construction, HAR cutoff and scaling bounds, incremental cost arithmetic, metrics/QLIKE, deterministic paired bootstrap and minute-resolution trade validation.
+- input_hashes.json records the four immutable source hashes.
+- daily_rv.csv contains only the through-2024 validation-prefix RV audit after the final correction.
+- validation_forecasts.csv and validation_daily_pnl.csv contain only their headers because model evaluation was barred.
+- validation_metrics.json contains the final machine-readable FAIL, violation counts and holdout flags.
+
+Final regression command:
+C:\Users\Milad\miniconda3\envs\reinforce_rl\python.exe -m pytest tests\test_har_risk_scaling_model4_v1.py tests\test_ftmo_public_evidence_v1.py tests\test_ftmo10k_qualification_v1.py tests\test_ftmo_account_replay_v1.py -q
+Result: 34 passed in 1.36s.
+
+Phase-1 command:
+C:\Users\Milad\miniconda3\envs\reinforce_rl\python.exe evaluate\har_risk_scaling_model4_v1.py
+Result: exit 2, FAIL, V-D1/V-D2 false, zero validation forecast rows, holdout_overlay_scored=false and holdout_files_written=false.
+
+Python compileall passed. Independent SHA-256 checks matched all four inputs. git diff --check found no study-path whitespace errors. graphify update . completed after the final code correction with 1032 files, 2150 nodes, 3080 edges and 267 communities.
+
+HONEST CONCLUSION
+
+The research claim was not refuted because the forecast was never fitted. The available Model=4 child exports and frozen all-days RV rule were ineligible for this experiment. Proceeding by ignoring overnight positions, dropping holidays, lowering the bar-count threshold, selecting only the cleaner child or charging zero financing would be a post-result rescue. Any correction must have a new mechanism-scoped SPEC/GATE and must first resolve the Model=4 multi-day exit behavior and define a schedule-aware realized-variance calendar.

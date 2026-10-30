@@ -1,0 +1,85 @@
+HYPOTHESIS 66: DELAYED EURUSD RESPONSE TO U.S. GROWTH SURPRISES
+Declared 2026-09-25 before this study's code or Phase-1 run.
+
+1. MECHANISM AND INSTRUMENT TRANSFER
+Transfer the fixed event universe, surprise direction, and delayed
+entry/exit of Hypothesis 64 from XAUUSD to EURUSD. A positive U.S.
+employment or consumption surprise should strengthen the dollar:
+SELL EURUSD; a negative surprise should weaken it: BUY EURUSD.
+The initial release jump is not counted. Trade only the return
+from one minute after publication to 15 minutes after. Hypothesis
+64's gold FAIL and all earlier verdicts remain final. No side,
+family, threshold, latency, or exit-time search is allowed.
+
+2. EVENT DATA, VINTAGE LIMIT, AND FIXED UNIVERSE
+Read only data/results/xauusd_macro_reaction_follow_v1/
+fred-us-macro-events-source.json, sha256
+b9d8a2256ecc61fda3f68efbc243b407db5b19b0f2288c44f827d03854861201.
+It is a FRED-derived release roster enriched after the fact with
+Investing.com calendar actuals/forecasts. Its forecast fields have
+NO independently verified captured-before-release timestamp and
+its actual fields have no receipt timestamp. Therefore a positive
+historical economics screen is PROVISIONAL and cannot validate
+or deploy the system. Do not use FRED's later-revised actual.
+Use the exact Hypothesis 64 filter, unchanged: PAYEMS at 08:30
+NY, RSAFS at 08:30, ADPMNUSNERSA at 08:15, JTSJOL at 10:00;
+releaseDateApproximate=false; createdAt UTC converted to exact
+specified America/New_York wall minute; finite numeric
+metadata.consensus.actual and .forecast; unequal values only.
+At most one trade per NY date: choose earliest eligible release;
+if two eligible families share that earliest instant, skip date.
+Later events that day are ignored. Positive actual-minus-forecast
+means short EURUSD, negative means long. No magnitude threshold.
+
+3. QUOTES, ENTRY, EXIT, AND COST
+Use verified raw EURUSD tick CSV C:/Users/Milad/download/
+eurusd-tick-2020-01-01-2026-09-20.csv with epoch-ms timestamp,
+askPrice, bidPrice. Source hash and integrity are recorded in
+data/results/eurusd_onboarding/onboarding_stats.json. Exclude an
+invalid individual quote (nonpositive, nonfinite, or Ask<Bid)
+and count it; do not repair or interpolate. Enter at the first
+valid quote from release+60 through release+65 seconds inclusive:
+BUY at Ask or SELL at Bid. Exit at the first valid quote from
+release+15 minutes through +15 minutes+10 seconds inclusive:
+long at Bid, short at Ask. Skip and log absent entry or exit.
+No stops, targets, second attempts, or overnight positions.
+Gross pips = direction*(exitMid-entryMid)/0.00010.
+Executable quote net pips = (exitBid-entryAsk)/0.00010 for long
+or (entryBid-exitAsk)/0.00010 for short. Extra-cost stress net
+pips = quote net - 0.3 on the SAME trades. Actual Bid/Ask spread
+is already paid in executable quote net; extra 0.3 pip buffers
+latency/slippage. No compounding or swap. First-quote fills remain
+optimistic about live order latency, rejection, and market impact.
+
+4. PARTITION AND INFERENCE
+2020-2021 NY dates are descriptive calibration; 2022-01-01
+through the archive end in April 2026 is the gated historical
+block, with 2026 partial. The frozen Hypothesis 64 event filter
+has 184 distinct 2022+ candidate dates before two simultaneous
+release skips and quote-validity checks. Report all year and
+event-family slices, funnel, raw and net pips, spread profile,
+win rate, max drawdown, and hold duration. Resample gated entry
+dates with replacement 10,000 times, seed 20261002, retaining
+all trades per sampled date. Report P(mean executable net <=0)
+and descriptive 95% quantiles. The historical event data have
+already been exposed in this project; do not call this virgin OOS.
+
+5. GATES, FROZEN BEFORE PHASE 1
+G-EMS1: At least 150 executed trades on distinct 2022-2026 NY event dates.
+G-EMS2: Strictly positive mean extra-cost stress net pips per trade in the gated block.
+G-EMS3: Date-bootstrap P(mean executable quote net <= 0) at most 0.05, 10,000 resamples, seed 20261002.
+G-EMS4: Strictly positive executable quote-net total pips in each complete gated year 2022, 2023, 2024, and 2025.
+All four are required for an economic-proxy PASS. Otherwise FAIL
+is final for this artifact. No post-hoc change to event family,
+side, surprise threshold, entry buffer, exit time, or year block.
+
+6. STOP RULE AND ARTIFACTS
+On FAIL, no MT5 tester. On PASS, first freeze a separate vintage
+and official-release-time data qualification SPEC/GATE. It must
+prove forecasts existed before publication, first actual receipt
+time, and release-date alignment. Only then freeze a Model=4
+native Bid/Ask order-execution SPEC/GATE requiring >=150 trades,
+year-sign agreement, positive net expectancy, and order-state
+reconciliation. Save this SPEC, verbatim GATE, source hashes,
+roster, quote trades, metadata, and REPORT even on FAIL. Never
+edit existing historical SPEC/GATE/REPORT documents.

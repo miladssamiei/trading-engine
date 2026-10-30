@@ -1,0 +1,36 @@
+FUTURES PROP VALIDATION INTRADAY - RE-MEASUREMENT V1 SPEC
+Date: 2026-09-26. Frozen before the re-measurement runner is written or run.
+
+This is a mechanical correction to futures_prop_validation_intraday. Its
+initial report is preserved as historical but invalid for D53 because the
+new M1 walker filled a signal-bar entry already beyond stop or target at the
+bracket level instead of at the simultaneous entry open. H53 SPEC section
+5.2 requires the open fill (gross zero, transaction floor paid). The same
+opening-level correction applies uniformly to D52 if its entry minute opens
+beyond a bracket after a favorable limit gap. No parameters, data, cost
+floors, statistical gate, prop distance or engine-selection rule change.
+
+Re-run all nine rows independently, not only the affected rows, for one
+internally consistent ledger. The source is the same three bid-only tapes;
+GC cost 0.13, NQ 0.39, ES 0.30; swap zero. C remains the literal H56 SPEC
+bracket interpretation (on a short entry at the minute's high, structural
+short stop above that high cannot be touched by that minute's low). The
+historical H56 implementation instead checks low against its short-stop bid
+level on the entry minute; that code defect is not replicated here. As a
+result, C is a frozen-SPEC transfer diagnostic, not a byte-identical replay
+of the old H56 executable ledger. D52 remains the frozen H52 15m pullback,
+D53 the frozen H53 1h sweep/FVG, as fully defined in the original SPEC.
+
+M1 peak net open equity, floor peak minus 2.5 times initial risk, close-based
+PROP_LIQUIDATION and 24-hour UTC cooldown remain identical. On the entry
+minute, test an open already beyond stop or target first and fill at the
+entry open; otherwise stop-touch has priority over target-touch. Bracket
+touch has priority over the close-based prop guard. Later adverse stop gaps
+and favorable target gaps fill at M1 open. Same-bar share is at the engine
+timeframe and same-minute share is reported separately. The M1 OHLC order
+within a minute is unknown, so even corrected fills are only a proxy.
+
+All original SPEC honesty limits remain: no CME native prices, rolls, bid/
+ask, contract-dollar sizing, account-wide firm threshold or walk-forward
+confirmation. Both D interpretations are reported without choosing a winner.
+The result is not live-ready regardless of its gate verdict.

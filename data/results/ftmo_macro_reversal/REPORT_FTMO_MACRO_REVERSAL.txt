@@ -1,0 +1,67 @@
+REPORT_FTMO_MACRO_REVERSAL
+Generated: 2026-09-13T01:13:12
+
+PREMISE: short_term_reversal failed G-R2 on financing alone (gross +2,701.18 pts,
+financing -21,250 pts, net -18,782 pts). This study replays the SAME 458 frozen OOS
+trades under simulated FTMO $10k Phase-1 Swap-Free rules (5% daily / 10% max / +8% target).
+It is a what-if simulation, not an FTMO qualification (ftmo10k_qualification_v1 stays INCOMPLETE);
+downstream_model_allowed=false, live_execution_allowed=false.
+
+EXECUTION: EA fills at first real tick at/after entry/exit-date+1day (D1-close proxy),
+US500.c Model=0, ref run 1.0 lot: wall=18.9s, ticks=105044519, bars=1387,
+tester pass=True, executed=70 trades, status={'initial_equity': '10000.00', 'final_balance': '10840.98', 'final_equity': '10840.98', 'target_reached': '1', 'breached': '0', 'breach_reason': '', 'signals_total': '458', 'signals_next': '70', 'trades_executed': '70', 'last_time': '2026.05.04 23:57'}
+SWAP OVERRIDE: tester charged swap total -39.00 USD -> forced to 0.00 for every
+trade (swap-free mirror); analysis PnL = raw DEAL_PROFIT - commission; commission total +0.00 USD.
+FILL-VS-MODEL: per-trade fill index points vs g2 gross_pt over first 70 trades: median -0.30 pts, mean +0.17, total +12.1 pts
+(overnight-gap + spread effect of daily-boundary execution; $ per index point per lot = 1.0000).
+
+GATES
+G-F1 EXECUTION INTEGRITY: compile 0/0=True, run passed=True, not timed out=True, executed 70 >= 95% of 70 armed -> PASS
+G-F2 SWAP-FREE OVERRIDE AUDIT: 70 trades, all swap-zeroed, tester swap -39.00 reported -> PASS
+G-F3 FTMO PHASE-1 FEASIBILITY: 25 passing lots -> PASS
+G-F4 CONFIRMATION RUN: PASS (lot 15.0: {'target_reached': True, 'breached': False, 'trades': 2, 'balance': 11440.3, 'py_trades_to_pass': 0, 'wall_s': 22.9})
+OVERALL VERDICT: PASS
+
+LOT SWEEP (D1-close marks, worst-floating via D1 extremes, prior-day balance anchor)
+  lot   pass_date  days  peak_daily%  max_trail% verdict first_breach
+  1.0  2021-10-19   206         1.58        2.16    PASS            -
+  1.5  2021-06-18   119         2.36        3.20    PASS            -
+  2.0  2021-04-13    71         3.12        4.21    PASS            -
+  2.5  2021-04-05    65         3.87        5.21    PASS            -
+  3.0  2021-04-01    63         4.61        6.18    PASS            -
+  3.5           -     -         5.34        4.91    FAIL   2021-01-29
+  4.0           -     -         5.24        4.29    FAIL   2021-01-27
+  4.5           -     -         5.85        4.79    FAIL   2021-01-27
+  5.0           -     -         6.46        5.29    FAIL   2021-01-27
+  5.5  2021-01-21    13         2.70        3.76    PASS   2021-01-27
+  6.0  2021-01-20    12         2.94        4.07    PASS   2021-01-27
+  6.5  2021-01-08     4         1.44        0.00    PASS   2021-01-27
+  7.0  2021-01-08     4         1.55        0.00    PASS   2021-01-27
+  7.5  2021-01-08     4         1.66        0.00    PASS   2021-01-27
+  8.0  2021-01-07     3         1.77        0.00    PASS   2021-01-27
+  8.5  2021-01-07     3         1.88        0.00    PASS   2021-01-27
+  9.0  2021-01-07     3         1.99        0.00    PASS   2021-01-27
+  9.5  2021-01-07     3         2.10        0.00    PASS   2021-01-27
+ 10.0  2021-01-07     3         2.21        0.00    PASS   2021-01-27
+ 10.5  2021-01-07     3         2.32        0.00    PASS   2021-01-27
+ 11.0  2021-01-07     3         2.43        0.00    PASS   2021-01-15
+ 11.5  2021-01-07     3         2.54        0.00    PASS   2021-01-15
+ 12.0  2021-01-07     3         2.66        0.00    PASS   2021-01-15
+ 12.5  2021-01-07     3         2.77        0.00    PASS   2021-01-15
+ 13.0  2021-01-07     3         2.88        0.00    PASS   2021-01-15
+ 13.5  2021-01-07     3         2.99        0.00    PASS   2021-01-15
+ 14.0  2021-01-07     3         3.10        0.00    PASS   2021-01-15
+ 14.5  2021-01-07     3         3.21        0.00    PASS   2021-01-15
+ 15.0  2021-01-06     2         3.32        0.00    PASS   2021-01-15
+
+OPTIMAL: 15.0 lots -> pass 2021-01-06 (2 trading days from 2021-01-05)
+  win rate to pass: n/a (pass occurred on floating equity before the first close); swap-free win rate over all 70 executed trades: 58.57%
+  peak FTMO daily loss: 3.32% (limit 5.00%)
+  max trailing DD of close-equity: 0.00%
+  avg holding per trade (all executed): 4.20 calendar days
+  average days-to-pass across passing lots: 24.2 (min 2, max 206)
+  fill economics check: $1.0000 per index point per lot recorded (expect 1.0000); fills track the D1-close model
+
+CAVEATS: Model=0 constant ~0.41 pt synthetic spread underestimates real ~0.51 median;
+daily anchor uses prior-day realized balance (tasking definition); worst-floating uses D1
+extremes (pessimistic); the failed G-R2 verdict of short_term_reversal stands untouched.

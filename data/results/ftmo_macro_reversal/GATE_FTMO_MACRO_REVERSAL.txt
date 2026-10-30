@@ -1,0 +1,30 @@
+GATE FILE — FTMO_MACRO_REVERSAL
+Verbatim extraction of all gates from SPEC_FTMO_MACRO_REVERSAL.txt.
+Frozen BEFORE ea/MacroReversal_FTMO.mq5, the tester ini, or
+evaluate/ftmo_macro_reversal_test.py existed.
+
+G-F1 EXECUTION INTEGRITY: EA compiles 0 errors/0 warnings; the reference
+tester run completes (agent log shows generation + test completion; a fresh
+ftmo_reversal_trades.csv is attributable); executed trades >= 95% of the
+signals armed before the EA target-stop (or before tape end).
+
+G-F2 SWAP-FREE OVERRIDE AUDIT: every trade's analysis PnL has swap forced to
+0.00; the tester-charged swap total is reported; no trade is dropped.
+
+G-F3 FTMO PHASE-1 FEASIBILITY: at least one L in [1.0, 15.0] (step 0.5)
+reaches equity >= $10,800 (D1-close mark) with, up to its pass date, no 5%
+daily-loss breach and equity strictly above $9,000 including worst-floating
+extremes.
+
+G-F4 CONFIRMATION RUN: a second tester run at the optimal L shows balance
+reaching >= $10,800 (or within one holding period of the Python pass date)
+with no EA guard breach before the pass.
+
+OVERALL VERDICT RULE: PASS iff G-F1..G-F4 all PASS. G-F3 FAIL (no feasible
+lot) is a complete, final answer: the swap-free counterfactual does not pass
+Phase 1.
+
+FTMO parameters (owner-stated, simulated): $10,000 Challenge; 5.0% max daily
+loss ($500, prior server-day 00:00 balance anchor, floating equity); 10.0%
+max loss ($1,000, static $9,000 floor on floating equity); +8% profit target
+($10,800); swap-free (swap forced 0.00 on every trade).

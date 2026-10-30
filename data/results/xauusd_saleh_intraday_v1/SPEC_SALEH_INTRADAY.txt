@@ -1,0 +1,78 @@
+HYPOTHESIS 70: SAME-DAY XAUUSD DONCHIAN/SUPERTREND BREAKOUT
+Declared 2026-09-25 before this study's code or Phase-1 run.
+
+1. MECHANISM AND RELATION TO HYPOTHESIS 57
+Test whether Hypothesis 57's 4H Supertrend-gated 1H Donchian
+breakout with ADX filter earns enough within the same New York
+calendar day to cover native gold CFD cost. The prior #57 gold
+screen made most profit on multi-day trends (median hold 42h),
+so it does not answer the user's intraday request. Its frozen
+PASS remains a swing-screen result. This adaptation changes only
+entry-hour eligibility and a mandatory daily flat exit. No
+parameter, side, signal, indicator, stop, or cost-floor search.
+The historical tape has already hosted many studies; any Phase-1
+PASS is a selected-screen result and needs later independent
+forward confirmation before a live-edge claim.
+
+2. PRICE DATA AND UNCHANGED CAUSAL FEATURES
+Read verified native-gold BID M1 bars at data/results/xauusd_onboarding/
+xauusdtick_m1.csv, 2337538 rows from 2020-01 to 2026-09-01,
+same hashed tape and same 1H/4H continuous-grid conventions as #57.
+Use #57 load_ctx() and detect_signals() unchanged, including:
+1H Donchian(20) previous completed close outside channel of t-2;
+4H NY-wall Supertrend(10,3) last strictly completed anchor;
+1H Wilder ADX14(t-1)>=20; ATR14, REAL execution bars only.
+No use of any future bar for signal or indicator. Keep original
+single-position occupancy and shadow all signals on or before
+the current exit bar.
+
+3. INTRADAY ENTRY, EXIT, COST
+On each NY civil date, eligible 1H entry opens have NY wall hour
+00 through 15 inclusive; hours 16-23 are skipped. Require that
+same NY date to have a REAL 15:00-16:00 1H bar; otherwise skip
+all candidates that date. Entry remains at REAL bar t BID open
+for short, ASK=BID+0.41 for long. Initial and trailing stops are
+the exact #57 rules, 4*Wilder ATR14, with stop check on the
+entry bar, conservative gap fill and ratchet after each REAL
+hour close. At the end of the REAL 15:00-16:00 bar, if no stop
+triggered earlier, force close at its final BID price for long
+or ASK=BID+0.41 for short. Stops on that same final hour take
+priority. This is before 17:00 NY rollover, max hold <16 hours,
+same NY entry and exit date; no overnight financing. No stop
+change, take-profit, partial, or re-entry on the exit bar.
+M1 reconstruction applies a fixed 0.41 round-trip spread and is
+optimistic about bar-open entry, queueing, quote spread variation,
+and stop level-touch fills. PnL units are gold price units/lot.
+Extra-cost stress = reconstructed net minus another 0.41 on
+exactly the same trades. Actual tick Bid/Ask must be tested in
+a separate Model=4 execution study if this M1 phase passes.
+
+4. PARTITION, INFERENCE, REPORTING
+2020-2023 NY entry dates descriptive calibration; 2024-01-01
+through 2026-09-01 NY entry dates gated historical block.
+Report funnel, counts, realized holding-hour distribution,
+gross/net/stress means and totals, win rate, profit factor,
+maximum drawdown, side, exit type and calendar-year totals.
+One or more trades may occur per date. Bootstrap distinct gated
+NY entry dates with replacement 10000 times, seed 20261006,
+keeping every trade of the selected date; report P(mean net<=0)
+and descriptive 95% quantiles. No random-walk or parameter search.
+2026 is partial and reported separately from complete 2024/25.
+
+5. GATES, FROZEN BEFORE PHASE 1
+G-SID1: At least 150 executed 2024-2026 trades spanning at least 150 distinct New York entry dates.
+G-SID2: Strictly positive mean extra-cost stress net gold units per gated trade.
+G-SID3: Date-bootstrap P(mean reconstructed quote net <= 0) at most 0.05, 10000 resamples, seed 20261006.
+G-SID4: Strictly positive reconstructed net total gold units in each complete gated year 2024 and 2025.
+G-SID5: Every executed trade has same NY entry/exit date and holding time below 16 hours.
+All five required for Phase-1 PASS. Otherwise FAIL final for
+this artifact; no post-hoc time, side, spread or stop rescue.
+
+6. STOP RULE AND DELIVERABLES
+Save this SPEC, verbatim GATE, trade CSV, funnel, run metadata,
+and REPORT even on FAIL. On FAIL no Model=4 tester. On PASS
+first freeze a separate exact real-tick Bid/Ask MT5 execution
+SPEC/GATE with order-state reconciliation, >=150 trades,
+positive net expectancy, year-sign agreement, and realistic
+slippage. Later forward confirmation is still required after
+historical selection. Never edit previous SPEC/GATE/REPORT.

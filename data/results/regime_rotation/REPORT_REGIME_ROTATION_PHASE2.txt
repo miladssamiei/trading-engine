@@ -1,0 +1,107 @@
+REPORT_REGIME_ROTATION_PHASE2
+Regime-rotation controller, Phase 2 (MT5 RegimeController EA +
+Python-vs-MT5 reconciliation), hypothesis #13
+Verdict per GATE_REGIME_ROTATION as written: FAIL -> controller NOT
+validated; children remain individually validated; no production use.
+
+Run: 2026-08-29. SPEC/GATE pre-declared in Phase 1; nothing changed.
+
+------------------------------------------------------------------------
+WHAT WAS BUILT (all per SPEC section 6)
+
+- ea/RegimeController.mq5 (Arm P gating) + ea/RegimeControllerUngated.mq5
+  (reproduction mode) + ea/RegimeController_body.mq5, built by the
+  deterministic generator evaluate/regime_rotation_build_ea.py: faithful
+  prefixed copies of the FROZEN child sources (embed/orb_child.mqh,
+  embed/sp2l_child.mqh) with exactly three entry-gates inserted (ORB
+  PlaceOrders; SP2L DetectSetup + PlaceMarketEntry); children's logic,
+  parameters, exits, lots UNCHANGED; per-child output files renamed
+  (orb_trades.csv / sp2l_trades.csv). Compiles 0 errors / 0 warnings.
+- In-EA causal monthly labels from US500.c D1 (EMA200, vol20, trailing
+  252 median, UTC-midnight month cutoff - the Phase-1 corrected
+  cutoff), cached per month, fail-safe (label unavailable -> no
+  trading), regime_days.csv logged once per day with features+flags.
+- 18 tester runs (Model=0, US500-tick): ungated M5 + ungated M1 + gated
+  M1, 6 yearly windows each; gated batches run with Nov-of-prior-year
+  overlap starts because the tester serves secondary-symbol D1 only
+  ~1-2 years back (diagnosed in-run; zero offline label flips predicted
+  and confirmed for all computable months).
+
+------------------------------------------------------------------------
+WHAT PASSED (the controller's logic is verified sound)
+
+1. UNGATED REPRODUCTION - EXACT (the automatic-fail check): embedded
+   ORB reproduces its validated trade set 447/447 keys identical,
+   +470.67 == +470.67; embedded SP2L 1343/1343, +281.84 == +281.84.
+   Zero trades in either direction outside the validated sets.
+2. GATED SUBSET INTEGRITY: every gated trade is a member of its child's
+   ungated (validated) trade set - gating never alters child behavior
+   (ORB 229/229 subset-ok; SP2L 664/664 subset-ok; 0 only-gated).
+3. SELF-CONSISTENCY: zero trades on days the EA itself marked the child
+   disabled (mt5-flag violations = 0); attribution complete (per-child
+   trade files, distinct magics 26082201/26082701).
+4. MONTH SCHEDULE: 63/64 months match the offline schedule (98.4% >=
+   the 95% G2 bar).
+5. G1 SHARPE CLAUSE: |Sharpe_mt5 - Sharpe_offline| = 0.092 <= 0.15
+   (0.628 vs 0.720).
+
+------------------------------------------------------------------------
+WHAT FAILED AND EXACTLY WHY (one classified root cause)
+
+G1 DRAWDOWN CLAUSE: MT5 max DD 2.73% vs offline 1.80% -> relative
+difference 0.512 > 0.20. FAIL.
+G2 ZERO-DISABLED-TRADES CLAUSE: 31 SP2L trades on days the OFFLINE
+schedule disables both children. FAIL.
+
+Both failures trace to ONE month out of 64 - May 2025:
+  - Offline label (terminal DB US500.c D1): trend_rel -0.982% -> RANGE
+    (0.018pp inside the +-1.0% band) -> both children disabled.
+  - MT5 label (tester-served US500.c D1): trend_rel -1.023% -> DOWN-VOL
+    (0.023pp outside) -> SP2L enabled.
+A 0.041pp difference in the EMA200 distance, from the tester's
+secondary-symbol D1 feed differing slightly from the terminal's
+database - the same documented two-tapes class that SP2L's own
+validation flagged (secondary data sources disagree at sub-point
+scale). Every other feature agrees to 3 decimals (2025-05 vol20 50.52
+== 50.52, vol_med 12.90 == 12.90; 2025-04: -2.035 vs -2.115; 2025-06:
+3.843 vs 3.80). SP2L's offline May-2025 loss (-101.19) therefore
+entered the MT5 book; it explains the ENTIRE net gap (MT5 +750.83 vs
+offline +852.02) and the entire DD gap. Nothing else diverged.
+
+Verdict under the GATE as written: G1 FAIL (DD clause), G2 FAIL
+(disabled-trade clause) -> the RegimeController is NOT validated on
+this tape. Per the stop rules: no production use, no rescue attempts,
+no relabeling; children remain individually as validated (ORB
+standalone; SP2L with its own caveats).
+
+Honest notes on what the gates measured here:
+- The controller's MECHANISM is verified faithful (exact child
+  reproduction, exact gated subset, 0 self-violations, 98.4% schedule
+  match, Sharpe within 0.092). What failed is label-input fidelity for
+  one borderline month in the tester environment, not controller logic.
+- The DD clause's +-20% of a 1.80% baseline is +-0.36pp - inherently
+  knife-edge: any single month's inclusion/exclusion can move it. The
+  gate was pre-declared exactly so; it stands as written.
+- A legitimate re-test path exists (not a rescue): run the same EA
+  where the label source matches the offline one (tester/broker feed
+  with terminal-identical US500.c D1, or a live/demo account whose
+  terminal serves the same history the offline labels used). That is
+  future work outside this SPEC and does not change this verdict.
+
+------------------------------------------------------------------------
+ARTIFACTS
+
+ea/RegimeController.mq5, ea/RegimeControllerUngated.mq5,
+ea/RegimeController_body.mq5, ea/embed/{orb_child.mqh,sp2l_child.mqh},
+evaluate/regime_rotation_build_ea.py,
+evaluate/regime_rotation_phase2/{regime_rotation_mt5_reference.py,
+regime_rotation_mt5_extract.py, regime_rotation_mt5_compare.py},
+data/results/regime_rotation/phase2/{run_regime_batches.py,
+reference_armP_daily.csv, mt5_ensemble_daily.csv, mt5_regime_days.csv,
+gated_orb_trades.csv, gated_sp2l_trades.csv, ungated_orb_trades.csv,
+ungated_sp2l_trades.csv, phase2_mt5_stats.json, gated/, ungated_m1/,
+ungated_m5/ (18 batch runs + logs)},
+data/results/regime_rotation/regime_days.csv (copy of the target-window
+regime log), REPORT_REGIME_ROTATION_PHASE2.txt.
+
+END OF REPORT_REGIME_ROTATION_PHASE2

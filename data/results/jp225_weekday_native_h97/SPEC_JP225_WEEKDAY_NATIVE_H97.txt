@@ -1,0 +1,82 @@
+HYPOTHESIS 97: NATIVE FTMO JP225 MONDAY-THURSDAY EQUITY-RISK HOLD
+Declared 2026-09-25 before H97 evaluator code or H97 trade-return run.
+Null/FAIL is complete. No account orders.
+
+MECHANISM AND NOVELTY
+Unhedged Japan 225 equity exposure may earn a weekday equity-risk
+premium distinct from the prior US index and gold books. This is one
+fixed long-only rule with a volatility-scaled loss stop, no threshold
+search. JP225 connected-account native tick source has not been used
+for strategy returns in this program. Some source price snapshots and
+quote coverage were inspected before this SPEC, but no H97 trade PnL.
+The Dukascopy jpnidxjpy proxy is rejected: eight same-minute differences
+against connected FTMO-Demo JP225.cash ranged -451.815 to +102.083
+index points versus ~10 points native spread. Never merge the feeds.
+
+SOURCE AND ACCOUNT
+JP225.cash connected FTMO-Demo native tick-derived M1 Bid/Ask OHLC:
+data/results/jp225_source_qualification/jp225cash_native_tick_m1_2022_2026.csv
+SHA256 7930268680aad61134831c48a0223499990dd9a9470dd7662b383f888aac84a1.
+It was built from 50,121,955 MT5 historical ticks 2022-01-03..2026-09-23;
+monthly source counts/hashes are frozen in native_tick_source_meta.json.
+M1 minute_epoch is UTC; convert to America/New_York wall time.
+Source provides first-tick native ASK and BID, Bid OHLC and Ask OHLC.
+Contract size 10 JPY/index point/lot; profit currency JPY, point0.01,
+minimum volume0.01 and step0.01 by connected symbol metadata.
+Index commission zero per FTMO's published all-indices terms.
+Owner states a swap-free EUR10000 account and news holds are allowed;
+actual swap postings remain to be reconciled in Phase 2.
+
+DAILY VOLATILITY AND ORDER RULE
+Aggregate only real M1 bars to NY trading-day OHLC using NY wall time
+plus seven hours (the 17:00 NY boundary); require prior completed
+Thursday or Friday trading day before Monday 00:00 entry. No synthetic
+daily bars, no price forward-fill. ATR20 is Wilder TR=max(high-low,
+abs(high-prev close),abs(low-prev close)), initial 20-day arithmetic
+mean and subsequent (19*prior+TR)/20. Use only the completed day before
+Monday; require finite positive ATR20.
+Each eligible NY Monday, buy at first native M1 first-tick ASK in
+[00:00,00:05). Initial hard stop=entry ASK - 2*prior ATR20.
+From the entry minute onward, if real M1 BID open<=stop fill at the
+worse BID open; otherwise if real M1 BID low<=stop fill at the stop.
+One trade per week; no short, target, trailing, reentry or overlap.
+On a normal week, unstopped exit at first native M1 first-tick BID
+Thursday NY [00:00,00:15). If that Thursday is Jan1, Jul4, Dec25 or
+fourth Thursday of November, unstopped exit at first native M1 BID
+Wednesday [11:00,11:15). Those holiday dates are known before entry.
+If no required exit quote, mark UNRESOLVED with no PnL. Exclude the
+incomplete final tape week. Flat before Friday on every resolved trade.
+
+COSTS, SPLIT AND ACCOUNT PACE
+Base net JP225 points=actual native BID exit - actual native ASK entry.
+Stress net=base minus another 11.54 index points (native M1 first-tick
+spread p90 10.54 from source audit, plus 1.00 point slippage). This is
+separate from the actual variable spread already paid. Zero index
+commission and owner-stated zero swap. R=stress net/(2*prior ATR20).
+2022-23 calibration description only; 2024 through source end partial
+2026 gated. Report yearly base/stress totals, stop/holiday/coverage,
+spread at entry, hold duration and both 90/180-day account pace.
+Circular five-week moving-block bootstrap of ordered 2024-26 stress
+points, 10000 draws, numpy default_rng(20261007). No family or
+parameter variants after evaluation.
+
+STOP AND PHASE 2
+Phase-1 FAIL is final for this artifact. If every Phase-1 gate passes,
+write a separate frozen Phase-2 SPEC/GATE before exact native tick path,
+EURJPY conversion, lot rounding, floating equity, Prague daily reset,
+actual swaps, margin and full EUR10000 two-stage 180-day challenge on
+one fixed 2% initial risk row. FTMO 2-Step targets 10% then 5%, daily
+loss5%, overall loss10%, >=4 trading days each phase. Require >=70%
+full challenge pass and <=10% equity breaches over >=50 complete starts.
+At least 150 genuinely unseen forward trades and year-sign agreement
+are still required before a verified strategy claim. No orders.
+
+VERBATIM GATES
+G-JP1: At least 120 fully resolved 2024-2026 Monday-to-Thursday JP225 trades on distinct NY dates, zero unresolved required exits, and native real-tick-derived M1 fills only.
+G-JP2: Strictly positive 2024-2026 mean stressed native JP225 points per trade after actual variable ASK/BID spread and another 11.54 points stress.
+G-JP3: Five-week circular moving-block bootstrap P(mean stressed JP225 points <= 0) at most 0.05 using 10000 draws and seed 20261007.
+G-JP4: Strictly positive stressed JP225 point totals separately in complete 2024, complete 2025 and partial 2026.
+G-JP5: If Phase 1 passes, a separately frozen exact-native EUR10000 two-stage 180-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts at fixed 2% initial risk.
+G-JP6: Tick-derived source hash, native first-tick variable Ask/Bid, causal prior completed ATR, actual Bid stop path, deterministic holiday early exit, no weekend position, zero-swap assumption and fixed stress are verified with no account orders.
+
+All six gates must pass; Phase-1 PASS alone is not verified.

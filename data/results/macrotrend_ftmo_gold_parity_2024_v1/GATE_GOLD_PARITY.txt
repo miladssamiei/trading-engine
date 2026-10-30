@@ -1,0 +1,4 @@
+G1: The frozen FTMO H1 snapshot has 16,181 ordered valid real rows with the preflight first/last timestamps; both chosen v1.01 tester segments are complete with the preflight A/B OPEN and below-minimum-volume event counts.
+G2: Every MT5 OPEN and below-minimum-volume event maps to an independent Python signal at the identical server H1 entry hour; all OPEN directions agree. Unmatched events cause a parity FAIL and are listed, not silently dropped.
+G3: Every matched OPEN initial SL and every parsed ratchet new SL agrees with the Python calculation within one broker price tick (0.01 gold unit); mismatches cause a parity FAIL and are listed.
+G4: Exact fill and exit parity is explicitly UNTESTED without complete same-feed M1/tick history. No positive performance validation claim follows from signal parity alone.

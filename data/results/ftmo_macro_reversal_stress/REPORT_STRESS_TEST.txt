@@ -1,0 +1,55 @@
+REPORT_STRESS_TEST
+Generated: 2026-09-21T17:25:53
+
+PREMISE: ftmo_macro_reversal (#23) showed the swap-free macro short-term reversal
+counterfactual passes FTMO Phase 1 at FixedLots 3.0 from a January 2021 start
+(pass 2021-04-01, 63 trading days, peak daily 4.61%) - a single-path result. This study
+stresses that pass at the same frozen economics: (A) rolling fresh challenges on every
+trade entry date 2021-01..2025-12, and (B) 10,000 seeded shuffles of the 458-trade list.
+NOT new strategy research; the short_term_reversal G-R2 FAIL stands; not an FTMO
+qualification; downstream_model_allowed=false, live_execution_allowed=false.
+
+ECONOMICS: 458 frozen g2 trades; swap-free PnL = (gross_pt - 0.51 spread) x $1/pt/lot
+x 3.0 lots; swap-free point total +2467.60 pts ($+7402.80 at 3.0 lots). D1-close marks from us500c_d1;
+worst floating via adverse D1 extremes; daily anchor = prior-day realized balance
+(5.0% of anchor, the frozen #23/#24 convention); static $9,000 floor; same-day breach
+voids a pass. Reconstruction audit: |signal*(close_exit-close_entry) - gross_pt| median
+0.00 pts (marks are consistent with the frozen PnL).
+
+TEST A - ROLLING CHALLENGE STARTS (fresh $10,000 per start date)
+  start dates simulated: 431
+  Rolling Start Pass Rate: 53.60% of all starts (231/431); 53.60% of resolved (231/431)
+  Average Days to Pass: 42.4 trading days (median 34)
+  Failures: 200 -> 5% Daily Loss 135 (67.5%) | 10% Max Loss floor 65 (32.5%)
+  Unresolved (tape end before pass/breach): 0 (0.0%)
+  Peak drawdown of passing runs: median 4.01%, p95 8.73%
+  Pass rate by entry year:
+    2021: starts  87  pass  87 (100.0%)  fail   0  unres   0
+    2022: starts  86  pass  56 ( 65.1%)  fail  30  unres   0
+    2023: starts  86  pass  52 ( 60.5%)  fail  34  unres   0
+    2024: starts  86  pass   7 (  8.1%)  fail  79  unres   0
+    2025: starts  86  pass  29 ( 33.7%)  fail  57  unres   0
+
+TEST B - MONTE CARLO SEQUENCING (10,000 shuffles, seed 20260921)
+  Sequencing: trades re-sequenced back-to-back on consecutive trading days, each
+  carrying its original holding span and daily adverse/close path (chronology
+  destroyed, per-trade risk preserved - SPEC 3.2).
+  Monte Carlo Pass Rate: 47.31% of all runs (4731/10000); 47.31% of resolved (4731/10000)
+  Failures: 5269 -> daily 4227 | floor 1042; unresolved 0
+  Median Peak Drawdown: 4.71%   95th Percentile Peak Drawdown: 10.62%
+  Median days-to-pass (passing runs): 32 trading days
+
+GATES
+G-T1 DATA INTEGRITY: 458 trades=True, dates aligned, swap-free total +2467.60 (expect +2467.60), $1/pt/lot, 0.51 pt spread -> PASS
+G-T2 ROLLING COVERAGE: 231+200+0=431 simulated start dates -> PASS
+G-T3 ROLLING ROBUSTNESS: resolved pass rate 53.60% >= 50% -> PASS
+G-T4 MONTE-CARLO ROBUSTNESS: resolved pass rate 47.31% >= 50% AND p95 peak DD 10.62% < 10.0% -> FAIL
+OVERALL VERDICT: FAIL - the FixedLots=3.0 pass is start-luck/sequencing fragile
+
+CAVEATS: worst floating uses D1 adverse extremes (pessimistic, no intraday path);
+the daily limit is 5% of the prior-day balance anchor (FTMO's live rule is a fixed
+$500 = 5% of initial - slightly stricter at grown balances); Monte Carlo blocks are a
+sequencing device, not a calendar simulation (market-regime dependence is destroyed
+by design, so MC pass rates measure sequencing luck only); offline D1-close fills vs
+the #23 EA fills showed median -0.30 pt drift; unresolved runs are non-passes in the
+primary rates.

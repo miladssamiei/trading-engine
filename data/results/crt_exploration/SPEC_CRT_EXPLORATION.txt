@@ -1,0 +1,141 @@
+SPEC -- CRT (CANDLE RANGE THEORY) MODEL 1 SIGNAL-QUALITY EXPLORATION ON US500-TICK
+Written 2026-09-09 BEFORE any code exists. Plain text, no markdown.
+
+SECTION 0 -- STATUS AND ANTI-LEAK DECLARATION
+0.1  Status: POST-TERMINATION EXPLORATORY. This study OFFICIALLY VIOLATES
+     the "Path C" termination rule pre-declared in SPEC_SHORT_TERM_REVERSAL
+     (failure of G-R1/G-R2 mandated immediate transition to Path C: cease
+     all strategy research on the US500/XAUUSD CFD tape and write
+     "TRANSITION TO PATH C: RESEARCH EXHAUSTED" into the report). It is
+     run only to measure the raw signal quality of one specific
+     third-party entry model (CRT "Model 1", per the source video) that
+     was requested for documentation.
+0.2  Regardless of outcome, NOTHING deployable may follow from this
+     study: no EA, no Phase 2, no parameter tuning, no re-tests under
+     alternate interpretations. A gate "pass" here grades raw signal
+     quality only and has no deployment meaning. A FAIL verdict is final
+     for this artifact.
+0.3  All standard anti-leak rules remain in force: causal computations
+     only, gates frozen before the data loop runs, every funnel
+     drop-off tallied and reported, null results are complete and
+     expected deliverables.
+
+SECTION 1 -- DATA
+1.1  Instrument US500-tick (custom symbol). M5 export
+     data/results/orb_2021_present/us500tick_m5.csv (364,330 bars,
+     2021-01-03 .. 2026-04-30, terminal-native, verified in prior
+     studies). Time: epoch UTC -> America/New_York for wall minutes
+     (project convention). The tape is extended-hours (roughly 00:00
+     .. 16:1x and 18:00 .. 23:59 NY), so the 08:00-12:00 reference
+     block below is fully populated on normal trading days.
+1.2  Cash day = NY date whose 09:30 (wall 570) bar exists. A day is
+     ELIGIBLE for signal generation iff it is a cash day AND has a
+     valid reference candle (2.2).
+1.3  Costs: 0.51 pt = the Model=4-confirmed real-tick median
+     round-trip spread floor. INFORMATIONAL ONLY in this study
+     (section 6.3); no net-of-cost gates are run.
+
+SECTION 2 -- CONSTRUCTS
+2.1  Reference 4H candle (per the source video, US indices): the
+     08:00 .. 12:00 NY wall-minute block [480, 720) on each trading
+     day, EST/EDT aware (tz_convert, DST handled). ref_high = max(high)
+     and ref_low = min(low) over the M5 bars whose wall minute lies in
+     the block.
+2.2  Reference validity: the block must contain >= 24 of the 48
+     possible M5 bars. Fewer -> the day is skipped for BOTH sides and
+     tallied. The bar-count distribution is reported.
+2.3  Execution timeframe: 15-minute candles aggregated from M5 buckets
+     (three M5 bars per candle), aligned to :00/:15/:30/:45 NY. Bucket
+     OHLC = first open / max high / min low / last close of the M5
+     bars present in the bucket. NY offsets are whole hours, so UTC
+     900-second bucketing is NY-aligned in both EST and EDT.
+2.4  ATR14 (Wilder) on the CONTINUOUS 15m tape: overnight bars feed
+     it, no per-day reset, seeded with the SMA of the first 14 TRs.
+     The binding ATR for a signal is the value at Candle 2's close --
+     the last completed candle at decision time (no lookahead past the
+     entry decision). A signal whose Candle 2 has fewer than 14 prior
+     15m candles, or a degenerate ATR (NaN or <= 0), is dropped and
+     tallied.
+
+SECTION 3 -- CRT "MODEL 1" STATE MACHINE (long side; short mirrored)
+3.1  Sweep (Candle 1): the first 15m candle of the day whose close is
+     strictly after 12:00 NY and whose Low is STRICTLY below ref_low.
+     (The 11:45-12:00 candle lies inside the reference block, so its
+     low cannot be strictly below ref_low; scanning effectively starts
+     at the 12:00 bucket.)
+3.2  Turtle-soup trigger (Candle 2): a SUBSEQUENT 15m candle, closing
+     within 3 hours after Candle 1's close (c2_close - c1_close <=
+     180 min), whose Low sweeps STRICTLY below Low(Candle 1) but whose
+     Close is STRICTLY above Low(Candle 1).
+3.2.1 Deepening rule: while armed, a subsequent candle with
+     Low < Low(C1) AND Close <= Low(C1) becomes the new Candle 1
+     (its close restarts the 3-hour window). A shallower candle
+     (Low >= Low(C1)) changes nothing.
+3.2.2 Window expiry: if 3 hours elapse with no Candle 2, the state
+     returns to SEARCHING; a fresh qualifying sweep later the same day
+     may re-arm it, time permitting. All scanning is same-NY-day only.
+3.3  Entry: Long at the OPEN of the 15m candle immediately following
+     Candle 2, i.e. the adjacent bucket c2_start + 15 min. If that
+     bucket does not exist (tape gap), the trigger dies and is
+     tallied. Signal accepted ONLY if the entry candle starts at or
+     before 15:00 NY (wall 900) -- "no signals accepted after 15:00".
+     Entry at exactly 15:00 is allowed.
+3.4  At most ONE long signal and ONE short signal per day (first
+     valid trigger per side). Both sides may fire on the same day and
+     are independent samples.
+3.5  Exit context: every position is flat by the session close = the
+     last M5 bar close before 16:00 NY (the 15:55 bar, project
+     convention). Nothing is held past it.
+
+SECTION 4 -- MEASUREMENT (per signal)
+4.1  Window: the M5 bars (finer tape, per project exit-fidelity
+     discipline) from the entry bar through the session-close bar
+     inclusive, same NY day.
+4.2  Long: MFE = max(high) - entry; MAE = entry - min(low).
+     Short: MFE = entry - min(low); MAE = max(high) - entry.
+     All in index points.
+4.3  Scaled: MFE_atr = MFE / ATR14, MAE_atr = MAE / ATR14.
+4.4  Expectancy proxy e = MFE - MAE (raw points). MFE/MAE are
+     excursion maxima, NOT simultaneously achievable PnL; e is the
+     project-standard Phase 1 signal-quality proxy only.
+
+SECTION 5 -- FUNNEL (every stage tallied in the report)
+     days in tape -> cash days -> eligible days (cash AND valid
+     reference) -> per side: days with >= 1 Candle-1 arm -> days with
+     a Candle-2 trigger -> triggers killed by the 15:00 entry cutoff
+     -> triggers killed by a missing adjacent next candle -> ATR
+     warmup/degenerate drops -> measured signals.
+
+SECTION 6 -- GATES (frozen here; GATE_CRT_EXPLORATION.txt is the
+             verbatim extraction, written before any script ran)
+6.1  G-C1 SAMPLE SIZE: total measured signals (long + short)
+     >= 150 over the 5.3-year tape.
+6.2  G-C2 GROSS EDGE -- ALL three clauses required:
+     (i)   mean(MFE) > mean(MAE) on raw points (binding);
+           mean(MFE_atr) > mean(MAE_atr) reported alongside;
+     (ii)  threshold dominance: count(MFE >= t * ATR14) >
+           count(MAE >= t * ATR14) at EVERY t in {0.50, 0.75, 1.00};
+     (iii) day-block bootstrap P(mean(MFE - MAE) <= 0) <= 0.20:
+           DAY MEANS of (MFE - MAE) resampled with replacement,
+           10,000 draws, seed 20260909. The ATR-normalized variant
+           (day means of (MFE - MAE)/ATR14) is reported alongside,
+           non-binding.
+     A clause that cannot be evaluated (missing data, degenerate
+     case) counts as FAIL.
+6.3  INFORMATIONAL COST CHECK (non-binding): if the raw point
+     expectancy mean(MFE - MAE) < 0.51 pt (the confirmed real-tick
+     spread floor), the report flags the strategy ECONOMICALLY DEAD
+     BEFORE COSTS. Clearing 0.51 pt would still not make it tradeable:
+     MFE/MAE maxima overstate achievable PnL, and this study is
+     post-termination exploratory (section 0).
+
+SECTION 7 -- ARTIFACTS
+     SPEC_CRT_EXPLORATION.txt and GATE_CRT_EXPLORATION.txt (both
+     saved BEFORE the data loop runs; the script refuses to run
+     without them), evaluate/crt_exploration_phase1.py,
+     phase1_signals.csv (every trigger with MFE/MAE and ATR context),
+     REPORT_CRT_EXPLORATION.txt (funnel, gate verdicts, raw point
+     expectancy, explicit comparison to the 0.51-pt cost floor).
+     PROGRESS.md receives a dated section. No file in this study is
+     ever edited after numbers are seen; corrections would go under a
+     NEW study name.

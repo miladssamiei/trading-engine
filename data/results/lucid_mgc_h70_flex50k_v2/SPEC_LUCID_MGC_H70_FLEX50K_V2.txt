@@ -1,0 +1,13 @@
+LUCID MICRO GOLD H70 50K FLEX - V2 SOURCE MATCH CORRECTION SPEC
+Date: 2026-09-26. Frozen before V2 code or report.
+
+V1's source exact-match check incorrectly required the complete 2020-26
+15:59 quote ledger to have 321 rows, while the floating-path audit source
+was deliberately restricted to 2024-26. The 2020-26 quote ledger has 806
+rows; its 2024-26 gated subset has 321, and all six source-identity fields
+match the 321 floating-path rows exactly in current read-only inspection.
+V2 compares only that gated quote-ledger subset. No change to trade rows,
+costs, account rules, floating proxy, rolling starts, case grid or gates.
+The one 2024-02-14 unresolved required exit still fails G1. V1's SPEC,
+GATE and REPORT remain immutable. This is a new named correction artifact.
+All transfer limitations and stop rules from V1 remain in force.

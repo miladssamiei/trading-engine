@@ -1,0 +1,60 @@
+REPORT - HYPOTHESIS #55: CRYPTO PORTFOLIO KC BREAKOUT - POOLED R-MULTIPLE VALIDATION
+Generated: 2026-09-24T10:46:41.826907+00:00  |  OVERALL VERDICT: PASS
+Mechanics frozen verbatim from #51/#54 (4h KC EMA29 +/- 2.77*ATR29 breakout + D1 EMA(50) 17:00 ET
+direction, EMA-riding stop with 1.5xATR clamp, exit checks before ratchet, honest gap fills,
+worst-case same-bar, 1 trade/instrument); BTCUSD + ETHUSD trades pooled into one chronological
+ledger and normalized by INITIAL risk distance: Net_R = (side*(Exit-Entry) - cost) / Initial_Risk.
+Costs are the #54 owner-estimated floors (BTCUSD 15.0 / ETHUSD 2.0 u RT), applied in native units
+before normalization. NOT a fresh touch of the data: the same instrument-level trade sets were
+already reported in #54 (SPEC section 0); this is the pre-declared portfolio aggregation step.
+
+=== BTCUSD leg (cost floor 15.0 price units RT, owner estimate) ===
+1. DATA: 3260989 M1 rows -> 1h base 58992 (4636 synthetic) / 14749 4h bars / 2459 D1 anchors, 2019-12-31 16:00:00 .. 2026-09-23 16:00:00
+   tape sha256 b9b4f43ad75466a9...
+2. FUNNEL: armed 4h bars=14448  candidates L/S=969/518  ignored-while-open=1487  EXECUTED=172
+3. R EXPECTANCY: n=172  mean Net R=0.3107/trade  total Net R=53.4  (mean gross R=0.3216)
+   sides: LONG: n=102 meanR=0.4250  SHORT: n=70 meanR=0.1443
+
+=== ETHUSD leg (cost floor 2.0 price units RT, owner estimate) ===
+1. DATA: 3375260 M1 rows -> 1h base 58992 (2731 synthetic) / 14749 4h bars / 2459 D1 anchors, 2019-12-31 16:00:00 .. 2026-09-23 16:00:00
+   tape sha256 5646970f33c8378f...
+2. FUNNEL: armed 4h bars=14448  candidates L/S=935/543  ignored-while-open=1478  EXECUTED=170
+3. R EXPECTANCY: n=170  mean Net R=0.2504/trade  total Net R=42.6  (mean gross R=0.2772)
+   sides: LONG: n=93 meanR=0.4417  SHORT: n=77 meanR=0.0193
+
+=== POOLED PORTFOLIO LEDGER (gated) ===
+4. LEDGER: 342 trades sorted by 4h entry time (tie-break asset name), 2020-02-26 20:00 .. 2026-09-18 12:00
+5. POOLED NET-R ECONOMICS: mean=0.2808 R/trade  median=-0.2479  total=96.0 R  win=38.3%  per-trade R Sharpe=2.648 (informational)
+   gross mean R=0.2995 vs pooled cost drag (net vs gross mean R=-0.0188)
+   EVENT-INDEXED equity curve (cumulative Net R in entry order): final=96.0 R; max drawdown=11.8 R (trades 295->329: 2025-11-13 16:00 .. 2026-05-28 00:00)
+   per-year pooled Net R:
+      2020: n=  46  total=    35.0 R  mean= 0.7607
+      2021: n=  50  total=     5.4 R  mean= 0.1089
+      2022: n=  47  total=     5.4 R  mean= 0.1146
+      2023: n=  47  total=    29.8 R  mean= 0.6335
+      2024: n=  54  total=    16.2 R  mean= 0.2993
+      2025: n=  57  total=     5.6 R  mean= 0.0986
+      2026: n=  41  total=    -1.4 R  mean=-0.0331
+   negative years: 2026
+   sides: LONG: n=195 meanR=0.4330  SHORT: n=147 meanR=0.0788
+   exit mix: {'SL': 333, 'SL_GAP': 9}
+6. GATES (pooled ledger, frozen in GATE_CRYPTO_PORTFOLIO.txt):
+   G-PORT1 pooled trades >= 300        :   342          -> PASS
+   G-PORT2 mean Net R > 0.15           :    0.2808    -> PASS
+   G-PORT3 MBB P(mean<=0) <= 0.10      :    0.0012    -> PASS  (block=10, 10000 resamples, seed 20261003)
+   OVERALL VERDICT: PASS
+
+HONESTY NOTES
+- NOT a fresh touch: the identical instrument-level trade sets were already observed in #54; pooling
+  and R-normalization are the pre-declared new content (SPEC section 0). A PASS certifies portfolio-
+  level robustness of already-seen results, not independent discovery, and does not by itself unblock
+  Phase 2 (validation_discipline).
+- R denominators use INITIAL risk distance, frozen at entry, never re-based when the EMA trail moves;
+  cost floors enter in native units before normalization (BTC 15.0 / ETH 2.0), so each asset's cost
+  drag reflects its own floor estimate; gross R printed alongside net R (SPEC 7.3).
+- Equity curve is EVENT-INDEXED cumulative Net R by entry order (declared simplification); concurrent
+  overlapping trades (max one per instrument) appear sequentially, so drawdown timing is approximate.
+- Continuous forward-fill conventions and owner-estimated cost floors carry over unchanged from #54;
+  single frozen parameterization, no optimization, no re-runs; assets, years, sides reported as run.
+- Phase 2 (MT5 execution) only via a NEW pre-declared forward-tracking / strict-partition SPEC meeting
+  the standard discipline (>=150 trades, year-by-year sign agreement, gates before the run).

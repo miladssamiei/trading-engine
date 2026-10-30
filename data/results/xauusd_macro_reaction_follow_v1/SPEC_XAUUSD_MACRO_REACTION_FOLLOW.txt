@@ -1,0 +1,97 @@
+HYPOTHESIS 63: XAUUSD POST-RELEASE FIRST-MINUTE REACTION FOLLOW
+Declared 2026-09-25 before this study's code or Phase-1 run.
+
+1. MECHANISM AND SCOPE
+Scheduled high-impact U.S. statistics create a new public-information
+shock in gold. If the first minute does not fully incorporate it, the
+direction of the initial XAUUSD midquote move may persist for 14 more
+minutes. Trade that observable direction, not the unseen actual or
+consensus figure. This is a release-conditioned information test,
+distinct from prior generic intraday momentum, calendar timing, or
+close-hedge studies. The earlier studies retain their frozen verdicts.
+There is no threshold, parameter search, side selection, or stop/target
+optimization. A historical PASS would be a candidate only: executable
+orders and prospective performance would still need confirmation.
+
+2. EVENT ROSTER, DATA, AND PROVENANCE
+Use only the three U.S. BLS release families: Employment Situation
+(PAYEMS), CPI (CPIAUCNS), and PPI (PPIACO). The date roster comes from
+the public FRED US Macro Core Data event JSON, main-branch download
+sha256 b9d8a2256ecc61fda3f68efbc243b407db5b19b0f2288c44f827d03854861201,
+URL https://raw.githubusercontent.com/superpilot69/fred-us-macro-open-data/main/data/fred-us-macro-events.json.
+Use only event records whose seriesId matches one of those three,
+releaseDateApproximate is false, and createdAt converted from UTC to
+America/New_York is exactly 08:30. Use createdAt solely to identify
+scheduled release DATE/TIME; never read consensus, actual, or later
+revisions into the trading signal. Deduplicate simultaneous releases
+to one event/trade per NY date. BLS states release-calendar times in ET;
+archive dates remain a provenance limit because the third-party FRED
+roster has not been independently reconciled date by date to BLS.
+Report this limitation explicitly; a PASS cannot be called validated
+without an official-calendar reconciliation and prospective execution.
+
+XAUUSD raw tick CSVs and file-hashes are those frozen by
+data/results/xauusd_onboarding/onboarding_stats.json. Raw fields are
+timestamp epoch milliseconds, askPrice, bidPrice; the onboarding
+verified monotonic timestamps and zero spread inversions. Use actual
+Bid and Ask for all reference, entry, and exit quotes. No bar-model
+touches, no fixed-spread fill approximation, no synthetic ticks.
+One gold price unit means a $1/oz change; no compounding, no swap.
+
+3. CAUSAL SIGNAL AND EXECUTION
+At each 08:30 ET roster date, take the last valid raw quote strictly
+before 08:30:00 as the pre-release midpoint, provided it is at most
+10 seconds old. Take the last valid quote strictly before 08:31:00
+as the reaction midpoint, provided it is at most 10 seconds old.
+Direction is sign(reaction mid - pre-release mid). Skip exactly zero.
+Do not inspect any quote at or after 08:31:00 to form the signal.
+Enter at the first valid quote timestamp >=08:31:05 and <=08:31:10:
+BUY at its Ask if direction positive, SELL at its Bid if negative.
+Exit at the first valid quote timestamp >=08:45:00 and <=08:45:10:
+long exits at Bid; short exits at Ask. If any required quote is missing
+or invalid, skip the date and report why. No other exits, stops,
+positions, or event-day filters. This quote-entry convention has zero
+additional modeled order latency after the first quote in the window;
+the stress test below charges one extra 0.41 unit per trade, but cannot
+reproduce market impact or rejected quotes.
+
+4. ECONOMICS AND MEASUREMENTS
+Gross midpoint-reference move is direction*(exit mid - entry mid).
+Executable quote net is exitBid-entryAsk for long and entryBid-exitAsk
+for short. Round-trip spread drag = gross mid move - quote net, which
+includes half-spreads at each endpoint and is measured per trade.
+Extra-cost stress net = quote net - 0.41 gold unit, representing one
+more stated CFD median-spread equivalent on the SAME trades. Report
+entry/exit spreads, their distributions, gross/quote/stress means and
+totals, win rate, max drawdown, year and release-family breakdowns,
+and the actual elapsed hold time. No favorable price improvement.
+
+5. PARTITION AND BOOTSTRAP
+2020-2021 event dates are descriptive calibration, never gated. The
+gated historical block is 2022-01-01 through the source-roster end
+(2026-04-23), by NY release date. 2026 is partial. The frozen roster
+has 153 distinct 2022+ candidate dates before quote-validity skips:
+2022 36, 2023 36, 2024 36, 2025 32, 2026 13. Resample gated entry
+dates with replacement 10,000 times, seed 20260929; report one-sided
+P(mean quote net <= 0) and descriptive 95% quantiles. One trade per
+event date makes date blocks independent for this calculation; do not
+replace it with a trade-level bootstrap if roster defects emerge.
+
+6. GATES, FROZEN BEFORE PHASE 1
+G-MRF1: At least 150 executed trades on distinct 2022-2026 event dates.
+G-MRF2: Strictly positive mean extra-cost stress net per trade in the gated block.
+G-MRF3: Date-bootstrap P(mean executable quote net <= 0) at most 0.05, 10,000 resamples, seed 20260929.
+G-MRF4: Strictly positive executable quote-net total in each complete gated year 2022, 2023, 2024, and 2025.
+Overall Phase-1 PASS requires all four gates. Otherwise FAIL is final
+for this artifact; no post-hoc change of direction, event family,
+year, signal threshold, entry buffer, or exit time can rescue it.
+
+7. STOP RULE AND ARTIFACTS
+On FAIL, no MT5 tester. On PASS, separately freeze a Model=4 execution
+SPEC/GATE and first reconcile every event date with official BLS
+archives. Require actual order-state/tick matching, >=150 trades,
+positive net expectancy, year-sign agreement, and latency/slippage
+sensitivity. Even that would be historical evidence, not live proof.
+Save this SPEC, verbatim GATE, event roster, code, quote-level trades,
+metadata, and REPORT regardless of outcome. Never edit historical
+SPEC/GATE/REPORT records.

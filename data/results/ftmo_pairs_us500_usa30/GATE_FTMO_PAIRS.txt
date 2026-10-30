@@ -1,0 +1,36 @@
+GATE FILE — FTMO_PAIRS
+Verbatim extraction of all gates from SPEC_FTMO_PAIRS.txt.
+Frozen BEFORE ea/Pairs_FTMO.mq5, the tester ini, or
+evaluate/ftmo_pairs_test.py existed.
+
+G-P1 EXECUTION INTEGRITY: EA compiles 0 errors/0 warnings; the reference
+tester run completes (tester log shows generation + Test passed; fresh
+ftmo_pairs_trades.csv collected from Common\Files); executed pair trades
+>= 95% of the signals armed before the EA target-stop (or tape end); every
+executed pair has BOTH legs filled and closed.
+
+G-P2 SWAP-FREE OVERRIDE AUDIT: every trade's analysis PnL has swap forced to
+0.00; the tester-charged swap total is reported; no trade dropped.
+
+G-P3 FTMO PHASE-1 FEASIBILITY: at least one M in [1.0, 30.0] (step 0.5)
+reaches equity >= $10,800 (D1-close mark) with, up to its pass date, no 5%
+daily-loss breach and equity strictly above $9,000 including worst-floating
+extremes.
+
+G-P4 CONFIRMATION RUN: a second tester run at the optimal M shows realized
+balance reaching >= $10,800 (within one holding period of the Python pass
+date) with no EA guard breach before the pass.
+
+OVERALL VERDICT RULE: PASS iff G-P1..G-P4 all PASS. G-P3 FAIL (no feasible
+multiplier) is a complete, final answer: the swap-free pairs counterfactual
+does not pass Phase 1.
+
+FTMO parameters (owner-stated, simulated): $10,000 Challenge; 5.0% max daily
+loss ($500, prior server-day 00:00 balance anchor, floating equity of BOTH
+legs); 10.0% max loss ($1,000, static $9,000 floor on floating equity); +8%
+profit target ($10,800); swap-free (swap forced 0.00 on every trade).
+
+Source trade list: data/results/pairs_us500_usa30/pairs_trades.csv (18
+frozen trades; gross +$1,572.62 / spread -$30.77 / swap -$5,510.00 / net
+-$3,968.14 in the original #19 study). Second-leg symbol: DJ30.c (broker has
+no USA30.c).

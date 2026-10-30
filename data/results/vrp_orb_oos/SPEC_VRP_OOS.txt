@@ -1,0 +1,136 @@
+HYPOTHESIS #45 SPEC: VRP-CONDITIONED ORB - STRICT OUT-OF-SAMPLE WALK-FORWARD VERIFICATION
+Study ID: vrp_orb_oos
+Date frozen: 2026-09-23, before any evaluation code was written or run.
+Status: frozen. Corrections or re-measurements require a NEW study name; this file is never edited.
+Context: reopening-path step 1 of data/results/vrp_orb_phase2_review/REVIEW_VRP_ORB_PHASE2.txt.
+Phase 2 (MT5 execution) remains HELD regardless of this study's outcome until the review's full path is met.
+
+1. MECHANISM UNDER TEST
+US500 opening-range breakout traded ONLY on sessions where the prior close's
+variance-risk-premium exceeds its trailing 252-session median. This is the
+frozen #31 mechanic, rebuilt natively with zero loads of #31 artifacts, and
+evaluated on a pre-designated temporal split: calibration (discovery period)
+= all sessions before 2024-01-01; out-of-sample = 2024-01-01 to present.
+All gates evaluate the OOS block ONLY.
+
+2. DATA SOURCING (fresh pipeline, no #31 artifact loads)
+2.1 Price tape: data/results/vwap_2021_2026/us500tick_m1.csv
+    (verified US500 M1 export; columns time,open,high,low,close,tick_volume;
+    time = epoch seconds UTC). Wall clock = America/New_York. A session's
+    bars are keyed by ny_date (NY calendar date) and wall minute
+    (hour*60+minute).
+2.2 Session universe: dates with a printed 570-wall (09:30) bar - the
+    project cash-day definition.
+2.3 D1 closes: per session, the LAST close among wall in [570, 960) - i.e.
+    the final cash-session M1 close (the 15:59 bar on normal days; the last
+    printed bar on early-close days).
+2.4 VIX daily closes: ^VIX via the Yahoo v8 chart API
+    (query1.finance.yahoo.com/v8/finance/chart/^VIX, interval=1d,
+    period1=2020-01-01, period2=run epoch, browser User-Agent).
+    yfinance is NOT installed in the project env (verified 2026-09-23:
+    ModuleNotFoundError); this endpoint is the identical backend yfinance
+    wraps. Raw JSON archived + sha256 pinned (the #40 GVZ convention).
+    VIX bar dates = America/New_York wall dates.
+2.5 Session grid = intersection of the session universe and the VIX date
+    set. All rolling/shift operations run on this grid.
+
+3. FEATURE ENGINEERING (causal, on the session grid)
+3.1 ret(s) = ln(D1 close_s) - ln(D1 close_{s-1}) on consecutive grid
+    sessions.
+3.2 RV21(s) = std(ret over the 21 sessions ending at s, ddof=1) * sqrt(252)
+    (annualized, decimal).
+3.3 VRP_raw(s) = VIX_close(s) - 100 * RV21(s). All inputs known at s close.
+3.4 Strict causal shift s -> s+1: VRP_shift(t) = VRP_raw of the immediately
+    PRECEDING grid session (pandas shift(1) on the grid series).
+3.5 P50(t) = rolling median of VRP_shift over the 252 grid sessions ending
+    at t INCLUSIVE (window=252, min_periods=252). Causal: VRP_shift(t) was
+    fixed at the prior session's close, so including t leaks nothing.
+3.6 Armed(t) := VRP_shift(t) > P50(t), both non-NaN. The 252-session warmup
+    is absorbed in the calibration block by design (first P50-valid session
+    ~Feb 2022; OOS starts Jan 2024).
+
+4. SIGNAL MECHANICS (frozen #31; no parameter search of any kind)
+4.1 For each armed session, Opening Range = M1 bars with wall in [570, 585):
+    OR_High = max(high), OR_Low = min(low) over available bars (the M1
+    export may skip no-tick minutes; the OR uses whatever printed).
+4.2 Trigger scan: bars with wall >= 585 in time order; the FIRST bar whose
+    close > OR_High arms a LONG, or whose close < OR_Low arms a SHORT.
+    One trigger per session, first occurrence wins; both-sided same-bar
+    conflicts resolve to the side with the larger absolute displacement
+    (|close - bound|), pre-declared here.
+4.3 Entry: open of the NEXT printed M1 bar of that session. If the trigger
+    bar is the session's last printed bar, the signal is void (no trade).
+4.4 Stop loss: the opposite OR boundary (long -> OR_Low, short -> OR_High).
+4.5 Excursion walk from the entry bar to the session's last bar
+    (wall < 960), bar by bar, stop checked before the time exit each bar:
+    LONG:  if bar open <= SL -> exit at bar open, reason STOP_GAP;
+           elif bar low  <= SL -> exit at SL, reason STOP.
+    SHORT: if bar open >= SL -> exit at bar open, reason STOP_GAP;
+           elif bar high >= SL -> exit at SL, reason STOP.
+    Never stopped -> exit at the last bar's close, reason EOD.
+    Degenerate case: the entry bar's OWN open already through the SL ->
+    entry and exit both at that open (gross 0), reason STOP_GAP.
+4.6 No trigger by session end -> no trade for that session.
+
+5. ECONOMICS (net, single convention, no cherry-picking)
+5.1 Gross points = side * (exit price - entry price).
+5.2 Net points = gross - 0.51 (verified US500 CFD spread floor; Model=4
+    median full-tape and 09:30-16:00 spread).
+5.3 No financing term: every position opens and closes inside one cash
+    session (no overnight holding; swap conventions do not apply).
+5.4 Net Sharpe = mean(net per trade) / std(net per trade, ddof=1) *
+    sqrt(252) - the family per-trade convention - computed on the stated
+    block's executed trades only.
+
+6. WINDOW DEFINITIONS
+6.1 Calibration (in-sample, discovery period, ABSORBS warmup): sessions
+    with ny_date < 2024-01-01. Stats reported for degradation comparison
+    ONLY; exploratory; NEVER gated.
+6.2 Out-of-sample: sessions with ny_date >= 2024-01-01 through tape end.
+    Performance tracking for verdicts and ALL gates are STRICTLY this block.
+6.3 The state machine (warmup, P50, armed flags, triggers) runs
+    continuously across the boundary with no knowledge of the split; only
+    accounting is partitioned.
+
+7. GATES (frozen; evaluated on the OOS block only)
+G-OOS1: total executed OOS trades >= 40.
+G-OOS2: OOS Net Sharpe > 0.
+G-OOS3: day-block bootstrap on OOS trades - 10,000 resamples, seed
+        20260924, pooled-mean convention (resample session blocks with
+        replacement; resampled mean = sum of block sums / sum of block
+        counts) - P(mean net <= 0) <= 0.20.
+Verdict rule: the study PASSES only if all three gates PASS; any FAIL is
+final for this artifact.
+
+8. BOOTSTRAP DEFINITION (frozen family convention)
+Blocks = OOS sessions holding >= 1 executed trade, block value = that
+session's net sum, block count = its trade count. rng =
+numpy.random.default_rng(20260924); idx = rng.integers(0, n_blocks,
+size=(10000, n_blocks)); resampled mean = sums[idx].sum(axis=1) /
+cnts[idx].sum(axis=1); p = fraction of resampled means <= 0.
+
+9. HONESTY / ANTI-LEAK RULES
+9.1 Zero loads of #31 or #37 artifacts or any data/results file except the
+    M1 tape; the VRP pipeline is rebuilt natively in this script.
+9.2 No parameter search, no model-family search, no post-hoc variant swaps;
+    the single frozen mechanic of section 4 runs exactly once.
+9.3 The 2024+ block is a TEMPORAL SPLIT, not a virgin holdout: the #31
+    family was screened over the full 2021-2026 tape (verdict FAIL at
+    G-VRP3), so post-2024 data influenced family-level culling. A PASS here
+    is necessary-but-not-sufficient for any Phase-2 reopening; the Phase-2
+    review path (year-by-year sign agreement, then a Phase-2 SPEC, then
+    Model=4 tester reconciliation) still applies in full.
+9.4 Year-by-year OOS net totals are reported for sign inspection whether or
+    not the gates pass.
+9.5 A null result (any gate FAIL) is a complete, expected deliverable. No
+    re-runs, no seed changes, no gate redefinition after execution.
+
+10. ARTIFACTS (data/results/vrp_orb_oos/)
+- SPEC_VRP_OOS.txt (this file), GATE_VRP_OOS.txt (frozen before the run)
+- vrp_oos_signals.csv (executed OOS trades), vrp_cal_signals.csv
+  (calibration trades, degradation accounting only)
+- vix_yahoo_raw.json (archived fetch), run_meta.json (integrity + params
+  + sha256 pins)
+- REPORT_VRP_OOS.txt (IS-vs-OOS degradation, net point expectancy, gate
+  verdicts, yearly breakdown)
+- PROGRESS.md entry as Hypothesis #45.

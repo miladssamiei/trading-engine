@@ -1,0 +1,49 @@
+HYPOTHESIS #95 - EURUSD H1 VOLUME/EMA GRID - REPORT - 2026-10-05
+EXPLORATORY PHASE 1; INTEGRITY PASS DOES NOT VALIDATE LIVE PERFORMANCE
+
+Source: data\results\eurusd_onboarding\eurusdtick_m1.csv
+Actual tape: 2020-01-01T22:01:00+00:00 through 2026-09-18T20:59:00+00:00 (last M1 open)
+M1 rows: 2,490,896; real H1 hours: 41,749; filled hours: 17,098
+Source SHA256: e578692f3b02d985a97c17d13f0fbd0f6797e47c9b31a43970667d020f4d7242
+Continuous UTC H1; EMA5; strictly rising three completed hourly tick volumes.
+Base size1; grid30pips; multiplier1.5; basket target strictly >30 base-unit net pips.
+Fixed round-trip spread0.3pips times each position's size, embedded once.
+
+REQUESTED METRICS
+Total baskets closed: 633
+Win rate of CLOSED baskets: 100.00%
+Absolute maximum floating loss (all baskets): 28,232.849805 base-unit pip equivalents
+Worst basket: 57 (CLOSED_TARGET); adverse M1 minute: 2020-07-31T06:49:00+00:00
+Maximum grid depth: 11 positions
+Maximum combined size: 170.995117 base units; largest individual: 57.665039
+Average calendar underwater time before closing (M1-mark/gap-carry estimate): 71.6925 hours / 2.9872 days
+Average observed-M1 underwater time: 51.3151 hours
+Average total basket hold: 85.6288 hours; maximum: 1,143.0000 hours
+
+REALIZED PROFITS AND UNRESOLVED EXPOSURE
+Positions opened: 1,142; grid additions: 508
+Closed net: 41,623.657520 base-unit pip equivalents
+Baskets open at tape end: 1; terminal floating net: -225.000000
+Closed net + terminal mark: 41,398.657520
+Total modeled spread, including open positions: 648.195410
+Maximum close-marked peak-to-trough floating drawdown: 27,405.540234
+OPEN basket 634: LONG, start 2026-09-04T00:00:00+00:00, depth3, size4.750000, floating-225.000000, max loss359.425000, hold357.0000h, underwater calendar estimate314.6333h.
+
+INTERPRETATION AND LIMITS
+Closed-basket wins are mechanically selected by the positive-profit-only exit. A 100% closed win rate is not evidence of an edge.
+No stop, position cap, margin limit, financing or prop equity guard is included. Inventory is allowed to grow exactly as specified.
+All PnL/risk is in base-unit pip equivalents. Multiply by the actual cash value of one pip at the chosen base size to obtain account-currency amounts.
+Tick volume counts quote activity, not centralized exchange traded volume or an order book.
+Adverse loss includes actual intrahour extrema. Close-marked drawdown is separate and does not infer OHLC event order.
+Calendar underwater time is an M1-close estimate with the last mark carried over missing quotes/weekends; observed-minute time excludes missing minutes.
+Entries use the first real minute in a bucket; exits use completed H1 close proxies, not independently verified executable broker tick fills.
+End-of-tape inventory stays open and is included in maximum risk and marked PnL. This full-tape fixed-rule replay is exploratory, not walk-forward validation.
+
+GATE: G1-G5 PASS FOR EXECUTION/DATA INTEGRITY ONLY
+G1: Source chronology, OHLC, minute alignment and nonnegative integer tick volume pass; actual coverage, source hash and exact H1 volume sums are recorded.
+G2: Entries occur on real H1 buckets using prior completed bars only, with strict volume/EMA direction and 30-pip spacing; sizes start at 1.0 and multiply by 1.5 with at most one order per bucket.
+G3: Every basket/position reconciles gross minus a single 0.3-pip cost times size to net; only real H1 closes with net>30 close baskets; occupancy and homogeneous basket direction hold.
+G4: Absolute adverse floating drawdown and maximum depth include all baskets, including OPEN_AT_TAPE_END; calendar/observed underwater estimates are labeled and bounded by each basket's duration.
+G5: Closed wins, terminal open liability and marked total are reported separately; no forced-close or omitted-loss claim, parameter search, prop compliance claim or live-performance validation is made.
+
+ARTIFACTS: frozen SPEC_GRID/GATE_GRID; baskets.csv; positions.csv; hourly_curve.csv; h1_grid.csv; metadata.json; this report.

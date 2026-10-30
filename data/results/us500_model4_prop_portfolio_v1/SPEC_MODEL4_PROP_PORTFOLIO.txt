@@ -1,0 +1,78 @@
+HYPOTHESIS 73: US500 MODEL=4 ORB + SP2L FROZEN EXECUTION PORTFOLIO
+Declared 2026-09-25 before any code or run for this study.
+This is a fixed combination of two pre-existing MT5 execution streams,
+not a new entry signal or an approval for live/FTMO execution.
+
+MECHANISM AND QUESTION
+ORB and SP2L enter US500 by different signal mechanisms. Combining
+their fixed executed results may diversify losses enough that scaling
+both legs could hit the first FTMO 2-Step $10k Challenge target within
+180 calendar days without a high loss-floor breach rate. This study
+tests that precise proposition under a deliberately optimistic
+close-based risk model. A null verdict is a complete outcome.
+
+FROZEN INPUTS AND DATA DEFINITIONS
+Read only the stitched final corrected Model=4 MT5 real-tick exports:
+data/results/execution_safe_model4_v1/stitched/orb_execution_safe_trades.csv
+data/results/execution_safe_model4_v1/stitched/sp2l_execution_safe_trades.csv
+data/results/execution_safe_model4_v1/stitched/orb_execution_safe_days.csv
+The trade files are semicolon-delimited and profit is USD at one lot
+($1/point/lot). Parse close_time as UTC and convert to New York date.
+Use the ORB day file rows with session_open>0 or prev_close>0 as the
+common cash-session day universe. Assert that every trade's open and
+close are on the same New York date, every close date is in that
+universe, and no duplicate trade key exists within a leg. Do not
+modify, rerun, reselect or refit either expert. Check the base streams
+against their frozen execution-safe report's trade count and PnL.
+
+PORTFOLIO AND COSTS
+Hold exactly one lot of each stream before a common scalar k. If both
+signal on a date, both execute; use the recorded fills and no cap or
+cross-strategy shadowing. The saved MT5 profit already includes the
+historical real variable spread and zero recorded swap/commission.
+For a conservative extra-cost scenario deduct another 0.51 USD per
+executed one-lot trade before scaling. Daily base and stressed PnL are
+the sum of trade profits by New York close date, zero-filled on the
+common universe. No compounding, financing or post-hoc leg weights.
+The extra 0.51 is a stress, not the actual FTMO quote-cost estimate.
+
+EVALUATION SPLIT AND STATISTICS
+2021-01 through 2023-12 is descriptive calibration. 2024-01 through
+last available 2026-04 date is the historical gated block; 2024 and
+2025 complete-year totals are separately gated. Report trade counts,
+yearly totals, net mean, daily Sharpe, maximum close-to-close drawdown
+and extra-cost stressed equivalents. For the gated block, bootstrap
+the 2024+ session dates with replacement 10,000 times, seed 20261009,
+and compute P(mean stressed daily PnL<=0). This is a historical
+description after prior strategy exposure, not virgin forward OOS.
+
+FIRST-CHALLENGE PACE SIMULATION
+For each 2024+ session-day start with a full 180-calendar-day observable
+window, reset first-phase account equity to $10,000. Apply every
+subsequent day's stressed closed PnL at both legs scaled together by
+k in the frozen grid {1,2,4,8,16,32}. First closed-day equity at or
+above $11,000 passes only after four distinct dates with at least one
+opened/closed trade. Closed-day equity at or below $9,000 breaches;
+daily closed PnL at or below -$500 also breaches. Check breach before
+pass for each date, otherwise time out after 180 calendar days. Report
+pass, breach, timeout and median days-to-pass for every k; count
+each rolling start but do not claim independent trials. Same-day
+intraday equity excursions, Prague rollover and FTMO broker fills are
+not observed; the pass rate is optimistic, and breach is understated.
+
+GATES FROZEN BEFORE PHASE 1
+G-MP1: Both input streams reproduce the corrected Model=4 report's trade counts and USD totals, with every trade on one New York date inside the common session universe.
+G-MP2: The 2024+ combined extra-0.51-per-trade stressed daily mean is strictly positive and its 10000-resample date-bootstrap P(mean<=0) is at most 0.05.
+G-MP3: Both complete gated years 2024 and 2025 have strictly positive combined extra-0.51-per-trade stressed USD totals.
+G-MP4: At least one fixed common scale k in {1,2,4,8,16,32} has at least 70% first-Challenge passes and at most 10% close-based breaches among all complete 180-calendar-day 2024+ rolling starts.
+All four gates must PASS for the Phase-1 portfolio screen to PASS.
+Even a PASS would permit only a separately predeclared intraday-risk,
+FTMO quote/account and simultaneous-MT5 execution reconciliation;
+it would not validate or authorize Challenge trading. Any FAIL is
+final for this frozen artifact. No new k, window, leg weight, exit,
+year selection or cost revision after seeing results.
+
+OUTPUTS
+Write a REPORT, dated daily/stressed CSV and k-grid pace CSV under
+this study directory. Append stages/verdict to PROGRESS.md. Never
+alter the frozen SPEC/GATE/REPORT of this or earlier studies.

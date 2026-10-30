@@ -1,0 +1,77 @@
+HYPOTHESIS 102: NATIVE FTMO GOLD SHORT BEFORE LBMA MORNING AUCTION
+Declared 2026-09-26 before H102 evaluator code or any H102 returns.
+Null/FAIL is complete. No account orders.
+
+MECHANISM AND SOURCE
+LBMA/ICE's electronic London Gold Price morning auction starts 10:30
+Europe/London. Published primary research found negative price
+pressure into precious-metal auctions outside active US trading
+hours, while finding no conclusive public manipulation signal. Test
+the fixed implication: short XAUUSD from 09:30 to 10:30 London on
+ordinary Tuesday-Thursday dates. No direction, side, clock or risk
+optimization. Earlier gold intraday studies did not test this clock.
+Source-only qualification found 401 complete 2024-26 Dukascopy M1
+windows and native FTMO XAUUSD ticks at five M1-gap dates. Phase 1
+uses ONLY connected FTMO-Demo XAUUSD COPY_TICKS_ALL real Bid/Ask for
+2022-01-01 through last complete date before 2026-09-26. 2022-23
+descriptive; 2024, 2025 and partial2026 gated. Symbol profit currency
+USD, 100 oz/lot; owner says intended EUR10000 account is swap-free.
+This same-day rule incurs no swap. No broker orders are placed.
+
+CAUSAL CALENDAR AND INDICATOR
+Trade London Tuesday, Wednesday, Thursday only, excluding every date
+Dec24-Dec31 or Jan1-Jan2 inclusive before any quote inspection. This
+avoids most UK bank holidays and the year-end auction calendar; it
+is a fixed conservative schedule and does not use actual future
+auction outcomes. Convert local times using IANA Europe/London.
+For each candidate, request native COPY_TICKS_ALL [09:30,10:31)
+London; keep ticks with Bid>0, Ask>=Bid and ordered time_msc.
+Require valid real ticks in [09:30,09:31) and [10:30,10:31), and
+at least one valid tick in every minute from 09:30 through 10:30.
+If required coverage fails, mark UNRESOLVED, no return; no future
+availability skip. The current date after 10:31 is excluded if not
+complete. For each fully covered candidate, observed 09:30-10:29
+BID high-low is a session range. Prior risk estimate = median of
+the previous 20 fully covered candidate ranges, excluding current
+day; require all 20 and max prior range date age <=60 days. This
+uses only completed days and no same-day future high/low at entry.
+
+ORDER PATH AND COSTS
+Sell at first real BID tick in [09:30,09:31). Initial stop = entry
+BID + 1.5*prior-20 median range, rounded to nearest 0.01 tick grid
+away from entry. If any subsequent real ASK quote before 10:30 is
+at/above stop, buy at that actual ASK quote (gap loss allowed).
+Otherwise buy at first real ASK in [10:30,10:31). One trade/date;
+no target, trail, reentry, news exclusion or overnight position.
+Base price-unit PnL = entry BID-exit ASK. Stressed net = base minus
+another 0.41 gold units roundtrip for commission, slippage and
+spread deterioration. Entry/exit variable native spread is already
+paid. Stress R = stressed net / initial stop distance. Report all
+native raw-array SHA256 hashes, candidate and quote coverage,
+entry/exit spread, stops, annual base/stress PnL and R, and
+date-ordered 15-trade circular moving-block bootstrap of 10000
+draws with numpy default_rng(20261011).
+
+STOP AND PHASE 2
+Any failed Phase-1 gate yields immutable REPORT FINAL_FAIL, no
+portfolio combination or after-result clock/side/stop change. If
+Phase 1 passes, freeze separate account SPEC/GATE for exact native
+tick replay with real lot rounding, EUR conversion, FTMO Prague
+daily-reset floating equity and 180-day full 10%+5% two-stage pace.
+At least 150 genuinely unseen forward trades and annual sign
+agreement remain necessary before claiming verified performance.
+The connected Free Trial itself is one phase with a 5% target and
+cannot prove a full 2-Step pass.
+
+VERBATIM GATES
+G-LB1: At least 300 fully resolved distinct London 2024-2026 Tuesday-Thursday XAUUSD auction-window trades, zero unresolved required native tick windows in that period, and strictly ordered valid real Bid/Ask ticks for every fill.
+G-LB2: Strictly positive 2024-2026 mean stressed gold units per trade after native variable Bid/Ask and another 0.41 gold units stress.
+G-LB3: Fifteen-trade circular moving-block bootstrap P(mean stressed gold units <= 0) at most 0.05 using 10000 draws and seed 20261011.
+G-LB4: Strictly positive stressed gold-unit totals separately in complete 2024, complete 2025 and partial 2026.
+G-LB5: If Phase 1 passes, a separately frozen exact-native EUR10000 two-stage 180-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 complete starts at fixed 2% initial risk.
+G-LB6: Official auction clock, fixed pre-known weekday/year-end calendar, causal prior-20 risk, executable native BID/ASK stop path, no overnight hold, raw quote source hashes and no account orders are verified.
+
+All six gates must pass; Phase-1 PASS alone is not verified.
+LBMA: https://www.lbma.org.uk/prices-and-data/about-lbma-daily-auction-prices
+ICE: https://www.ice.com/iba/lbma-precious-metals
+Primary research: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2657767

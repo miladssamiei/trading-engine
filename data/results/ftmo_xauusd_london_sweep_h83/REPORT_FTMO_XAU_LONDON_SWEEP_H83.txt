@@ -1,0 +1,138 @@
+H83 FTMO GOLD LONDON SWEEP PHASE-1 REPORT
+{
+  "generated_utc": "2026-09-25T10:10:17.189128+00:00",
+  "spec_sha256": "31c8bae601fe3da7e26707cefcbe1954cfc5317e49e3374763f6548fe005022a",
+  "gate_sha256": "10e23100d260135e0b055a8b36d7ce49711ea2e46196fc5e86e23293dac248e5",
+  "source": {
+    "source": "FTMO-Demo XAUUSD native MT5 M15 BID OHLC",
+    "clock": "server wall epoch localized Europe/Athens then converted UTC",
+    "rows": 64684,
+    "sha256": "59add37f91b792ee0944780774ece65c797e799f46811b52b9772c65275e2e01",
+    "first_utc": "2024-01-01T23:00:00+00:00",
+    "last_utc": "2026-09-24T20:45:00+00:00",
+    "largest_gap_hours": 73.25,
+    "non_custom": true,
+    "contract_size": 100,
+    "strict_unique_utc_quarters": true,
+    "sample_server_bar_epoch": 1758812400,
+    "sample_bar_open_bid": 3752.45,
+    "sample_first_tick_bid": 3752.48,
+    "sample_tick_delay_s": 0.164,
+    "sample_tick_aligned": true
+  },
+  "funnel": {
+    "MISSING_OPENING_BAR": 5,
+    "TARGET": 214,
+    "NO_RETURN_SIGNAL": 156,
+    "STOP": 309,
+    "OPPOSITE_EDGE_BEFORE_RETURN": 7,
+    "AMBIGUOUS_FIRST_BREAK": 8,
+    "INVALID_ENTRY_GEOMETRY": 1,
+    "DAY_FLAT": 11
+  },
+  "years": {
+    "2024": {
+      "n": 200,
+      "net_total_units": -174.07999999999106,
+      "stress_mean_units": -1.2803999999999554
+    },
+    "2025": {
+      "n": 191,
+      "net_total_units": -239.5724999999902,
+      "stress_mean_units": -1.6643062827224615
+    },
+    "2026": {
+      "n": 143,
+      "net_total_units": -43.22249999998576,
+      "stress_mean_units": -0.7122552447551447
+    }
+  },
+  "gated": {
+    "n": 334,
+    "dates": 334,
+    "net_mean_units": -0.8466916167663951,
+    "net_total_units": -282.79499999997597,
+    "stress_mean_units": -1.2566916167663948,
+    "mean_stressed_r": -0.1171340155574545,
+    "win_rate": 0.4311377245508982,
+    "profit_factor": 0.8480474994291052,
+    "max_drawdown_units": 367.14749999997775,
+    "median_hold_hours_upper": 1.5,
+    "unresolved": 0,
+    "missing_entry": 0,
+    "side": {
+      "LONG": {
+        "size": 154,
+        "sum": -293.9424999999769
+      },
+      "SHORT": {
+        "size": 180,
+        "sum": 11.147500000000946
+      }
+    },
+    "exit_reasons": {
+      "STOP": 183,
+      "TARGET": 141,
+      "DAY_FLAT": 10
+    }
+  },
+  "bootstrap": {
+    "date_blocks": 334,
+    "p_mean_le_zero": 0.8904,
+    "ci95_low": -2.2177359655688273,
+    "ci95_high": 0.5190424775449844
+  },
+  "pace": [
+    {
+      "risk_pct": 0.5,
+      "starts": 240,
+      "pass": 0,
+      "breach": 25,
+      "timeout": 215,
+      "pass_rate": 0.0,
+      "breach_rate": 0.10416666666666667,
+      "median_pass_days": null
+    },
+    {
+      "risk_pct": 1.0,
+      "starts": 240,
+      "pass": 6,
+      "breach": 227,
+      "timeout": 7,
+      "pass_rate": 0.025,
+      "breach_rate": 0.9458333333333333,
+      "median_pass_days": 14.5
+    },
+    {
+      "risk_pct": 1.5,
+      "starts": 240,
+      "pass": 10,
+      "breach": 230,
+      "timeout": 0,
+      "pass_rate": 0.041666666666666664,
+      "breach_rate": 0.9583333333333334,
+      "median_pass_days": 11.0
+    },
+    {
+      "risk_pct": 2.0,
+      "starts": 240,
+      "pass": 15,
+      "breach": 225,
+      "timeout": 0,
+      "pass_rate": 0.0625,
+      "breach_rate": 0.9375,
+      "median_pass_days": 7.0
+    }
+  ],
+  "gates": {
+    "G-LS1": true,
+    "G-LS2": false,
+    "G-LS3": false,
+    "G-LS4": false,
+    "G-LS5": false,
+    "G-LS6": true
+  },
+  "verdict": "FAIL",
+  "limitations": "M15 BID bar model with fixed spread, optimistic next-open and level-touch fills; no commissions, variable spread, slippage, 0.01 lot rounding or historical EUR conversion. External source did not test this exact fade rule."
+}
+OVERALL VERDICT: FAIL

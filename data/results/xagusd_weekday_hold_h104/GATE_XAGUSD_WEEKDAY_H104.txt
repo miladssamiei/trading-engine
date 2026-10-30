@@ -1,0 +1,6 @@
+G-H104-1: At least 150 fully resolved 2024-2026 signaled XAGUSD trades, zero unresolved signaled exits, and zero unaccounted normal-hours M1 gaps along those holds.
+G-H104-2: Strictly positive 2024-2026 mean stressed silver units per ounce after actual native spread, current long-swap snapshot, two-side metal commission and extra 0.060 execution stress.
+G-H104-3: Five-week circular moving-block bootstrap P(mean stressed silver units <= 0) at most 0.05 using 10000 draws and seed 20261004.
+G-H104-4: Strictly positive stressed silver-unit sums separately in full 2024, full 2025 and partial 2026.
+G-H104-5: The exact native M1 source hash, prior completed features, real ASK/BID fills and costs reconcile; no orders or hindsight substitutions.
+G-H104-6: After Phase 1 passes, a separately frozen EUR10000 FTMO Swing two-stage 180-calendar-day replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts in one fixed risk row; at least 150 genuinely unseen forward trades are required for verified status.

@@ -1,0 +1,98 @@
+REPORT - HYPOTHESIS #53: DAILY RANGE SWEEP & INVERSION FVG (1h execution / D1 17:00 ET anchor)
+Generated: 2026-09-24T09:45:46.837831+00:00  |  OVERALL VERDICT: FAIL
+Mechanics: prior-day-high (low) sweep by any 1h bar of the current 17:00 ET session, then a 1h close
+through the far side of the most recent opposite-side 1h FVG (inversion): SHORT if Swept_PDH and
+Close(t-1) < bullish-FVG bottom (High of candle-1); LONG if Swept_PDL and Close(t-1) > bearish-FVG top
+(Low of candle-1). Entry at 1h signal-bar open; SL = signal-time Sweep_High/Low; TP = opposite daily
+bound (PDL/PDH); worst-case same-bar SL-before-TP, honest gap fills, FORCED_EOD included; continuous
+forward-filled grids per SPEC_PDH_IFVG.txt.
+
+=== US500 (cost floor 0.51 points RT) ===
+1. DATA: 1791504 M1 rows -> 1h base 46633 (15251 synthetic = 32.7%) / 1944 D1 anchors, 2021-01-03 18:00:00 .. 2026-04-30 19:00:00
+   tape sha256 29ad8f8b25b43be4...
+2. FUNNEL: 1h FVGs detected bull/bear=4031/3143  bars-ending-swept PDH/PDL=13723/11049
+   signal candidates SHORT=3990 LONG=3683  ignored-while-open=7407  EXECUTED=2806
+3. NET ECONOMICS (points): mean=0.214/trade  median=-0.510  total=601.5  win=22.8%  Net Sharpe=0.149
+   excursion asymmetry: mean MFE=13.90 vs mean MAE=12.49  (MFE/MAE=1.11)
+   sides: LONG: n=1326 mean=0.60  SHORT: n=1480 mean=-0.13
+   exit mix: {'TP_GAP': 1527, 'TP': 667, 'SL': 604, 'SL_GAP': 8}
+   year-by-year net:
+      2021: n= 529  total=     -49.1  mean=  -0.093
+      2022: n= 502  total=     525.4  mean=   1.047
+      2023: n= 528  total=     337.1  mean=   0.638
+      2024: n= 552  total=    -330.5  mean=  -0.599
+      2025: n= 494  total=    -167.8  mean=  -0.340
+      2026: n= 201  total=     286.4  mean=   1.425
+4. GATES (independent, frozen in GATE_PDH_IFVG.txt):
+   G-SMC1 executed >= 30          :  2806          -> PASS
+   G-SMC2 Net Sharpe > 0           :     0.149    -> PASS
+   G-SMC3 MBB P(mean<=0) <= 0.20   :    0.3073    -> FAIL  (block=5, 10000 resamples, seed 20261001)
+   US500 VERDICT: FAIL
+
+=== EURUSD (cost floor 0.3 pips RT) ===
+1. DATA: 2490896 M1 rows -> 1h base 58847 (17098 synthetic = 29.1%) / 2452 D1 anchors, 2020-01-01 17:00:00 .. 2026-09-18 16:00:00
+   tape sha256 e578692f3b02d985...
+2. FUNNEL: 1h FVGs detected bull/bear=4115/4049  bars-ending-swept PDH/PDL=16458/16891
+   signal candidates SHORT=5456 LONG=5630  ignored-while-open=10651  EXECUTED=3889
+3. NET ECONOMICS (pips): mean=-1.007/trade  median=-0.300  total=-3914.7  win=17.9%  Net Sharpe=-0.729
+   excursion asymmetry: mean MFE=14.05 vs mean MAE=13.64  (MFE/MAE=1.03)
+   sides: LONG: n=1934 mean=-1.14  SHORT: n=1955 mean=-0.87
+   exit mix: {'TP_GAP': 2407, 'SL': 760, 'TP': 713, 'SL_GAP': 8, 'FORCED_EOD': 1}
+   year-by-year net:
+      2020: n= 510  total=   -1671.6  mean=  -3.278
+      2021: n= 649  total=    -767.5  mean=  -1.183
+      2022: n= 623  total=    -899.5  mean=  -1.444
+      2023: n= 682  total=     183.8  mean=   0.270
+      2024: n= 458  total=     405.9  mean=   0.886
+      2025: n= 503  total=   -1466.1  mean=  -2.915
+      2026: n= 464  total=     300.3  mean=   0.647
+4. GATES (independent, frozen in GATE_PDH_IFVG.txt):
+   G-SMC1 executed >= 30          :  3889          -> PASS
+   G-SMC2 Net Sharpe > 0           :    -0.729    -> FAIL
+   G-SMC3 MBB P(mean<=0) <= 0.20   :    0.9981    -> FAIL  (block=5, 10000 resamples, seed 20261001)
+   EURUSD VERDICT: FAIL
+
+=== XAUUSD (cost floor 0.41 price units RT) ===
+1. DATA: 2337538 M1 rows -> 1h base 58438 (19450 synthetic = 33.3%) / 2435 D1 anchors, 2020-01-01 18:00:00 .. 2026-09-01 16:00:00
+   tape sha256 a8c4c1d6551d27f3...
+2. FUNNEL: 1h FVGs detected bull/bear=4060/3371  bars-ending-swept PDH/PDL=17843/14692
+   signal candidates SHORT=5704 LONG=4872  ignored-while-open=10204  EXECUTED=3918
+3. NET ECONOMICS (price units): mean=-0.533/trade  median=-0.410  total=-2090.2  win=17.2%  Net Sharpe=-0.607
+   excursion asymmetry: mean MFE=7.21 vs mean MAE=6.79  (MFE/MAE=1.06)
+   sides: LONG: n=1736 mean=0.07  SHORT: n=2182 mean=-1.02
+   exit mix: {'TP_GAP': 2475, 'TP': 743, 'SL': 693, 'SL_GAP': 7}
+   year-by-year net:
+      2020: n= 490  total=    -484.3  mean=  -0.988
+      2021: n= 651  total=    -222.9  mean=  -0.342
+      2022: n= 613  total=     -48.4  mean=  -0.079
+      2023: n= 654  total=    -355.7  mean=  -0.544
+      2024: n= 613  total=    -207.6  mean=  -0.339
+      2025: n= 623  total=    -705.0  mean=  -1.132
+      2026: n= 274  total=     -66.3  mean=  -0.242
+4. GATES (independent, frozen in GATE_PDH_IFVG.txt):
+   G-SMC1 executed >= 30          :  3918          -> PASS
+   G-SMC2 Net Sharpe > 0           :    -0.607    -> FAIL
+   G-SMC3 MBB P(mean<=0) <= 0.20   :    0.9965    -> FAIL  (block=5, 10000 resamples, seed 20261001)
+   XAUUSD VERDICT: FAIL
+
+OVERALL VERDICT: FAIL (requires all three instruments to pass G-SMC1..G-SMC3 independently)
+
+HONESTY NOTES
+- Strictly causal state: PDH/PDL come only from D1 buckets completed at or before the open of the signal
+  bar; sweep flags/extremes are read as of the end of bar t-1 within the same 17:00 session; FVG detection
+  uses completed bars t-3..t-1 only (a bullish gap detected at t can never satisfy its own short
+  condition, since Close(t-1) >= Low(t-1) > High(t-3)).
+- Declared mechanic absences (not oversights): no FVG staleness/invalidation rule (a gap persists until
+  replaced by a newer same-side gap, even after close-throughs), no sweep recency limit, no session-time
+  filter on entries.
+- Continuous forward-fill convention: synthetic flat bars carry the last real close; flat closes can
+  satisfy close-through conditions and carried highs/lows extend sweeps only within the carried range;
+  entries on synthetic bars fill at the carried price and the walk resumes at the real reopen with honest
+  gap fills (SPEC 2.2/9.3). No bar-skipping fix applied.
+- Structural bracket: SL = signal-time sweep extreme, TP = opposite prior-day bound; worst-case same-bar
+  ordering (SL before TP) and honest entry/subsequent-bar gap fills; degenerate entry-bar gap exits pay
+  the cost floor.
+- Single pre-declared parameterization (the mechanic has no free numeric parameters); no optimization, no
+  re-runs; sides, years and instruments reported as run. Phase-1 screen is in-sample by construction;
+  MFE/MAE are exploratory descriptors, never results. Phase 2 (MT5 execution) only on overall PASS; any
+  FAIL is final here.

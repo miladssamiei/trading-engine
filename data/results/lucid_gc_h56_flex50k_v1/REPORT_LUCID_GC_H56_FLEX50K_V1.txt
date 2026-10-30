@@ -1,0 +1,38 @@
+LUCID GC H56 50K FLEX - ACCOUNT TRANSFER REPORT
+OVERALL VERDICT: NO GO
+2026-09-26. Frozen XAUUSD bid-M1 proxy; not native CME GC or Lucid fills.
+Source rows 503, complete 180-day rolling entry-day starts 352.
+G1 same-day weekday before 16:45 NY: PASS.
+G2 >=50 complete starts: PASS.
+G5 native CME price/quote and Lucid forward fills: FAIL (unavailable).
+Assumed one-tick spread, listed Lucid commissions and zero slippage are floors.
+Pretrade structural risk-reserve check is conservative but not a floating tick replay.
+The signal's M1-extreme entry is optimistic. No contract rolls or historical spread.
+Historical full-tape and rolling starts overlap; none is unseen forward validation.
+
+1_GC_floor: 1 x 100 oz, cost 0.146 + extra 0.0 gold units
+  Full-ledger mean $65.05/trade; sum $32722.60; annual $ {'2024': 2735.0, '2025': 8605.0, '2026': 12886.0}
+  180d starts: pass 111/352, breach 40/352, timeout 201/352
+  G3 FAIL; G4 PASS; diagnostic FAIL.
+
+1_GC_plus_0p5: 1 x 100 oz, cost 0.146 + extra 0.5 gold units
+  Full-ledger mean $15.05/trade; sum $7572.60; annual $ {'2024': -865.0, '2025': 1955.0, '2026': 9236.0}
+  180d starts: pass 39/352, breach 184/352, timeout 129/352
+  G3 FAIL; G4 FAIL; diagnostic FAIL.
+
+2_GC_floor: 2 x 100 oz, cost 0.146 + extra 0.0 gold units
+  Full-ledger mean $130.11/trade; sum $65445.20; annual $ {'2024': 5470.0, '2025': 17210.0, '2026': 25772.0}
+  180d starts: pass 143/352, breach 184/352, timeout 25/352
+  G3 FAIL; G4 PASS; diagnostic FAIL.
+
+5_MGC_floor: 5 x 10 oz, cost 0.26 + extra 0.0 gold units
+  Full-ledger mean $26.83/trade; sum $13494.20; annual $ {'2024': 957.1, '2025': 3544.4, '2026': 6026.9}
+  180d starts: pass 35/352, breach 0/352, timeout 317/352
+  G3 FAIL; G4 PASS; diagnostic FAIL.
+
+References:
+https://support.lucidtrading.com/en/articles/12945790-lucidflex-evaluation-account
+https://support.lucidtrading.com/en/articles/12945815-lucidflex-drawdown
+https://support.lucidtrading.com/en/articles/12945805-lucidflex-consistency-percentage
+https://support.lucidtrading.com/en/articles/11404729-allowed-trading-times
+https://support.lucidtrading.com/en/articles/11508978-approved-products-and-commissions

@@ -1,0 +1,12 @@
+REPORT_PAIRS_FUTURES
+Written: 2026-09-11T00:38:47
+
+VERDICT: INCOMPLETE - NO RESULTS
+Reason: no Eikon App Key: EIKON_APP_KEY not set and no interactive input available
+
+This is an execution/environment failure, NOT a strategy FAIL verdict.
+Required to complete the run:
+  1. python package 'eikon' installed in the running environment
+  2. EIKON_APP_KEY environment variable set (or interactive key entry)
+  3. Refinitiv Workspace / Eikon desktop running and signed in with Data API permissioning
+No substitute data source may be used without a new pre-declared SPEC.

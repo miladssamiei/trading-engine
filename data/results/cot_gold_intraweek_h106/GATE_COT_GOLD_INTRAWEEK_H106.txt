@@ -1,0 +1,5 @@
+﻿G-H106-1: At least 150 resolved gated trades; at least 97% of planned non-excluded weeks have required real Monday entry and Thursday exit quotes, and no retained trade has a normal-hours M1 gap over 30 consecutive minutes.
+G-H106-2: Stressed mean net gold units per ounce is strictly positive and the 5-calendar-week moving-block bootstrap P(mean stressed net<=0) is at most 0.05.
+G-H106-3: Stressed net gold-unit totals are strictly positive in each complete gated year 2023, 2024 and 2025; partial 2026 is reported but not a gate.
+G-H106-4: The stressed gold-unit mean exceeds an unconditional Monday-to-Thursday long under the same costs by strictly more than zero, with 5-week block-bootstrap P(mean paired difference<=0) at most 0.05.
+G-H106-5: If G-H106-1 through G-H106-4 pass, a separately frozen Phase-2 FTMO-native Bid/Ask, paid-swap, EUR floating-equity and two-stage 180-day challenge replay must pass its own predeclared gates before any paid-account recommendation; otherwise NOT_RUN.

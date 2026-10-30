@@ -1,0 +1,12 @@
+X-S1: Both frozen parent EA SHA-256 hashes are recorded before work and unchanged after work; only new EA artifacts implement corrections.
+X-S2: Static review confirms no change to entry signals, directions, stop/target formulas, volume, intended exit time, or day accounting outside corrections A-C and artifact identifiers.
+X-C1: Both new sources compile with zero errors and zero warnings, and compiled executable/source hashes are archived.
+X-M1: All 12 configured batches use Model=4 and their logs explicitly evidence generation based on real ticks.
+X-M2: All 12 tester batches complete successfully and produce attributable, parseable trade and day exports.
+X-E1: Across both stitched trade streams there are zero trades whose close New York date is later than their open New York date and zero negative-duration trades.
+X-E2: Across both stitched trade streams there are zero entries on the fixed 45-date nonstandard-session block list.
+X-E3: Across all tester logs there are zero invalid-price close failures, zero market-closed close failures, and zero other unsuccessful grid-close helper results for an owned position.
+X-E4: Every batch ends with no position owned by the tested expert, supported by export reconciliation and tester/log evidence.
+X-R1: Closing deals caused by SL or TP are classified as SL or TP even if force-close state was active; static tests and output reconciliation find zero priority violations.
+X-A1: The final audit archives all required provenance and descriptive frozen-versus-corrected comparisons without using performance to select or alter the correction.
+X-FINAL: PASS only if X-S1, X-S2, X-C1, X-M1, X-M2, X-E1, X-E2, X-E3, X-E4, X-R1, and X-A1 all PASS. Otherwise FAIL. In either case downstream_model_allowed=false and live_execution_allowed=false.

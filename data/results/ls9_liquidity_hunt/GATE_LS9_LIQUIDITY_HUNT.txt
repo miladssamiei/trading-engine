@@ -1,0 +1,18 @@
+GATE_LS9_LIQUIDITY_HUNT
+Verbatim extraction of SECTION 5 gates of SPEC_LS9_LIQUIDITY_HUNT.txt
+(frozen 2026-09-21, BEFORE any script for this study existed).
+
+G-A1 SAMPLE SIZE: total excursion-valid signals >= 150.
+
+G-A2 EXCURSION EDGE: for every threshold tau in {0.5, 0.75, 1.0} ATR and
+for the aggregate set AND each direction separately:
+mean(max(MFE_atr - tau, 0)) > mean(max(MAE_atr - tau, 0)).
+(9 comparisons; all must hold.)
+
+G-A3 DAY-BLOCK BOOTSTRAP: 10,000 resamples (numpy default_rng(20260921))
+of UTC-date blocks with replacement over the aggregate signal set; the
+fraction of resamples with mean(MFE_atr - MAE_atr) <= 0 must be <= 0.20.
+
+OVERALL: PASS iff G-A1..G-A3 all PASS. PASS is a descriptive screen pass
+ONLY (in-sample, single window, no costs, no walk-forward); FAIL is final
+for this artifact.

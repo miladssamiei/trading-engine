@@ -1,0 +1,5 @@
+G1: Source and original-signal hashes/coverage pass, all signals use completed H1 bars, and every entry/addition/exit is reproducible on actual M1 observations with one order per H1 bucket and cost charged once.
+G2: Actual lots obey0.01 step, five-position/0.30-lot/margin caps, all bailout cooldowns and Prague daily latches; gap overshoots are retained and all account/cash/swap ledgers reconcile.
+G3: Development-only candidate selection is frozen before validation; no full-tape or validation-winner substitution and no post-result parameter tuning.
+G4: The selected primary case has at least150 closed VALIDATION baskets, positive closed net expectancy, positive unannualized net basket Sharpe, positive marked total including terminal liability, and MBB P(mean net<=0)<=0.05.
+G5: The selected primary case has zero official daily/static breaches and zero internal total-buffer halts in VALIDATION; every full calendar validation year has nonnegative net exit-year PnL, and unresolved risk/gap overshoot/current-swap assumptions are disclosed. A pass is only a demo candidate pending broker/MT5 reconciliation; otherwise NOT_ADOPTED.

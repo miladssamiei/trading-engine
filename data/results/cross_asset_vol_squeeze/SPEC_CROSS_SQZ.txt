@@ -1,0 +1,138 @@
+HYPOTHESIS #47 SPEC: CROSS-ASSET MULTI-TIMEFRAME VOLATILITY SQUEEZE BREAKOUT (4h anchor, 15m execution)
+Study ID: cross_asset_vol_squeeze
+Date frozen: 2026-09-23, before any evaluation code was written or run.
+Status: frozen. Corrections or re-measurements require a NEW study name.
+Lineage: first cross-asset study of the program (US500 + EURUSD + XAUUSD). The
+4h BB-inside-KC squeeze with a 15m Donchian trigger is a NEW pre-declared
+mechanism (TTM-squeeze-style construction); it is not on the closed-family list
+(Bollinger MR closed is a mean-reversion rule, not a squeeze breakout). EURUSD
+D1 Donchian breakout (#42/#46) is closed; this is a different timeframe pair and
+a different arming condition. Single pre-declared parameterization, no parameter
+search, one run per instrument.
+
+1. DATA
+1.1 Tapes (verified M1, epoch-UTC time, columns time,open,high,low,close,
+    tick_volume; sorted ascending defensively before aggregation):
+    - US500 : data/results/vwap_2021_2026/us500tick_m1.csv  (points; cost floor 0.51)
+    - EURUSD: data/results/eurusd_onboarding/eurusdtick_m1.csv (pips, 1 pip = 0.0001; cost floor 0.3)
+    - XAUUSD: data/results/xauusd_onboarding/xauusdtick_m1.csv (price units; cost floor 0.41)
+1.2 Timezone America/New_York (EST/EDT) for all wall-time logic.
+1.3 Cost floors are round-trip and subtracted once per trade from gross.
+
+2. MULTI-TIMEFRAME AGGREGATION
+2.1 15m bars: M1 epochs floored to 900s slots; open=first, high=max, low=min,
+    close=last, volume=sum per slot. NY wall 15m boundaries align exactly with
+    the epoch-900 grid because the NY UTC offset is always a whole number of
+    hours.
+2.2 Continuity: the 15m series is reindexed to the FULL continuous 900s grid
+    from first to last slot; missing bars are forward-filled with OHLC = prior
+    close, volume = 0 (synthetic flat bars). This fills no-tick minutes,
+    overnight/maintenance breaks, holidays and weekends alike.
+2.3 4h anchor bars: built FROM the continuous 15m grid by NY WALL-clock bucket
+    [00:00-04:00), [04:00-08:00), ... (open=first, high=max, low=min,
+    close=last per bucket). Wall bucketing means DST-transition anchor buckets
+    span 3 or 5 real hours; buckets are contiguous by construction.
+2.4 The two series are strictly aligned (4h built from the same continuous 15m
+    grid).
+
+3. STATE MACHINE (causal indicators)
+3.1 For a 15m bar t, all 15m inputs use bars <= t-1; the 4h input is the most
+    recently completed 4h bar relative to bar t's open: the wall bucket
+    strictly before the wall bucket containing t. Its indicators include that
+    4h bar's own close, which is known at its end, hence at t's open.
+3.2 4h indicators (on close c, high h, low l):
+    - SMA20 and population stddev (ddof=0) -> Bollinger BB = SMA20 +/- 2.0*std20.
+    - EMA20 (span=20, adjust=False) and Wilder ATR(14) -> Keltner
+      KC = EMA20 +/- 1.5*ATR14. Wilder: TR=max(H-L,|H-cPrev|,|L-cPrev|),
+      ATR(13)=mean(TR 0..13), ATR(i)=(ATR(i-1)*13+TR(i))/14.
+    - Squeeze ON at 4h bar k iff BB_upper(k) < KC_upper(k) AND
+      BB_lower(k) > KC_lower(k).
+    - Linear-regression slope (20): least-squares slope of the last 20 4h
+      closes vs x=0..19 (closed-form weights; slope is exactly 0.0 on a
+      constant window, so fully-flat windows arm neither side).
+3.3 15m indicators: Donchian(20) strictly prior: dch(t)=max High over
+    [t-20, t-1]; dcl(t)=min Low over [t-20, t-1]. Wilder ATR(14) on 15m
+    (same recursion as 3.2).
+3.4 Armed: 15m index >= 20 AND dch, dcl, prior ATR(14 at t-1) non-NaN AND the
+    mapped 4h bar index >= 19 (BB/EMA/LR warmup) AND the mapped 4h squeeze
+    state is defined.
+3.5 CONSEQUENCE OF 2.2, declared honestly: synthetic flat bars feed the
+    indicators. Flat windows make Donchian breakouts impossible (close equals
+    channel) and set LR slope to exactly 0, but Wilder ATR decays across long
+    gaps (weekends), so early post-gap signals carry mechanically tightened
+    stops. This is accepted as part of the declared continuity convention; no
+    bar-skipping or ATR-freezing fix is applied.
+
+4. SIGNALS AND EXECUTION
+4.1 Long signal at 15m bar t: 4h squeeze ON, 4h LR slope > 0, AND
+    Close(t-1) > dch(t). Short: squeeze ON, slope < 0, AND Close(t-1) < dcl(t).
+4.2 Execution cap: max ONE open trade per instrument; signals while a trade is
+    open are counted (ignored-while-open) and discarded.
+4.3 Entry: Open price of the signal bar t. A trade occupies bars
+    [entry_bar, exit_bar] inclusive; the next actionable signal can only fire
+    at exit_bar + 1 or later.
+
+5. EXCURSION WALK AND TRAILING-STOP EXIT
+5.1 Initial risk unit: ATRsig = 15m Wilder ATR(14) at bar t-1 (strictly
+    prior). Initial SL = Entry - 2.0*ATRsig (long) / Entry + 2.0*ATRsig
+    (short).
+5.2 Walk 15m bars j = entry_bar, entry_bar+1, ... in order (long case; short
+    mirrored):
+    a) Open(j) <= SL -> exit at Open(j), reason SL_GAP (honest fill);
+    b) Low(j)  <= SL -> exit at SL, reason SL (worst-case default on same-bar
+       dual conditions);
+    c) at the close of j, ratchet: SL = max(SL, max Close over
+       [entry_bar..j] - 2.5*ATR15(j)), ATR15(j) known at that close; if
+       ATR15(j) is NaN the ratchet is skipped (SL unchanged).
+5.3 If no stop is hit by the final 15m bar, exit at that bar's close, reason
+    FORCED_EOD, included in results.
+5.4 Per-trade record includes MFE/MAE excursions over [entry_bar..exit_bar]:
+    long MFE = max High - Entry, MAE = Entry - min Low (short mirrored),
+    in instrument units, descriptive only.
+
+6. ECONOMICS
+6.1 Gross = side*(Exit - Entry) in instrument units: points for US500 and
+    XAUUSD, pips (x10,000) for EURUSD. Net = Gross - cost floor (0.51 / 0.3 /
+    0.41 respectively), one round trip per trade.
+6.2 Net Sharpe (per-trade convention): mean(Net)/std(Net, ddof=1) * sqrt(252)
+    over executed trades of the instrument.
+
+7. PHASE 1 GATES (applied INDEPENDENTLY to each instrument; frozen verbatim in
+   GATE_CROSS_SQZ.txt)
+    G-SQ1: Total executed signals >= 30.
+    G-SQ2: Net Sharpe Ratio > 0.
+    G-SQ3: Moving-block bootstrap (10,000 resamples, block=5 trades,
+           seed 20260926) P(mean Net PnL <= 0) <= 0.20.
+    VERDICT RULE: an instrument PASSES only if G-SQ1 AND G-SQ2 AND G-SQ3 all
+    PASS. OVERALL verdict PASS only if ALL THREE instruments PASS. Any FAIL is
+    final for this artifact; corrections require a new study name. Null
+    results are complete, expected deliverables.
+
+8. OUTPUTS (data/results/cross_asset_vol_squeeze/)
+    SPEC_CROSS_SQZ.txt (this file), GATE_CROSS_SQZ.txt (written before the
+    run), REPORT_CROSS_SQZ_PHASE1.txt (funnel, net expectancy, win rate,
+    excursion asymmetry, per-instrument gates), cross_sqz_signals.csv (all
+    instruments, asset column), run_meta.json (sha256 lineage of tapes and
+    script, funnel, gates, verdict).
+
+9. HONESTY / ANTI-LEAK RULES
+9.1 All indicator inputs strictly prior (15m) or completed (4h) as defined in
+    section 3; entries only at 15m bar opens; no intrabar lookahead; gap fills
+    at the open, worst-case same-bar stop default.
+9.2 Single frozen parameterization; no optimization, no re-runs, no
+    post-hoc filtering; sides and instruments reported separately and pooled.
+9.3 Phase 2 (MT5 execution) only on overall PASS; in-sample character of this
+    screen is acknowledged; MFE/MAE reconstructions are exploratory
+    descriptors, never results.
+
+ERRATUM 2026-09-23 (pre-verdict, appended; sections above left as originally frozen).
+The first execution of the Phase-1 script returned ZERO signal candidates on all three
+instruments. Root cause: sections 3.3/4.1 as originally worded define dch(t) = max High
+over [t-20, t-1] and require Close(t-1) > dch(t); since High(t-1) >= Close(t-1), the long
+trigger is unsatisfiable by definition (short mirrored). This is a degenerate spec clause,
+not a market null. Corrected causal reading, matching the declared intent (signal state
+completed at bar t-1, channel strictly prior to the compared close):
+  dch(t) = max High over [t-21, t-2]; dcl(t) = min Low over [t-21, t-2];
+  Long  : Close(t-1) > dch(t); Short: Close(t-1) < dcl(t); armed from 15m index >= 21.
+All other clauses, parameters, gates and the verdict rule are unchanged. No results
+existed at correction time (0 trades); the single corrected run is the run of record.

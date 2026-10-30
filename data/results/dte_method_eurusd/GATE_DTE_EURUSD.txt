@@ -1,0 +1,27 @@
+GATE_DTE_EURUSD.txt
+
+Frozen 2026-09-22 BEFORE any Phase-1 code exists (verbatim extraction of
+SPEC_DTE_EURUSD.txt section 8). Evaluated only by
+evaluate/dte_method_eurusd_phase1.py on data/results/dte_method_eurusd/.
+
+G-DTE1 (sample size)
+  Total session-valid signals >= 150.
+  PASS/FAIL: __ (filled by the Phase-1 run)
+
+G-DTE2 (directional excursion quality, aggregate, strict)
+  For T in {0.5, 1.0, 1.5} (multiples of initial Risk):
+    mean(max(MFE - T*Risk, 0)) > mean(max(MAE - T*Risk, 0))   [pips]
+  evaluated on the aggregate session-valid signal set. In R-normalized
+  terms: mean(max(MFE/R - T, 0)) > mean(max(MAE/R - T, 0)).
+  PASS requires ALL THREE strict inequalities.
+  PASS/FAIL: __ (filled by the Phase-1 run)
+
+G-DTE3 (day-block stability)
+  Bootstrap P(pooled mean(MFE - MAE) <= 0) <= 0.20, where the bootstrap
+  resamples NY dates with replacement (10,000 resamples, one draw of
+  numpy.random.default_rng(20260921)) and the statistic is the pooled mean
+  of (MFE - MAE) in pips over all signals of the resampled dates.
+  PASS/FAIL: __ (filled by the Phase-1 run)
+
+OVERALL: PASS iff G-DTE1 AND G-DTE2 AND G-DTE3. Any FAIL is final for this
+artifact; no re-run without a new pre-declared SPEC.

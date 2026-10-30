@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trading-engine-research"
+version = "0.1.0"
+description = "Causal strategy research, execution reconciliation, and portfolio risk experiments for CFD and futures proxies"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "numpy>=2.0,<2.3",
+  "pandas>=2.2,<3",
+  "numba>=0.61,<0.62",
+  "tzdata>=2024.1",
+]
+
+[project.optional-dependencies]
+research = [
+  "scipy>=1.14,<2",
+  "matplotlib>=3.9,<4",
+  "scikit-learn>=1.5,<2",
+  "statsmodels>=0.14,<0.15",
+  "xgboost>=2,<4",
+  "lightgbm>=4,<5",
+]
+mt5 = ["MetaTrader5>=5.0.45; sys_platform == 'win32'"]
+dev = ["pytest>=8,<10"]
+
+[tool.setuptools.packages.find]
+include = ["evaluate", "evaluate.*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [".", "evaluate"]
+addopts = "--strict-markers"
+markers = ["integration: requires external data, broker software, or model artifacts"]

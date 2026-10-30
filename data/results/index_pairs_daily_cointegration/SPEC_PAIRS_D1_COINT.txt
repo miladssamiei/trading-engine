@@ -1,0 +1,90 @@
+SPEC: US500/USA30 DAILY OLS COINTEGRATION - PHASE 1 SIGNAL QUALITY SCREEN (HYPOTHESIS #41)
+Declared: 2026-09-23, before any code for this study existed.
+
+0. CONTEXT AND FAMILY LINEAGE
+  - Third artifact of the US500/USA30 relative-value family: #19 (rolling
+    log-OLS cointegration, FAIL), #39 (intraday 60-bar Z, FAIL). This study
+    is the tasked PRICE-LEVEL OLS variant with different mechanics (price
+    regression, two-stage z-standardization, 45-day time exit, per-direction
+    sequential state machine) - a new artifact, not a re-litigation.
+  - Null result pre-accepted as a complete deliverable.
+
+1. DATA AND D1 AGGREGATION
+  1.1 Tapes: data/results/vwap_2021_2026/us500tick_m1.csv (US500) and
+      data/results/usa30_onboarding/usa30tick_m1.csv (USA30; substitution as
+      in #39 - the tasked path vwap_2021_2026/usa30tick_m1.csv does not
+      exist). Both epoch-UTC open-time Bid OHLC.
+  1.2 Timezone America/New_York. D1 bar dated D covers the strict interval
+      (D-1 17:00 ET, D 17:00 ET]; assignment rule: a M1 bar opening at wall
+      time t belongs to D1 date (t - 17:00h).date() + 1 day (a bar opening
+      exactly at 17:00:00 belongs to the NEXT D1 bar, matching the onboarding
+      D1 convention). D1 open = first M1 open in the interval, D1 close =
+      last M1 close in it, high/low = extremes; days with no M1 bars do not
+      exist.
+  1.3 Inner join of the two D1 series on the exact D1 date.
+
+2. STATE MACHINE (ROLLING OLS COINTEGRATION)
+  2.1 For each joined D1 bar t with at least 252 trailing observations
+      (window INCLUSIVE of t): OLS of US500 close (Y) on USA30 close (X) in
+      PRICE LEVELS. beta_t = cov(Y,X)/var(X), alpha_t = mean(Y) - beta_t*
+      mean(X) (rolling least squares).
+  2.2 Daily residual spread series: Spread_t = Y_t - (beta_t*X_t + alpha_t),
+      each day using THAT day's fitted (beta_t, alpha_t). First valid Spread
+      observation = joined day 252.
+  2.3 Z-score: Z_t = (Spread_t - Mean_252(Spread)) / StdDev_252(Spread)
+      where Mean_252/StdDev_252 roll over the trailing 252 Spread
+      observations inclusive of t, sample std (ddof=1). Two-stage warmup:
+      Z armed at joined day 503 (252 for the regression + 252 spread obs).
+      StdDev = 0 -> unarmed.
+
+3. SIGNAL GENERATION
+  3.1 SHORT_SPREAD (US500 overpriced): Z_t > +2.0 -> short US500 / long
+      USA30. LONG_SPREAD (US500 underpriced): Z_t < -2.0 -> long US500 /
+      short USA30.
+  3.2 Two independent per-direction state machines, evaluated
+      chronologically: a breach on day t opens a trade at the NEXT D1 bar's
+      opens (day t+1) ONLY if no trade is currently open in that direction
+      (no re-entry while open; the opposite direction is unaffected). No
+      next bar -> no-entry drop.
+
+4. EXCURSION WALK AND ECONOMICS (GROSS)
+  4.1 From entry day E (entry at D1 opens) evaluate daily closes until the
+      FIRST of: (a) REVERSION - Z_j crosses to the entry-opposite side of
+      zero (Z_j <= 0 for SHORT_SPREAD, Z_j >= 0 for LONG_SPREAD; the entry
+      day's own Z is evaluable); exit at that day's close; (b) TIME - 45
+      trading days elapsed after entry; exit at the close of bar E+45;
+      (c) EOD - end of data forces a close at the last bar (flagged).
+  4.2 Leg notionals: $10,000 on the US500 leg; USA30 leg = $10,000 x beta_s
+      where beta_s is the SIGNAL-day beta. Daily pair PnL:
+      pnl_j = d_y*$10,000*(Y_j/Y_E - 1) + d_x*$10,000*beta_s*(X_j/X_E - 1),
+      with (d_y, d_x) = (-1, +1) for SHORT_SPREAD, (+1, -1) for LONG_SPREAD,
+      Y_E/X_E the entry-day D1 opens.
+  4.3 MFE = max pnl_j over the walk (daily closes), MAE = -min pnl_j.
+      Exit PnL = pnl at the exit close. All GROSS (no costs); descriptive
+      cost floor alongside: CFD spreads 0.51 pt US500 / 2.28 pt USA30 ->
+      $10,000*0.51/Y_E + $10,000*beta_s*2.28/X_E per round trip.
+
+5. GATES (frozen verbatim in GATE_PAIRS_D1_COINT.txt)
+  G-DC1 total session-valid signals >= 30.
+  G-DC2 aggregate mean Pair MFE > mean Pair MAE.
+  G-DC3 mean gross PnL > 0.
+
+6. DELIVERABLES
+  - evaluate/index_pairs_daily_cointegration_phase1.py, project python.
+  - data/results/index_pairs_daily_cointegration/{SPEC,GATE}_PAIRS_D1_COINT.txt
+    (frozen before any code).
+  - data/results/index_pairs_daily_cointegration/REPORT_PAIRS_D1_COINT_PHASE1.txt,
+    pairs_d1_coint_signals.csv, run_meta.json.
+  - PROGRESS.md entry as Hypothesis #41.
+
+7. HONESTY AND ANTI-LEAK RULES
+  - Causality: every signal uses only the completed D1 bar t and its
+    trailing window; entries are at the NEXT day's printed opens; exits at
+    closes of completed bars.
+  - Price-level OLS on index levels is formally a spurious-regression risk
+    (non-stationary levels); this artifact measures the tasking's specified
+    mechanics as frozen, and the family lineage (#19/#39 nulls) is context,
+    not evidence.
+  - No parameter search: windows (252/252), threshold (|Z| 2.0), time exit
+    (45 days), notionals ($10k x beta) are frozen.
+  - Null result is final for this artifact; verdicts quote frozen gates only.

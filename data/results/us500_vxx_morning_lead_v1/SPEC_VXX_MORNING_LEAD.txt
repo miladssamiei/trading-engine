@@ -1,0 +1,71 @@
+HYPOTHESIS 76: VXX MORNING MOVE LEADS ONE-HOUR US500 CASH RETURN
+Declared 2026-09-25 before source download, Phase-1 code or run.
+
+MECHANISM AND SOURCE QUALITY
+Sung, An Empirical Study of the Price Leadership of VIX (2014),
+https://ir.lib.ncu.edu.tw/handle/987654321/65376,
+reports some 5-45 minute VIX-to-S&P 500 lead-lag at high frequency.
+Tapiero, The Information Content of Intraday VIX and its Expected
+Correlation on the S&P 500 (2015),
+https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2674086,
+reports incremental one-step-ahead S&P return-density information.
+Those studies do not establish directional CFD profit, and VXX is
+a short-term VIX-FUTURES ETN, not the VIX index. This study tests
+the distinct, uncertain transfer that the first 15-minute VXX
+move predicts the next one-hour US500 return in the inverse
+direction. Earlier price-only morning and intraday-momentum FAILs
+remain final; no market, clock, side, threshold or exit search.
+
+DATA AND CAUSAL CLOCK
+Obtain Dukascopy vxxususd BID M5 CSV for 2021-01-01 through
+2026-05-01 (end exclusive) using the published dukascopy-node CLI;
+save the unmodified export and SHA256 before any evaluation.
+Dukascopy lists VXX quote history from 2017:
+https://www.dukascopy-node.app/instrument/vxxususd.
+The instrument is an indicative Dukascopy VXX quote, not an
+exchange audit-trail trade/option feed. Epoch timestamps are UTC;
+convert to America/New_York. For each NY cash date require REAL
+VXX M5 bars at 09:30, 09:35, 09:40, all with positive tick volume.
+The VXX signal is sign of (09:40 bar close - 09:30 bar open), fully
+known at 09:45. A positive sign means SELL US500, a negative sign
+means BUY US500; zero skips. No VXX level, magnitude, gap, year,
+US500 prior return, news, volatility or other filter.
+
+Use the verified US500-tick real-tick-derived BID M5 export at
+data/results/orb_2021_present/us500tick_m5.csv, SHA256
+a8ee68f1a0010a1be9704c0d59fd5382aa798846cdae4d519b799ae21ec66c2d.
+Require a real 09:30 NY cash open bar, and real 09:45 entry and
+10:45 exit M5 bars on the same NY date. Enter at the 09:45 BID
+bar open; exit at the 10:45 BID bar open. Signed BID open-to-open
+move is gross US500 points. Subtract 0.51 point per trade for the
+CFD spread and a second 0.51 for execution stress. One trade per
+cash date; no stop, target, alternate fill or overnight position.
+M5 open fills and fixed spread are optimistic execution proxies;
+native Model=4 and FTMO quote/risk confirmation would follow only
+an economic Phase-1 PASS.
+
+SPLIT, REPORTS, AND STOP RULE
+2021-2023 dates are calibration/descriptive only. Gate 2024-01-01
+through 2026-04-30 NY dates. Report source coverage and skips,
+annual and side gross/base/stressed point totals, number of trades,
+win rate, and date-bootstrap P(mean base net<=0). Bootstrap gated
+cash dates 10,000 times with seed 20261012. This is the 76th
+historical project study, so require p<=0.01 rather than the usual
+0.05 as a selection caution, but even a historical PASS is not
+independent forward confirmation. A FAIL is final and stops before
+native tick replay or prop Challenge pace evaluation. Null expected.
+
+GATES FROZEN BEFORE PHASE 1
+G-VL1: At least 150 executed 2024-2026 distinct cash dates with all three real VXX signal bars and exact real 09:45/10:45 US500 BID M5 bars.
+G-VL2: The gated mean net US500 points is strictly positive after the 0.51 spread proxy and an additional 0.51 execution cost.
+G-VL3: The 10000-resample cash-date bootstrap P(mean base net <= 0) is at most 0.01 with seed 20261012.
+G-VL4: Base 0.51-cost net point totals are strictly positive in complete gated years 2024 and 2025.
+All four gates required. Any historical PASS permits only a new
+predeclared real-tick and prop pace study, not Challenge trading.
+Never edit this SPEC, its GATE or REPORT after Phase-1 run. No
+post-hoc sign inversion, VXX threshold, window or year selection.
+
+OUTPUTS
+Save the original VXX CSV, source hash, signal/trade CSV, run
+metadata and REPORT under this study directory. Append dated
+SPEC/GATE, run and verdict stages to PROGRESS.md.

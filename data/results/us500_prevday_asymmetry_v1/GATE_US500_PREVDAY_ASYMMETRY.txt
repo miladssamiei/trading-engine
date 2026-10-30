@@ -1,0 +1,6 @@
+G-PA1: At least 150 gated executed-or-marked trades on 150 distinct NY dates, and zero unresolved exits after an entry.
+G-PA2: Mean gated extra-0.51-stressed net index points per trade strictly positive.
+G-PA3: NY-date bootstrap P(mean base net <= 0) at most 0.01, 10000 resamples, seed 20260925.
+G-PA4: Base net total strictly positive in complete gated 2024 and 2025.
+G-PA5: At least 150 fully observed rolling 90-calendar-day paid-Challenge starts, pass rate at least 0.70 and floating-equity breach rate at most 0.10 at fixed 1.0% planned risk.
+G-PA6: Every resolved entry/exit is same NY date, initial stop D>0, source is unique chronological real BID M5, and there is no missing in-position bar before exit.

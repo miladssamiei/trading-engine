@@ -1,0 +1,123 @@
+REPORT_REGIME_ROTATION
+Slow regime-rotation controller (monthly D1 labels, ORB/SP2L family
+switching), hypothesis #13, Phase 1 verdict: BOTH ARMS PASS ALL R-GATES
+-> Phase 2 ELIGIBLE (Arm P primary)
+
+Run: 2026-08-29. SPEC_REGIME_ROTATION.txt and GATE_REGIME_ROTATION.txt
+were written BEFORE any code. Labels were computed and written
+(regime_labels.csv) BEFORE any child P&L was joined. Child streams
+reproduced exactly (ORB 447/+470.67/0.337/5.13%; SP2L
+1,343/+281.84/0.275/4.17%; static anchors from the portfolio study).
+
+------------------------------------------------------------------------
+CAUSALITY BUG FOUND AND FIXED BEFORE ACCEPTING THE PASS
+
+The first run's month-label cutoff (NY-midnight of the month's first
+day) wrongly included the D1 bar stamped 00:00 UTC of the month's
+FIRST TRADING DAY - a one-day lookahead (that bar completes 17:00 ET
+on the day it governs). Caught by independent hand-recomputation of
+pivotal labels (2022-03: correct bar says RANGE at trend_rel -0.881,
+lookahead bar said DOWN-VOL at -2.223; 2025-04: -2.035 vs -1.509).
+The cutoff was corrected to UTC midnight of the month's first
+calendar day (includes the last prior-day bar, excludes the month's
+own first trading day) and EVERYTHING was recomputed. Note honestly:
+the buggy version also passed R1-R4 for arm P (Sharpe 0.608); the
+causal version is STRONGER (0.720), so the pass is not an artifact of
+the bug - the corrected labels flipped 2022-03 to RANGE and 2025-05 to
+RANGE, both risk-off months that dodged SP2L losses. Post-fix, the
+pivotal labels match hand-recomputation exactly; arm-day arithmetic
+verified (UP-VOL day ensemble = SP2L only; RANGE day = 0).
+
+Related permanent note: US500.c D1 bars are stamped 00:00 UTC of
+their NY trading date (tz-converts to the PRIOR EVENING's date). Any
+"bars strictly before day D" filter must use UTC-midnight cutoffs,
+not NY-midnight ones. (The session-transfer study's descriptive-only
+D1 regime split used nydate < d with these stamps - descriptive,
+non-gating there; flagged for awareness.)
+
+------------------------------------------------------------------------
+LABELS (64 months, 2021-01..2026-04; three causal thresholds)
+
+Counts: UP-CALM 32, UP-VOL 17, DOWN-VOL 9, DOWN-CALM 3, RANGE 3.
+Labels are highly persistent (2021 nearly all UP-CALM; 2022 dominated
+by DOWN/UP-VOL; 2023-2024H1 UP-CALM; the 2025 tariff episode visible
+as DOWN-VOL 2025-04, RANGE 2025-05). Burn-in verified: EMA200 and the
+trailing-252 vol median are fully converged for every label month
+(6.5+ years of prior D1 history).
+
+------------------------------------------------------------------------
+RESULTS (common 1,369-day universe, $10k base, 1.00 lot per enabled
+child, max 2.00 lots; children frozen)
+
+|                     | ORB   | SP2L  | static S1 | ARM P  | ARM Q  |
+|---------------------|-------|-------|-----------|--------|--------|
+| Sharpe              | 0.337 | 0.275 | 0.420     | 0.720  | 0.597  |
+| max drawdown        | 5.13% | 4.17% | 8.02%     | 1.80%  | 2.85%  |
+| total net (pts)     | 470.7 | 281.8 | 752.5     | 852.0  | 827.1  |
+| traded days         | -     | -     | -         | 580    | 829    |
+| full years positive | -     | -     | 3/5       | 5/5    | 4/5    |
+| best-year share     | -     | -     | 71.9%     | 38.6%  | 40.6%  |
+| 2025 net            | -228  | -260  | -488      | +251.9 | +57.6  |
+
+ARM P (complementary: CALM->ORB, VOL->SP2L, RANGE->flat):
+R1 PASS (0.720 > 0.420 > children), R2 PASS (1.80% << 11.29%), R3 PASS
+(580 >= 150), R4 PASS - all five full years positive (2021 +69.4,
+2022 +65.6, 2023 +329.3, 2024 +103.6, 2025 +251.9; 2026 partial
++32.4), best-year 38.6% <= 60%, and the named stress case 2025 is
+POSITIVE (vs every baseline negative).
+ARM Q (vol-gated stack: CALM->both, VOL->SP2L, RANGE->flat): also
+passes all R-gates (2024 -7.1 the only negative full year; 4/5 rule
+satisfied; 2025 +57.6). Arm P dominates (Sharpe, DD, year shape) and
+is the Phase-2 primary; Q is reported, not substituted.
+
+Per-regime (Arm P): UP-CALM 681 days net +471.7 Sharpe 0.787 (ORB
+only - vs 0.337 standalone); UP-VOL 360 days +263.7 / 0.892 (SP2L
+only - vs 0.275 standalone); DOWN-CALM 67 days +56.4 / 0.859 (ORB);
+DOWN-VOL 194 days +60.2 / 0.313 (SP2L; the weakest cell, honestly
+noted); RANGE 67 days flat by design. The labels genuinely separate
+each child's good environment: both children's Sharpe roughly doubles
+inside their assigned regimes.
+
+Correlations (Arm P daily P&L): vs ORB +0.505, vs SP2L +0.535, vs
+static S1 +0.700 - moderate, as expected for a book containing each
+child about half the time; not a repackaged S1.
+
+------------------------------------------------------------------------
+HONEST ROBUSTNESS NOTES (descriptive, no new variants run)
+
+1. The 2025 result does not hinge on the single April exclusion: with
+   correct labels, April 2025 (DOWN-VOL, SP2L-only, -14.1) avoided
+   ORB's -228.6 tariff-crash month. Descriptive arithmetic on the
+   reported outputs: had April been an ORB month instead, 2025 would
+   be about +37 - still positive, R4 would still pass. The May 2025
+   RANGE month (flat) similarly excluded SP2L's -101.2; the year
+   passes with or without these two luck-adjacent months, but they
+   are visibly the largest single contributors.
+2. DOWN-VOL (SP2L in down-market vol) is the weakest regime cell
+   (Sharpe 0.313). Per the anti-swap rule this cannot be redesigned;
+   it is the honest cost of the pre-declared mapping.
+3. The mechanism contains no new edge - it is a causal calendar split
+   of two validated children. Its Sharpe comes from each child
+   trading only in its documented favorable environment, plus 67
+   risk-off RANGE days.
+4. Same-tape caveat applies: one instrument, one 5.3-year window, and
+   the 2022/2025 regime episodes dominate the label variety. Phase 2
+   (MT5) and G-gates are the required next check before any of this
+   is treated as validated.
+
+------------------------------------------------------------------------
+VERDICT
+
+Phase 1 PASSES (both arms; Arm P primary). Per the SPEC, Phase 2 (the
+RegimeController master EA with in-EA D1 labels, G1/G2 gates) is the
+next stage and is REQUIRED before any deployment claim. No EA has
+been built yet; children remain frozen.
+
+Artifacts (data/results/regime_rotation/): SPEC_REGIME_ROTATION.txt,
+GATE_REGIME_ROTATION.txt, regime_labels.csv (written first),
+child_streams_regime.csv, ensemble_regime_pnl.csv,
+yearly_breakdown_regime.csv, regime_breakdown.csv,
+phase1_regime_stats.json,
+evaluate/regime_rotation_phase1.py, REPORT_REGIME_ROTATION.txt.
+
+END OF REPORT_REGIME_ROTATION

@@ -1,0 +1,4 @@
+G-MRF1: At least 150 executed trades on distinct 2022-2026 event dates.
+G-MRF2: Strictly positive mean extra-cost stress net per trade in the gated block.
+G-MRF3: Date-bootstrap P(mean executable quote net <= 0) at most 0.05, 10,000 resamples, seed 20260929.
+G-MRF4: Strictly positive executable quote-net total in each complete gated year 2022, 2023, 2024, and 2025.

@@ -1,0 +1,77 @@
+HYPOTHESIS 78: DIRECT VIX MORNING MOVE -> NEXT-HOUR US500 CASH RETURN
+Declared 2026-09-25 after read-only source-coverage qualification and
+before any H78 trade/evaluation code or Phase-1 run.
+
+MECHANISM AND SOURCE LIMIT
+Sung, An Empirical Study of the Price Leadership of VIX (2014),
+https://ir.lib.ncu.edu.tw/handle/987654321/65376,
+reports VIX-to-S&P 500 lead-lag at 5-45 minute frequency. Tapiero,
+The Information Content of Intraday VIX and its Expected Correlation
+on the S&P 500 (2015),
+https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2674086,
+reports incremental one-step-ahead S&P return-density information.
+Neither paper proves directional CFD profit or FTMO pace. Direct VIX
+is a materially different signal from H76's inaccessible Dukascopy
+VXX futures-ETN quote source; H76 stays INCOMPLETE and frozen. This
+test asks whether the first 15 cash minutes of direct VIX predict
+the next US500 hour in the inverse direction. Null is complete.
+
+SOURCE AND CAUSAL CLOCK
+Use the original FirstRate Data free VIX 1-minute zip at
+data/results/project_status/vix_frd_source_probe/
+VIX_1min_sample_firstratedata.zip, SHA256
+a9be4714e5bfa2e9e13e24d0771fc68c69c7d9a18f7e7b0a995eb8ee853b922c.
+Published source page and download:
+https://firstratedata.com/free-intraday-data
+https://frd001.s3-us-east-2.amazonaws.com/VIX_1min_sample_firstratedata.zip
+The provider says timestamps are US Eastern/New York wall time;
+the archived VIX_full_1min.txt is 2022-09-30 to 2023-09-29,
+191737 lines. Treat timestamps as New York wall times, not UTC.
+Require 15 distinct real VIX M1 bars with positive OHLC values at
+09:30 through 09:44 inclusive on one NY cash date. Signal is sign of
+09:44 VIX bar close minus 09:30 VIX bar open, fully known at 09:45.
+Positive VIX sign means SELL US500; negative sign means BUY; zero
+skips. No VIX level, magnitude, prior-US500 return, volatility,
+news, date, side, or holiday filter. FirstRate is a vendor-derived
+VIX minute archive, not the primary Cboe feed; source fidelity and
+revised history are limitations.
+
+US500 PHASE-1 SAME-DAY BID PROXY
+Use real-tick-derived US500-tick BID M5 CSV at
+data/results/orb_2021_present/us500tick_m5.csv, SHA256
+a8ee68f1a0010a1be9704c0d59fd5382aa798846cdae4d519b799ae21ec66c2d.
+UTC epoch seconds convert to America/New_York. Require a real
+09:30 cash-open M5 bar and exact real 09:45 entry and 10:45 exit
+M5 bars. Enter at 09:45 BID open and exit at 10:45 BID open,
+one same-day trade per cash date. Gross points are direction times
+exit-minus-entry BID. Subtract the owner's 0.51 point round-trip
+US500 CFD spread proxy and a further 0.51 point execution stress.
+No stop, target, alternative fill, or clock search. This BID/fixed
+spread proxy does not establish native order fills or account risk.
+
+SPLIT, STATS, AND FROZEN GATES
+Describe 2022-09-30 through 2022-12-31 without tuning. Gate all
+2023-01-01 through 2023-09-29 eligible NY dates. Report source
+coverage and skips, n, side, quarter, mean/sum base and stressed
+net points, and win rate. Bootstrap gated NY cash dates with
+replacement 10000 times, seed 20261014, report P(mean base net<=0).
+This is the 78th historical project hypothesis. Require p<=0.01,
+and positive base totals in each Q1, Q2, Q3 2023 subperiod.
+These quarters do not replace independent 2024-26 year validation.
+
+GATES FROZEN BEFORE PHASE 1
+G-VM1: At least 150 executed distinct 2023-01-01 through 2023-09-29 NY cash dates, each with 15 exact VIX M1 signal bars and real 09:30/09:45/10:45 US500 BID M5 bars.
+G-VM2: Gated mean net US500 points remains strictly positive after the 0.51 spread proxy and an additional 0.51 execution stress.
+G-VM3: The 10000-resample cash-date bootstrap P(mean base net <= 0) is at most 0.01 with seed 20261014.
+G-VM4: Base 0.51-cost net US500 point totals are strictly positive in each 2023 calendar quarter Q1, Q2 and Q3.
+All four gates are required for this historical Phase-1 PASS.
+Otherwise FAIL is final. Even a PASS only justifies acquiring
+independent 2024-26 primary-source VIX data and freezing a new
+native Model=4/prop-pace study; it does not validate a system.
+No post-hoc VIX threshold, inversion, interval, source, subperiod
+or stop rescue. Existing SPEC/GATE/REPORT artifacts remain frozen.
+
+OUTPUTS
+Keep the original source zip, save signal/trade CSV, metadata and
+REPORT even on FAIL. Append dated SPEC/GATE, run and verdict stages
+to PROGRESS.md. REPORT is immutable.

@@ -1,0 +1,57 @@
+ENGINE A $25K MONTE CARLO - PREDECLARED SPEC
+Date: 2026-09-26. Written before prop_firm_monte_carlo_25k.py exists or runs.
+
+INPUT: data/results/futures_prop_validation/trades.csv. Keep exactly rows
+with engine A_KC and asset GC, BTC or ETH. Require finite net, entry and
+initial_stop, with Initial_Risk = abs(entry-initial_stop) > 0. Compute exact
+R = net / Initial_Risk for every selected row, no clipping or asset weights.
+Frequency = selected trade count / 2458 inclusive calendar days. Retain
+the prior study's identical R pool and historical average frequency.
+
+SIMULATION: Base closed equity $25000; closed-equity Phase-1 target $26500.
+Initial peak closed equity $25000. For each risk fraction f in {0.0010,
+0.0015,0.0020,0.0025}, sample R IID with replacement from the pooled R
+ledger. Position dollar risk is pre-trade closed equity times f, so at the
+starting balance this is exactly $25/$37.50/$50/$62.50 respectively. Trade
+PnL dollars = sampled R times position dollar risk. Update equity and closed
+peak after each trade. PASS when equity >= $26500; MAX_RUIN when peak minus
+equity >= $1000. The dollar risk can vary slightly after gains/losses; this
+continues the previous fixed-fractional study, not fixed-dollar contracts.
+
+DAILY PROXY: The rolling four-trade window is the sum of dollar PnL from
+the last min(4, trades so far) completed trades, including the current
+trade. DAILY_RUIN occurs when this sum <= -$500. This is a trade-count proxy,
+not a wall-clock trading day or a true session reset. At a shared boundary,
+classify in order PASS, then MAX_RUIN, then DAILY_RUIN; record how often both
+ruin triggers coincide. Terminate on the first classified event.
+
+RUN: 10000 independent paths for each of the four risk profiles, using
+separate numpy PCG64 seeds 20260930, 20261001, 20261002, 20261003.
+Cap paths at 50000 trades for a finite run. Report unresolved paths as
+CENSORED, not pass or ruin. Do not adjust seeds, cap or profiles after results.
+
+OUTPUT: REPORT_MONTE_CARLO_25K.txt, monte_carlo_25k_paths.csv,
+monte_carlo_25k_summary.csv and monte_carlo_25k_meta.json in the existing
+futures_prop_validation results directory. For every risk show PASS,
+MAX_RUIN, DAILY_RUIN and CENSORED fractions (all use 10000 as denominator),
+median and 95th-percentile pass-trade count conditional on PASS, and median
+pass days = median trades / (selected trades / 2458). Also report 95th pass
+days as a diagnostic. Empirical quantiles use numpy linear interpolation.
+
+PREFLIGHT ANALYTIC CHECK: On the frozen R pool, minimum R is about -1.029.
+For every still-active path equity < $26500, so the greatest possible
+single-trade loss at f=0.0025 is about $68.17. Four such losses sum to less
+than $273, below the $500 daily proxy. Thus DAILY_RUIN should be impossible
+under all four profiles. The simulator still checks it; any nonzero count
+requires investigation, not reinterpretation or post-hoc parameter change.
+
+HONESTY: This is a user-defined closed-equity scenario, not an actual
+single firm's rule book. Apex's current intraday $25K evaluation has a
+$1000 live unrealized-equity trailing threshold and no $500 daily loss
+limit; other $25K products may differ. The simulation has no real intraday
+account equity, calendar-day resets, account access period, contract-lot
+granularity, concurrent-position margin, second stage, payout or funding.
+The input is a retrospective bid-only CFD-proxy ledger with owner-estimated
+futures cost floors and an existing per-position M1 guard. IID R sampling
+erases chronology and asset dependence. Results are conditional sample
+stress metrics, not prospective pass probabilities or a risk recommendation.

@@ -1,0 +1,124 @@
+SPEC_VOL_TARGET_STRESS
+Study dir: data/results/ftmo_macro_vol_target/
+Pre-declared: 2026-09-21, BEFORE any script for this study exists.
+Hypothesis number: #28 (owner-tasked; post-Path-C descriptive lane; sizing-overlay
+stress sibling of ftmo_macro_reversal_stress #26, which showed the FixedLots=3.0
+pass of ftmo_macro_reversal #23 is start-luck/sequencing fragile).
+
+SECTION 0. SCOPE, PREMISE, AND STATUS
+
+0.1 Premise: #26 stressed the #23 swap-free macro short-term reversal replay at
+FIXED 3.0 lots: rolling pass rate 53.60%, Monte Carlo pass rate 47.31%, p95
+peak drawdown 10.62% - fragile. This study asks the NARROW sizing question:
+does VOLATILITY-TARGETED dynamic position sizing (the classic vol-scaling
+overlay; NO signal change) improve FTMO Phase-1 robustness at comparable
+speed on the SAME frozen 458-trade list? The trade list, entries, exits,
+directions, and per-trade PnL are untouched; only lot size varies with
+realized volatility.
+
+0.2 This is NOT new signal research (no new strategy family is opened; the
+closed_signal_families list and the short_term_reversal G-R2 FAIL stand) and
+NOT an FTMO qualification (ftmo10k_qualification_v1 stays INCOMPLETE).
+downstream_model_allowed=false, live_execution_allowed=false regardless of
+verdict.
+
+SECTION 1. DATA, VOLATILITY MODEL, AND ECONOMICS
+
+1.1 Trade list: data/results/short_term_reversal/g2_trades.csv, exactly 458
+rows, 2021-01-04..2026-04-23 (verified in #26: all dates on the D1 grid;
+swap-free per-trade points = gross_pt - 0.51, total +2,467.60 pts).
+1.2 D1 grid: data/results/momentum_multihorizon/us500c_d1.csv (3,146 server
+dates 2014-06..2026-08; close prices drive both the vol model and the
+floating marks).
+1.3 VOLATILITY MODEL: RV20_t = sqrt(252 x Var(ln(P_t/P_{t-1}), ...,
+ln(P_{t-19}/P_{t-20}))) - the annualized standard deviation of the 20 daily
+log returns ENDING AT AND INCLUDING day t (population variance, ddof=0).
+Using returns through day t is legitimate: trades enter at day t's close,
+which is observable. RV20 must be computable (non-NaN) for every trade entry
+day - verified, the grid starts 2014-06 while trades start 2021-01.
+1.4 DYNAMIC SIZING: DynamicLots_i = clip(BaseLots x TargetVol / RV20_{t_i},
+0.5, 15.0) with BaseLots = 1.0, computed once per trade at its ACTUAL
+historical entry day and frozen for that trade everywhere (rolling sim AND
+Monte Carlo shuffles use the same per-trade lots; a shuffled trade keeps its
+historical entry-day lot size). The clamps [0.5, 15.0] prevent extreme
+margin exposure; the fraction of trades at each clamp is reported.
+1.5 FTMO economics (identical to #26): swap-free realized USD = (gross_pt -
+0.51) x $1/pt/lot x DynamicLots_i; floating marks signal x (close_d -
+entry_close) x DynamicLots; worst floating via the adverse D1 extreme
+(low_d for +1, high_d for -1) x DynamicLots; exposure days entry+1..exit
+(entry at close; exit-day extreme counted before the close); initial
+$10,000; pass on first D1-close equity >= $10,800 with no same-or-earlier
+breach; Max Daily Loss = 5.0% of the prior server-day realized balance
+anchor (frozen #23/#24/#26 convention; approximates FTMO's fixed $500 at
+start); Max Loss = static $9,000 floor on worst floating equity; breach on
+the pass day voids the pass; failure attribution FLOOR-first.
+
+SECTION 2. TARGETVOL SWEEP
+
+2.1 TargetVol grid: {10%, 15%, 20%, 25%, 30%, 40%}. For each value build the
+per-trade DynamicLots (1.4) and run the BASE PATH - the single #26-baseline
+challenge starting at the first trade (entry 2021-01-04) through tape end.
+2.2 OPTIMAL TargetVol = the value whose base path passes with the EARLIEST
+pass date (ties broken toward the SMALLER TargetVol) - the family's
+shortest-time-to-pass convention (#23/#24). The full grid (pass date, days,
+peak daily loss, mean/min/max lots, clamp fractions) is reported. If no
+TargetVol passes the base path, the study reports G-V2/G-V3 not run and
+OVERALL FAIL (vol targeting does not rescue the base path at any tested
+target).
+
+SECTION 3. STRESS TESTS AT THE OPTIMAL TARGETVOL
+
+3.1 TEST A - ROLLING STARTS: identical to #26 - fresh $10,000 challenge on
+every g2 trade entry date from 2021-01-01 through 2025-12-31 (431 starts),
+forward trades entry >= s, stop at PASS/FAIL, UNRESOLVED at tape end.
+Metrics: Rolling Start Pass Rate (passes/all and resolved-only), Average +
+Median Days to Pass, failure split DAILY vs FLOOR, unresolved count,
+per-entry-year table, median/p95 peak DD of passing runs.
+3.2 TEST B - MONTE CARLO: 10,000 permutations, numpy default_rng(20260921),
+trades re-sequenced back-to-back on consecutive D1-grid days (original
+holding span, original daily adverse/close path, and ORIGINAL entry-day
+DynamicLots carried per trade; chronology destroyed). Fresh $10,000; same
+stop rules. Metrics: MC Pass Rate (all and resolved-only), Median Peak
+Drawdown, 95th-percentile Peak Drawdown (max peak-to-trough of the
+worst-path equity series, % of peak), median days-to-pass of passing runs,
+failure split.
+
+SECTION 4. GATES (verbatim in GATE_VOL_TARGET_STRESS.txt)
+
+G-V1 DATA/VOL INTEGRITY: both inputs load; exactly 458 trades; all dates on
+the D1 grid; swap-free point total equals 2,467.60 within 0.01; RV20
+computable at every trade entry day; every DynamicLots within [0.5, 15.0];
+rolling coverage pass + fail + unresolved equals the start-date count.
+G-V2 ROLLING PASS RATE: rolling-start pass rate over RESOLVED runs >= 50%.
+G-V3 MONTE-CARLO ROBUSTNESS: MC pass rate over RESOLVED runs >= 50% AND
+95th-percentile peak drawdown < 10.0%.
+OVERALL: PASS iff G-V1..G-V3 all PASS. FAIL is a complete, final answer:
+volatility targeting does not make the #23 replay robust. PASS means only
+that the sizing overlay survived THIS stress at the tested targets - no
+strategy validation.
+
+SECTION 5. HONESTY RULES
+
+5.1 The g2 trade list is frozen; no trade, date, direction, or PnL is edited.
+The sizing overlay multiplies frozen per-trade dollars; it does not alter
+any signal or the #26 baseline.
+5.2 Pessimistic conventions inherited from #26: D1 adverse extremes for
+worst floating; exit-day extreme counted before the close; same-day breach
+voids a pass; unresolved runs are non-passes in primary rates.
+5.3 Declared limitations: RV20 is close-to-close (no intraday vol); the lot
+clamps are hard; % -of-anchor daily convention vs FTMO's fixed $500; MC
+blocks are a sequencing device, not a calendar simulation; the comparison
+against #26 uses identical code paths and conventions.
+5.4 No claim of FTMO qualification; no re-opening of the short_term_reversal
+FAIL; downstream_model_allowed=false, live_execution_allowed=false.
+
+SECTION 6. ARTIFACTS (data/results/ftmo_macro_vol_target/)
+
+  SPEC_VOL_TARGET_STRESS.txt / GATE_VOL_TARGET_STRESS.txt (frozen before code)
+  REPORT_VOL_TARGET_STRESS.txt               (sweep grid, optimal TargetVol,
+                                              stress metrics, explicit
+                                              comparison vs #26 FixedLots=3.0)
+  vol_target_stress_distributions.png        (days-to-pass + peak-DD histograms)
+  run_meta.json                              (machine-readable summary)
+
+END OF SPEC. FROZEN 2026-09-21.

@@ -1,0 +1,95 @@
+SPEC: US500/USA30 INTRADAY RELATIVE VALUE - PHASE 1 SIGNAL QUALITY SCREEN (HYPOTHESIS #39)
+Declared: 2026-09-23, before any code for this study existed.
+
+0. CONTEXT AND DATA NOTE
+  - Intraday sibling of the daily pairs line (#19 rolling-cointegration FAIL,
+    #27 FTMO stress): session-anchored intraday return-differential mean
+    reversion, NOT OLS-hedge cointegration. Null result pre-accepted as a
+    complete deliverable.
+  - DATA PATH SUBSTITUTION (declared before code): the tasked tape
+    data/results/vwap_2021_2026/usa30tick_m1.csv does not exist. The verified
+    USA30 M1 onboarding tape data/results/usa30_onboarding/usa30tick_m1.csv
+    (epoch-UTC open-time, Bid OHLC, 3-decimal) is used instead. US500 tape:
+    data/results/vwap_2021_2026/us500tick_m1.csv (1,791,504 bars). The inner
+    join restricts the study to the timestamp overlap.
+  - All wall-time session logic is evaluated in America/New_York (EST/EDT).
+
+1. DATA AND ALIGNMENT
+  1.1 Inner join of the two M1 tapes on the exact epoch minute timestamp; a
+      joined bar exists iff BOTH instruments printed that minute. Minutes
+      where either feed is silent are dropped (counted in the funnel).
+  1.2 Cash day = NY date with a printed joined 09:30 bar (minute-of-day 570),
+      per project convention. Session bars: minute-of-day [570, 955]
+      (09:30..15:55). Bars after 15:55 are not used by this study.
+  1.3 Session-open anchor = the 09:30 bar opens of both legs. All metrics
+      reset daily at the 09:30 open.
+
+2. STATE MACHINE (INTRADAY SPREAD DIVERGENCE, per NY day)
+  2.1 Cumulative session returns: Ret_500(t) = Close_500(t)/Open_500(09:30)-1;
+      Ret_30(t) likewise.
+  2.2 Raw spread: Spread(t) = Ret_500(t) - Ret_30(t).
+  2.3 Rolling statistics over the trailing 60 PRINTED joined session bars
+      (inclusive of the current bar, min_periods 60; the tape skips silent
+      minutes so window length is bar count, not wall minutes):
+      Mean_60, StdDev_60 (sample, ddof=1).
+  2.4 Z(t) = (Spread(t) - Mean_60)/StdDev_60 where StdDev_60 > 1e-12; bars
+      with StdDev_60 <= 1e-12 or fewer than 60 in-window observations are
+      UNARMED (no Z, cannot signal).
+  2.5 Arming: Z first exists at the 60th printed session bar (~10:29 under a
+      complete tape); the signal window opens strictly after 10:30 regardless.
+
+3. SIGNAL GENERATION (RELATIVE VALUE MEAN REVERSION)
+  3.1 Signal window: joined session bars with minute-of-day in [631, 929]
+      (strictly between 10:30 and 15:30 ET).
+  3.2 SHORT_DIV (US500 outperforming): Z(t) > +2.0 -> short US500 / long
+      USA30. LONG_DIV (USA30 outperforming): Z(t) < -2.0 -> long US500 /
+      short USA30.
+  3.3 Execution cap: the FIRST armed |Z| breach in the window wins; maximum
+      1 pair trade per day; drops never re-arm. Days without a breach
+      produce no trade.
+  3.4 Entry: the opens of the next PRINTED joined bar after the signal bar,
+      both legs simultaneously. If that bar lies beyond minute-of-day 955,
+      the candidate is dropped as no-entry.
+
+4. EXCURSION WALK AND ECONOMICS (GROSS, PRE-COST)
+  4.1 Walk forward from the entry bar until the FIRST of:
+      (a) REVERSION: the first bar t (entry bar evaluable) where the evolving
+      Z(t) crosses to the entry-opposite side of zero - Z(t) <= 0 for
+      SHORT_DIV, Z(t) >= 0 for LONG_DIV; exit at that bar's close;
+      (b) TIME: the 15:55 bar (minute-of-day 955); exit at its close.
+  4.2 Leg returns from entry: r_500(t) = Close_500(t)/EntryOpen_500 - 1;
+      r_30(t) likewise.
+  4.3 Pair PnL (unlevered, $10,000 allocated per leg): pnl(t) =
+      $10,000 * (d500*r_500(t) + d30*r_30(t)) with d = +1 long / -1 short.
+  4.4 Pair MFE = max pnl(t) over walk bars; Pair MAE = -min pnl(t). Computed
+      on per-bar CLOSES: synchronous intrabar extremes of two instruments
+      are not observable from M1 OHLC, and the reversion exit is close-based.
+  4.5 Exit PnL = pnl at the exit bar close, signed.
+  4.6 Cost floor (descriptive only, never netted into gates): 0.51 pt US500
+      and 2.28 pt USA30 CFD spreads -> round-trip pair cost in $ on the
+      $10k-per-leg basis, computed at the median signal-date closes of each
+      leg, reported alongside the gross edge.
+
+5. GATES (frozen verbatim in GATE_PAIRS_INTRADAY.txt)
+  G-P1 total session-valid signals >= 150.
+  G-P2 aggregate mean Pair MFE > mean Pair MAE (strict, $).
+  G-P3 day-block bootstrap (10,000 resamples, seed 20260924) over NY-date
+      blocks of P(pooled mean(MFE - MAE) <= 0) <= 0.20.
+
+6. DELIVERABLES
+  - evaluate/index_pairs_intraday_phase1.py, run with project python.
+  - data/results/index_pairs_intraday/{SPEC,GATE}_PAIRS_INTRADAY.txt (frozen
+    before any code).
+  - data/results/index_pairs_intraday/REPORT_PAIRS_INTRADAY_PHASE1.txt,
+    pairs_intraday_signals.csv, run_meta.json.
+  - PROGRESS.md entry as Hypothesis #39.
+
+7. HONESTY AND ANTI-LEAK RULES
+  - Phase-1 pre-cost screen only; no execution claim; both legs assumed
+    filled at printed next-bar opens with zero slippage.
+  - Causality: every statistic feeding Z uses only completed joined bars at
+    or before t; the 09:30 anchor is known at the open; entries are at
+    printed next-bar opens.
+  - The window/threshold set (60-bar rolling, |Z| 2.0, 10:30/15:30 signal
+    window, 15:55 exit, $10k/leg) is frozen archetype parameters; no search.
+  - Null result is final for this artifact; verdicts quote frozen gates only.

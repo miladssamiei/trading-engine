@@ -1,0 +1,24 @@
+GATE_SP2L_M1.txt - HYPOTHESIS #56 PHASE 1 GATES (frozen 2026-09-24, BEFORE the
+Phase 1 script ran; verbatim extraction from SPEC_SP2L_M1.txt section 7)
+
+Population: all executed trades of the single pre-declared machine pass over
+data/results/xauusd_onboarding/xauusdtick_m1.csv (full tape), one
+configuration: all filters enabled, fixed spread 0.41, session [01:00,05:00)
+ET. Net PnL per trade in price units as defined in SPEC section 6.
+
+G-SP1: Total executed trades >= 30.
+
+G-SP2: Net Sharpe Ratio > 0.
+       Net Sharpe = mean(trade Net PnL) / std(trade Net PnL, ddof=1),
+       event-indexed per trade, not annualized.
+
+G-SP3: Moving-block bootstrap P(mean Net PnL <= 0) <= 0.20.
+       10,000 resamples, block = 5 trades, seed 20261004.
+       Algorithm: n = trade count; per resample draw ceil(n/5) block starts
+       uniformly from {0..n-5}, concatenate the 5-trade blocks, truncate to
+       n, take the mean; P = fraction of the 10,000 resample means <= 0.
+       (If n < 5, P is undefined and G-SP3 is scored FAIL.)
+
+Verdict rule: OVERALL PASS iff G-SP1 AND G-SP2 AND G-SP3 all PASS. Any FAIL
+-> OVERALL FAIL, final for this artifact; no re-runs. A PASS is not a
+validated result under validation_discipline and does not authorize Phase 2.

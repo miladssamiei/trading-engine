@@ -1,0 +1,5 @@
+Pre-code, pre-run correction to H88 SPEC section 2:
+The H87 metadata contains 107 unresolved FX dates, not 111.
+The number 111 in the frozen H88 SPEC is a transcription error.
+This addendum changes no H88 mechanism, gate or code instruction.
+The authoritative unresolved count is len(run_meta.json.unresolved)=107.

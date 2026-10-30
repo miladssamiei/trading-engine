@@ -1,0 +1,6 @@
+G-HY1: Real-tick Model=4 native FTMO-Demo XAUUSD source covers 2025-01-01 through at least 2026-09-01, with zero unexplained tick-history/agent-journal gaps and at least 150 fully closed gated trades in a risk row.
+G-HY2: Strictly positive average EUR net per gated trade after actual Bid/Ask and commission plus additional 0.41-gold-unit spread and 0.25-gold-unit slippage stresses in the same risk row.
+G-HY3: Date-block bootstrap one-sided P(mean stressed EUR net <= 0) at most 0.05 with 10000 draws and seed 20260928 in at least one predeclared risk row.
+G-HY4: Strictly positive stressed EUR net total in complete 2025 and partial 2026 in the same qualifying risk row.
+G-HY5: At least 150 fully observed rolling paid 90-calendar-day starts, with pass rate at least 0.70 and floating-equity breach rate at most 0.10 in the same qualifying risk row.
+G-HY6: Every EA trade opens and closes on the same Europe/Prague date, zero unrelated account actions or unbounded retries, zero unclosed/unknown trades, exact pinned-source adaptation and verified compiler/tester logs.

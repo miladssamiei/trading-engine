@@ -1,0 +1,59 @@
+REPORT: CROSS-ASSET VRP-CONDITIONED ORB - PHASE 1 (HYPOTHESIS #40)
+Generated: 2026-09-23 18:00:24  |  script: evaluate/cross_asset_vrp_orb_phase1.py
+SPEC/GATE: data/results/cross_asset_vrp_orb/{SPEC,GATE}_CROSS_ASSET_VRP.txt (frozen before code)
+
+VERDICT: PASS   (G-XV1=True, G-XV2=True, G-XV3=True)
+
+1. FEASIBILITY AUDIT (declared in SPEC before code)
+   USA100: NO local tape exists anywhere under data/results/ -> leg INFEASIBLE, VXN not fetched.
+   Gold: verified onboarding M1 tape (2020-01..2026-09). GVZ fetched from Yahoo chart API (EOD,
+   2020-01-02..2026-09-01, n=1675), archived gvz_yahoo_raw.json, sha256 0743eef14f854559...
+   US500: #31 Arm A trades reused verbatim (171 rows, net includes 0.51 pt spread).
+
+2. GOLD FEATURE PIPELINE
+   D1 dates from M1: 2074; GVZ-joined VRP dates: 1659; first arm-eligible date: 2021-01-26
+   RV = sqrt(252)*std(ln-ret, 21 obs, ddof=1); VRP = GVZ - RV*100; shifted s->s+1 on the joined grid;
+   trailing_P50 over 252 obs inclusive of d (causal per #31 convention).
+
+3. GOLD ORB FUNNEL (OR [08:20,08:35) ET, first close-breakout/day, SL opposite OR side, 16:00 exit)
+   days in tape: 2074 | with OR bars: 1697 | no trigger: 4 | degenerate: 0
+   trades: all 1693 | arm-eligible 1379 = A 659 + D 720 (+FLAT 0) | warmup 252 | no-feature 62
+   exit mix: STOP=1016, TIME=672, STOP_GAP=5
+
+4. PER-INSTRUMENT METRICS (net in $/unit; Sharpe = per-trade mean/std(net_return) x sqrt(252), #31 convention)
+   GOLD all-history (descr):        n=1693  win=31.8%  total=-811.5  mean=-0.479  sharpe=-0.431
+   GOLD baseline (arm-eligible):    n=1379  win=32.8%  total=-644.8  mean=-0.468  sharpe=-0.352
+   GOLD Arm A (VRP > P50):          n=659  win=33.8%  total=-272.9  mean=-0.414  sharpe=-0.160
+   GOLD Arm D (control, VRP < P50): n=720  win=31.9%  total=-371.9  mean=-0.516  sharpe=-0.519
+   edge concentration (Arm A mean vs baseline mean): -11.4%
+   US500 #31 Arm A (reused):        n=171  win=51.5%  total=453.4  mean=2.651  sharpe=1.590
+
+5. COMBINED PORTFOLIO (daily union calendar, net-return-on-notional streams)
+   members: US500_A31, XAUUSD_A  (gold included: passed G-XV1+G-XV2)
+   span 2021-02-03 .. 2026-08-26 (5.56y), trades 830, active days 744
+   trades/year 149.3 (2.87/week)  vs G-XV3 floor 120/yr
+   combined daily Net Sharpe: 0.214
+   daily-return correlation matrix:
+     US500_A31: +1.000  +0.067
+     XAUUSD_A: +0.067  +1.000
+
+6. GATES (frozen verbatim in GATE file)
+   G-XV1 >= 1 new-instrument Arm A with >= 100 trades post-warmup: gold A n=659 (USA100 infeasible) -> True
+   G-XV2 qualifying Arm A Net Sharpe > baseline: -0.160 vs -0.352 -> True
+   G-XV3 combined portfolio >= 120 trades/yr: 149.3 -> True
+   OVERALL PHASE-1: PASS
+
+7. NOTES AND CAVEATS
+   - G-XV2 IS A NEGATIVE-VS-NEGATIVE PASS: gold Arm A Sharpe -0.160 improves on the -0.352
+     baseline but REMAINS negative-expectancy (mean -0.414 $/trade, win 33.8%, total -272.9);
+     the conditioning shrinks losses, it does not create an edge (edge concentration is
+     meaningless on two negative means). G-XV3's 149.3 tr/yr is carried by 659 gold trades
+     with negative total PnL; the combined 0.214 daily Sharpe is attributable entirely to
+     US500 #31 Arm A. NO ECONOMIC CASE FOR TRADING GOLD ORB EXISTS IN THIS ARTIFACT; the
+     portfolio pass is a mechanical gate outcome, not a validated result.
+   - Arm A conditioning is in-sample selection (#31 lineage); all portfolio metrics inherit that optimism;
+     #31's overall FAIL (G-VRP3 win-rate gate) stands and is not re-litigated here.
+   - Yahoo-sourced GVZ EOD is a third-party redistribution, not the official Cboe release (pinned, archived).
+   - Gold fills: signal-bar-close entry, stop at SL with gap-through filled at the touching bar's open;
+     0.41 round-trip cost floor; no swap. US500 stream is the #31 artifact with its own execution model.
+   - Null result is final for this artifact.

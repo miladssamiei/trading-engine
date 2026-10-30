@@ -1,0 +1,192 @@
+SPEC_DAILY_FEATURE_ENGINEERING
+Study dir: data/results/daily_feature_engineering/
+Pre-declared: 2026-09-08, BEFORE any script or data download exists.
+Lineage: daily-horizon path of data/results/project_status/LITERATURE_EDGE_REVIEW.txt
+(Option A). Follows the 2026-09-07 macro-qualification termination (G-Q3 power
+FAIL, single-instrument intraday exhaustion accepted; REPORT_MACRO_QUALIFICATION.txt).
+This SPEC governs DATA PREPARATION ONLY. It trains no model, generates no
+signals, defines no trade rule, and touches no EA/tester. A predictive-model
+SPEC may only be written after this SPEC's gates are PASSED and closed.
+
+SECTION 0. SCOPE AND NON-GOALS
+
+0.1 Objective: construct a causal, stationary, orthogonal daily feature dataset
+(daily_features_stationary.csv) for horizons h = 1..5 days, suitable for later
+ingestion by a regularized linear model or tree ensemble under a SEPARATE SPEC.
+
+0.2 Non-goals: no return prediction, no feature-importance ranking, no model
+selection, no PnL, no walk-forward evaluation. Null outcome (feature count < 3
+after gates) is a COMPLETE deliverable.
+
+SECTION 1. DATA SOURCES, WINDOWS, CALENDAR (frozen)
+
+1.1 Instruments and price inputs:
+  - US500 daily close: from the verified M5 export
+    data/results/orb_2021_present/us500tick_m5.csv. Cash close = close of the
+    15:55 NY bar (existing project convention); date universe = the 1,369-day
+    cash-day set (570-wall bar exists). Span 2021-01-04..2026-04-30.
+  - XAUUSD daily close: derived from the read-only onboarded Dukascopy tick
+    tape (C:\Users\Milad\download\xauusd-tick-*.csv + patches\*). Daily close =
+    last mid = (ask+bid)/2 of the LAST tick within the NY calendar date
+    (00:00..24:00 America/New_York). Span used: 2020-01..2026-04 (warmup).
+  - USA30 daily close: identical construction from the onboarded usa30idxusd
+    tape. Span used: 2020-01..2026-04 (warmup).
+  - FRED daily series, downloaded ONCE as fredgraph.csv (no API key), archived
+    under raw/ with URL and download date: VIXCLS (VIX), T10Y2Y (term slope),
+    DFII10 (10Y TIPS real yield). Download range 2018-12-01..2026-05-31 to
+    allow 252-row warmup. FRED "." sentinels -> NaN.
+  - Current-vintage FRED is accepted and DOCUMENTED as a limitation (vintage
+    data not available keyless); this choice is frozen and never re-litigated.
+  - MT5 CalendarValueHistory remains BARRED as a source.
+
+1.2 Calendar and joins: dataset date universe = US500 cash days only. XAUUSD,
+USA30, and FRED series are joined by NY date. FRED values missing on a cash
+day (holiday) are forward-filled at most 5 consecutive rows; beyond that, NaN.
+
+1.3 Availability convention (THE causality anchor, audited by G-F3): a feature
+dated t may use ONLY information published by the daily close of t.
+  - Market-derived same-day (t): US500 close_t, USA30 close_t, XAUUSD close_t,
+    VIX_t.
+  - FRED Treasury series (T10Y2Y, DFII10): the value published for calendar
+    day s is first usable in features dated t = s+1 (shift rule). All derived
+    transforms (Delta-21, cointegration residual input) operate on the SHIFTED
+    series, never the raw same-day series.
+  - All lookbacks (21, 252) are TRADING-ROW counts on the dataset date
+    universe, not calendar days.
+
+1.4 Windows:
+  - Warmup: 2019-01..2021-12 (FRED), 2020-01..2021-12 (XAUUSD/USA30),
+    2021-01..2021-12 (US500). Warmup rows NEVER appear in the dataset.
+  - PRIMARY dataset window: 2022-01-04..2026-04-30 (first date all candidates
+    can be non-NaN given the frozen FFD window and 252-row OLS warmup).
+  - d*-search (training) window: 2021-01-04..2023-12-29, each series' non-NaN
+    dates within it. 2024-01-01..2026-04-30 is the ULTIMATE HOLDOUT: no
+    parameter of any transform (d*, thresholds, windows) may be chosen using
+    it. Holdout rows appear only under frozen application and in the final
+    pre-declared acceptance gates G-F1..G-F3.
+
+SECTION 2. FIXED-WIDTH FRACTIONAL DIFFERENCING (FFD)
+
+2.1 Weight recursion: w_0 = 1; for k = 1..l:
+       w_k = -w_{k-1} * (d - k + 1) / k.
+   Transformation: FFD_l(x)_t = sum_{k=0}^{l} w_k * x_{t-k}.
+   Normalization: none (weights already sum to 0 for 0<d<1; no rescaling).
+
+2.2 Truncation window l = 252 frozen for ALL FFD series (satisfies the
+   l >= 40 requirement; removes expanding-window boundary effects). The first
+   l rows of each FFD series are NaN and never imputed.
+
+2.3 d-grid: d in {0.05, 0.10, ..., 0.95}, step 0.05 (19 points).
+
+2.4 d* selection per series, using ONLY the 2021-01-04..2023-12-29 search
+   window: run the ADF test (constant, no trend; lag order by AIC, statsmodels
+   adfuller defaults) on FFD_d of the series. A d PASSES iff the ADF statistic
+   < -2.86 (95% confidence). d* = the SMALLEST passing d on the grid (smallest
+   d maximizes retained memory, i.e. Pearson correlation with the original
+   series; that correlation is computed and recorded at d* but is diagnostic,
+   not a selection criterion beyond minimality). If NO d passes, the feature is
+   EXCLUDED from the candidate set and the exclusion is recorded in
+   fracdiff_optimal_d.json; no substitution is permitted.
+   Non-monotonic ADF behavior across the grid is handled by the same frozen
+   rule: smallest passing d, no exceptions.
+
+2.5 Freeze: the selected d* per series is written to fracdiff_optimal_d.json
+   (with ADF statistic, p-value, and Pearson correlation at every grid point)
+   and applied unchanged to the full 2022-01-04..2026-04-30 window.
+
+SECTION 3. CANDIDATE FEATURE LIST (frozen; NO additions after this point)
+
+F1 ffd_log_us500   = FFD_{d*}( log US500 close )                         [2.4]
+F2 ffd_log_xauusd  = FFD_{d*}( log XAUUSD close )                        [2.4]
+F3 ffd_log_spdj    = FFD_{d*}( log (US500 close / USA30 close) )         [2.4]
+F4 vrp             = (VIX_t / 100)^2  -  RV21_prior,
+                    RV21_prior = 252 * sum_{i=1..21} r^2_{t-i}, r = log
+                    US500 close-to-close returns on strictly PRIOR cash
+                    days. Both terms are annualized variances.
+F5 tslope_d21      = shifted T10Y2Y minus its value 21 dataset rows earlier
+                    (Delta-21 on the availability-shifted series, 1.3).
+                    The 252-row rolling z-score variant is declared
+                    NOT-implemented and may NOT be swapped in post hoc.
+F6 dfii10_d21      = Delta-21 on the availability-shifted DFII10 series.
+F7 ci_resid        = residual at t of a rolling 252-row OLS of
+                    log(XAUUSD_s) on shifted DFII10_s, window ending at t
+                    (refit daily, fully causal): ci_resid_t =
+                    log(XAUUSD_t) - (a_t + b_t * DFII10shift_t).
+
+No interaction terms, no returns/momentum add-ons, no volatility add-ons
+beyond F4. Feature list, formulas, windows, and transforms are frozen.
+
+SECTION 4. GATES (verbatim-extracted into GATE_DAILY_FEATURE_ENGINEERING.txt)
+
+G-F1 (STRICT STATIONARITY): every engineered feature in the final candidate
+set must pass the ADF test (constant, no trend, AIC lag; p-value < 0.05,
+equivalent to statistic < -2.86) over its non-NaN dates in the primary window
+2022-01-04..2026-04-30 (holdout included: testing is acceptance, not fitting).
+A feature that fails is DROPPED ENTIRELY from the dataset. Dropped features
+and their statistics are recorded in REPORT_FEATURE_ENGINEERING.txt.
+
+G-F2 (ORTHOGONALITY BUDGET): compute the Spearman rank correlation matrix over
+the rows where all surviving features are non-NaN. NO pairwise |rho| may
+exceed 0.70. For each violating pair, the feature with the LOWER variance
+after min-max normalization to [0,1] over the primary window is automatically
+dropped; ties are broken by dropping the later feature in the Section 3 order
+(F7 before F6 ... F1). The matrix is recomputed after each drop until no
+violation remains. The final matrix is written to correlation_matrix.csv. No
+feature may be added, transformed, or re-parameterized to resolve a violation.
+
+G-F3 (CAUSALITY AUDIT): a seeded RNG (seed = 20260908, numpy default_rng)
+samples 5 dates from the final dataset rows. For each sampled date the script
+writes to feature_sync_audit.txt, for EVERY final feature: the feature value,
+each raw input value used, the input's source publication date, and its
+availability date under the 1.3 shift rules. PASS iff for all 5 dates, every
+input of every feature was available by the close of the feature date. Any
+violation is a G-F3 HARD FAIL; there is no partial credit.
+
+SECTION 5. HONESTY AND STOP RULES
+
+5.1 If fewer than 3 features survive G-F1 and G-F2, THIS SPEC FAILS. The
+deliverable is complete: the project accepts that the selected features do not
+form a viable orthogonal basis; no rescue, no relaxation of thresholds.
+
+5.2 No new features may be added after the correlation matrix is viewed. The
+Section 3 list is frozen. FFD-excluded series are not replaced.
+
+5.3 No post-hoc parameter changes: d*, l, the ADF critical value, the 0.70
+budget, the variance tie-break, windows, and shift rules are frozen here.
+A gate failure is final for this artifact; corrections require a NEW study
+under a NEW name (project convention).
+
+5.4 The holdout 2024-01-01..2026-04-30 is never used to choose anything. If
+any leakage into it is discovered later, the study is voided and re-run under
+a new name.
+
+5.5 NaN policy: rows where any FINAL feature is NaN are excluded from
+daily_features_stationary.csv; the count is reported. No interpolation of
+features. FRED ffill is limited to the 1.2 rule (<= 5 consecutive rows).
+
+SECTION 6. ARTIFACTS (all under data/results/daily_feature_engineering/)
+
+  SPEC_DAILY_FEATURE_ENGINEERING.txt   (this file; never edited after run)
+  GATE_DAILY_FEATURE_ENGINEERING.txt   (verbatim gate extraction, pre-script)
+  raw/fredgraph_*.csv                  (archived FRED downloads + provenance
+                                        line: URL + download timestamp)
+  fracdiff_optimal_d.json              (per-series: full d-grid ADF stats,
+                                        Pearson correlations, chosen d*)
+  daily_features_stationary.csv        (date index + final surviving features)
+  correlation_matrix.csv               (final Spearman matrix, G-F2 evidence)
+  feature_sync_audit.txt               (G-F3 transcripts)
+  REPORT_FEATURE_ENGINEERING.txt       (per-gate Pass/Fail, dropped-feature
+                                        log, final feature count, row counts)
+
+SECTION 7. EXECUTION STAGES AND PROGRESS HOOKS
+
+  Stage 1 (done at pre-declaration): this SPEC + GATE file.
+  Stage 2: data ingestion (FRED download/archive; D1 close derivation) and the
+           fracdiff d-search on the training window only ->
+           hook "daily feature engineering - data ingestion and fracdiff search".
+  Stage 3: frozen application, G-F1..G-F3, artifacts, REPORT ->
+           hook "daily feature engineering - orthogonality test and verdict".
+  PROGRESS.md hook pre-declared now:
+           "daily feature engineering - SPEC/GATE pre-declared".
+
+END OF SPEC. FROZEN 2026-09-08.

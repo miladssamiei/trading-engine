@@ -1,0 +1,67 @@
+REPORT: DTE METHOD (DELIVERY + EXECUTION) - EURUSD PHASE 1 (HYPOTHESIS #34)
+Generated: 2026-09-23 00:46:53  |  script: evaluate/dte_method_eurusd_phase1.py
+SPEC/GATE: data/results/dte_method_eurusd/{SPEC,GATE}_DTE_EURUSD.txt (frozen before code)
+Mechanism: M15 FVG delivery context + M1 inverted-FVG (V-spike) execution on EURUSD;
+discretionary liquidity-target trendlines / oscillator confluence deliberately omitted.
+Phase-1 pre-cost excursion screen ONLY (no trade rule, no EA, no tester, no Phase 2 implied).
+
+VERDICT: FAIL   (G-DTE1=True, G-DTE2=False, G-DTE3=False)
+
+1. DATA AND INTEGRITY
+  Tape: data\results\eurusd_onboarding\eurusdtick_m1.csv (2490896 M1 bars, 2020-01-01 17:01:00-05:00 .. 2026-09-18 16:59:00-04:00 NY; Bid, 5-decimal)
+  Displacement window [08:00,16:00) ET M1 bars: 832562 | walk cutoff: open wall < 17:00 ET (wall < 1020)
+  M15 buckets: 166982 (sparse <15 M1 bars: 7012, 4.20%; mean M1 bars/bucket: 14.92)
+  M15 built from the M1 tape per SPEC tasking (project M5 convention overridden; integrity above).
+  All excursion statistics in pips (1 pip = 0.00010).
+
+2. FUNNEL
+  full-tape M1 FVG formations: bull=343067 bear=338790
+  inverted within 6 printed bars (raw, before session filter): short=142708 long=141059
+  displacement bar open wall in [08:00,16:00) ET: short=46248 long=45878 -> session-valid setups=92126
+  drops: entry-missing-or-late=2 date-mixed=0 degenerate-risk=8
+  pre-context session-valid: 92116
+  context-joined (active same-direction M15 FVG at displacement close): short=8041 long=8121
+  FINAL excursion-qualified signals: 16162 | by year: 2020:1902, 2021:2411, 2022:2448, 2023:2612, 2024:2579, 2025:2248, 2026:1962
+
+3. EXCURSION EXPECTANCY (pips, pre-cost; R-normalized)
+  AGGREGATE: n=16162 MFE=14.37 MAE=14.41 diff=-0.04 pips | medians MFE=8.60 MAE=8.90 diff=0.00 | MFE>MAE share=49.9%
+    R-multiples: MFE/R=4.501 MAE/R=4.462 (medians 3.000 / 2.962)
+    0.5R: excess MFE=12.646 pips vs excess MAE=12.675 pips
+    1.0R: excess MFE=11.107 pips vs excess MAE=11.122 pips
+    1.5R: excess MFE=9.763 pips vs excess MAE=9.752 pips
+  LONG: n=8121 MFE=14.61 MAE=14.68 diff=-0.07 pips | medians MFE=8.90 MAE=9.30 diff=-0.30 | MFE>MAE share=49.4%
+    R-multiples: MFE/R=4.471 MAE/R=4.452 (medians 2.941 / 3.000)
+    0.5R: excess MFE=12.840 pips vs excess MAE=12.885 pips
+    1.0R: excess MFE=11.269 pips vs excess MAE=11.274 pips
+    1.5R: excess MFE=9.901 pips vs excess MAE=9.851 pips
+  SHORT: n=8041 MFE=14.14 MAE=14.15 diff=-0.01 pips | medians MFE=8.40 MAE=8.40 diff=0.30 | MFE>MAE share=50.5%
+    R-multiples: MFE/R=4.532 MAE/R=4.471 (medians 3.038 / 2.933)
+    0.5R: excess MFE=12.450 pips vs excess MAE=12.462 pips
+    1.0R: excess MFE=10.943 pips vs excess MAE=10.969 pips
+    1.5R: excess MFE=9.623 pips vs excess MAE=9.652 pips
+
+4. COST-FLOOR CONTEXT (descriptive only; Phase 1 stays gross)
+  Verified EURUSD London/NY overlap median spread: 0.3 pips round trip (eurusd_onboarding 2026-09-22).
+  Aggregate vs floor: mean MFE=14.37, mean MAE=14.41, mean (MFE-MAE)=-0.04 pips;
+  medians: MFE=8.60, MAE=8.90, (MFE-MAE)=0.00 pips. The mean/median diff must clear the
+  0.3-pip round-trip floor for any residual edge to survive costs; no net gate exists at Phase 1.
+
+5. GATES (frozen verbatim in GATE file)
+  G-DTE1 total session-valid signals >= 150: 16162 -> True
+  G-DTE2 excess-excursion dominance at ALL of 0.5R/1.0R/1.5R (strict, pips):
+    0.5R: mean(max(MFE-0.5R,0))=12.646 vs mean(max(MAE-0.5R,0))=12.675 -> False
+    1.0R: mean(max(MFE-1.0R,0))=11.107 vs mean(max(MAE-1.0R,0))=11.122 -> False
+    1.5R: mean(max(MFE-1.5R,0))=9.763 vs mean(max(MAE-1.5R,0))=9.752 -> True
+    -> G-DTE2=False (descriptive only, NOT part of the gate: plain mean MFE 14.37 vs MAE 14.41 -> False)
+  G-DTE3 day-block bootstrap P(pooled mean(MFE-MAE)<=0) <= 0.20: 0.5474 (n_day_blocks=1693) -> False
+  OVERALL PHASE-1: FAIL
+
+6. NOTES AND CAVEATS
+  - Excursions are pre-cost (gross); the 0.3-pip spread floor is descriptive context only.
+  - No discretionary liquidity-target trendlines or oscillator confluence modeled
+    (omission pre-declared, conservative for the method).
+  - M15 context is causal: state as of the last bucket closing at or before the displacement
+    bar close; M1/M15 sequencing is printed-bar based; gaps across weekend closures allowed.
+  - Null result is final for this artifact; a PASS would only justify a separate Phase-2 SPEC.
+  - EURUSD is a new domain per tasking; this is NOT a rescue attempt for the #32 dte_method
+    or fvg_continuation nulls on US500-tick (frozen verdicts stand).

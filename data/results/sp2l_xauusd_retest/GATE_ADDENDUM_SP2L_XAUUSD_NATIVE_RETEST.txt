@@ -1,0 +1,32 @@
+GATE_ADDENDUM_SP2L_XAUUSD_NATIVE_RETEST.txt
+Verbatim extraction of every gate from SPEC_ADDENDUM_SP2L_XAUUSD_NATIVE_RETEST.txt,
+written 2026-09-05 BEFORE any re-test code ran. Nothing below may change after
+numbers are seen.
+
+PHASE 1 GATES (per configuration, tape 2020-01..2026-09, thresholds
+PGAP=$1.00 / MAX_SL=$10.00 fixed dollar):
+  G1: count(MFE >= t) > count(MAE >= t) at ALL of t in {0.10%, 0.15%, 0.20%}
+      under BOTH E-XTM and E-CLS.
+  G2: >= 150 first-entry signals over the full range.
+  A configuration passes only if G1 AND G2 hold.
+  If NO configuration passes: write the NULL result and STOP - no Step 3,
+  no EA, no MT5 work.
+  PGAP sensitivity {$0.50, $2.00} is INFORMATIONAL ONLY and cannot admit
+  any configuration to Step 3.
+
+STEP 3 WALK-FORWARD GATES (only for Phase-1 passers; TP_R grid
+{0.5, 0.75, 1.0, 1.5, 2.0}; burn-in = pre-2022-01; folds 2022H1..2026H1,
+final fold ends 2026-09; selection by trailing expectancy >= 20 trades
+else TP_R=1.0; occupancy re-simulation; gross-of-cost):
+  G1: expectancy > 0 AND Sharpe > 0 (zero-filled daily PnL, sqrt(252)).
+  G2: >= 150 walk-forward trades (legs count).
+  G3: positive in >= 4 of 5 calendar years (2022..2026) AND no single
+      year > 60% of total profit.
+  CONFIRMED requires the WF gates under BOTH E-XTM and E-CLS.
+  E-NEXT is a tightening-only step-4 gate (can disqualify from EA
+  construction, never admit).
+
+MT5 PROGRESSION BAR (task-owner 2026-09-05):
+  MT5 Custom-base tick import + Model=4 probe + D1/D2 reconciliation ONLY
+  if Phase 1 passes AND at least one configuration is CONFIRMED at
+  Step 3. Model=0 is not used anywhere in this task.

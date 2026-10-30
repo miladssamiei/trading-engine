@@ -1,0 +1,97 @@
+HYPOTHESIS 64: DELAYED GOLD RESPONSE TO U.S. GROWTH SURPRISES
+Declared 2026-09-25 before this study's code or Phase-1 run.
+
+1. MECHANISM AND LIMIT
+A positive surprise in U.S. employment or consumption can raise
+expected rates and the dollar, pressuring gold; a negative surprise
+can do the reverse. Prior research reports a negative gold-futures
+response to positive nonfarm-payroll and advance-retail-sales
+surprises in the first five minutes. This study asks whether the
+same signed information has an executable residual return AFTER
+one minute, not whether the untradeable initial jump exists.
+JOLTS and ADP employment are predeclared labor-demand analogues to
+reach adequate event count; their predictive strength is unproven.
+The failed Hypothesis 63 price-reaction-follow result stays failed:
+this signal uses an external actual-minus-forecast, not price.
+
+2. HISTORICAL EVENT SOURCE AND HONESTY LIMIT
+Use only data/results/xauusd_macro_reaction_follow_v1/
+fred-us-macro-events-source.json, sha256
+b9d8a2256ecc61fda3f68efbc243b407db5b19b0f2288c44f827d03854861201.
+It is the public FRED US Macro Core Data release archive, enriched
+after the fact with Investing.com historical consensus records.
+The event source has release-date fields but NO verifiable captured-
+before-release timestamp for each forecast. Therefore even a price
+economics PASS is PROVISIONAL and may not be called a validated or
+deployable result. A later source-vintage qualification would need
+archived pre-release forecasts and actual receipt/publication times.
+Never use FRED's currently revised observation value as actual;
+use only metadata.consensus.actual and .forecast in the archived
+event record. Both must be finite numeric values. Do not use the
+stored surprise value or later return data to choose events.
+
+3. FROZEN EVENT UNIVERSE
+Four U.S. release families: PAYEMS Employment Situation at 08:30
+America/New_York; RSAFS advance retail sales at 08:30; ADPMNUSNERSA
+ADP employment at 08:15; JTSJOL job openings at 10:00. Accept an
+event only when its seriesId matches, releaseDateApproximate is false,
+createdAt UTC converts to that exact NY wall release minute, and
+actual and forecast are finite and unequal. Actual-minus-forecast
+positive means SELL XAUUSD; negative means BUY. No surprise-size
+threshold or model fitting. At most one trade per NY date: choose
+the earliest eligible event by release instant. If two eligible
+families share that earliest instant, skip that date entirely to
+avoid attributing a joint release to one sign. Later same-day
+events are not trades. Calendar dates are provisional third-party
+roster entries; an economics PASS would require official schedule
+reconciliation before execution confirmation.
+
+4. TICK EXECUTION AND COST
+Use the verified raw XAUUSD timestamp, askPrice, bidPrice CSVs
+listed in data/results/xauusd_onboarding/onboarding_stats.json.
+For each event, enter at the first valid quote timestamp from
+release+60 seconds through release+65 seconds inclusive. BUY at
+Ask or SELL at Bid. Exit at the first valid quote from release+
+15 minutes through release+15 minutes+10 seconds inclusive: long
+exits Bid, short exits Ask. Skip and log missing or invalid quotes.
+No stop, target, order retry, size filter, or overnight holding.
+Gross midpoint-reference move = direction*(exit mid - entry mid).
+Executable quote net = exitBid-entryAsk for long; entryBid-exitAsk
+for short. Extra-cost stress net = quote net - 0.41 gold unit on
+the SAME trades, as a buffer for additional slippage/latency.
+Actual Bid/Ask spreads are already charged by executable quote net.
+One price unit equals $1/oz; no compounding or swap. Quote fills
+at the first recorded tick remain optimistic about order latency,
+market impact, and rejection.
+
+5. PARTITION AND UNCERTAINTY
+2020-2021 NY event dates are descriptive calibration. The gated
+historical block is 2022-01-01 through the event archive end in
+April 2026, with 2026 partial. Before quote-validity exclusions,
+the frozen filter yields 184 distinct 2022+ dates, including two
+simultaneous earliest-release ambiguities to skip. Report roster,
+all skips, entry/exit spread, gross/quote/stress economics, annual
+and family breakdowns, win rate, max drawdown, and hold duration.
+Resample gated entry dates with replacement 10,000 times, seed
+20260930, retaining all trades from each date; report one-sided
+P(mean executable quote net <= 0) and descriptive 95% quantiles.
+
+6. GATES, FROZEN BEFORE PHASE 1
+G-MSD1: At least 150 executed trades on distinct 2022-2026 NY event dates.
+G-MSD2: Strictly positive mean extra-cost stress net per trade in the gated block.
+G-MSD3: Date-bootstrap P(mean executable quote net <= 0) at most 0.05, 10,000 resamples, seed 20260930.
+G-MSD4: Strictly positive executable quote-net total in each complete gated year 2022, 2023, 2024, and 2025.
+All four are required for an economic-proxy PASS. A FAIL is final
+for this artifact. No post-hoc family/side/year/threshold/window
+selection is permitted. A PASS remains PROVISIONAL because the
+forecast vintage and actual receipt timestamps are not proven.
+
+7. STOP AND ARTIFACTS
+On economic-proxy FAIL, stop with no MT5 tester. On PASS, first
+obtain independently archived before-release forecasts, first
+actual/publication timestamps, and official release-date checks;
+then freeze a separate source-qualification SPEC/GATE. Only after
+that can a separately frozen Model=4 execution test be considered.
+Save SPEC, verbatim GATE, exact source hash, event roster, quote
+trades, metadata, and REPORT regardless of result. Never alter
+prior SPEC/GATE/REPORT documents.

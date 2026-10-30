@@ -1,0 +1,25 @@
+FTMO GOLD EA V1.02 VS PYTHON - CORRECTED 2023 WARMUP
+Verdict: FAIL
+G1 frozen tester and 2023-2026 H1 source: PASS; 22074 H1 rows, 2023-01-03 01:00:00+00:00 through 2026-09-24 23:00:00+00:00
+G2 all logged entries and minimum-lot decisions match Python: PASS
+G3 initial and trailing SL within 0.01 Gold unit: FAIL
+G4 chronological tester position accounting: PASS
+G5 same-feed tick fill/intrabar exit parity: UNTESTED
+
+Engine A: Python raw 2024-26 signals 650; MT5 opens 84 (34 minimum-lot); override attempts 34; cap blocks 0; ratchets 1125; stops 83; market closes 1; open at test end 0; panic 0; post-fill risk closures 0; final tester balance EUR 10321.44; mismatched events 0.
+  Signal coverage: 84 logged actions; 566 signals while occupied; 0 flat signals without logged action.
+Engine B: Python raw 2024-26 signals 1162; MT5 opens 244 (43 minimum-lot); override attempts 43; cap blocks 0; ratchets 2064; stops 243; market closes 0; open at test end 1; panic 0; post-fill risk closures 0; final tester balance EUR 11909.41; mismatched events 2.
+  Signal coverage: 244 logged actions; 918 signals while occupied; 0 flat signals without logged action.
+
+All divergent events: 2
+  B 2025-04-07 04:00:00 RATCHET: MT5 SL 3034.29, Python SL 3034.31, difference 0.01999999999998181; CS	0	22:24:50.905	MacroTrendEnsemble_FTMO (XAUUSD,H1)	2025.04.07 04:00:00   MTE: ratcheted ticket=248 SL 3047.60000000 -> 3034.29000000
+  B 2025-04-11 13:00:00 RATCHET: MT5 SL 3159.15, Python SL 3159.13, difference 0.01999999999998181; CS	0	22:24:52.490	MacroTrendEnsemble_FTMO (XAUUSD,H1)	2025.04.11 13:00:00   MTE: ratcheted ticket=252 SL 3154.40000000 -> 3159.15000000
+
+M1 availability probes (small date windows; completeness across the tape remains unproven):
+  early_2024: {'rows': 1, 'first_utc': '2026-06-18T04:40:00+00:00', 'last_utc': '2026-06-18T04:40:00+00:00', 'in_requested_window': False}
+  early_2025: {'rows': 1, 'first_utc': '2026-06-18T04:40:00+00:00', 'last_utc': '2026-06-18T04:40:00+00:00', 'in_requested_window': False}
+  late_2026: {'rows': 1365, 'first_utc': '2026-09-02T01:05:00+00:00', 'last_utc': '2026-09-02T23:49:00+00:00', 'in_requested_window': True}
+
+The tester reports many discarded real ticks caused by M1 price mismatch. A matched signal/stop is not evidence of clean fill or exit execution.
+The minimum-lot policy can take more than 0.5% initial-stop risk, with a configured 3.5% ceiling. Tester balances are observed, not independently replicated.
+The original V1.02 audit and its failed early-2024 comparison are preserved unchanged.

@@ -1,0 +1,143 @@
+HYPOTHESIS #52 SPEC: TREND-ALIGNED BOLLINGER BAND PULLBACK (4h anchor, 15m limit execution)
+Study ID: cross_asset_rsi_pullback
+Date frozen: 2026-09-23, before any evaluation code was written or run.
+Status: frozen. Corrections or re-measurements require a NEW study name.
+Lineage: fifth cross-asset study. #47-#50 were breakout/trailing paradigms;
+#51 delivered a bounded PASS on XAUUSD KC breakout. This study tests a
+pullback paradigm: in a strong 4h trend (RSI extreme + Supertrend + very
+strong ADX), BUY the 15m lower-Band dip (SELL the upper-Band rally) with a
+limit order, harvesting to the opposite band under a wide 6xATR stop.
+NOTE: the closed "Bollinger MR" family was an unconditional 15m mean
+reversion; this is a 4h-trend-conditioned limit-entry variant with a
+different exit paradigm - a new pre-declared mechanism, not a re-run.
+Parameterization (RSI 70/30, ST(10,3.0), ADX 40/20, BB(20,2.0), 6xATR stop)
+is owner-supplied and frozen as given; no parameter search, one run per
+instrument.
+
+1. DATA
+1.1 Tapes (verified M1, epoch-UTC time, columns time,open,high,low,close,
+    tick_volume; sorted ascending defensively before aggregation):
+    - US500 : data/results/vwap_2021_2026/us500tick_m1.csv  (points; cost floor 0.51)
+    - EURUSD: data/results/eurusd_onboarding/eurusdtick_m1.csv (pips, 1 pip = 0.0001; cost floor 0.3)
+    - XAUUSD: data/results/xauusd_onboarding/xauusdtick_m1.csv (price units; cost floor 0.41)
+1.2 Timezone America/New_York (EST/EDT) for all wall-time logic.
+1.3 Cost floors are round-trip, subtracted once per trade from gross.
+
+2. MULTI-TIMEFRAME AGGREGATION
+2.1 15m bars: M1 epochs floored to 900s slots; open=first, high=max, low=min,
+    close=last, volume=sum per slot. NY wall 15m boundaries align exactly
+    with the epoch-900 grid (NY UTC offset is always whole hours).
+2.2 Continuity: the 15m series is reindexed to the FULL continuous 900s grid
+    from first to last slot; missing bars are forward-filled with OHLC = prior
+    close, volume = 0 (synthetic flat bars). This fills no-tick minutes,
+    maintenance breaks, holidays and weekends alike.
+2.3 4h anchor bars: built FROM the continuous 15m grid by NY WALL-clock
+    bucket [00:00-04:00), [04:00-08:00), ... DST-transition buckets span 3 or
+    5 real hours; buckets are contiguous. The two series are strictly aligned.
+2.4 For a 15m bar t, the 4h input is the most recently completed 4h bar
+    relative to the open of t (the wall bucket strictly before the bucket
+    containing t); its indicators include that anchor bar's own close.
+
+3. STATE MACHINE (causal indicators)
+3.1 4h anchor indicators (on the mapped completed bar):
+    - RSI(14) Wilder: RMA-smoothed gains/losses seeded with 14-term means;
+      RS=ag/al; RSI=100-100/(1+RS); al=0 -> 100 if ag>0 else undefined.
+    - Supertrend(10, 3.0): median m=(H+L)/2; Wilder ATR(10); basic bands
+      UB=m+3*ATR10, LB=m-3*ATR10; final bands
+      fUB(i)=UB(i) if (UB(i)<fUB(i-1) or C(i-1)>fUB(i-1)) else fUB(i-1);
+      fLB(i)=LB(i) if (LB(i)>fLB(i-1) or C(i-1)<fLB(i-1)) else fLB(i-1);
+      direction seeded +1 at the first bar with valid ATR10, then
+      dir(i)=-1 if (dir(i-1)=+1 and C(i)<fLB(i)); dir(i)=+1 if (dir(i-1)=-1
+      and C(i)>fUB(i)); otherwise dir(i)=dir(i-1). Valid from the seed bar.
+    - ADX(14) Wilder double smoothing: +DM/-DM tie->0; TR/+DM/-DM
+      RMA-smoothed; +DI/-DI; DX; ADX(27)=mean(DX 14..27), RMA after.
+3.2 15m execution indicators, evaluated strictly on bar t-1:
+    - Bollinger Bands: SMA(20) of Close +/- 2.0*population std (ddof=0).
+    - ADX(14) as in 3.1.
+    - ATR(14) Wilder (stop sizing).
+3.3 Armed: bar t is armed iff BB_U/L(t-1), ADX15(t-1), ATR15(t-1) and the
+    mapped 4h RSI, Supertrend direction, ADX4 are all non-NaN.
+
+4. SETUP, LIMIT ORDER AND FILL
+4.1 At the open of each 15m bar t while flat:
+    - Long setup: 4h RSI > 70 AND 4h Supertrend dir = +1 AND 4h ADX > 40 AND
+      ADX15(t-1) > 20. Place a Limit Buy at BB_Lower(t-1).
+    - Short setup: 4h RSI < 30 AND 4h Supertrend dir = -1 AND 4h ADX > 40 AND
+      ADX15(t-1) > 20. Place a Limit Sell at BB_Upper(t-1).
+4.2 Fill rules (same-bar limit fill, honest gap accounting):
+    - Long fills iff Low(t) <= BB_Lower(t-1); fill price = min(Open(t),
+      BB_Lower(t-1)).
+    - Short fills iff High(t) >= BB_Upper(t-1); fill price = max(Open(t),
+      BB_Upper(t-1)).
+    Equality counts as a touch/fill (declared).
+4.3 Orders do NOT persist past bar t if unfilled (one-bar limit validity).
+    Setups while a trade is open are counted (ignored-while-open) and no
+    order is placed. After an exit at bar j, the next order can be placed at
+    the open of bar j+1. A trade occupies [entry_bar, exit_bar] inclusive.
+4.4 Funnel counting: setups = flat bars with a true setup (order placed);
+    fills = executed trades; unfilled = difference.
+
+5. EXCURSION WALK AND BRACKET EXIT
+5.1 ATRsig = ATR15(t-1) (strictly prior, at the setup/entry bar).
+5.2 Long: SL = Fill - 6.0*ATRsig; TP = BB_Upper(t-1) (the opposite band).
+    Short: SL = Fill + 6.0*ATRsig; TP = BB_Lower(t-1).
+    Fixed bracket; no trailing.
+5.3 The ENTRY bar itself participates in the walk with worst-case ordering
+    (a fill and an exit may occur in the same bar): long - if Low(t) <= SL
+    exit at SL; elif High(t) >= TP exit at TP; short mirrored.
+5.4 Subsequent 15m bars j > t (long case; short mirrored), checks in order:
+    a) Open(j) <= SL -> exit at Open(j), reason SL_GAP (honest fill);
+    b) Open(j) >= TP -> exit at Open(j), reason TP_GAP (honest fill);
+    c) Low(j)  <= SL -> exit at SL, reason SL (worst-case default when both
+       levels are touched in the same bar);
+    d) High(j) >= TP -> exit at TP, reason TP.
+5.5 If no level is hit by the final 15m bar, exit at that bar's close,
+    reason FORCED_EOD, included in results.
+5.6 Per-trade record includes MFE/MAE excursions over [entry_bar..exit_bar]
+    (long MFE = max High - fill, MAE = fill - min Low; short mirrored),
+    in instrument units, descriptive only. R multiple =
+    side*(Exit-Fill)/(6.0*ATRsig).
+
+6. ECONOMICS
+6.1 Gross = side*(Exit - Fill) in instrument units: points for US500 and
+    XAUUSD, pips (x10,000) for EURUSD. Net = Gross - cost floor (0.51 / 0.3 /
+    0.41 respectively), one round trip per trade.
+6.2 Net Sharpe (per-trade convention): mean(Net)/std(Net, ddof=1) * sqrt(252)
+    over executed trades of the instrument.
+
+7. PHASE 1 GATES (applied INDEPENDENTLY to each instrument; frozen verbatim in
+   GATE_RSI_PULLBACK.txt)
+    G-MR1: Total executed signals >= 30.
+    G-MR2: Net Sharpe Ratio > 0.
+    G-MR3: Moving-block bootstrap (10,000 resamples, block=5 trades,
+           seed 20260930) P(mean Net PnL <= 0) <= 0.20.
+    VERDICT RULE: an instrument PASSES only if G-MR1 AND G-MR2 AND G-MR3 all
+    PASS. OVERALL verdict PASS only if ALL THREE instruments PASS. Any FAIL is
+    final for this artifact; corrections require a new study name. Null
+    results are complete, expected deliverables.
+
+8. OUTPUTS (data/results/cross_asset_rsi_pullback/)
+    SPEC_RSI_PULLBACK.txt (this file), GATE_RSI_PULLBACK.txt (written before
+    the run), REPORT_RSI_PULLBACK_PHASE1.txt (funnel setups vs limit fills,
+    net expectancy, win rate, exit mix), rsi_pullback_signals.csv (all
+    instruments, asset column), run_meta.json (sha256 lineage of tapes and
+    script, funnel, gates, verdict).
+
+9. HONESTY / ANTI-LEAK RULES
+9.1 Setups use only the strictly prior state (t-1 15m inputs, completed 4h
+    anchor); same-bar limit fills use only that bar's Open/Low/High with the
+    declared honest prices; exits have no intrabar lookahead beyond the
+    worst-case same-bar default; gap fills at the open.
+9.2 Single frozen parameterization; no optimization, no re-runs, no post-hoc
+    filtering; sides, years and instruments reported separately and pooled.
+9.3 CONSEQUENCE OF 2.2, declared honestly: on long flat runs the BB bands
+    collapse toward the last close and equality-touch fills at the collapsed
+    band become theoretically possible; in practice the ADX15>20 gate decays
+    below 20 within ~20 flat 15m bars and the 4h ADX>40 gate decays across
+    the anchor buckets, suppressing degenerate flat-market fills. Wilder
+    ATR/ADX decay across gaps also tightens the 6xATR stop for post-gap
+    fills. Accepted under the declared continuity convention; no
+    bar-skipping or ATR-freezing fix is applied.
+9.4 Phase 2 (MT5 execution) only on overall PASS; in-sample character of
+    this screen acknowledged; MFE/MAE are exploratory descriptors, never
+    results.

@@ -1,0 +1,4 @@
+G1: H1 has 16,181 ordered valid real rows, first 2024-01-02 01:00, last 2026-09-24 23:00; complete tester segments have 23 A OPEN, 265 A min-volume skips, 106 B OPEN, 248 B min-volume skips.
+G2: Every logged OPEN and min-volume skip matches a Python signal at the same enclosing H1 hour; all OPEN directions agree.
+G3: Every logged OPEN initial SL and every logged ratchet new SL matches the Python calculation within 0.01 Gold unit (one broker tick). Any mismatch fails parity and must be listed.
+G4: Exact fill/exit parity is UNTESTED without complete same-feed M1/tick history; signal parity does not imply performance validation.

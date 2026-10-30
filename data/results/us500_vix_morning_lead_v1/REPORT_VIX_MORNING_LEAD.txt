@@ -1,0 +1,38 @@
+REPORT: HYPOTHESIS 78 DIRECT VIX MORNING LEAD
+{
+  "vix_source": {
+    "sha256": "a9be4714e5bfa2e9e13e24d0771fc68c69c7d9a18f7e7b0a995eb8ee853b922c",
+    "rows": 191737,
+    "first_wall": "2022-09-30 03:15:00",
+    "last_wall": "2023-09-29 16:15:00",
+    "dates_with_any_signal_bar": 251,
+    "dates_with_15_valid_bars": 0
+  },
+  "us500_sha256": "a8ee68f1a0010a1be9704c0d59fd5382aa798846cdae4d519b799ae21ec66c2d",
+  "spec_sha256": "574487b3c8b39473bd173fd3a17736cd54b5625bf521a7b634ce0ce1a0385605",
+  "gate_sha256": "69180d98b59c5a3d6dfe97cb239f0044e30a8ebe32d45ecdf6ce971ec7aaf565",
+  "candidate_dates": 261,
+  "executed_dates": 0,
+  "skip_reasons": {
+    "MISSING_OR_INVALID_VIX_15_BARS": 261
+  },
+  "calibration_2022q4": {
+    "trades": 0,
+    "base_total_points": 0.0
+  },
+  "gated_2023q1_q3": {
+    "trades": 0,
+    "base_total_points": 0.0
+  },
+  "bootstrap_p_nonpositive": 1.0,
+  "quarterly": {},
+  "gates": {
+    "G-VM1": false,
+    "G-VM2": false,
+    "G-VM3": false,
+    "G-VM4": false
+  },
+  "verdict": "FAIL",
+  "caveat": "Vendor-derived 2022-23 VIX M1 archive and US500 BID M5 fixed-spread proxy only; no recent year, native execution, account feed, stop or prop pace validation."
+}
+FINAL PHASE-1 VERDICT: FAIL

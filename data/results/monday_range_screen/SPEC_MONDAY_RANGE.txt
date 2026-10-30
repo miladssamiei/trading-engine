@@ -1,0 +1,57 @@
+SPEC: MONDAY RANGE STRATEGY SCREEN (HYPOTHESIS #33)
+Frozen: 2026-09-22, BEFORE any Phase-1 code existed.
+Script (to exist only after this freeze): evaluate/monday_range_phase1.py
+Phase: 1 only - offline Python signal-quality screen with M1 execution walk. No MT5 execution.
+
+1. MECHANISM AND ALGORITHMIC TRANSLATION
+- Source concept (discretionary "Monday Range" method): the Monday session's high/low defines a weekly liquidity range; a sweep-and-reclaim of either side during mid-week (Tue/Wed/Thu) signals continuation toward the opposite side.
+- Algorithmic translation: Monday NY-date M15 extremes = range; first mid-week M15 bar that trades through one side and closes back inside = reclaim signal; enter next M1 open; stop at the sweep extreme; target the opposite range side; time exit Friday 15:55 NY.
+- DELIBERATE OMISSION (pre-declared): the discretionary method's oscillator divergence filter is NOT modeled. The screen tests the raw sweep/reclaim core. The omitted filter could only remove trades, not add them.
+- Relationship to prior artifacts: calendar/day-of-week seasonality studies in this project are closed nulls; this screen tests a DIFFERENT mechanism (weekly range liquidity sweep/reclaim with an execution walk), and it does not reopen the calendar family. Prior fvg/liquidity-sweep screens (#29, #32) were also excursion-negative; this is a new artifact with its own gates.
+
+2. DATA
+- Tape: data/results/vwap_2021_2026/us500tick_m1.csv (1,791,504 M1 bars, 2021-01-03..2026-04-30, epoch-seconds UTC bar open times).
+- Timezone America/New_York throughout (EST/EDT handled by tz conversion).
+- M15 aggregation: from the M1 tape per tasking (buckets = floor(open/15 min); OHLC from bucket bars; no-trade buckets absent; printed-bucket sequencing). Integrity section reports sparse buckets. Same convention as Hypothesis #32.
+
+3. RANGE DEFINITION
+- Group M15 buckets by ISO calendar (year, week) of their NY date.
+- Monday Range per ISO week: Monday_High = max High, Monday_Low = min Low over ALL M15 buckets whose NY date is Monday (this includes the Monday-evening session; all such buckets complete before any Tue/Wed/Thu bucket - causal).
+- Weeks with no Monday-date buckets (market holiday) are skipped entirely.
+
+4. SIGNAL GENERATION (SWEEP + RECLAIM, FIRST PER WEEK)
+- Candidate bars: M15 buckets on Tuesday, Wednesday, or Thursday of the same ISO week, in chronological order.
+- Bullish Reclaim (LONG):  Low < Monday_Low  AND Close > Monday_Low.
+- Bearish Reclaim (SHORT): High > Monday_High AND Close < Monday_High.
+- Only the FIRST valid signal per week (either direction) is taken; the week is then closed for signal generation regardless of outcome ("no re-entry").
+- The two rules are mutually exclusive on a single bar by construction.
+
+5. EXECUTION WALK (M1, TP/SL/TIME)
+- Entry: the OPEN of the first M1 bar with bar open time >= the reclaim bucket's close time (bucket open + 15 min). If no such bar exists at or before the week's Friday 15:55 NY cutoff, the signal is dropped (funnel-counted).
+- Stop Loss: the reclaim candle's absolute extreme - its Low for longs, its High for shorts. Initial Risk = |Entry - SL|; signals with Risk <= 0 are degenerate and dropped (funnel-counted).
+- Take Profit: the opposite side of the Monday Range (Monday_High for longs, Monday_Low for shorts).
+- Walk M1 bars from the entry bar through the last bar opening <= Friday 15:55 NY of that week. Exit at the FIRST event, checked bar by bar: SL hit (long: Low <= SL; short: High >= SL) takes priority over TP hit (long: High >= TP; short: Low <= TP) WITHIN THE SAME BAR (SL-first, conservative). Time exit otherwise, at the close of the last walked bar.
+- Exit fills are AT the SL/TP level exactly (limit-style); the time exit fills at the walked-tape close.
+- Gross PnL (points, pre-cost): long exit-entry; short entry-exit. Costs are NOT subtracted in this screen; the verified 0.51 pt real-tick spread floor is the reference the gross edge must clear.
+- MFE/MAE: over the walked bars through the exit bar inclusive, clamped at 0, normalized by Initial Risk (descriptive only).
+
+6. PHASE-1 GATES (verbatim in GATE_MONDAY_RANGE.txt)
+- G-MON1: Total valid signals >= 75 (lowered from 150 because max theoretical signals = ~1 per week over 5.3 years).
+- G-MON2: Aggregate Gross Expectancy (Average PnL per trade before costs) > 0.
+- G-MON3: Block bootstrap (10,000 iterations, seed 20260921) P(mean Gross PnL <= 0) <= 0.20.
+
+7. MECHANICAL INTERPRETATIONS PRE-DECLARED
+- Valid signals = the executed set (entry found before cutoff, Risk > 0, non-empty walk).
+- G-MON2 is strict (> 0) on the aggregate gross mean.
+- G-MON3: circular moving-block bootstrap over the time-ordered per-trade gross series, block length = 5 trades (~5 weeks, the weekly signal cadence), 10,000 draws, numpy default_rng(20260921); PASS if P(mean <= 0) <= 0.20.
+- OVERALL PHASE-1 PASS = G-MON1 AND G-MON2 AND G-MON3.
+
+8. HONESTY / ANTI-LEAK / STOP RULES
+- Causality: Monday range completes before any signal bar; entries are next-M1 opens; exits use only post-entry bars; no future data in any condition.
+- No parameter sweep: days Tue/Wed/Thu, first-signal cap, SL/TP definitions, Friday-15:55 time exit, block length 5 are all frozen here.
+- Win rate is reported as the TP/SL/Time outcome mix AND share(gross > 0); long/short and per-year splits are descriptive.
+- Null result (any gate FAIL) is a complete, expected deliverable and ends this artifact.
+
+9. ARTIFACTS
+- data/results/monday_range_screen/: SPEC_MONDAY_RANGE.txt (this file), GATE_MONDAY_RANGE.txt, REPORT_MONDAY_RANGE_PHASE1.txt, monday_range_signals.csv, run_meta.json.
+- Script: evaluate/monday_range_phase1.py (written only after SPEC and GATE were frozen).

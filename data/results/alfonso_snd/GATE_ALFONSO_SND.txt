@@ -1,0 +1,6 @@
+G1: Each asset/sequence/R:R cell requires at least 150 closed trades.
+G2: Each asset/sequence/R:R cell requires net expectancy > 0 after the fixed retail cost floor.
+G3: Each asset/sequence/R:R cell requires unannualized per-trade net Sharpe > 0.
+G4: Each asset/sequence/R:R cell requires MBB P(mean net <= 0) <= 0.05 with 10000 resamples, block length 5, seed 20260928.
+G5: Each asset/sequence/R:R cell requires no negative net entry-cohort total in a full calendar year covered by the tape (XAUUSD/EURUSD 2020-2025; US500 2021-2025); partial 2026 is disclosed, not gated.
+G6: No cell is called validated on this retrospective Phase 1 proxy alone. A cell passing G1-G5 is eligible only for a separately predeclared execution/forward validation.

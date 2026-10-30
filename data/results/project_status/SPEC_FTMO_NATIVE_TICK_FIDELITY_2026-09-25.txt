@@ -1,0 +1,15 @@
+FTMO native tick fidelity diagnostic declared 2026-09-25 before the
+US500.cash and EURUSD diagnostic tester runs. This is a data-source
+audit, not a trading hypothesis; the EA makes zero orders and no
+strategy performance is measured.
+
+Use the connected EUR10k FTMO-Demo terminal. Compile a no-trade EA,
+verify its only OnTick action is none, then run configured Model=4
+every-tick-based-on-real-ticks tester on native US500.cash and EURUSD
+from 2025-01-01 through 2026-09-24, M5, EUR10k deposit. Capture full
+agent journals and report real ticks begin, absent/discarded minute
+counts, generated-tick fallback, total bars/ticks, tester completion
+and file hashes. Compare each symbol to XAUUSD's H86 277621/607651
+discarded-minute baseline. A clean source has no unexplained real-tick
+discard or fallback in the intended trading window. Do not claim
+execution or edge from a source-quality pass. No account orders.

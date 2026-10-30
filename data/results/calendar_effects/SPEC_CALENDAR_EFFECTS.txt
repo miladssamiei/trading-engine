@@ -1,0 +1,391 @@
+SPEC_CALENDAR_EFFECTS
+Calendar structure of US500: unconditional overnight premium and
+day-of-week seasonality, two independent tests
+(hypothesis #14, project hypothesis numbering)
+
+Status: SPEC written 2026-08-30 BEFORE any code or run. The companion
+GATE_CALENDAR_EFFECTS (artifact list, section 9) must be created as a
+verbatim extraction of every gate number in sections 2, 6 and 7 BEFORE
+the first Phase-1 script runs. Nothing in this document may be changed
+after Phase-1 output exists; any addition is exploratory and labeled.
+
+------------------------------------------------------------------------
+1. GOAL, MECHANISMS, DISTINCTNESS
+
+Two INDEPENDENT, UNCONDITIONAL, calendar-only hypotheses on US500,
+defined and gated separately. A null result for either or both is a
+complete, expected deliverable.
+
+  HYPOTHESIS OVERNIGHT: being long US500 from the cash session close to
+  the next cash session open captures the bulk of the instrument's
+  directional drift - the documented academic "overnight return
+  anomaly" (overnight returns dominate cumulative index gains;
+  intraday returns are flat to negative in aggregate).
+
+  HYPOTHESIS DOW (day-of-week): average daily returns differ
+  systematically by day of week - historically a "Monday effect" of
+  lower/negative Monday returns and stronger returns later in the
+  week. Recent literature reports the effect weakening or having
+  disappeared in many developed markets since the 2000s; this
+  hypothesis is explicitly expected to be a LIKELY NULL and is tested
+  honestly as such. ONLY the classic Monday claim is gated (section
+  6.2); no other weekday rule may be adopted from this study.
+
+Distinct from every prior hypothesis, explicitly:
+
+  - Not session transfer (hypothesis #11): that mechanism required
+    EXTREME, percentile-conditioned pre-open/post-close moves (causal
+    trailing-252d P80 thresholds) to predict reversal or continuation.
+    OVERNIGHT here is UNCONDITIONAL: always long every overnight
+    regardless of the size of any prior move. No percentile filters,
+    no conditioning variables.
+  - Not multi-horizon momentum (hypothesis #5): that tested
+    trend-following EMA signals with weekly/monthly rebalancing over
+    multi-day/week horizons. Both hypotheses here are
+    calendar/session-structure effects with NO trend or momentum
+    signal of any kind.
+  - Not regime rotation (hypothesis #13) and not the meta-coordinator
+    (hypothesis #12): no child strategies, no gating rules, no
+    ensemble machinery, no D1 regime labels. Both hypotheses are
+    single, static, unconditional rules over the whole tape.
+  - Not ORB/VWAP MR/SP2L/trend-pullback: no intraday structure is
+    consulted for any signal. The only inputs are session open and
+    close prices and the NY calendar.
+
+------------------------------------------------------------------------
+2. DATA AND TIME DEFINITIONS
+
+Instrument: US500 index CFD (US500-tick / US500.c mapping, unchanged
+from all prior work). No new data is collected: both hypotheses use
+only the verified session-day universe and the verified D1 data from
+prior work.
+
+Primary data: verified M5 export
+data/results/orb_2021_present/us500tick_m5.csv (364,330 bars,
+2021-01..2026-04, byte-exact vs terminal in prior studies). Cash open
+and cash close prices come from this file. Verified D1 cross-checks:
+data/results/momentum_multihorizon/us500c_d1.csv (2014-06..2026-08)
+and data/results/momentum_multihorizon/us500tick_d1.csv (the verified
+tick-derived D1 used in daily-close work).
+
+Timezone: epoch UTC converted to America/New_York (wall minutes =
+hour*60 + minute of the bar OPEN). Same convention as ORB/VWAP/SP2L.
+
+Trading calendar: a date is a CASH DAY if a bar with wall 570 (09:30)
+exists on that NY date. Verified baseline: 1,370 cash dates
+2021-01..2026-04 (session-transfer reproduction, re-verified below).
+Holidays and evening-only dates are excluded automatically (no 09:30
+bar). No other calendar filter exists.
+
+Cash session: [09:30, 16:00) NY, verbatim from ORB/VWAP/session-
+transfer work. Cash open = first bar OPEN at 09:30 (wall 570). Cash
+close = last bar CLOSE before 16:00 (the 15:55 bar close).
+
+Day universes: descriptive statistics use all 1,370 cash dates; every
+P&L/Sharpe series is zero-filled on the common 1,369-day ORB
+session-day universe (portfolio-study convention). The difference is
+tallied in the funnel, never silently dropped.
+
+Day eligibility: an overnight span from cash day d to the next valid
+cash day d+1 exists only when both days have a cash open and a cash
+close; weekend/holiday gaps are INCLUDED as a single overnight span
+per the existing conventions (session transfer treats cross-day
+signals the same way). The last cash day of the tape has no span and
+is excluded by construction (tallied).
+
+PHASE 1 PRE-GATES (PG1-PG3, reproduction sanity; failure = abort with
+a data problem, not a hypothesis result):
+  PG1  1,370 cash dates reproduced exactly.
+  PG2  the momentum-study swap anchor reproduced exactly: US500-tick
+       D1 buy-and-hold swap = -$55,360.00 (-20 x (1,656 + 4 x 278
+       Wednesdays)).
+  PG3  full-tape close-to-close buy-and-hold from cash closes
+       reproduces the documented D1 buy-and-hold figure within the
+       documented first-bar residual (34.66%..34.69% band).
+
+------------------------------------------------------------------------
+3. CORE DAILY VARIABLES
+
+  r_ovn(d)    = ln(cash_open(d+1) / cash_close(d))   signed log
+                overnight return, every valid consecutive cash-day
+                pair (d+1 = the next valid cash day; weekend/holiday
+                gaps included as one span).
+  r_intra(d)  = ln(cash_close(d) / cash_open(d))     comparison
+                benchmark ONLY, never traded.
+  r_cc(d)     = ln(cash_close(d) / cash_close(d-1))  close-to-close
+                log return with d-1 = the PREVIOUS valid cash day.
+                This is the DOW return definition: close-to-close,
+                the classic day-of-week literature convention, used
+                consistently throughout.
+  weekday(d)  = NY calendar day of week of date d (Mon..Fri; US500
+                has no weekend cash session).
+
+All percent figures in CSVs are 100*x for log returns (documented
+form in the headers). No other variable is computed for any signal.
+No thresholds, no lookback windows, no percentile rules exist in this
+SPEC by design - the mechanisms are unconditional.
+
+------------------------------------------------------------------------
+4. HYPOTHESES (signal definitions, both pre-declared)
+
+HYPOTHESIS OVERNIGHT - UNCONDITIONAL OVERNIGHT PREMIUM
+  Signal: unconditional. On every valid cash day d, hold 1 lot long
+  from cash close(d) to cash open(d+1). No entry filter, no direction
+  filter - always long, every single overnight.
+  Phase 1 is already a defined round trip; no exits are needed (the
+  position is mechanically closed at the next cash open).
+  Claim tested: overnight returns carry the directional drift on THIS
+  instrument and tape, and survive the documented financing cost.
+
+HYPOTHESIS DOW - DAY-OF-WEEK SEASONALITY (CLASSIC MONDAY CLAIM ONLY)
+  Signal: unconditional, calendar-only. For each weekday (Mon..Fri),
+  compute the mean and distribution of r_cc(d) across the full tape.
+  Pre-declared claim: ONLY the classic Monday effect is gated -
+  mean(r_cc | Monday) < pooled mean(r_cc | Tue..Fri), i.e. "Monday
+  underperforms the rest of the week". Any other weekday-specific
+  rule discovered after seeing the data is exploratory and cannot be
+  adopted (section 8).
+
+The two hypotheses are independent tests; each is gated separately,
+and each can fail or pass without affecting the other.
+
+------------------------------------------------------------------------
+5. COSTS AND FINANCING (both conventions, never cherry-picked)
+
+Costs: 0.8 pt round-trip spread, $1/pt/lot, $10,000 base, 1 lot, no
+compounding - the project cost model. Each overnight round trip costs
+0.8 pt. The DOW tradeable version costs one 0.8 pt round trip per
+contiguous held block (section 6.2), charged on the block's entry
+day.
+
+Financing: the SAME swap treatment used in the multi-horizon momentum
+study, BOTH readings reported everywhere, never cherry-picked:
+  CONVENTION A (documented): swap_long -20 $/day/lot, swap_short
+       +2 $/day/lot, Wednesday x5 (rollover3days=5 read as
+       Wednesday-swap x5 - the reading behind all prior financing
+       figures). Charged on the close-of-day position for the coming
+       night: a position held over a Wednesday night is charged 5
+       days; every other night 1 day.
+  CONVENTION B (strict MT5 points): US500.c point = 0.01, so the
+       strict reading charges -20 x 0.01 = -$0.20/day/lot (100x
+       smaller), same Wednesday-x5 structure.
+Weekend spans (Friday close -> next Monday open) count as held nights
+with NO separate weekend multiplier - the weekend financing lives
+entirely in the Wednesday-night x5, exactly as in the momentum
+study's B&H accounting (PG2 reproduces that anchor). Every reported
+statistic shows ex-financing, Convention A net, and Convention B net.
+
+Only long positions occur in this SPEC; the swap_short rate never
+applies but is stated for completeness.
+
+------------------------------------------------------------------------
+6. PHASE 1 - DESCRIPTIVE QUALITY (no tuning, no exits)
+
+6.1 HYPOTHESIS OVERNIGHT
+
+Procedure:
+  - Compute r_ovn(d) for the full tape; tally the funnel (valid
+    pairs; excluded boundary days are never silently dropped).
+  - Summary statistics: n, mean, median, std, Sharpe = mean/std
+    (ddof=1) x sqrt(252) (252 = overnight periods per year), win
+    rate, skew - gross, net of 0.8 pt round trip, and net of
+    financing under BOTH conventions.
+  - The SAME statistics for r_intra(d) as the comparison benchmark,
+    to confirm or refute the "overnight carries the drift, intraday
+    is flat/negative" claim on THIS specific instrument/tape.
+  - Year-by-year overnight Sharpe and net PnL: gross (before costs),
+    net of costs, and net of financing under both conventions;
+    2021-2025 full years, 2026 partial reported only.
+  - Bootstrap: day-block bootstrap, 10,000 resamples of days (each
+    overnight return is a one-day block), of the mean overnight
+    return; a 10-day moving-block bootstrap is reported alongside as
+    robustness (non-gating).
+
+PHASE 1 GATES - OVERNIGHT (O1-O4; ALL must hold to proceed):
+
+  O1  Gross mean(r_ovn) > 0 AND day-block bootstrap (10,000
+      resamples) P(mean <= 0) <= 0.10. (Tighter than prior 0.40
+      bars: a much higher-frequency, unconditional claim with much
+      larger n.)
+  O2  Net-of-financing Sharpe > 0 under BOTH financing conventions
+      (A documented AND B strict-points). Surviving under only one
+      convention is a FAIL, not a pass - no convention-shopping.
+  O3  Year shape under EACH convention separately: at least 4 of 5
+      full years (2021-2025) net-of-financing positive AND no single
+      year > 60% of total net. 2026 partial: reported only.
+  O4  Net-of-financing Sharpe > every individually validated
+      single-instrument strategy already in the project, i.e. >
+      0.337 (ORB, the current best; SP2L is 0.275 on the common
+      universe), under EACH financing convention separately. Failure
+      of O4 = the hypothesis is reported as a NULL RESULT: being
+      merely positive does not justify adoption.
+
+PASS = O1-O4 -> Phase 2 (section 7). Any failure -> null write-up for
+HYPOTHESIS OVERNIGHT in REPORT_CALENDAR_EFFECTS and STOP for that
+hypothesis: no Phase 2, no EA. (HYPOTHESIS DOW is gated
+independently and is unaffected.)
+
+6.2 HYPOTHESIS DOW
+
+Procedure:
+  - Compute r_cc(d) for the full tape, tagged by weekday(d).
+  - Per weekday: n, mean, median, std, Sharpe = mean/std (ddof=1) x
+    sqrt(252), win rate.
+  - Rank weekdays by mean return; report day-block bootstraps
+    (10,000 resamples) per weekday: P(mean <= 0) for the best
+    weekday and P(mean >= 0) for the worst weekday (descriptive,
+    NOT gates). Welch t-test reported alongside as descriptive.
+  - Test the classic claim: delta = mean(r_cc | Monday) - pooled
+    mean(r_cc | Tue..Fri). Report whether the classic pattern HOLDS
+    (delta < 0, P(delta >= 0) <= 0.10), is REVERSED (delta > 0,
+    P(delta <= 0) <= 0.10), or is ABSENT (neither), on the
+    day-block bootstrap (10,000 resamples preserving weekday
+    labels). Do NOT search for "whichever weekday looks best": only
+    the Monday claim is gated.
+  - Robustness (non-gating): the D1-derived close-to-close series
+    from data/results/momentum_multihorizon/us500tick_d1.csv is
+    computed and reported alongside; the cash-close series remains
+    authoritative.
+
+PHASE 1 GATES - DOW (D1-D3; ALL must hold):
+
+  D1  The pre-declared classic effect holds: mean(r_cc | Monday) <
+      pooled mean(r_cc | Tue..Fri), with day-block bootstrap (10,000
+      resamples) P(no effect) <= 0.10 (i.e., P(delta >= 0) <= 0.10).
+  D2  The pre-declared tradeable version - FLAT over the Monday-
+      earning span, LONG the rest of the week: hold 1 lot from cash
+      close(d) to cash close(d+1) for every valid cash day d with
+      weekday(d+1) in {Tue, Wed, Thu, Fri}; flat otherwise (the only
+      skipped spans end on Monday - the r_cc(Monday) spans, weekend
+      gaps included; positions close at the last valid cash close of
+      the week or the tape end, whichever is first). One 0.8 pt
+      round trip per contiguous held block. Net Sharpe (costs +
+      financing) must EXCEED the net Sharpe of the unconditional
+      buy-and-hold-equivalent baseline (1 lot always long over every
+      night between consecutive valid cash days, no turnover costs,
+      same conventions) on the same tape, under BOTH financing
+      conventions. Both series zero-filled on the common 1,369-day
+      universe, sqrt(252).
+  D3  The effect is present in at least 4 of 5 full years
+      (2021-2025), not concentrated in 1-2 years: per-year delta < 0
+      in >= 4 of 5 full years AND the tradeable version's yearly net
+      is positive in >= 4 of 5 full years AND no single year > 60%
+      of its total net (the project year-shape clause; this project
+      has repeatedly found "one good year" false positives). 2026
+      partial: reported only.
+
+If D1 fails (which the literature suggests is likely - the effect has
+been reported fading/vanishing in recent decades), STOP IMMEDIATELY:
+HYPOTHESIS DOW is written up in REPORT_CALENDAR_EFFECTS as a clearly
+labeled null result, and D2/D3 are NOT run. No tradeable design is
+computed beyond what D1 needs, and no weekday-specific rule
+discovered after seeing the data may be adopted.
+
+Pass for DOW = D1-D3. On DOW pass, any Phase-2 execution design is
+OUT OF SCOPE of this SPEC and requires its own pre-declared SPEC
+amendment (section 9), exactly like any new hypothesis.
+
+------------------------------------------------------------------------
+7. PHASE 2 - OVERNIGHT EXECUTION (only if O1-O4 pass)
+
+Execution design (pre-declared parameters, no search):
+  Entry: market order at or just before the cash close (the 15:55 M5
+  bar close), 1 lot long.
+  Exit: market order at or just after the next cash open (the 09:30
+  M5 bar open), the overnight window end.
+  Implementation form: a scheduled script OR a simple EA on an M5
+  chart; the choice is made BEFORE any Phase-2 code with cause
+  recorded (the regime-rotation embed-vs-toggle rule). If an EA, the
+  project order conventions apply verbatim: NormPrice tick-grid
+  rounding on every order and close, DST-aware session code, a magic
+  number reserved for this study.
+  Realistic execution costs: total round trip = 1.2 pt (0.8 pt
+  spread + 0.2 pt per side slippage), replacing the Phase-1 0.8 pt
+  cost in all Phase-2 recomputations.
+  Gap-risk gate (pre-declared): X = 3.0%. No single overnight loss
+  (cash close(d) to cash open(d+1), gap included) may exceed 3.0% of
+  the $10,000 account = $300 = 300 points at 1 lot. ONE violation =
+  Phase-2 FAIL regardless of every other metric (tail gap risk is
+  not captured by daily Sharpe alone).
+  Phase-2 gates: O1-O4 recomputed net of realistic execution costs
+  and with actual gap outcomes (O1's gross mean is cost-invariant
+  but re-verified on the Phase-2 tape), plus the reconciliation
+  gates below.
+
+PHASE 2 GATES (G1-G2, project standard):
+  G1  Consistency: Phase-2 execution Sharpe within +/- 0.15
+      (absolute) and max drawdown within +/- 20% (relative) of the
+      offline Phase-2 reference numbers over the same window
+      (Model=0 yearly batches, 2021-01..2026-04).
+  G2  Execution integrity: >= 95% of the expected overnight schedule
+      present (one round trip per valid overnight span), zero
+      off-schedule trades, every trade attributed, every mismatch
+      classified.
+
+G-failure rejects the Phase-2 implementation; the Phase-1 findings
+stand as reported.
+
+------------------------------------------------------------------------
+8. HONESTY AND ANTI-LEAK RULES
+
+  - TWO hypotheses are tested in this SPEC, not one. Every bootstrap
+    p-value is reported raw AND Bonferroni-adjusted for 2 tests
+    (adjusted p = min(1, 2 x raw)). Gates are evaluated on the raw
+    p-values as written above; a hypothesis that passes a gate raw
+    but fails adjusted is explicitly labeled in the report as
+    fragile under the multiple-testing adjustment. The adjustment is
+    reported and flagged, never used to relax or tighten a gate post
+    hoc.
+  - Swap/financing conventions are applied exactly as previously
+    documented (section 5), both readings reported, never
+    cherry-picked. No convention-specific rescue exists.
+  - Both hypotheses are unconditional static rules - no fitting, no
+    optimization, no percentile thresholds, no lookback windows to
+    tune. No filter or conditioning variable may be added after
+    Phase-1 output; any such addition is exploratory and cannot
+    rescue a failed gate.
+  - ONLY the classic Monday claim is gated for DOW; no other
+    weekday-specific rule may be adopted from this study. No
+    combination of OVERNIGHT and DOW (e.g., "hold overnight only on
+    Tuesdays") may be tested under this SPEC - that would be a new,
+    third hypothesis requiring its own pre-declared SPEC amendment.
+  - A null result for either or both hypotheses is a complete,
+    expected, and valuable deliverable. The literature itself flags
+    DOW as likely fading and OVERNIGHT as cost-fragile for
+    individual instruments; finding either negative on US500 CFD is
+    informative, not a failure of the research process.
+  - Scope statement (one instrument, one tape, 5.3 years, session
+    definitions as specified) appears in every report.
+
+------------------------------------------------------------------------
+9. ARTIFACTS AND LOGGING (data/results/calendar_effects/)
+
+  SPEC_CALENDAR_EFFECTS.txt     this document (before any code)
+  GATE_CALENDAR_EFFECTS.txt     verbatim extraction of PG1-PG3,
+                                O1-O4, D1-D3, the X = 3.0% gap gate,
+                                and G1-G2 (before any script runs)
+  overnight_returns.csv         per-day overnight and intraday
+                                returns + both swap conventions
+  dow_returns.csv               per-day close-to-close returns tagged
+                                by weekday
+  yearly_breakdown_calendar.csv per-hypothesis yearly stats
+  phase1_calendar_stats.json    all metrics, bootstraps (raw and
+                                adjusted p-values), gate outcomes
+  REPORT_CALENDAR_EFFECTS.txt   Phase-1 verdict for BOTH hypotheses,
+                                regardless of outcome; Phase-2
+                                results included only if OVERNIGHT
+                                passes fully
+  evaluate/calendar_effects_phase1.py; only on OVERNIGHT full pass:
+  evaluate/calendar_effects_phase2.py, the overnight EA or scheduled
+  script source, and standard Python-vs-MT5 reconciliation artifacts
+  (G-gates, tolerances, execution-integrity logs), consistent with
+  prior SPEC conventions.
+
+PROGRESS.md hooks (append per stage, current style):
+  "calendar effects - SPEC/GATE pre-declared",
+  "calendar effects - Phase 1 run (overnight/DOW)",
+  "calendar effects - Phase 1 verdict",
+  and on OVERNIGHT pass only: "calendar effects - Phase 2 execution
+  design", "calendar effects - reconciliation verdict".
+
+END OF SPEC_CALENDAR_EFFECTS

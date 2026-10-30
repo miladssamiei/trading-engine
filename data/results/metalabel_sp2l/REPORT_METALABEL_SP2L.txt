@@ -1,0 +1,139 @@
+REPORT_METALABEL_SP2L
+Phase 1 verdict for hypothesis #15: meta-label ML filter
+(ALLOW/REDUCE/SKIP) on the frozen SP2L spike/gap EA
+
+Status: written 2026-08-30 after the first Phase-1 run, per
+SPEC_METALABEL_SP2L.txt and GATE_METALABEL_SP2L.txt (M1-M5, N1-N3
+pre-declared). PRIMARY MODEL (logistic regression) FAILS (M5);
+SECONDARY MODEL (random forest) FAILS (M1). VERDICT: NULL RESULT.
+STOP per GATE: no Phase 2, no EA modification. SP2L continues to run
+unfiltered exactly as validated. SP2L's file, parameters, entries,
+exits, and lots were never modified.
+
+------------------------------------------------------------------------
+1. SCOPE
+
+Frozen SP2L trade set data/results/sp2l_2021_2026/mt5_trades.csv
+(1,343 trades, 2021-01..2026-04) + the verified US500-tick M1 export
+(vwap_2021_2026/us500tick_m1.csv) + hypothesis #13 regime labels.
+Walk-forward folds 2022H1..2026H1, 2021 unfiltered burn-in. Primary
+logistic regression (L2, C nested grid {0.01, 0.1, 1.0},
+class_weight balanced); secondary shallow RF (depth<=4, n=200,
+seed 42). Decision rule frozen: p>=0.60 ALLOW / 0.45<=p<0.60 REDUCE
+(0.5 lot) / p<0.45 SKIP.
+
+------------------------------------------------------------------------
+2. REPRODUCTION AND FEATURE COVERAGE - ALL EXACT
+
+  Baseline: 1,343 trades, +281.84 pts, Sharpe 0.2745, maxDD 4.17%,
+  2025 -260.25 (reproduction gate PASS within portfolio-study
+  tolerances; documented 0.275 common-universe).
+  Setup-bar matching: 1,343/1,343 trades matched to their exact M1
+  setup bar (setup_time column); 0 unmatched.
+  Feature coverage: regime_label present for all months; setup_type
+  distribution gap 561 / spike 782; session_tag NY 1,156 / LON 129 /
+  ASIAN 58; base win rate 35.6% (imbalanced - balanced class_weight
+  applied as pre-declared).
+  Pre-declared interpretations used exactly as written in the SPEC:
+  setup_type = "gap" if the setup's gap clause holds at 0.00%
+  tolerance (literal price gap), else "spike"; session_tag via
+  SP2L's own session windows (NY [09:30,15:30) ET; LON [08:00,16:00)
+  London local; ASIAN otherwise).
+
+------------------------------------------------------------------------
+3. PRIMARY MODEL - LOGISTIC REGRESSION: M1-M4 PASS, M5 FAILS
+
+3.1 Classifier diagnostics (reported, not gated): nested C selection
+chose C=0.01 in all 9 folds. Per-fold AUC: 0.52/0.45/0.47/0.38/
+0.44/0.53/0.52/0.45/0.40 - at or below chance in most folds. The
+model has NO trade-level classification skill.
+
+3.2 The degeneration (the decisive finding): predicted p(win) spans
+0.441..0.546, with 99.8% of post-burn-in trades inside the REDUCE
+deadband. Decisions: 0 ALLOW / 1,160 REDUCE / 2 SKIP. The meta-label
+collapsed into a near-uniform half-sizing of SP2L - it does not
+selectively filter anything. The classifier's tiny coefficients
+(|coef| <= ~0.05) and balanced intercept pin probabilities near the
+0.5 deadband center by construction.
+
+3.3 Filtered series (LR): total +178.22 pts (vs +281.84 unfiltered),
+Sharpe 0.3109 (vs 0.2745), maxDD 2.08% (vs 4.17%). Yearly: 2021
++100.07 (burn-in, unfiltered), 2022 +63.84, 2023 +70.46, 2024 +64.62,
+2025 -130.13, 2026 +9.36.
+
+3.4 Gates:
+  M1 PASS (Sharpe 0.3109 > 0.275).
+  M2 PASS (maxDD 2.08% <= 4.17%).
+  M3 PASS (1,160 trades remain >= 100).
+  M4 PASS (4 of 5 full years positive; 2025 filtered -130.13 is less
+      negative than unfiltered -260.25).
+  M5 FAIL: total net improvement over the baseline is NEGATIVE
+      (-103.61 pts; +281.84 -> +178.22). Per-fold improvement:
+      2022H1 -39.84, 2022H2 -49.45, 2023H1 -5.24, 2023H2 -65.21,
+      2024H1 +12.75, 2024H2 -77.37, 2025H1 +119.88, 2025H2 +10.24,
+      2026H1 -9.37 - negative in 6 of 9 folds. A filter that
+      destroys 37% of the validated profit is not an improvement,
+      and M5 was written to catch exactly this.
+
+Verdict: PRIMARY FAILS -> STOP per GATE. The apparent M1-M4 pass is
+a sizing artifact (uniform 0.5x), not selective meta-labeling.
+
+------------------------------------------------------------------------
+4. SECONDARY MODEL - SHALLOW RANDOM FOREST: FAILS (M1)
+
+Fixed depth<=4 RF, same folds. Decisions: 4 ALLOW / 129 REDUCE /
+1,029 SKIP (degenerate skip-most behavior; in 6 of 9 folds the RF
+predicted ZERO winners - precision 0.0). Filtered: total +51.62,
+Sharpe 0.1507, maxDD 0.77%; yearly 2022 -15.85, 2023 -23.91, 2024
++13.30, 2025 -21.99. M1 FAIL (0.1507 < 0.275); M3 passes barely
+(133 >= 100). Reported for comparison only; per the SPEC it can
+never be substituted as the passing model (barred post-hoc model
+swap - irrelevant here since it failed anyway).
+
+------------------------------------------------------------------------
+5. EXPLORATORY THRESHOLD PAIR (0.65/0.40) - LABELED, NOT ADOPTABLE
+
+Run only because the primary failed (single pre-declared comparison):
+with the wider deadband, all 1,343 trades land in REDUCE (no ALLOW,
+no SKIP) - the same degeneration, wider. Sharpe 0.3324, total
++190.95. EXPLORATORY, not a rescue, not adoptable.
+
+------------------------------------------------------------------------
+6. HONESTY AND ANTI-LEAK NOTES
+
+  - SP2L was never modified (frozen file, frozen parameters, frozen
+    entries/exits/lots).
+  - No feature, threshold, or model family was added after results;
+    the single exploratory threshold pair is labeled and barred from
+    adoption.
+  - day_of_week side-door check: weekday coefficients are among the
+    larger ones in later folds (Fri ~+0.04-0.05) but tiny in absolute
+    terms and no feature dominates - the near-constant intercept
+    drives every prediction. Hypothesis #14's rejected univariate
+    claim is NOT being revived: there is no evidence the model's
+    behavior is weekday-driven, and the model's behavior produced no
+    tradable advantage anyway.
+  - This is the CAIRO precedent playing out as the SPEC predicted:
+    an ML layer over sound underlying signals fails to add selective
+    value and would not survive the backtest-to-live transition.
+  - A null result is a complete deliverable: the meta-label learned
+    nothing trade-specific from the seven frozen causal features on
+    this 1,343-trade tape, and its only "improvement" (Sharpe
+    0.275 -> 0.311) is pure position scaling, which the M5 gate
+    correctly rejects.
+
+------------------------------------------------------------------------
+7. ARTIFACTS
+
+  data/results/metalabel_sp2l/SPEC_METALABEL_SP2L.txt
+  data/results/metalabel_sp2l/GATE_METALABEL_SP2L.txt
+  data/results/metalabel_sp2l/metalabel_features.csv
+  data/results/metalabel_sp2l/metalabel_folds.csv
+  data/results/metalabel_sp2l/metalabel_filtered_trades.csv
+  data/results/metalabel_sp2l/yearly_breakdown_metalabel.csv
+  data/results/metalabel_sp2l/phase1_metalabel_stats.json
+  data/results/metalabel_sp2l/REPORT_METALABEL_SP2L.txt (this)
+  evaluate/metalabel_sp2l_phase1.py
+  No Phase-2 artifacts (N1-N3 never evaluated; SP2L stays unfiltered).
+
+END OF REPORT_METALABEL_SP2L

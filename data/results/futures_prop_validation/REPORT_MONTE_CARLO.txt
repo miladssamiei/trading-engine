@@ -1,0 +1,41 @@
+ENGINE A GC/BTC/ETH PORTFOLIO MONTE CARLO - PHASE 1 CLOSED-EQUITY DIAGNOSTIC
+Ledger: data\results\futures_prop_validation\trades.csv
+Pool: 551 A_KC trades; GC 191, BTC 184, ETH 176.
+R = net / abs(entry - initial_stop), without clipping or asset reweighting.
+R mean 0.182410, median -0.229353, range [-1.029043, 9.746841].
+Historical frequency: 551 / 2458 inclusive calendar days (2020-01-01..2026-09-23) = 0.22416599 trades/day.
+Account $100,000; Phase-1 target $108,000; closed-peak trailing drawdown $10,000; 10,000 independent paths/risk; cap 50,000 trades/path.
+
+Risk 0.25% of pre-trade equity (seed 20260926):
+  Phase-1 pass probability: 99.98% (9998/10000)
+  Closed-trailing-drawdown ruin: 0.02% (2/10000)
+  Censored at cap: 0.00% (0/10000)
+  Successful paths: median trades 160.00; 95th percentile trades 377.00
+  Frequency-projected time: median 713.76 calendar days; 95th percentile 1681.79 calendar days
+
+Risk 0.50% of pre-trade equity (seed 20260927):
+  Phase-1 pass probability: 98.60% (9860/10000)
+  Closed-trailing-drawdown ruin: 1.40% (140/10000)
+  Censored at cap: 0.00% (0/10000)
+  Successful paths: median trades 75.00; 95th percentile trades 229.00
+  Frequency-projected time: median 334.57 calendar days; 95th percentile 1021.56 calendar days
+
+Risk 0.75% of pre-trade equity (seed 20260928):
+  Phase-1 pass probability: 94.48% (9448/10000)
+  Closed-trailing-drawdown ruin: 5.52% (552/10000)
+  Censored at cap: 0.00% (0/10000)
+  Successful paths: median trades 47.00; 95th percentile trades 152.00
+  Frequency-projected time: median 209.67 calendar days; 95th percentile 678.07 calendar days
+
+Risk 1.00% of pre-trade equity (seed 20260929):
+  Phase-1 pass probability: 89.04% (8904/10000)
+  Closed-trailing-drawdown ruin: 10.96% (1096/10000)
+  Censored at cap: 0.00% (0/10000)
+  Successful paths: median trades 31.00; 95th percentile trades 109.00
+  Frequency-projected time: median 138.29 calendar days; 95th percentile 486.25 calendar days
+
+INTERPRETATION LIMITS:
+This models one Phase-1 target, not funding, a second phase, payout, or live firm eligibility.
+Only closed-equity trailing drawdown is checked here. The input ledger already has a separate M1 per-position guard; no account-wide unrealized-equity path is reconstructed.
+IID pooled-R replacement removes chronology, concurrency, regimes and asset-specific opportunity rates. Calendar days are a simple historical frequency conversion.
+The R pool comes from retrospective bid-only CFD proxy tapes with owner-supplied futures cost floors. These are conditional sample simulations, not prospective pass probabilities or a risk-profile recommendation.

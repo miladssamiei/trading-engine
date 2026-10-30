@@ -1,0 +1,105 @@
+GATE_CALENDAR_EFFECTS
+Calendar-effects gates for hypothesis #14 (OVERNIGHT and DOW)
+
+Status: written 2026‑08‑30 before any Phase‑1 script. This file is a verbatim extraction of every gate number in SPEC_CALENDAR_EFFECTS sections 2, 6, and 7. Nothing here may be relaxed after Phase‑1 or Phase‑2 output exists. Any new gate is exploratory and labeled.
+
+    Pre‑gates (data reproduction sanity — failure means a data problem, not a hypothesis result)
+
+PG1. Cash‑day count
+1,370 cash dates (2021‑01..2026‑04) must reproduce exactly from the verified M5 export.
+
+PG2. Swap anchor reproduction
+US500‑tick D1 buy‑and‑hold swap must reproduce exactly: −$55,360.00 (= −20 × (1,656 + 4 × 278 Wednesdays)).
+
+PG3. Buy‑and‑hold reproduction
+Full‑tape close‑to‑close buy‑and‑hold from cash closes must reproduce the documented D1 buy‑and‑hold figure within the documented residual band (34.66%..34.69%).
+
+Failure of PG1, PG2, or PG3 aborts the study as a data‑integrity issue; no Phase‑1 hypothesis result may be reported until all three pass.
+
+    Phase 1 gates — HYPOTHESIS OVERNIGHT (O1–O4; all must hold)
+
+O1. Gross drift and significance
+Gross mean(r_ovn) > 0
+AND day‑block bootstrap (10,000 resamples) P(mean ≤ 0) ≤ 0.10.
+
+O2. Financing robustness
+Net‑of‑financing Sharpe > 0 under BOTH financing conventions (A documented AND B strict‑points).
+Passing under only one convention counts as FAIL — no convention‑shopping.
+
+O3. Year shape
+Under EACH financing convention separately:
+At least 4 of 5 full years (2021–2025) net‑of‑financing positive
+AND no single year contributes more than 60 percent of total net.
+2026 partial is reported only, not counted.
+
+O4. Dominance over existing strategies
+Net‑of‑financing Sharpe > 0.337 (the current best validated single‑instrument strategy, ORB) under EACH financing convention separately.
+Failure of O4 means the hypothesis is reported as a NULL RESULT even if otherwise positive — being merely positive does not justify adoption.
+
+Pass condition: O1–O4 all hold → proceed to Phase 2 (section 4 below).
+Any failure → null write‑up for HYPOTHESIS OVERNIGHT in REPORT_CALENDAR_EFFECTS; STOP for this hypothesis only (no Phase 2, no EA). HYPOTHESIS DOW is unaffected and gated independently.
+
+    Phase 1 gates — HYPOTHESIS DOW (D1–D3; all must hold)
+
+D1. Classic Monday effect
+mean(r_cc | Monday) < pooled mean(r_cc | Tue..Fri)
+AND day‑block bootstrap (10,000 resamples, weekday labels preserved) P(delta ≥ 0) ≤ 0.10.
+STOP RULE: if D1 fails, HYPOTHESIS DOW is written up immediately as a null result in REPORT_CALENDAR_EFFECTS. D2 and D3 are NOT run. No weekday‑specific rule discovered after seeing the data may be adopted.
+
+D2. Tradeable version beats buy‑and‑hold
+The pre‑declared rule (flat over Monday‑ending spans, long the rest of the week) must have net Sharpe (costs + financing) that EXCEEDS the net Sharpe of the unconditional buy‑and‑hold‑equivalent baseline, under BOTH financing conventions, on the same zero‑filled common‑universe series (sqrt(252) annualization).
+
+D3. Year consistency
+Per‑year delta < 0 in at least 4 of 5 full years (2021–2025)
+AND the tradeable version's yearly net is positive in at least 4 of 5 full years
+AND no single year contributes more than 60 percent of its total net.
+2026 partial is reported only, not counted.
+
+Pass condition: D1–D3 all hold. On DOW pass, any Phase‑2 execution design is OUT OF SCOPE of this SPEC and requires its own pre‑declared SPEC amendment — it may not be built under this SPEC.
+
+    Phase 2 gates — OVERNIGHT execution (only if O1–O4 all pass)
+
+Gap‑risk gate (pre‑declared, checked first, hard stop):
+X = 3.0 percent. No single overnight loss (cash close(d) to cash open(d+1), including any gap) may exceed 3.0 percent of the $10,000 account (= $300 = 300 points at 1 lot).
+ONE violation = Phase‑2 FAIL regardless of every other metric.
+
+G1. Consistency
+Phase‑2 execution Sharpe within ±0.15 (absolute) of the offline Phase‑2 reference Sharpe
+AND Phase‑2 max drawdown within ±20 percent (relative) of the offline Phase‑2 reference max drawdown
+over the same window (Model=0 yearly batches, 2021‑01..2026‑04).
+
+G2. Execution integrity
+At least 95 percent of the expected overnight schedule present (one round trip per valid overnight span)
+AND zero off‑schedule trades
+AND every trade attributed
+AND every mismatch classified.
+
+Pass condition: the gap‑risk gate AND G1 AND G2 must all hold. Failure of any one rejects the Phase‑2 implementation; the Phase‑1 findings stand as reported, unchanged.
+
+    Multiple‑testing and honesty rules
+
+    Two hypotheses (OVERNIGHT and DOW) are tested in this SPEC. Every bootstrap p‑value must be reported both raw and Bonferroni‑adjusted for 2 tests (adjusted p = min(1, 2 × raw)).
+
+    Gates above are evaluated on the RAW p‑values as written. A hypothesis that passes a gate on raw p but fails on the Bonferroni‑adjusted p must be explicitly labeled FRAGILE UNDER MULTIPLE‑TESTING ADJUSTMENT in the report. The adjustment is reported and flagged, never used to relax or tighten a gate after the fact.
+
+    No convention‑specific rescue is allowed for financing (section 5 of SPEC).
+
+    No filter, threshold, or conditioning variable may be added to either hypothesis after Phase‑1 output exists; any such addition is exploratory and cannot rescue a failed gate.
+
+    No combination of OVERNIGHT and DOW may be tested under this SPEC.
+
+    A null result for either or both hypotheses is a complete, expected, and valuable deliverable.
+
+    Stop rules summary
+
+    PG1/PG2/PG3 fail → abort as data problem; fix and rerun before any hypothesis result is reported.
+
+    O1–O4 fail (any one) → HYPOTHESIS OVERNIGHT null result; no Phase 2 for OVERNIGHT.
+
+    D1 fails → HYPOTHESIS DOW null result immediately; D2/D3 not run.
+
+    D1–D3 all pass → DOW Phase‑2 requires a new, separate pre‑declared SPEC amendment; nothing may be built under this SPEC.
+
+    Gap‑risk gate, G1, or G2 fail in Phase 2 → OVERNIGHT Phase‑2 implementation rejected; Phase‑1 OVERNIGHT findings stand as the final result.
+
+END OF GATE_CALENDAR_EFFECTS

@@ -1,0 +1,75 @@
+HYPOTHESIS 89: US100 OPENING RELATIVE MOVE AS A US500 CATCH-UP SIGNAL
+Declared 2026-09-25 before any H89 evaluator code or return calculation.
+Null result is complete. This is a distinct hypothesis; previous H87/H88
+open-persistence FAIL reports remain frozen. No account orders.
+
+MECHANISM AND RULE
+US100 and US500 are different equity baskets. A larger US100 move in the
+first 15 minutes may reflect sector information that the broad US500 CFD
+has not fully incorporated. This is a hypothesis, not an established
+broker-CFD lead. On each eligible NY cash date, use FTMO-Demo native
+US100.cash and US500.cash Bid/Ask midquotes from [09:30,09:45) NY. Take
+each symbol's first quote at/after 09:30 and last quote before 09:45.
+Require a quote within the first 60 seconds and at least one quote in
+all 15 opening minutes for BOTH symbols. Let r100 and r500 be fractional
+last/first midpoint returns. Residual = r100 - 1.4*r500; fixed 1.4 is a
+before-test approximate relative-volatility normalization, not fitted.
+Buy US500 if residual > 0, sell if residual < 0; exactly zero skips.
+Do not use a target-US500 own-momentum filter or optimize the residual.
+Enter at the first US500 quote at/after 09:45 and strictly before 09:46.
+Entry price is ASK for buy, BID for sell. Initial risk distance is the
+US500 [09:30,09:45) midquote high-low rounded UP to the 0.01 grid,
+minimum 1.00 index point. Set stop at entry +/- one such distance,
+target at 2R, both rounded to the 0.01 tick. Monitor actual target
+US500 Bid for buys and Ask for sells in time order. First stop/target
+touch fills at that observed quote (gap-through adverse as observed).
+Otherwise exit at first quote at/after 12:00 and before 12:05 NY.
+One trade per day, always flat by noon. Missing post-entry exit or
+causal FX conversion is unresolved and fails coverage, never dropped
+from the source funnel to improve performance.
+
+SOURCE AND DATA QUALITY
+Connected EUR10000 FTMO-Demo MT5 account; source date 2025-01-02 through
+2026-09-24 inclusive. Use COPY_TICKS_ALL for both native symbols and
+validate every returned time_msc falls inside the requested broker-time
+window. Source hash of all retrieved daily bytes; record valid/missing
+opens and spreads. Exclude 2025-03-21 BEFORE evaluation because prior
+native US500 Model=4 QA found a broker-source mismatch concentrated
+there. Use the H88 verified NY-to-broker clock and causal EURUSD quote
+lookup in prior 60 seconds at entry and exit; detect if a broader
+source anomaly invalidates the sample. If US100 source coverage is too
+sparse or invalid, report FAIL and stop. No synthetic M1 bars.
+
+COSTS, RISK AND CHALLENGE
+Observed Bid/Ask entry and exit already charge actual variable spread.
+Additional stress subtracts 0.51 US500 point per round trip plus 0.25
+point slippage. Use 0.5% and 1.0% of initial EUR10000 for sizing, lots
+floored to 0.01, no compounding; cap by 15:1 index notional leverage.
+US500 contract size 1 USD/point/lot; causal EURUSD conversion (gain at
+ASK, loss at BID) and 0.7% additional conversion adjustment as in H88.
+Replay every fully observed rolling 90-calendar-day FTMO 2-Step stage-1
+start: EUR11000 target, four distinct trading days, EUR500 daily and
+EUR1000 overall max loss including worst observed floating P/L.
+Eligible start must have full 90 days observed by sample end. Report
+both risk rows, all trade/outcome rows, yearly signs and dates. This
+is a proxy for FTMO execution, not a paid-account result.
+
+STATISTICS AND HONESTY
+One frozen rule, no post-hoc beta, side, time, stop, risk or year choice.
+Use NY-date bootstrap 10000 draws, seed 20260930, for probability that
+mean stressed EUR net/trade <=0. Full 2025 and partial 2026 must both
+have positive stressed EUR totals. Historical selection bias from the
+project's many tried ideas remains; a historical PASS would only justify
+a separately frozen native tester and future forward confirmation.
+No historical Phase 1 alone may be called a verified system.
+
+VERBATIM GATES
+G-XI1: At least 300 executed trades on 300 distinct valid FTMO-native US100/US500 NY dates, with zero unresolved signaled exits, zero unknown causal FX quotes and zero out-of-window source timestamps.
+G-XI2: Strictly positive mean stressed EUR net/trade in one fixed risk row after actual Bid/Ask and extra 0.51-point spread plus 0.25-point slippage costs.
+G-XI3: NY-date bootstrap P(mean stressed EUR net/trade <= 0) at most 0.05 with 10000 draws and seed 20260930 in the same fixed risk row.
+G-XI4: Strictly positive stressed EUR totals in complete 2025 and partial 2026 in the same qualifying risk row.
+G-XI5: At least 150 fully observed rolling paid 90-calendar-day starts, with pass rate at least 0.70 and floating-equity breach rate at most 0.10 in the same qualifying risk row.
+G-XI6: Every trade uses only causal completed opening quotes, observed Bid/Ask fills, a positive tick-grid stop, same-day noon flat and frozen source/configuration with no account orders.
+
+All six must pass in the SAME risk row. Any gate FAIL yields immutable
+FINAL FAIL for H89; do not tune it after inspecting outcomes.

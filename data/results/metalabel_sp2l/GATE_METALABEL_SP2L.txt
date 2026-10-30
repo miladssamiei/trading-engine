@@ -1,0 +1,44 @@
+GATE_METALABEL_SP2L
+Meta-labeling filter gates for hypothesis #15 (SP2L ALLOW/REDUCE/SKIP)
+
+Status: written before any Phase‑1 script. Verbatim extraction of every M and N gate in SPEC_METALABEL_SP2L sections 6 and 7. Nothing here may be relaxed after Phase‑1 or Phase‑2 output exists.
+
+    Phase 1 gates (offline, primary model = logistic regression; all must hold)
+
+M1. Filtered Sharpe > unfiltered SP2L baseline Sharpe (> 0.275).
+
+M2. Filtered max drawdown ≤ unfiltered SP2L's max drawdown (≤ 4.17% at 1 lot, scaled appropriately for the reduce/skip sizing).
+
+M3. At least 100 trades remain after filtering (guards against a degenerate "skip almost everything" solution that trivially improves Sharpe by trading rarely).
+
+M4. At least 4 of 5 full years (2021–2025) net positive for the filtered series, AND 2025 filtered net must be LESS NEGATIVE than SP2L's unfiltered 2025 net.
+
+M5. Walk-forward stability: no single fold may contain more than 50% of total net improvement over the baseline.
+
+Pass condition: M1–M5 all hold for the PRIMARY model (logistic regression). The secondary model (shallow random forest) is reported for comparison only and can never be substituted as the passing model if logistic regression fails — that is a barred post-hoc model swap.
+
+Any failure → STOP at REPORT_METALABEL_SP2L: no Phase 2, no EA modification; SP2L continues running unfiltered exactly as validated.
+
+    Phase 2 gates (only if Phase 1 passes)
+
+N1. MQL5-ported logistic regression scores match Python scores within 1e-6 for all trades in the reconciliation window (automatic fail if not — pure arithmetic, no "two tapes" excuse).
+
+N2. MT5 filtered ensemble Sharpe within ±0.15 (absolute) and max drawdown within ±20% (relative) of the offline Phase-1 filtered numbers. Known feature-input tape sensitivities (particularly regime_label, which inherits the same UTC-midnight D1 fidelity risk that broke regime rotation's Phase 2) must be explicitly flagged and monitored.
+
+N3. Execution integrity: every ALLOW/REDUCE/SKIP decision in MT5 matches the Python reference for ≥ 95% of trades, with every mismatch classified.
+
+Failure of N1–N3 rejects the meta-label deployment; SP2L continues running unfiltered exactly as validated.
+
+    Stop and honesty rules
+
+    SP2L's file, parameters, entries, and exits are never modified under this SPEC, in Phase 1 or Phase 2.
+
+    The model class, feature list, decision thresholds, and all gates are frozen before Phase 1 runs; nothing may be added after seeing results.
+
+    Retraining on evaluation data, non-causal features, or silently switching to the random forest are explicitly forbidden.
+
+    If the model's performance is later found driven mostly by day_of_week, this must be flagged as reviving hypothesis #14's rejected univariate claim through a side door — treated with extra skepticism, not celebrated.
+
+    A null result is a complete, expected, valuable deliverable.
+
+END OF GATE_METALABEL_SP2L

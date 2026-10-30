@@ -1,0 +1,61 @@
+LUCID NQ H56 50K FLEX - PREDECLARED ACCOUNT TRANSFER SPEC
+Date: 2026-09-26. Frozen before evaluator code or returns.
+
+PURPOSE
+Check whether the corrected frozen H56 M1 expansion/pullback proxy on the
+USTECH CFD index could withstand a Lucid 50K Flex account with NQ contracts.
+This is not CME NQ trade/quote data or a validated futures strategy.
+
+INPUT AND FROZEN STRATEGY
+Read only NQ / C_H56_M1 rows from the immutable V2 intraday futures proxy
+trades.csv. H56 uses a three-completed-M1-candle expansion with aligned
+closes/opens, >1.0 index-point gap and middle body >1.5x neighbors; pending
+pullback at the later M1 extreme, EMA60 direction, Wilder ADX14>=20, entry
+New York [01:00,05:00), structural pre-spike stop, 1R target and at most one
+position. Exit is same-day in the frozen proxy ledger. No signal parameter,
+direction, filter, date or stop change is allowed. Verify all entry/exit NY
+dates are same weekdays and exits before 16:45 NY.
+
+DATA AND COST LIMITS
+The source is USTECH bid-only CFD M1 bars, with bar-extreme entry and no CME
+NQ quote, contract roll, actual fill or Lucid platform data. The source
+floor cost was 0.39 index points. NQ contract multiplier is $20/index
+point, tick 0.25 point, Lucid listed commission $1.75 per side. Scenario
+round trip cost is full spread in points + 3.50/20 = full spread +0.175.
+No extra platform/exchange fee is assumed. Run all fixed rows:
+  2 NQ, one-tick spread, cost 0.425 points;
+  4 NQ, one-tick spread, cost 0.425 points;
+  2 NQ, two-tick spread plus 0.5 adverse fill points, cost 1.175;
+  4 NQ, two-tick spread plus 0.5 adverse fill points, cost 1.175.
+These are assumption scenarios, not historical NQ spread measurements.
+Transfer each trade's source gross as (gross - scenario cost) x $20 x
+contract count. This does not re-run stops and targets under new price paths.
+
+LUCID 50K FLEX ACCOUNT MODEL
+$50,000 start, $53,000 pass target, $2,000 EOD trailing max loss. MLL begins
+at $48,000, follows the highest closing balance minus $2,000 and locks at
+$50,100 when that closing balance exceeds $52,100. No optional DLL. A pass
+also requires largest positive daily closed P/L / total account profit <=
+50%. Maximum evaluation size 4 minis. Funded starting scaling is lower;
+evaluation passing does not imply funded payout viability.
+
+Pretrade structural stop reserve: long = initial_risk + scenario cost;
+short = initial_risk + scenario cost - original 0.39 source cost. Multiply
+by $20 and contract count. If balance less stop reserve reaches MLL, mark
+BREACH_RISK_RESERVE before entry. After trade, check closed equity at or
+below MLL. Update high closing balance/MLL only at NY day close. This is a
+conservative account affordability check, not actual intratrade floating
+equity: source OHLC M1 cannot reconstruct futures stop sequences.
+
+ROLLING STARTS, REPORTING AND GATES
+Use every unique entry day with a complete [start,start+180 calendar days)
+horizon ending by the last source entry day. Reset account for each start.
+At each close, pass if balance >=$53,000 and 50% consistency holds; breach
+first, otherwise timeout after 180 days. Report all four cases, all-trade
+net mean/sum, 2024/2025/partial-2026 net, and pass/breach/timeout counts.
+The verbatim gates in GATE_LUCID_NQ_H56_FLEX50K_V1.txt are frozen before
+the evaluator. G1 same-day and cutoff, G2 >=50 starts, G3 >=50% passes and
+<=10% breaches, G4 positive 2024/2025/2026 annual signs, G5 native CME
+point-in-time NQ/MNQ quote and trade history plus Lucid forward fills.
+No row can be recommended without G5; a proxy statistical pass remains
+exploratory. No optimization, purchase or order is authorized.

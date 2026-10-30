@@ -1,0 +1,6 @@
+G-OG1: At least 150 executed gated trades on at least 150 distinct New York cash dates with complete real entry, path and exit M5 bars.
+G-OG2: Strictly positive gated mean US500 points per trade after the 0.51 spread proxy and an additional 0.51 cost stress.
+G-OG3: New York date bootstrap P(mean base 0.51-cost net <= 0) at most 0.01, 10000 resamples, seed 20261016.
+G-OG4: Strictly positive base 0.51-cost net US500 point totals in each complete gated calendar year 2024 and 2025.
+G-OG5: Every executed trade is same-New-York-day, enters at 09:30, exits no later than 10:00, and has a strictly positive causal initial stop distance.
+G-OG6: In the gated 180-calendar-day first-Challenge proxy at fixed 1% planned risk, at least 70% of eligible starts pass and at most 10% breach an equity floor.

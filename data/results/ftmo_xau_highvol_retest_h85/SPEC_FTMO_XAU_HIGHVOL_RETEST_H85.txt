@@ -1,0 +1,93 @@
+HYPOTHESIS 85: FTMO XAUUSD LONDON HIGH-VOLUME BAR RETEST
+Declared 2026-09-25 before H85 code, signals, returns or runs.
+
+1. OBJECTIVE AND MECHANISM
+Test one strictly intraday long-only gold rule on the confirmed EUR10k
+FTMO-Demo target. A London opening advance that later tests the price
+area of its most active M15 bar might have continuation demand.
+Highest M15 tick volume is only a broker activity proxy; the bar
+midpoint is NOT a true volume-profile point of control. The public
+Gold POC Retest author's results motivate this separate hypothesis,
+but its proprietary signal and published returns are NOT replicated.
+No parameter/side/time rescue after the first run. Null is complete.
+
+2. FIXED SOURCE AND CLOCK
+Read existing immutable target-broker source
+data/results/ftmo_xauusd_london_sweep_h83/ftmo_xauusd_m15.csv,
+SHA256 59add37f91b792ee0944780774ece65c797e799f46811b52b9772c65275e2e01.
+It has native non-custom FTMO-Demo XAUUSD BID OHLC, M15 tick_volume,
+UTC epoch corrected from the GMT+2/+3 server, 2024-01-01 through
+2026-09-24. Recheck hash, strict UTC chronology/quarter-hours,
+positive OHLC and tick volumes; do not re-export or change source.
+London wall slots use Europe/London. The trade and both ends must be
+on the same Europe/Prague date. 2024 is descriptive calibration;
+2025-01-01..2026-09-24 is gated historical screen, not independent
+forward validation (the gold tape has been inspected in prior work).
+
+3. FIXED ONE-TRADE-PER-DAY RULE
+For each London weekday, require exactly eight real consecutive M15
+bars opening 08:00, 08:15, ..., 09:45 London, all tick_volume>0.
+Define opening O as 08:00 BID open, opening close C as 09:45 BID close,
+opening H and L as eight-bar extremes, width W=H-L. Require W>0.82
+gold units and C>O. Pick the opening bar with largest tick_volume;
+ties choose earliest. Reference P=(that bar's BID high+low)/2.
+Require C>P. Scan M15 bars opening 10:00..13:45 London in order.
+The first completed bar with BID low<=P and BID close>P is the sole
+signal; do not take another setup that day. Require the next real bar
+to open exactly 15 minutes later and no later than 14:00 London.
+Buy at next bar BID open+0.41 assumed Ask. Require entry BID>P;
+otherwise skip this date without another attempt. Initial BID stop
+is P-0.5W. Require entry Ask>stop and risk=entry Ask-stop>0.
+Target BID is entry Ask+2*risk. No discretionary filter, no shorts,
+no pyramiding and no carry past London 16:00.
+
+4. EXIT, COST AND COVERAGE
+From entry bar through 15:45 London bar inclusive: long stop hits
+when BID low<=stop, fill min(stop, BID open); target hits when BID
+high>=target, fill target. If both hit in one bar, stop wins. Require
+consecutive 15-minute printed bars along an open trade; gaps mark
+the trade unresolved. If no bracket hits, flat at 15:45 bar BID close.
+If that bar is absent, trade is unresolved and counts against gate.
+Never pre-filter a signal using future exit-bar availability. Net
+gold units=exit BID-entry Ask; extra-cost stress=net-0.41. Compute
+floating worst from the minimum BID low of every bar used and charge
+the extra 0.41 stress to it. Native historical variable Bid/Ask,
+commission, slippage, EUR conversion and 0.01-lot rounding are not
+available from this M15 source. These limitations prevent deployment
+or claimed broker-executed performance after a Phase-1 pass.
+
+5. FIXED STATISTICS AND PACE
+Save every eligible-day status and every signaled trade including
+unresolved ones. Report base/stressed net, gross BID movement, R
+based on initial stop, year totals, drawdown, hit reasons, holding
+time and bootstrap. Bootstrap complete gated London dates with
+replacement, 10,000 samples, seed 20260927; report one-sided
+P(mean base net<=0), 95% interval. Trades with unresolved outcomes
+cannot be omitted to make any gate pass.
+For EUR10k paid 2-Step first-phase proxy, use every gated trade-date
+start with a fully observed 90-calendar-day follow-up. Replay fixed
+0.5%, 1.0%, 1.5% or 2.0% of initial EUR10k per initial-stop R,
+continuous theoretical lots and no compounding; extra-stressed
+realized and worst floating R. Pass at EUR11k with at least four
+distinct Prague trade dates; breach if floating or close equity falls
+below EUR9k total or prior Prague-midnight balance minus EUR500.
+Breach wins ties. Report pass/breach/timeout counts and median days.
+Also report 14-calendar-day EUR10k Free Trial proxy at EUR10.5k,
+same risk rows and floors, descriptive only. An unresolved trade
+invalidates all pace estimates and fails coverage; any provisional
+pace tally must be labeled optimistic.
+
+6. PREDECLARED GATES
+G-HV1: At least 150 gated signals and executed/marked trades on at least 150 distinct London dates, zero missing next-bar entries after a signal and zero unresolved exits.
+G-HV2: Strictly positive mean extra-0.41-cost-stressed net gold units per gated trade.
+G-HV3: London-date bootstrap P(mean base net <= 0) at most 0.05, 10000 samples, seed 20260927.
+G-HV4: Strictly positive base net gold-unit totals in each gated year 2025 and partial 2026.
+G-HV5: At least 150 fully observed rolling paid 90-calendar-day starts and one predeclared risk row with pass rate at least 0.70 and breach rate at most 0.10.
+G-HV6: Every executed trade is flat on its entry Europe/Prague date, with positive entry-stop distance, target above entry Ask, and verified immutable native target-broker source hash/clock/coverage.
+
+All six gates must pass. A FAIL is final for H85; no rerun with tuned
+bar count, volume definition, side, target, stop, session, cost,
+test year or risk row. Historical Phase-1 PASS permits only a NEW
+predeclared native Bid/Ask real-tick and MT5 Model=4 study, followed
+by independent forward confirmation. Save code, trade/day CSVs,
+summary and REPORT regardless of verdict. No account orders.

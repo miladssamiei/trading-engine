@@ -1,0 +1,26 @@
+GOLD MACRO ENGINE ALL-INCLUSIVE COST STRESS - REPORT
+2020-2026 full BID M1 proxy tape; old 0.410 vs strict 0.585 units round trip.
+Tape C:\Users\Milad\Desktop\RR\data\results\xauusd_onboarding\xauusdtick_m1.csv; SHA256 a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f; 2,337,538 M1 bars; 2020-01-01T23:00:00+00:00 to 2026-09-01T20:59:00+00:00.
+MBB: 10,000 moving-block resamples, 5 trades/block, seed 20260928.
+Dollar conversion: 1 standard XAUUSD lot = 100 oz = $100 per gold price unit.
+OVERALL EXPLORATORY ROBUSTNESS GATE: FAIL
+
+A_KC
+  OLD cost 0.410 | trades 190 | win 36.32% | net expectancy 4.602902 gold units/trade | total net 874.5514 gold units | Net Sharpe 0.07741 | MBB p 0.1334 | gate FAIL
+    Exit counts {'SL_INIT': 2, 'SL_TRAIL': 188, 'END': 0}; NY overnight 183; 2021-2025 year signs FAIL; annual entry-cohort PnL {'2020': {'trades': 21, 'net_units': 54.99305488666482}, '2021': {'trades': 25, 'net_units': -22.536445210932015}, '2022': {'trades': 33, 'net_units': -128.9760186697722}, '2023': {'trades': 32, 'net_units': 13.611221045467573}, '2024': {'trades': 30, 'net_units': 23.5725524231882}, '2025': {'trades': 31, 'net_units': 406.96758812468534}, '2026': {'trades': 18, 'net_units': 526.9194400214924}}; funnel {'candidates': 1708, 'shadowed': 1451, 'no_real_entry_bar': 67}
+  STRICT cost 0.585 | trades 190 | win 35.79% | net expectancy 4.427902 gold units/trade | total net 841.3014 gold units | Net Sharpe 0.07447 | MBB p 0.1456 | gate FAIL
+    Exit counts {'SL_INIT': 2, 'SL_TRAIL': 188, 'END': 0}; NY overnight 183; 2021-2025 year signs FAIL; annual entry-cohort PnL {'2020': {'trades': 21, 'net_units': 51.31805488666578}, '2021': {'trades': 25, 'net_units': -26.91144521093088}, '2022': {'trades': 33, 'net_units': -134.7510186697707}, '2023': {'trades': 32, 'net_units': 8.011221045468801}, '2024': {'trades': 30, 'net_units': 18.322552423183197}, '2025': {'trades': 31, 'net_units': 401.5425881246797}, '2026': {'trades': 18, 'net_units': 523.7694400214891}}; funnel {'candidates': 1708, 'shadowed': 1451, 'no_real_entry_bar': 67}
+  EXACT FULL-REPLAY LOSS FROM HIGHER COST: $3,325.00 per 1.00 standard lot (old net minus strict net).
+    Cost-posting component $3,325.00; cost-induced gross/exit-path component $0.00; components sum to full difference.
+
+B_DONCHIAN
+  OLD cost 0.410 | trades 560 | win 39.46% | net expectancy 5.948003 gold units/trade | total net 3330.8815 gold units | Net Sharpe 0.13133 | MBB p 0.0003 | gate FAIL
+    Exit counts {'SL_INIT': 64, 'SL_TRAIL': 495, 'END': 1}; NY overnight 486; 2021-2025 year signs FAIL; annual entry-cohort PnL {'2020': {'trades': 71, 'net_units': 513.9100806522808}, '2021': {'trades': 85, 'net_units': 2.7785156353959337}, '2022': {'trades': 93, 'net_units': 38.50122517750742}, '2023': {'trades': 86, 'net_units': 39.489547432653126}, '2024': {'trades': 93, 'net_units': -131.25253672595227}, '2025': {'trades': 85, 'net_units': 893.3135241284795}, '2026': {'trades': 47, 'net_units': 1974.1411063141018}}; funnel {'candidates': 2514, 'shadowed': 1954, 'no_real_entry_bar': 0}
+  STRICT cost 0.585 | trades 564 | win 38.83% | net expectancy 5.652382 gold units/trade | total net 3187.9432 gold units | Net Sharpe 0.12523 | MBB p 0.0004 | gate FAIL
+    Exit counts {'SL_INIT': 65, 'SL_TRAIL': 498, 'END': 1}; NY overnight 489; 2021-2025 year signs FAIL; annual entry-cohort PnL {'2020': {'trades': 71, 'net_units': 507.78508065228243}, '2021': {'trades': 86, 'net_units': -32.541116980845345}, '2022': {'trades': 93, 'net_units': 30.086332468184764}, '2023': {'trades': 88, 'net_units': -3.946596977505351}, '2024': {'trades': 94, 'net_units': -166.89510665980856}, '2025': {'trades': 85, 'net_units': 883.6885241284695}, '2026': {'trades': 47, 'net_units': 1969.7661063140972}}; funnel {'candidates': 2514, 'shadowed': 1950, 'no_real_entry_bar': 0}
+  EXACT FULL-REPLAY LOSS FROM HIGHER COST: $14,293.82 per 1.00 standard lot (old net minus strict net).
+    Cost-posting component $10,034.00; cost-induced gross/exit-path component $4,259.82; components sum to full difference.
+
+Costs are embedded once in Ask/Bid fills. Engine A keeps its BID-coordinate stop path; Engine B retains its original ASK-trigger short stop, which can change exits when cost changes.
+The 0.410 baseline here is a fresh M1-stop replay. It is not the previously published 4H/1H OHLC-run total.
+Fixed cost is a scenario floor, not measured time-varying spread or commission. No swap, slippage, MT5 fill fidelity, lot sizing, or FTMO account drawdown is modeled. Retrospective prior-researched proxy performance is not independent validation.

@@ -1,0 +1,81 @@
+REPORT - HYPOTHESIS #47: CROSS-ASSET MULTI-TIMEFRAME VOLATILITY SQUEEZE BREAKOUT (4h anchor / 15m execution)
+Generated: 2026-09-23T21:39:56.831526+00:00  |  OVERALL VERDICT: FAIL
+Mechanics: 4h BB(20,2.0) inside KC(20EMA,1.5*ATR14) squeeze + 4h LR-slope(20) direction + 15m Donchian(20)
+close breakout, entry at signal-bar open, initial SL 2.0*ATR15(t-1), close-ratchet trail 2.5*ATR15(j),
+honest gap fills, worst-case same-bar stop, continuous forward-filled 15m/4h grid per SPEC_CROSS_SQZ.txt.
+
+=== US500 (cost floor 0.51 points RT) ===
+1. DATA: 1791504 M1 rows -> 186532 15m bars (65046 synthetic = 34.9%) / 11659 4h bars, 2021-01-03 18:00:00 .. 2026-04-30 19:45:00
+   tape sha256 29ad8f8b25b43be4...
+2. FUNNEL: armed bars=186220  squeeze-ON bars=24304  candidates: L=854 S=434  ignored-while-open=1288  EXECUTED=436
+3. NET ECONOMICS (points): mean=-0.037/trade  median=-3.582  total=-16.3  win=35.1%  Net Sharpe=-0.037
+   excursion asymmetry: mean MFE=14.13 vs mean MAE=8.93  (MFE/MAE=1.58)
+   sides: LONG: n=263 mean=0.85  SHORT: n=173 mean=-1.39
+   exit mix: {'SL': 432, 'SL_GAP': 3, 'FORCED_EOD': 1}
+   year-by-year net:
+      2021: n=  85  total=     102.9  mean=   1.210
+      2022: n=  71  total=    -146.9  mean=  -2.069
+      2023: n=  87  total=      88.3  mean=   1.016
+      2024: n=  99  total=     100.3  mean=   1.013
+      2025: n=  63  total=      37.8  mean=   0.600
+      2026: n=  31  total=    -198.6  mean=  -6.407
+4. GATES (independent, frozen in GATE_CROSS_SQZ.txt):
+   G-SQ1 executed >= 30          :   436          -> PASS
+   G-SQ2 Net Sharpe > 0           :    -0.037    -> FAIL
+   G-SQ3 MBB P(mean<=0) <= 0.20   :    0.5216    -> FAIL  (block=5, 10000 resamples, seed 20260926)
+   US500 VERDICT: FAIL
+
+=== EURUSD (cost floor 0.3 pips RT) ===
+1. DATA: 2490896 M1 rows -> 235388 15m bars (68406 synthetic = 29.1%) / 14713 4h bars, 2020-01-01 17:00:00 .. 2026-09-18 16:45:00
+   tape sha256 e578692f3b02d985...
+2. FUNNEL: armed bars=235072  squeeze-ON bars=36400  candidates: L=986 S=913  ignored-while-open=1899  EXECUTED=691
+3. NET ECONOMICS (pips): mean=0.538/trade  median=-5.260  total=372.0  win=33.6%  Net Sharpe=0.421
+   excursion asymmetry: mean MFE=17.80 vs mean MAE=10.15  (MFE/MAE=1.75)
+   sides: LONG: n=362 mean=0.30  SHORT: n=329 mean=0.80
+   exit mix: {'SL': 682, 'SL_GAP': 9}
+   year-by-year net:
+      2020: n= 104  total=     253.1  mean=   2.433
+      2021: n=  92  total=    -100.3  mean=  -1.091
+      2022: n= 121  total=      52.6  mean=   0.434
+      2023: n=  96  total=      46.9  mean=   0.489
+      2024: n= 117  total=      15.2  mean=   0.130
+      2025: n= 105  total=     196.4  mean=   1.871
+      2026: n=  56  total=     -91.9  mean=  -1.641
+4. GATES (independent, frozen in GATE_CROSS_SQZ.txt):
+   G-SQ1 executed >= 30          :   691          -> PASS
+   G-SQ2 Net Sharpe > 0           :     0.421    -> PASS
+   G-SQ3 MBB P(mean<=0) <= 0.20   :    0.2554    -> FAIL  (block=5, 10000 resamples, seed 20260926)
+   EURUSD VERDICT: FAIL
+
+=== XAUUSD (cost floor 0.41 price units RT) ===
+1. DATA: 2337538 M1 rows -> 233752 15m bars (77868 synthetic = 33.3%) / 14611 4h bars, 2020-01-01 18:00:00 .. 2026-09-01 16:45:00
+   tape sha256 a8c4c1d6551d27f3...
+2. FUNNEL: armed bars=233440  squeeze-ON bars=40520  candidates: L=980 S=868  ignored-while-open=1848  EXECUTED=724
+3. NET ECONOMICS (price units): mean=-0.218/trade  median=-2.632  total=-157.6  win=30.9%  Net Sharpe=-0.280
+   excursion asymmetry: mean MFE=9.14 vs mean MAE=5.44  (MFE/MAE=1.68)
+   sides: LONG: n=358 mean=0.26  SHORT: n=366 mean=-0.69
+   exit mix: {'SL': 715, 'SL_GAP': 9}
+   year-by-year net:
+      2020: n= 119  total=      -0.1  mean=  -0.001
+      2021: n= 142  total=    -228.3  mean=  -1.608
+      2022: n= 101  total=      -5.4  mean=  -0.054
+      2023: n=  96  total=     -22.8  mean=  -0.237
+      2024: n= 123  total=      37.9  mean=   0.308
+      2025: n=  85  total=     -24.3  mean=  -0.286
+      2026: n=  58  total=      85.4  mean=   1.473
+4. GATES (independent, frozen in GATE_CROSS_SQZ.txt):
+   G-SQ1 executed >= 30          :   724          -> PASS
+   G-SQ2 Net Sharpe > 0           :    -0.280    -> FAIL
+   G-SQ3 MBB P(mean<=0) <= 0.20   :    0.7739    -> FAIL  (block=5, 10000 resamples, seed 20260926)
+   XAUUSD VERDICT: FAIL
+
+OVERALL VERDICT: FAIL (requires all three instruments to pass G-SQ1..G-SQ3 independently)
+
+HONESTY NOTES
+- Continuous forward-fill convention: synthetic flat bars fill no-tick minutes, maintenance breaks, holidays
+  and weekends; they make Donchian breakouts impossible on flat windows and set 4h LR slope to exactly 0, but
+  they DECAY Wilder ATR across long gaps, so early post-gap signals carry mechanically tightened stops. This is
+  a declared consequence of the continuity convention (SPEC 2.2/3.5), not a bug fix applied post hoc.
+- Single pre-declared parameterization; no optimization, no re-runs; sides, years and instruments reported as run.
+- Phase-1 screen is in-sample by construction; MFE/MAE are exploratory descriptors, never results. Phase 2 (MT5
+  execution) only on overall PASS; any FAIL is final for this artifact.

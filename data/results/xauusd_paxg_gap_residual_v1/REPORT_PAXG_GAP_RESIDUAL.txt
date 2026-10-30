@@ -1,0 +1,133 @@
+REPORT: HYPOTHESIS 75 PAXG-XAUUSD WEEKEND GAP RESIDUAL
+{
+  "source": {
+    "source_manifest_sha256": "b8dc6726c5686861475109bea8b9bfa82c3587da335df6a01d9cbea468c6e9fc",
+    "source_months": 73,
+    "source_months_ok": 73,
+    "source_rows": 52649,
+    "first_utc": "2020-08-28 12:00:00+00:00",
+    "last_utc": "2026-08-31 23:00:00+00:00"
+  },
+  "source_manifest_sha256": "b8dc6726c5686861475109bea8b9bfa82c3587da335df6a01d9cbea468c6e9fc",
+  "xau_sha256": "a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f",
+  "spec_sha256": "4b57f0dc2e3833dd5b0315685f2f5210d85fa0127c942e8b86c823220c611158",
+  "gate_sha256": "702de82861cd28c54814c5943839dd0681726be415025754dc5b30ccf06011f4",
+  "signal_sundays": 314,
+  "executed_sundays": 281,
+  "skip_reasons": {
+    "MISSING_XAU_FRIDAY_ANCHOR": 21,
+    "MISSING_XAU_ENTRY": 11,
+    "MISSING_XAU_EXIT": 1
+  },
+  "calibration_through_2022": {
+    "trades": 105,
+    "buy_trades": 65,
+    "sell_trades": 40,
+    "gross_mean_units": -0.49084761904763624,
+    "base_mean_units": -0.9008476190476361,
+    "base_total_units": -94.58900000000179,
+    "stress_mean_units": -1.3108476190476364,
+    "stress_total_units": -137.63900000000183,
+    "win_rate_base": 0.47619047619047616
+  },
+  "gated_2023_plus": {
+    "trades": 176,
+    "buy_trades": 96,
+    "sell_trades": 80,
+    "gross_mean_units": 2.249823863636369,
+    "base_mean_units": 1.83982386363637,
+    "base_total_units": 323.8090000000011,
+    "stress_mean_units": 1.4298238636363694,
+    "stress_total_units": 251.64900000000102,
+    "win_rate_base": 0.5454545454545454
+  },
+  "bootstrap_p_nonpositive": 0.1233,
+  "yearly": {
+    "2020": {
+      "trades": 16,
+      "buy_trades": 11,
+      "sell_trades": 5,
+      "gross_mean_units": -0.8900625000000275,
+      "base_mean_units": -1.3000625000000277,
+      "base_total_units": -20.801000000000442,
+      "stress_mean_units": -1.7100625000000278,
+      "stress_total_units": -27.361000000000445,
+      "win_rate_base": 0.5
+    },
+    "2021": {
+      "trades": 48,
+      "buy_trades": 32,
+      "sell_trades": 16,
+      "gross_mean_units": -0.09389583333334883,
+      "base_mean_units": -0.503895833333349,
+      "base_total_units": -24.18700000000075,
+      "stress_mean_units": -0.9138958333333491,
+      "stress_total_units": -43.86700000000076,
+      "win_rate_base": 0.5416666666666666
+    },
+    "2022": {
+      "trades": 41,
+      "buy_trades": 22,
+      "sell_trades": 19,
+      "gross_mean_units": -0.7997804878048932,
+      "base_mean_units": -1.2097804878048932,
+      "base_total_units": -49.601000000000624,
+      "stress_mean_units": -1.6197804878048934,
+      "stress_total_units": -66.41100000000063,
+      "win_rate_base": 0.3902439024390244
+    },
+    "2023": {
+      "trades": 47,
+      "buy_trades": 18,
+      "sell_trades": 29,
+      "gross_mean_units": 0.17631914893618061,
+      "base_mean_units": -0.23368085106381914,
+      "base_total_units": -10.9829999999995,
+      "stress_mean_units": -0.643680851063819,
+      "stress_total_units": -30.252999999999496,
+      "win_rate_base": 0.46808510638297873
+    },
+    "2024": {
+      "trades": 50,
+      "buy_trades": 27,
+      "sell_trades": 23,
+      "gross_mean_units": 1.302700000000018,
+      "base_mean_units": 0.8927000000000183,
+      "base_total_units": 44.635000000000915,
+      "stress_mean_units": 0.4827000000000177,
+      "stress_total_units": 24.135000000000886,
+      "win_rate_base": 0.6
+    },
+    "2025": {
+      "trades": 47,
+      "buy_trades": 32,
+      "sell_trades": 15,
+      "gross_mean_units": 2.2917234042553534,
+      "base_mean_units": 1.8817234042553537,
+      "base_total_units": 88.44100000000162,
+      "stress_mean_units": 1.4717234042553535,
+      "stress_total_units": 69.17100000000161,
+      "win_rate_base": 0.574468085106383
+    },
+    "2026": {
+      "trades": 32,
+      "buy_trades": 19,
+      "sell_trades": 13,
+      "gross_mean_units": 6.7136249999999364,
+      "base_mean_units": 6.30362499999994,
+      "base_total_units": 201.71599999999808,
+      "stress_mean_units": 5.893624999999938,
+      "stress_total_units": 188.595999999998,
+      "win_rate_base": 0.53125
+    }
+  },
+  "gates": {
+    "G-PR1": true,
+    "G-PR2": true,
+    "G-PR3": false,
+    "G-PR4": false
+  },
+  "verdict": "FAIL",
+  "caveat": "Historical PAXG/XAUUSD source exposure; BID M1 fixed 0.41 spread proxy, no Sunday variable spread, intraday floating-loss, stop or FTMO pace test."
+}
+FINAL PHASE-1 VERDICT: FAIL

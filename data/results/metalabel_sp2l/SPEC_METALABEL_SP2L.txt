@@ -1,0 +1,348 @@
+SPEC_METALABEL_SP2L
+Meta-labeling ML filter on the frozen SP2L spike/gap EA: learned
+ALLOW / REDUCE / SKIP filtering of validated trades
+(hypothesis #15, project hypothesis numbering)
+
+Status: SPEC written 2026-08-30 BEFORE any code or run. The companion
+GATE_METALABEL_SP2L (artifact list, section 9) must be created as a
+verbatim extraction of every M and N gate in sections 6 and 7 BEFORE
+any Phase-1 script runs. Nothing in this document may be changed after
+Phase-1 output exists; any addition is exploratory and labeled.
+
+------------------------------------------------------------------------
+1. GOAL, MECHANISM, DISTINCTNESS
+
+A secondary machine-learning classifier (a "meta-label") sits on top
+of SP2L's existing, UNCHANGED trade signals. For each signal SP2L
+would take, the classifier answers one question: ALLOW (take the trade
+at full size), REDUCE (take at half size), or SKIP (do not take the
+trade). The classifier never invents a new entry, direction, or exit;
+it only filters/sizes signals SP2L already generates. SP2L's entries,
+exits, lots, and parameters are NEVER modified under this SPEC - the
+EA stays frozen exactly as validated.
+
+Distinctness, stated explicitly:
+
+  - Not the CAIRO checkpoint bridge (pre-project-repositioning): that
+    system used GBM + RLlib APPO + a decision transformer to GENERATE
+    signals directly from raw features; its Python backtest Sharpe of
+    15-20 collapsed to MT5 Sharpe of -6.6..+4.4 with non-significant
+    correlation (+0.65, p=0.16) - the checkpoint signal did not
+    survive the trip into MT5 execution. This SPEC does NOT generate
+    signals with ML: SP2L generates 100% of the direction/entry/exit
+    logic exactly as validated. The ML model only answers a
+    binary/ternary question about a signal SP2L already decided to
+    take.
+  - Not regime rotation (hypothesis #13): that used fixed,
+    hand-declared D1 thresholds and a fixed monthly mapping, with
+    zero fitting. This SPEC explicitly DOES fit a model, and must
+    therefore carry stricter walk-forward and overfitting controls
+    than any prior hypothesis in this project.
+  - Not the meta-coordinator (hypothesis #12): that gated whole
+    strategies on/off based on trailing Sharpe. This SPEC gates
+    individual TRADES within a single strategy (SP2L) based on
+    trade-level context features.
+
+------------------------------------------------------------------------
+2. NAMED PRIORS AND BASELINES
+
+Named prior weaknesses this SPEC must confront honestly (all
+documented, none recomputed in Phase 1 beyond reproduction checks):
+
+  - SP2L's fragile regimes: 2025 negative on BOTH the Python and MT5
+    engines (2025 net -260.25 pts on the common universe); the
+    DOWN-VOL regime cell was SP2L's weakest inside regime rotation
+    (Sharpe 0.313).
+  - SP2L's documented two-tapes tester sensitivity: ~10% of trades
+    differ between the tester-served tape and the chart-served
+    export.
+  - The CAIRO precedent above: ML layers are prone to failing the
+    backtest-to-live transition even when the underlying idea
+    (using regime/context to filter trades) is sound.
+
+The meta-label's burden: demonstrate that it can filter OUT some of
+this fragility using only information available strictly BEFORE each
+trade is taken, without curve-fitting to the same 2025 data it will
+be evaluated on.
+
+Baselines the filter must confront (all on the common day universe,
+zero-filled, $10,000 base, 1 lot, no compounding):
+
+  BASELINE 1 - unfiltered SP2L exactly as validated:
+    data/results/sp2l_2021_2026/mt5_trades.csv (1,343 trades,
+    2021-01..2026-04, Sharpe 0.275, maxDD 4.17% at 1 lot).
+  BASELINE 2 - regime rotation's SP2L-in-VOL-only cell (Sharpe 0.892),
+    a NON-ML benchmark for what a good filter could achieve.
+
+------------------------------------------------------------------------
+3. DATA, FEATURES, AND LABEL (all causal, all pre-declared)
+
+Base data: SP2L's own validated trade set
+(data/results/sp2l_2021_2026/mt5_trades.csv, 1,343 trades,
+2021-01..2026-04) and the underlying US500-tick M1 export used to
+generate SP2L's setups (same source as the sp2l_ablation work).
+
+LABEL (the meta-label target) - triple-barrier-style convention
+simplified to match SP2L's own defined exit:
+  y(trade) = 1 if the trade's realized net PnL as recorded in
+  mt5_trades.csv is > 0, else 0.
+This is NOT re-simulated; it uses SP2L's own realized outcome exactly
+as validated, so the label itself introduces zero new modeling
+assumptions.
+
+FEATURES (exactly these, all computable strictly BEFORE the trade's
+entry bar, all reused from already-validated project artifacts; no
+new feature engineering beyond simple interpretable combinations):
+
+  F1 setup_type        SP2L's own setup classification (spike vs
+                       gap) at signal time.
+  F2 session_tag       NY / London / Asian session flag at signal
+                       time, from SP2L's own session logic.
+  F3 ema60_slope       EMA60 slope at the signal bar (SP2L's own
+                       trend estimator, already computed).
+  F4 adx_value         ADX(14) at the signal bar (already part of
+                       SP2L's ablation features).
+  F5 regime_label      the D1 regime label from hypothesis #13
+                       (UP-CALM / UP-VOL / DOWN-CALM / DOWN-VOL /
+                       RANGE), computed with the SAME corrected
+                       UTC-midnight causal cutoff already validated.
+                       This directly tests whether the regime
+                       information that made regime rotation
+                       attractive can rescue SP2L via a learned
+                       filter instead of a hand-built family switch.
+  F6 trailing_sp2l_sharpe_20
+                       trailing Sharpe of SP2L's own last 20
+                       realized trades strictly before this one
+                       (causal, no lookahead; computed from prior
+                       trades only; 0 if no prior trade exists).
+  F7 day_of_week       NY weekday of the trade's open date, from
+                       the calendar effects work (hypothesis #14).
+                       Included DESPITE hypothesis #14's null result,
+                       because a MODEL is allowed to find weak
+                       multivariate structure a single-variable gate
+                       could not - but this must be reported
+                       honestly as a feature that individually failed
+                       to pass hypothesis #14's own gates (section 8
+                       skepticism rule).
+
+No other features may be added after this list is frozen. Any feature
+discovered to "help" after seeing Phase-1 results is exploratory and
+cannot be added to the frozen model.
+
+Feature encoding (pre-declared, part of the frozen pipeline):
+one-hot for F1 (2 levels), F2 (3 levels), F5 (5 levels), F7 (5
+levels); numeric for F3, F4, F6. Numeric features are standardized
+using the mean/std of the TRAINING window only (causal; the fold's
+own data never contributes to its scaler).
+
+------------------------------------------------------------------------
+4. MODEL CLASS AND TRAINING PROTOCOL (no search over model families)
+
+PRIMARY MODEL: logistic regression (L2-regularized, sklearn
+LogisticRegression, solver lbfgs, max_iter 1000, class_weight
+'balanced' - pre-declared because SP2L's base win rate is reported
+before thresholds are chosen and the label may be imbalanced).
+Regularization C is swept ONLY within the pre-declared small grid
+{0.01, 0.1, 1.0} via nested walk-forward: for each fold, C is chosen
+on STRICTLY PRIOR trades by an inner walk-forward (each inner
+validation half-year scored by the model trained on all trades before
+it; criterion = mean log-loss; ties broken toward the smaller C). The
+selected C's model is then trained on ALL strictly prior trades and
+predicts the fold. The inner loop never touches the fold's own
+trades.
+
+SECONDARY/COMPARISON MODEL: shallow random forest (max_depth <= 4,
+n_estimators = 200, fixed random_state = 42), trained on the same
+walk-forward folds with the same features, reported alongside. It can
+never be silently substituted for the primary if logistic regression
+fails - that would be a post-hoc model swap (barred, section 8).
+
+No gradient boosting, no neural networks, no deep learning, no
+autoML, no hyperparameter search beyond the stated 3-value grid. The
+model must stay small enough to audit by hand given SP2L's modest
+sample size (1,343 trades).
+
+Training protocol:
+  - Walk-forward ONLY. Burn-in: 2021 trades (no meta-label
+    predictions in 2021 - SP2L trades are taken at full size,
+    unfiltered, exactly as validated). Folds: 2022H1, 2022H2, 2023H1,
+    2023H2, 2024H1, 2024H2, 2025H1, 2025H2, 2026H1 (the project's
+    standard half-year fold convention). For each fold, train on ALL
+    STRICTLY PRIOR trades, predict the fold's trades, never retrain
+    on future data.
+  - No shuffling, no k-fold cross-validation on this time-ordered
+    data - walk-forward only, consistent with every prior SPEC in
+    this project.
+
+------------------------------------------------------------------------
+5. META-LABEL DECISION RULE (pre-declared, not tuned post-hoc)
+
+Given the classifier's predicted probability p(win) for a signal:
+
+  p(win) >= 0.60          ALLOW  at full size (1.00 lot, SP2L's
+                          validated size)
+  0.45 <= p(win) < 0.60   REDUCE to 0.50 lot
+  p(win) < 0.45           SKIP   (do not take the trade)
+
+These thresholds (0.60/0.45) are fixed in advance and may NOT be
+re-tuned after seeing Phase-1 filtered performance. If Phase 1 with
+these thresholds fails, a SINGLE pre-declared alternative threshold
+pair (0.65/0.40, wider deadband) may be tried as one labeled
+EXPLORATORY comparison - not a rescue, and not adoptable if the
+primary fails its gates.
+
+Sizing convention for filtered PnL: sized PnL = decision multiplier x
+recorded PnL (1.00 / 0.50 / 0.00), where the recorded PnL already
+includes SP2L's validated costs and financing at 1 lot. Skipped
+trades contribute zero.
+
+------------------------------------------------------------------------
+6. PHASE 1 - OFFLINE META-LABEL QUALITY (Python only, no MT5)
+
+Procedure: for each walk-forward fold, generate meta-label decisions
+for every SP2L trade in that fold using the model trained only on
+strictly prior trades. Compute the FILTERED SP2L daily PnL series
+(allowed trades at full/half size per the decision rule; skipped
+trades contribute zero) on the same common day universe and
+cost/financing conventions as all prior SP2L work.
+
+Metrics: Sharpe, max drawdown, total net, trade count (allowed /
+reduced / skipped tallies), per-fold classifier accuracy / precision /
+recall / AUC (reported, NOT gated - a classifier can improve trading
+performance without high raw accuracy), per-year net and share,
+comparison against BASELINE 1 (unfiltered SP2L) and BASELINE 2
+(SP2L-in-VOL cell). Reproduction gate: the unfiltered baseline
+recomputed from mt5_trades.csv must reproduce the documented
+Sharpe 0.275 / maxDD 4.17% / 1,343 trades within portfolio-study
+tolerances - abort on failure.
+
+PHASE 1 GATES (M1-M5; ALL must hold for the PRIMARY model):
+
+  M1  Filtered Sharpe > unfiltered SP2L baseline Sharpe (> 0.275).
+  M2  Filtered max drawdown <= unfiltered SP2L's max drawdown
+      (<= 4.17% at 1 lot, scaled appropriately for the
+      reduce/skip sizing).
+  M3  At least 100 trades remain after filtering (explicit check
+      against the degenerate "skip almost everything" solution that
+      trivially improves Sharpe by trading rarely - a classifier
+      CAN cheat this way).
+  M4  At least 4 of 5 full years (2021-2025) net positive for the
+      FILTERED series, with explicit attention to 2025 (SP2L's known
+      bad year): 2025 filtered net must be LESS NEGATIVE than SP2L's
+      unfiltered 2025 net, or the filter has not demonstrably helped
+      in its named target scenario.
+  M5  Walk-forward stability: the logistic regression's fold-level
+      filtered Sharpe must not be driven by a single fold containing
+      more than 50% of total net improvement over the baseline (a
+      concentration/overfitting check specific to ML claims,
+      stricter than the standard 60% year-concentration rule because
+      ML models are more prone to fold-specific overfitting).
+
+PASS = M1-M5 all hold for the PRIMARY model (logistic regression).
+The secondary model (shallow random forest) is reported for
+comparison but cannot be substituted as the passing model if it does
+better and logistic regression fails - a post-hoc model swap is
+explicitly barred.
+
+Any failure -> STOP at REPORT_METALABEL_SP2L: no Phase 2, no EA
+modification, SP2L continues to run unfiltered exactly as validated.
+A null result is a complete, expected, valuable deliverable - this
+project's own CAIRO history predicts ML layers are more likely to
+fail than hand-built rules.
+
+------------------------------------------------------------------------
+7. PHASE 2 - MT5 IMPLEMENTATION DESIGN (only if Phase 1 passes)
+
+  - The frozen ea/SP2L_SpikeGap.mq5 remains completely untouched.
+  - The meta-label filter runs as a SEPARATE lightweight process:
+    either an external Python process, or - preferred - a rule
+    encoding exported from the trained logistic regression's
+    coefficients into MQL5 (logistic regression is a weighted sum
+    plus sigmoid - trivial to port exactly, unlike a random forest
+    or neural net; this exact-portability is another reason logistic
+    regression is the primary model).
+  - The filter intercepts SP2L's signal before order placement (via
+    a shared file, named pipe, or embedded coefficient calculation
+    inside a wrapper EA) and applies the frozen ALLOW/REDUCE/SKIP
+    thresholds of section 5.
+  - Reconciliation: the ported MQL5 logistic scoring must reproduce
+    the Python model's p(win) for every historical trade EXACTLY.
+
+PHASE 2 GATES:
+
+  N1  MQL5-ported logistic regression scores match Python scores
+      within 1e-6 for all trades in the reconciliation window
+      (automatic fail if not - pure arithmetic, no "two tapes"
+      excuse).
+  N2  MT5 filtered ensemble Sharpe within +/- 0.15 (absolute) and
+      max drawdown within +/- 20% (relative) of the offline Phase-1
+      filtered numbers - the SAME tolerance convention as regime
+      rotation. Known feature-input tape sensitivities are flagged
+      and monitored (particularly regime_label: it inherits the
+      SAME UTC-midnight D1 fidelity risk that broke regime
+      rotation's Phase 2, and must be explicitly watched).
+  N3  Execution integrity: every ALLOW/REDUCE/SKIP decision in MT5
+      matches the Python reference for >= 95% of trades, with every
+      mismatch classified (expect regime_label-driven mismatches
+      specifically, per the regime rotation precedent).
+
+Failure of N1-N3 rejects the meta-label deployment; SP2L continues
+running unfiltered exactly as validated.
+
+------------------------------------------------------------------------
+8. HONESTY AND ANTI-LEAK RULES
+
+  - SP2L's file, parameters, entries, and exits are NEVER modified
+    under this SPEC, in Phase 1 or Phase 2.
+  - The model class, feature list, decision thresholds, and all
+    gates are frozen before Phase 1 runs. No feature, threshold, or
+    model family may be added after seeing results; any such change
+    is exploratory, labeled, and cannot rescue a failed gate.
+  - Explicitly forbidden: retraining the model on data it will be
+    evaluated on, using non-causal features, or silently switching
+    to the random forest if logistic regression fails.
+  - The day_of_week feature is included DESPITE hypothesis #14's
+    null result, specifically to test whether multivariate ML can
+    find structure a univariate gate could not. If the model's
+    performance is later found to be driven mostly by day_of_week,
+    this must be flagged explicitly as reviving a previously-
+    rejected univariate claim through a side door, and treated with
+    extra skepticism - not celebrated as a new finding.
+  - A null result is a complete, expected, valuable deliverable,
+    consistent with this project's own CAIRO precedent that ML
+    layers are prone to failing the backtest-to-live transition
+    even when the underlying idea (using regime/context to filter
+    trades) is sound.
+
+------------------------------------------------------------------------
+9. ARTIFACTS AND LOGGING (data/results/metalabel_sp2l/)
+
+  SPEC_METALABEL_SP2L.txt      this document (before any code)
+  GATE_METALABEL_SP2L.txt      verbatim extraction of M1-M5 and
+                               N1-N3 (before any script runs)
+  metalabel_features.csv       per-trade features and labels,
+                               causal
+  metalabel_folds.csv          walk-forward fold assignments and
+                               trained model coefficients per fold
+  metalabel_filtered_trades.csv  per-trade ALLOW/REDUCE/SKIP
+                               decisions and resulting sized PnL
+  yearly_breakdown_metalabel.csv
+  phase1_metalabel_stats.json  all metrics, classifier diagnostics,
+                               gate outcomes for both models
+  REPORT_METALABEL_SP2L.txt    Phase-1 verdict regardless of
+                               outcome; Phase-2 results only if
+                               Phase 1 passes
+  Only on Phase-1 pass: the ported MQL5 scoring wrapper,
+  reconciliation scripts and logs, REPORT_METALABEL_SP2L_PHASE2.txt
+  evaluate/metalabel_sp2l_phase1.py, and only on pass:
+  evaluate/metalabel_sp2l_phase2.py
+
+PROGRESS.md hooks (append per stage, current style):
+  "metalabel SP2L - SPEC/GATE pre-declared",
+  "metalabel SP2L - Phase 1 run (logistic regression + RF
+  comparison)",
+  "metalabel SP2L - Phase 1 verdict",
+  and on pass: "metalabel SP2L - Phase 2 MT5 porting",
+  "metalabel SP2L - reconciliation verdict".
+
+END OF SPEC_METALABEL_SP2L

@@ -1,0 +1,33 @@
+GATE_ADDENDUM_MOKAMEL_FLIP_USA30_NATIVE_RETEST.txt
+Verbatim extraction of every gate from SPEC_ADDENDUM_MOKAMEL_FLIP_USA30_NATIVE_RETEST.txt,
+written 2026-09-05 BEFORE any re-test code ran. Nothing below may change after
+numbers are seen.
+
+GATE A1 (Stage A, binding_filtered population, window 2025-07-01..2026-08-31,
+         universe = usa30_days_binding.csv rows with session_open>0 OR
+         prev_close>0, WARMUP 200):
+  (i)   n >= 150 binding signals.
+  (ii)  count(MFE >= t) > count(MAE >= t) at ALL of t in
+        {0.50, 0.75, 1.00} x ATR14(trigger M5).
+  (iii) day-block bootstrap p <= 0.20 (10,000 draws, seed 20260903).
+  VERDICT: PASS only if (i) AND (ii) AND (iii).
+
+GATE B1 (Stage B, binding_40_80 arm only, COST_PRIMARY = 2.282 USA30 pts):
+  (i)   expectancy_after_cost > 0.
+  (ii)  VACUOUS BY ORIGINAL Q2 RESOLUTION (single exogenous cell; unit ring
+        reported non-binding).
+  (iii) n_trades >= 150.
+  VERDICT: PASS only if (i) AND (iii).
+
+NON-GATING (reported only):
+  - Unfiltered-population Stage A stats.
+  - Ring arms {20/40, 30/60, 50/100, 60/120} (promotion forbidden).
+  - Half-year nets 2025H2/2026H1/2026H2; 2026-only sensitivity sub-run.
+  - Exit-reason mix (time-exit share) on the binding arm.
+  - All comparisons vs the frozen US500 runs.
+
+STOP RULES:
+  - Stage A FAIL -> report NULL, do not run Stage B.
+  - Stage B FAIL -> report NULL (stronger than the US500 null); no MT5 work.
+  - Stage A AND B PASS -> MT5 Custom-base tick import + Model=4 probe +
+    D1/D2 reconciliation only (task-owner bar, 2026-09-05); Model=0 banned.

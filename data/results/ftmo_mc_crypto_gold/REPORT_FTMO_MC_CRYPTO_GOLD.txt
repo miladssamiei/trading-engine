@@ -1,0 +1,25 @@
+FTMO-LIKE CRYPTO + GOLD POOLED-R MONTE CARLO - 2026-09-29
+Scenario: $10,000, $175 fee, 80% first-payout split, fixed initial-account-dollar risk
+Input: 2,275 trades; mean net R +0.096914952; SHA256 d11585c778f7d638ba209cc595361fb07d15203528400da2f8c4ae2bc120e4fb
+Simulation: 10,000 IID-with-replacement paths per profile; seed 20261031+1000*profile_index
+Phase targets: +$1,000 then +$500; phase static floor -$1,000; evaluation single-trade loss proxy <= -$500.
+Funded: 30 trades, static floor -$1,000, first receipt only if final PnL > $0.
+Net EV = average gross receipt across all paths minus $175 fee. Payout receipt includes the refunded fee.
+
+RESULTS MATRIX
+Risk | P1 pass | P2 pass conditional | Both pass | First payout | Gross receipt/path | Net EV/challenge | Median trades | P95 trades | Median months | P95 months
+0.5% | 88.67% | 90.31% | 80.08% | 48.23% | $238.51 | $+63.51 | 220.0 | 583.0 | 7.56 | 20.03
+1.0% | 71.36% | 76.81% | 54.81% | 32.37% | $269.77 | $+94.77 | 73.0 | 203.0 | 2.51 | 6.98
+1.5% | 63.35% | 71.32% | 45.18% | 26.59% | $311.84 | $+136.84 | 38.0 | 103.0 | 1.31 | 3.54
+2.0% | 58.04% | 67.26% | 39.04% | 20.54% | $322.65 | $+147.65 | 24.0 | 67.0 | 0.82 | 2.30
+
+PATH COUNTS AND FAILURE BREAKDOWN
+Risk | P1 passes | P1 static/single/capped | P2 passes | P2 static/single/capped | Funded static | First payouts
+0.5% | 8,867 | 1,133/0/0 | 8,008 | 859/0/0 | 0 | 4,823
+1.0% | 7,136 | 2,598/266/0 | 5,481 | 1,561/94/0 | 348 | 3,237
+1.5% | 6,335 | 3,528/137/0 | 4,518 | 1,762/55/0 | 874 | 2,659
+2.0% | 5,804 | 4,018/178/0 | 3,904 | 1,835/65/0 | 1,283 | 2,054
+
+Median/P95 trade counts include Phase 1 plus Phase 2 only among paths that passed both phases; months = trades/29.1.
+GATE: PASS - frozen input and path-accounting checks passed; capped paths, if any, are explicitly shown above.
+LIMITATIONS: The <=-$500 single-trade rule is not FTMO's full daily equity-loss calculation. IID sampling misses clustered losses, correlated BTC/ETH/gold positions, unrealized drawdown, and real phase timing. Historical net R comes from proxy fills and owner cost scenarios; months assume a constant 29.1 trades/month. Positive simulated EV is not a purchase recommendation or payout guarantee.

@@ -1,0 +1,73 @@
+SPEC_EXECUTION_INFRASTRUCTURE: PropFirmGuard & Slippage Control
+Study dir: deploy/infrastructure/
+Pre-declared: 2026-09-08.
+Lineage: Transition to Path C (Execution Infrastructure). Research on single-instrument CFD price tapes is formally exhausted. This SPEC governs the creation of production-grade risk management and execution wrappers for the validated ORB and SP2L strategies.
+
+SECTION 1. ARCHITECTURE AND SCOPE
+
+1.1 Objective: Build a standalone MQL5 include file (Include/PropFirmGuard.mqh) that enforces institutional risk limits, protects against prop-firm evaluation breaches, and implements real-time microstructure filters.
+1.2 Integration: The frozen ORB_Strategy.mq5 and SP2L_SpikeGap.mq5 will be modified ONLY to #include <PropFirmGuard.mqh> and wrap their OrderSend calls with these pre-trade checks. The core strategy logic, parameters, and entry/exit conditions remain mathematically identical to their validated backtests.
+
+SECTION 2. GLOBAL RISK LIMITS (ACCOUNT LEVEL)
+
+2.1 Daily Drawdown Hard Stop
+
+    Prop firm standard: 5% daily loss limit based on the prior day EOD equity/balance.
+
+    Guardrail threshold: MAX_DAILY_LOSS_PCT = 3.5%. This provides a 1.5% buffer for slippage and gap risk during forced liquidations.
+
+    Logic: The EA logs the AccountInfoDouble(ACCOUNT_BALANCE) at the 00:00:00 broker rollover. At every tick, it evaluates CurrentEquity. If (EOD_Balance - CurrentEquity) / EOD_Balance >= 0.035, the PANIC_FLATTEN protocol is triggered.
+
+2.2 Maximum Trailing Drawdown
+
+    Prop firm standard: 10% trailing or static max drawdown.
+
+    Guardrail threshold: MAX_TRAILING_DRAWDOWN_PCT = 8.0%.
+
+    Logic: The EA maintains a High-Water Mark (HWM) of account equity in a terminal global variable (to survive terminal restarts). If (HWM - CurrentEquity) / HWM >= 0.08, the PANIC_FLATTEN protocol is triggered.
+
+2.3 The PANIC_FLATTEN Protocol
+
+    If a global risk limit is breached, the EA immediately sends market orders to close all open positions, deletes all pending limit/stop orders, and sets a Global Terminal Variable (PROP_GUARD_BREACHED = true).
+
+    The EA OnTick() function will return immediately if PROP_GUARD_BREACHED == true, physically preventing any further trading until a human intervenes and resets the variable.
+
+SECTION 3. MICROSTRUCTURE FILTERS (TRADE LEVEL)
+
+3.1 Maximum Allowable Spread
+
+    The tick-model revalidation proved that the real median spread on US500 is ~0.516 points, and periods of illiquidity expand this drastically.
+
+    Guardrail threshold: MAX_SPREAD_US500 = 0.60 points; MAX_SPREAD_XAUUSD = 0.45 points.
+
+    Logic: Before any entry, the EA calculates Ask - Bid. If the real-time spread exceeds the threshold, the entry is rejected. The signal is skipped, not queued (to avoid entering late at worse prices).
+
+3.2 Slippage Control (Deviation)
+
+    All OrderSend requests (market entries and exits) must explicitly define the deviation parameter.
+
+    Guardrail threshold: MAX_SLIPPAGE_POINTS = 0.20 points.
+
+    If the broker cannot fill the order within this deviation, the fill is rejected. For ORB (breakout), missing a fill is mathematically superior to capturing a fill 0.8 points late.
+
+SECTION 4. PORTFOLIO SIZING CONTROLLER
+
+4.1 Inverse Volatility Allocation
+
+    The meta-coordinator failed because trailing-Sharpe gating did not change the concentration shape. A static risk-parity allocation is required.
+
+    Standard sizing: Risk 0.5% of account equity per trade.
+
+    If ORB and SP2L signal simultaneously (or hold concurrent positions), their combined open risk cannot exceed MAX_CONCURRENT_RISK = 1.0%. If SP2L attempts to open a trade that would breach this limit while an ORB trade is active, SP2L is blocked.
+
+SECTION 5. ARTIFACTS AND IMPLEMENTATION
+
+Produce:
+
+    Include/PropFirmGuard.mqh (containing the risk logic, PANIC_FLATTEN protocol, and IsTradeAllowed() boolean checks).
+
+    Updated ea/ORB_Strategy_Live.mq5 and ea/SP2L_SpikeGap_Live.mq5. These are duplicates of the frozen EAs, appended with _Live to delineate the production deployment files from the research validation files.
+
+    A synthetic test script scripts/TestPropGuard.mq5 to force a 3.5% drawdown and verify the PANIC_FLATTEN executes successfully.
+
+END OF SPEC.

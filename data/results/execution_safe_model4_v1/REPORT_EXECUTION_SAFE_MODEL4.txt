@@ -1,0 +1,89 @@
+Study: execution_safe_model4_v1
+Finalized: 2026-09-11
+Verdict: PASS for the pre-declared execution-eligibility correction only
+downstream_model_allowed: false
+live_execution_allowed: false
+
+Purpose and scope
+
+This study corrected the two defects that stopped Hypothesis #21 before modeling: 54 ORB trades carried into a later New York date after off-grid force-close requests were rejected, and one SP2L trade opened on a nonstandard session that had no tradable tick at the configured exit. The frozen parent EAs and their historical results were not modified. Two new versioned experts were created and tested:
+
+ea/ORB_ExecutionSafe_v1.mq5
+ea/SP2L_ExecutionSafe_v1.mq5
+
+The allowed changes were limited to tick-grid-normalized explicit close requests with local result logging and retry state, SL/TP reason priority over force-close state, and the fixed 45-date historical nonstandard-session entry block. Inputs other than the identifying magic numbers remained equal to the frozen parents. Manual diff review found no change to signal, direction, stop, target, volume, intended exit time, or day-accounting formulas outside the approved corrections.
+
+Gate verdicts
+
+X-S1 PASS: Frozen parent hashes recorded before implementation still match after all work.
+X-S2 PASS: Static and manual diff review found only approved corrections A-C and artifact identifiers.
+X-C1 PASS: Both new EAs compiled with zero errors and zero warnings; source and executable hashes were archived.
+X-M1 PASS: All 12 yearly batches used Model=4 and logged generation based on real ticks.
+X-M2 PASS: All 12 batches logged Test passed and produced attributable, parseable trade and day exports from one tester agent.
+X-E1 PASS: Zero later-New-York-date closes and zero negative-duration trades across both stitched streams.
+X-E2 PASS: Zero entries occurred on the frozen 45-date block list.
+X-E3 PASS: All 256 explicit close-helper attempts succeeded; zero invalid-price, market-closed, or other unsuccessful close-helper results.
+X-E4 PASS: All 12 batches logged flat=1 and owned_positions=0 at deinitialization.
+X-R1 PASS: All 1,792 exit markers were checked; zero SL/TP classification-priority violations.
+X-A1 PASS: Config, log, source, executable, and selected-output hashes plus frozen-versus-corrected comparisons were archived.
+X-FINAL PASS: Every required gate passed.
+
+Compilation and tester evidence
+
+MetaEditor compiled both fresh sources after deletion of any stale new binary or log. ORB source SHA-256 is fe01757874e59f871aa87a9b2b3e5652d9cf9733031f94f126b34415142e3a99 and executable SHA-256 is 94864e8e2319caed42a6b812e9f6e023855daadb052a6ef82fea8fa59bf6e22b. SP2L source SHA-256 is b0d6efac80dfa01c93ab9b815df97fa9c8123574adf282ae34c0538e41aa11ac and executable SHA-256 is 8cb47715df48fed2439882cbcbe7ffe358bf5b35cd620d14ef04a19b808072f0.
+
+The yearly windows were 2021, 2022, 2023, 2024, 2025, and 2026 through 2026-04 for each strategy. ORB ran on M5 and SP2L on M1. Each strategy replayed 96,122,449 real ticks across its six batches. The terminal did not emit its optional configured XML file in this installation, so each batch archives a nonempty batch_evidence_report.json derived from the attributable tester log, config, and sandbox output hashes in addition to the raw agent logs and CSVs.
+
+Corrected Model=4 results
+
+ORB
+Trades: 450
+Total PnL: +$383.14 at 1 lot, $1/point, $10,000 fixed base
+Common-universe daily Sharpe: 0.2722
+Maximum drawdown: $580.42, or 5.80% of the fixed base
+Year PnL: 2021 -$32.45; 2022 +$271.53; 2023 +$377.20; 2024 -$215.75; 2025 -$256.99; 2026 through April +$239.60
+Exit reasons: 187 session_end, 158 stop_loss, 105 take_profit
+Later-date closes: 0
+Blocked-date entries: 0
+
+SP2L
+Trades: 1,342
+Total PnL: +$182.75 at 1 lot, $1/point, $10,000 fixed base
+Common-universe daily Sharpe: 0.1754
+Maximum drawdown: $478.31, or 4.78% of the fixed base
+Year PnL: 2021 +$49.93; 2022 +$176.08; 2023 +$74.33; 2024 +$151.26; 2025 -$306.81; 2026 through April +$37.96
+Exit reasons: 859 stop_loss, 414 target, 69 time_exit
+Later-date closes: 0
+Blocked-date entries: 0
+
+Descriptive comparison with frozen Model=4 streams
+
+Frozen ORB had 437 trades, +$114.91 PnL, 0.0745 Sharpe, $791.59 maximum drawdown, 54 later-date closes, and two blocked-date entries. The corrected stream matched 435 frozen trade keys, removed two, and added 15 after same-day closes released occupancy for subsequent opportunities. PnL increased by $268.23 and maximum drawdown fell by $211.17. These changes are consequences of the predeclared execution correction and were not used as a selection gate.
+
+Frozen SP2L had 1,349 trades, +$138.65 PnL, 0.1329 Sharpe, $513.18 maximum drawdown, one later-date close, and seven blocked-date entries. The corrected stream matched 1,342 trade keys and removed the seven blocked-date trades, with no added trades. PnL increased by $44.10 and maximum drawdown fell by $34.87. These changes were not used as a selection gate.
+
+Known limitations
+
+The PASS is narrow. The tester logs retain two entry-side rejection episodes from the frozen entry logic: ORB made two rejected retries with invalid price retcode 10015 on 2022-10-14 before entering on the next M5 bar, and SP2L made two rejected retries with invalid stops retcode 10016 on 2025-12-29 and did not enter that setup. X-E3 explicitly gates the corrected close helper, so these entry failures do not change this verdict. They require a separately predeclared correction study before any claim of general order-execution robustness.
+
+The fixed date list is based on incomplete-session dates observed in the available 2021-01 through 2026-04 historical tape. It is not a future exchange calendar or proof of the broker's live CFD schedule. The new EAs therefore remain historical research artifacts.
+
+The corrected performance is still weak and unstable. ORB has three negative calendar segments, including 2024 and 2025. SP2L loses $306.81 in 2025. Neither corrected stream has a performance gate in this study, and no new walk-forward predictive-edge claim was tested. The result does not repair the incomplete FTMO account identity, live quote, tick-value, fill, margin, or reconciliation evidence.
+
+Conclusion
+
+The specific Model=4 cross-date close defects are corrected on the tested historical tape, so the execution_safe_model4_v1 artifact passes its technical gates. This PASS does not qualify either EA for the FTMO 10k Challenge and does not reopen the failed HAR study retroactively. Any continuation must use a new pre-declared study. The next justified work is a separate entry-order normalization/stops correction, followed by a new risk-model eligibility study only after its own data gates pass. Live or FTMO execution remains prohibited by this research verdict.
+
+Primary artifacts
+
+SPEC_EXECUTION_SAFE_MODEL4.txt SHA-256 b42089d56151e744803287fe9c9f60a1df6e4e202f299a1dec9b702fc52dc187
+GATE_EXECUTION_SAFE_MODEL4.txt SHA-256 0f18e009dc5b68daee05faf1e34fd0bf6029913d311936452095f481c381237c
+audit.json contains the machine-readable verdict and comparisons.
+provenance.json contains source and frozen-parent hashes.
+compile/ contains compiler logs, source copies, and executables.
+orb/batches and sp2l/batches contain 12 configs, logs, evidence reports, metadata, and attributable exports.
+stitched/ contains the final corrected trade and day streams.
+
+Independent verification and tests
+
+An independent Luna verification recomputed all 12 batch checks, all 24 selected export hashes, stitched row counts, trade metrics, all 256 close results, and all 1,792 reason classifications without finding a verdict-changing discrepancy. The focused execution-safe and HAR regression suite completed with 15 passing tests; the final execution-safe-only suite completed with 9 passing tests before report freeze.

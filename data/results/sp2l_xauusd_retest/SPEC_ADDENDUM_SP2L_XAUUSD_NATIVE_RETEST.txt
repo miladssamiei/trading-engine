@@ -1,0 +1,113 @@
+SPEC_ADDENDUM_SP2L_XAUUSD_NATIVE_RETEST.txt
+Written 2026-09-05, BEFORE any XAUUSD re-test code was written or run.
+
+0. WHAT THIS IS
+
+SP2L (XAUUSD native re-test). Data-domain re-test of the SP2L spike/gap/
+continuation hypothesis (original: data/results/sp2l_ablation/SPEC.md,
+2026-08-27, run on US500-tick). SP2L was ported from a third-party XAUUSD
+M1 bot (SP2L_Advanced_Bot.py) and forced onto US500 because no gold data
+existed then. This addendum removes that substitution: the EXISTING
+pipeline logic runs on native XAUUSD tick data with the ORIGINAL gold
+parameters. Not a new hypothesis, not a rule change:
+- evaluate/sp2l_phase1.py, evaluate/sp2l_step3.py: LOGIC VERBATIM; the
+  re-test derivatives sp2l_phase1_xauusd.py / sp2l_step3_xauusd.py (in
+  this directory) differ ONLY by the input path, the dollar-denominated
+  thresholds below, and the walk-forward end bound; the exact diff is
+  stored in DIFF_phase1.txt / DIFF_step3.txt for audit.
+- evaluate/sp2l_reference.py / ea/SP2L_SpikeGap.mq5: untouched (Phase 2
+  tooling; only earned if gates pass).
+
+1. DATA (verified 2026-09-05, data/results/xauusd_onboarding/)
+
+M1 tape: data/results/xauusd_onboarding/xauusdtick_m1.csv (2,337,538
+bars, BID OHLC, open-time epoch seconds, no-tick minutes skipped,
+M1->M5 agreement identical). Full tape 2020-01-01 23:00 UTC ->
+2026-09-01 21:00 UTC (Dukascopy XAUUSD, 385,483,125 ticks, 0
+duplicates/monotonic violations/inversions; gaps = weekends/holidays +
+three 3.0h vendor-maintenance blocks; structurally complete: median
+1,378/1,380 M1 bars per day, stable 2020-2026). Window: FULL TAPE
+2020-01..2026-09 (the original US500 window was 2021-01..2026-04; the
+longer window is a power improvement, declared here).
+
+2. UNIT CONVERSION REVERSED - THE ORIGINAL GOLD PARAMETERS (Q2 resolution,
+   task-owner confirmed 2026-09-05)
+
+| Param                 | US500 conversion (frozen)   | XAUUSD NATIVE BINDING          |
+|-----------------------|-----------------------------|--------------------------------|
+| SPIKE_CANDLE_SIZE     | 1.5 (dimensionless)         | 1.5 (as-is)                    |
+| PGAP                  | 0.04% of gapped-over level  | $1.00 FIXED DOLLAR (= 100 pts x |
+|                       |                             | 0.01 on a 2-decimal gold broker;|
+|                       |                             | the original bot semantics)    |
+| MAX_SL_DISTANCE       | 0.40% of entry price        | $10.00 FIXED DOLLAR (= 1000 pts|
+|                       |                             | x 0.01)                        |
+| EMA_PERIOD            | 60 M1                       | 60 (as-is)                     |
+| ADX_PERIOD / MIN_ADX  | 14 / 20.0                   | 14 / 20.0 (as-is)              |
+| MAX_OPPOSITE_MOVES    | 1                           | 1 (as-is)                      |
+| TP_R                  | 1.0 default, grid below     | unchanged                      |
+
+This feed's XAUUSD ticks are 3-decimal (point=0.001); the LITERAL
+points-on-this-feed reading (PGAP=$0.10 / MAX_SL=$1.00) is REJECTED as a
+feed-decimal artifact (10x too tight vs the original bot's broker grid).
+Note the binding is FIXED DOLLAR, not percent: at $1,520 (2020) $1.00 is
+0.066% of price, at $4,300+ (2026) it is 0.023% - the percent reading
+would drift with the 2020-2026 gold bull run; the original bot's literal
+semantics are fixed-dollar. PGAP sensitivity is REPORTED INFORMATIONALLY
+at {$0.50, $2.00} (mirroring the original {0.02, 0.08}% half/double
+structure) on the no-filter ALL24 baseline only; gates evaluate ONLY at
+PGAP=$1.00.
+
+3. MECHANISM, SESSIONS, CONVENTIONS (all identical to the frozen SPEC.md)
+
+Setup detection (10 clauses, SIGNED bodies, spike-candle-spanning gap),
+pending machine (single pending, break+risk+MAX_SL kill, trend/EMA/ADX
+filters, session gating), second-entry toggle, E-XTM/E-CLS dual
+conventions, LON/NY/ALL24 session variants with DST-aware zoneinfo walls,
+NY-date day blocks, 0.01 trade-grid price normalization. The gold tape's
+daily structure (24h with 17:00-18:00 NY break + weekends) feeds the same
+natural-gap handling the US500 daily halt did (SPEC sec 2).
+
+4. PHASE 1 (gates identical to GATE.md)
+
+48 configurations = {EMA, TREND, ADX, SECOND} x {LON, NY, ALL24} on the
+full 2020-01..2026-09 M1 tape. Stage-A light-touch subset reported first.
+- G1: count(MFE>=t) > count(MAE>=t) at ALL of t in {0.10%, 0.15%, 0.20%},
+  under BOTH E-XTM and E-CLS.
+- G2: >= 150 first-entry signals.
+- Multiplicity honesty identical (both conventions; Phase 1 only admits
+  to Step 3; PGAP sensitivity cannot admit).
+If no configuration passes: NULL result, STOP.
+
+5. STEP 3 (only for Phase-1 passers; protocol identical to GATE.md)
+
+TP_R grid {0.5, 0.75, 1.0, 1.5, 2.0}, SL = pre-spike extreme
+(rule-fixed). Phase A first-crossing reconstruction (exploratory).
+Phase B occupancy re-simulation + walk-forward: BURN-IN = everything
+before 2022-01 (26 months; the original burned only 2021 because its
+tape began 2021-01 - equivalent everything-before-first-fold structure,
+declared), folds 2022H1..2026H1 (9 half-year folds, the final fold ends
+2026-09 - the tape end; the original final fold ended 2026-05 at ITS
+tape end), select by trailing expectancy (>= 20 trailing trades else
+TP_R=1.0).
+Walk-forward gates (gross-of-cost, as frozen): G1 expectancy>0 AND
+Sharpe>0; G2 >= 150 trades; G3 positive in >= 4 of 5 calendar years
+(2022..2026) AND best year < 60% of profit. CONFIRMATION requires the
+gates under BOTH E-XTM and E-CLS; E-NEXT remains the tightening-only
+step-4 buildability gate. Metrics remain gross-of-cost (bid tape); the
+REPORT additionally states after-cost context using the MEASURED XAUUSD
+floor ($0.41 full-tape / $0.399 cash median spread, Q4) WITHOUT changing
+any gate.
+
+6. HONESTY / ANTI-LEAK / STOP RULES
+
+- Null is a complete deliverable; if SP2L fails on its ORIGINAL target
+  instrument, the wrong-instrument excuse is removed and the null is
+  stronger than the US500 result (which was: Phase-1 passers existed;
+  Model=4 Sharpe 0.133 marginal).
+- No parameter tuning, no re-denomination after numbers are seen, no
+  additional thresholds. The dollar binding was fixed by the task owner
+  before any XAUUSD signal existed.
+- MT5 tick import + Model=4 work happens ONLY IF Phase 1 passes AND
+  Step-3 walk-forward gates pass for at least one configuration (the
+  Stage-A-and-Stage-B bar, task-owner 2026-09-05). Model=0 is banned
+  from this task entirely.

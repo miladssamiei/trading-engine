@@ -1,0 +1,110 @@
+HYPOTHESIS 86: PUBLIC HYDRAPRIME GOLD EA WITH FTMO SAME-DAY GUARD
+Declared 2026-09-25 before H86 source copy, adaptation code, tester
+configuration, signals, returns or runs. Null/FAIL is a full result.
+
+1. PURPOSE AND SOURCE BOUNDARY
+Test whether the public, executable HydraPrime MQL5 defaults, with
+only the mandatory same-day, GMT-session and account-scope corrections
+below, can generate positive cost-adjusted real-tick intraday XAUUSD
+performance and pass an EUR10k FTMO 2-Step first phase within 90
+calendar days at a reasonable breach rate. This is a NEW adaptation,
+not reproduction of the author's 530-trade headline. Public GitHub
+HEAD observed 2026-09-25:
+b5b7169ec49c0dab762cdeb4f49f1afebae7ec9f
+Source URL at that commit:
+https://raw.githubusercontent.com/sriramvarun0636/HydraPrime/b5b7169ec49c0dab762cdeb4f49f1afebae7ec9f/main.mq5
+Archive the exact raw source bytes and SHA256 after this SPEC/GATE.
+The source labels defaults masked; do not infer the author's tested
+parameters. No optimization, post-hoc input or risk setting change.
+
+2. TARGET, TIME AND MODEL
+Use the existing connected FTMO-Demo native XAUUSD, 100 oz/lot, on
+the EUR10k confirmed target account, MT5 Strategy Tester only, never
+attach the EA to a live/demo chart or send account orders. M5 chart,
+Model=4 every tick based on real ticks, deposit EUR10000, current
+target symbol contract and broker commission, 2024-01-01 through
+2026-09-24 (or latest complete prior date if native tick history ends
+earlier; if so FAIL source coverage if gated <2026-09-01). 2024 is
+descriptive; 2025-01-01 through 2026-09-24 is historical gated block.
+Record tester agent journal proving real ticks, bid/ask, date coverage,
+trade deals, commission, rejected orders and tester quality. Reject
+synthetic Model=0 or one-minute OHLC as qualifying evidence.
+Treat all old years as exposed project development data. A historical
+PASS is replication only, requiring subsequent independently forward
+recorded outcomes before a verified trading recommendation.
+
+3. ALLOWED ADAPTATION, FIXED IN ADVANCE
+Start from the pinned source. Preserve all published public default
+trade-setup inputs and trade logic: M5 swing ATR, OTE/FVG, stops,
+limits, partialing, trailing, TP, expiry and InpSpread_Max=300
+(on this 0.01-point gold contract this permits USD3.00; report it).
+Two fixed tester input rows change only InpRisk_Per_Trade: 0.5 and
+1.0 percent. Preserve all other default numeric inputs.
+Correct intended session 08:00..18:00 GMT by deriving GMT hour from
+broker GMT+2 winter/GMT+3 summer using European last-Sunday
+March/October DST, rather than fixed offset=2. Sessions near DST
+transition must be verified on logged entry timestamps.
+At broker/server wall time >=22:30 every weekday, delete only this
+EA's XAUUSD pending orders and close only its XAUUSD positions,
+bounded to one pass over each account list per tick. Block new entries
+from that time through midnight. On Friday use the same 22:30 flat.
+The server is exactly one hour ahead of Europe/Prague throughout
+the year, so this ensures flat before Prague midnight. Record any
+failed flat action; a carry across Prague dates fails coverage.
+Change the original daily-drawdown breaker so it targets only matching
+symbol+magic with bounded loops and broker retcode checks; preserve
+its 5% threshold and otherwise preserve strategy behavior. Keep
+account-wide equity in the threshold, as in the public code. No
+cross-symbol close/delete, infinite retry, automatic live attach or
+network/filesystem operations beyond standard terminal state.
+Document all adaptation diff lines and compile log. Any compile fix
+must be syntax-only and recorded before performance inspection; any
+behavior change beyond these rules voids this H86 run and needs a
+new SPEC/GATE.
+
+4. EXECUTION AND COST ACCOUNTING
+Use actual MT5 tester executed Bid/Ask prices, deal commissions and
+EUR account profit. Gross/net separate spread and commissions when
+broker report permits; never add 0.41 to already executable tester
+P/L. Report entry-time and exit-time spreads, including p50/p90,
+trade count and year totals. Stress each completed trade by an
+ADDITIONAL 0.41 gold units times filled lot times 100 USD/lot-unit,
+converted to EUR using the trade's observed tester conversion if
+available; if conversion cannot be reconstructed, report USD-unit
+stress and FAIL the monetary challenge gate. Also apply incremental
+0.25 gold units/lot round-trip slippage stress in the same fashion.
+Require these stresses to remain positive in expectancy. No
+unresolved/deleted tester journal period, unexplained history gap,
+unclosed end position or manual trade intervention.
+
+5. CHALLENGE PACE AND SAFETY
+For each risk row, simulate every gated trade-date start with 90
+calendar days of full historical follow-up, using the *executed*
+chronological tester deals and worst recorded real-tick equity path
+where available, or a conservative stop/gap bound. Do not substitute
+closed-trade-only daily balances for the FTMO floating-equity rule.
+EUR10k paid 2-Step first phase: pass at EUR11k after >=4 distinct
+Prague trading dates and all positions flat; 5% daily loss floor
+relative to previous Prague-midnight balance and static EUR9k
+overall equity floor. Breach takes precedence. Report starts,
+PASS/BREACH/TIMEOUT and median pass time. Also show descriptive
+14-calendar-day 5%-target Free Trial outcomes. Risk is actual EA
+sizing at 0.5% or 1.0%, with 0.01 lot rounding and native margin.
+If tick equity cannot be independently observed/reconstructed,
+challenge gate FAIL; an optimistic approximation may be reported
+as a diagnostic only.
+
+6. PREDECLARED GATES
+G-HY1: Real-tick Model=4 native FTMO-Demo XAUUSD source covers 2025-01-01 through at least 2026-09-01, with zero unexplained tick-history/agent-journal gaps and at least 150 fully closed gated trades in a risk row.
+G-HY2: Strictly positive average EUR net per gated trade after actual Bid/Ask and commission plus additional 0.41-gold-unit spread and 0.25-gold-unit slippage stresses in the same risk row.
+G-HY3: Date-block bootstrap one-sided P(mean stressed EUR net <= 0) at most 0.05 with 10000 draws and seed 20260928 in at least one predeclared risk row.
+G-HY4: Strictly positive stressed EUR net total in complete 2025 and partial 2026 in the same qualifying risk row.
+G-HY5: At least 150 fully observed rolling paid 90-calendar-day starts, with pass rate at least 0.70 and floating-equity breach rate at most 0.10 in the same qualifying risk row.
+G-HY6: Every EA trade opens and closes on the same Europe/Prague date, zero unrelated account actions or unbounded retries, zero unclosed/unknown trades, exact pinned-source adaptation and verified compiler/tester logs.
+
+All six require the SAME risk row. Any FAIL is final; do not tune
+inputs, flat time, spread cutoff, side, date partition or size after
+viewing H86 returns. Save source hash, adapted code, diff, tester
+configuration/logs, deal and position CSVs, risk/replay data,
+metadata and immutable REPORT even on FAIL. If source/tick/tester
+access fails, report INCOMPLETE with exact reason; do not claim PASS.

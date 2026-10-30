@@ -1,0 +1,87 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Environments
+.env
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data (large files)
+data/checkpoints/**/*.pkl
+data/checkpoints/**/*.zip
+data/checkpoints/**/*.pt
+data/checkpoints/**/policies/
+data/results/**/*.xml
+data/results/**/*.html
+
+# Logs
+data/logs/*.log
+
+# Configs generated per job
+configs/**/*.ini
+
+# Terminal instance data dirs (created by terminal_manager.py)
+data/terminals/
+
+# Test compile logs
+tests/*_compile*.log
+
+# Test output artifacts
+tests/*_output.txt
+tests/*_compile*.log
+
+# MT5 compiled binaries
+ea/*.ex5
+ea/Libraries/*.dll
+
+# Local research artifacts and credentials (publication contains source/text only)
+.env.*
+!.env.example
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.kilo/
+.dukascopy-cache/
+graphify-out/
+~/
+temp_*.py
+temp_test/
+*.log
+*.db
+*.sqlite
+*.sqlite3
+*.dll
+*.ex5
+*.pkl
+*.pickle
+*.joblib
+*.pt
+*.pth
+*.zip
+data/**/*.csv
+data/**/*.parquet
+data/**/*.json
+data/**/*.html
+data/**/*.xml
+data/**/*.bin
+data/**/*.tkc
+data/**/*.hcs
+data/checkpoints/
+data/terminals/
+*.egg-info/
+!configs/examples/*.ini

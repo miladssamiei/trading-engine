@@ -1,0 +1,36 @@
+REPORT: US500/USA30 DAILY OLS COINTEGRATION - PHASE 1 (HYPOTHESIS #41)
+Generated: 2026-09-23 18:25:37  |  script: evaluate/index_pairs_daily_cointegration_phase1.py
+SPEC/GATE: data/results/index_pairs_daily_cointegration/{SPEC,GATE}_PAIRS_D1_COINT.txt (frozen before code)
+
+VERDICT: FAIL   (G-DC1=False, G-DC2=True, G-DC3=True)
+
+1. FUNNEL
+   D1 days: us500 1376 / usa30 1720 -> joined 1373 (2021-01-04 .. 2026-05-01)
+   two-stage warmup: first regression day 252, Z armed at joined day 503 (2022-12-14)
+   armed days 871; direction breaches: SHORT_SPREAD 3 / LONG_SPREAD 5 (first-open gating)
+   FINAL SIGNALS: 8  (SHORT 3 / LONG 5)
+   mean signal-day beta 0.1557
+
+2. AGGREGATE PAIR EXCURSIONS + GROSS EDGE ($10k US500 leg, beta-weighted USA30 leg, gross)
+   n=8  MFE 279.24 vs MAE 235.38  (medians 161.12 / 269.55)  MFE>MAE share 37.5%
+   gross exit PnL/trade +117.59 (median -6.28, win 50.0%)
+   REVERSION: 5 (62.5%)  mean PnL +290.04
+   TIME: 3 (37.5%)  mean PnL -169.82
+   reversion (target-hit) rate: 62.5%
+   time in market: mean 30.1 / median 29 bars (45-bar time cap)
+   LONG_SPREAD: n=5  MFE 384.56 vs MAE 136.09  exit +303.52
+   SHORT_SPREAD: n=3  MFE 103.70 vs MAE 400.86  exit -192.29
+   descriptive cost floor: mean 1.03 $/pair round trip (0.51pt + 2.28pt CFD spreads, never netted)
+
+4. GATES (frozen verbatim in GATE file)
+   G-DC1 >= 30 signals: 8 -> False
+   G-DC2 mean MFE > mean MAE: 279.24 vs 235.38 -> True
+   G-DC3 mean gross PnL > 0: +117.59 -> True
+   OVERALL PHASE-1: FAIL
+
+5. NOTES AND CAVEATS
+   - Price-level OLS on non-stationary index levels carries a spurious-regression risk; the
+     two-stage z (each day's own beta/alpha, then trailing spread stats) is the tasked mechanic.
+   - Family lineage: #19 (log-OLS daily) FAIL, #39 (intraday 60-bar Z) FAIL - context, not evidence.
+   - Gross only; fills at printed D1 opens/closes, no slippage; cost floor reported alongside.
+   - Null result is final for this artifact.

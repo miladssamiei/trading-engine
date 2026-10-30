@@ -1,0 +1,59 @@
+REPORT - HYPOTHESIS #56: SP2L ADVANCED M1 SCALPER - NATIVE XAUUSD PHASE 1
+Generated: 2026-09-24T17:45:21.513748+00:00  |  OVERALL VERDICT: FAIL
+
+Mechanics (frozen in SPEC_SP2L_M1.txt before the run): M1 3-candle expansion/
+imbalance detection on bars t-4/t-3/t-2 evaluated at completed bar t-1
+(3 aligned candles, strictly monotone opens/closes, P-gap 1.0 price unit across
+the spike, spike body > 1.5x both neighbors, SL = extreme of t-4); pending-order
+pullback entry (breaking bar's own extreme as Trigger_Price, risk clamp (0, 10.0]);
+all filters enabled: EMA60 direction, Wilder ADX14 >= 20, trend structure max 1
+opposite move, NY session [01:00, 05:00) ET at entry; spread-aware brackets with
+fixed 0.41 spread (long at Ask = Bid+0.41, TP_Bid = Ask+1R, SL_Bid = structural;
+short at Bid, stops/targets offset by the spread on the Ask side); worst-case
+same-bar SL-before-TP; honest gap fills; max 1 open trade; pending expires at its
+NY date end; 1.0 lot, PnL in price units ($100/unit/lot).
+
+1. TAPE: 2337538 M1 bars, 2074 NY dates, UTC 2020.01.01 23:00 .. 2026.09.01 20:59
+   (data/results/xauusd_onboarding/xauusdtick_m1.csv, verified 2026-09-04; full
+   tape, single pass, in-sample screen).
+
+2. FUNNEL: setups buy 6547 / sell 6393 (both-fired dropped 2337535); pendings processed 2214; entered 500; killed (risk > 10.0) 35; expired 1679 (of which trend-dead 548); break-bars skipped with risk <= 0: 36.
+
+3. NET ECONOMICS (price units, 1.0 lot):
+   executed trades   : 500
+   win rate          : 27.4%
+   net expectancy    : -1.3673 u/trade (median -1.9470, total -683.6 u, -68,364 $)
+   profit factor     : 0.368
+   Net Sharpe        : -0.435 (per-trade, ddof=1, not annualized)
+   MBB P(mean<=0)    : 1.0000 (block=5, 10000 resamples, seed 20261004)
+
+4. CHARACTER DIAGNOSTICS (not gated; the #52/#53 hollow-pass check):
+   sides   : BUY: n=224 sum=+131.3 u  SELL: n=276 sum=-814.9 u
+   exits   : {'SL': 363, 'TP': 137}
+   same-bar-exit share: 59.4%  (median bars held 0, p90 36)
+   risk    : median 2.466 u, p10 1.245, p90 5.113 u
+   yearly  : 2020: n=80 sum=-86.8 u; 2021: n=50 sum=-73.9 u; 2022: n=58 sum=-65.6 u; 2023: n=37 sum=-49.1 u; 2024: n=73 sum=-87.0 u; 2025: n=134 sum=-223.4 u; 2026: n=68 sum=-97.8 u
+
+5. GATES (frozen in GATE_SP2L_M1.txt before the run):
+   G-SP1 executed trades >= 30        :    500      -> PASS
+   G-SP2 Net Sharpe > 0               :    -0.435  -> FAIL
+   G-SP3 MBB P(mean<=0) <= 0.20       :    1.0000  -> FAIL
+   OVERALL VERDICT: FAIL - final for this artifact; no re-runs
+
+HONESTY NOTES
+- Single pre-declared configuration; no variant, parameter, or cost floor was
+  run before this verdict; the fixed 0.41 spread is the pre-declared cost model
+  (applied inside the fills) and no spread sweep is part of this screen.
+- Known optimism, declared in SPEC 8: entry fills at the breaking bar's extreme
+  (source-faithful E-XTM) and same-bar TP fills are best-case on a bar-close
+  reconstruction; the section-4 character diagnostics exist to expose any hollow
+  pass (same-bar round trips, degenerate micro-risk entries).
+- Full-tape in-sample single screen: under validation_discipline a PASS here is
+  NOT a validated result (no walk-forward, no year-sign agreement requirement)
+  and does not by itself authorize Phase 2 (MT5 execution); a Phase 2 would need
+  a new pre-declared SPEC meeting the standard discipline.
+- Declared deviations from the source bot (SPEC 3/4): detection omits the
+  forming-bar pullback/spike clauses (pullback is exclusively the entry trigger);
+  pending expires at its NY date end (source leaves it indefinitely alive /
+  replaced); indicators are continuous full-tape recursions (source: 10k-bar
+  poll windows); single-pending occupancy with shadowing.

@@ -1,0 +1,80 @@
+HYPOTHESIS 100: US100 CASH-CLOSE TO NEXT CASH-OPEN OVERNIGHT LONG
+Declared 2026-09-25 before H100 evaluator code or H100 return run.
+Null/FAIL is complete. No account orders.
+
+MECHANISM AND LINEAGE
+Nasdaq equity risk premium may concentrate between the US cash close
+and next cash open. Test one fixed long-only rule four nights per
+ordinary week, flat before the Friday cash close and over weekends.
+H14 US500 overnight was a null result; H94 US100 Monday-Thursday
+long hold had historical positive points but poor full-challenge pace.
+This is a new daily US100 instrument/time exposure, not a revision of
+either artifact. No parameter, direction, day or threshold search.
+
+SOURCE AND CAUSAL DAILY ATR
+Source-qualified frozen Dukascopy USTECH BID M1 CSV at
+data/results/virgin_assets/ustech_m1.csv, SHA256
+152f9c995b370e5391cb7da99b64a8002ceee5e52cc68899ddca409ac7e15e39.
+M1 open time is UTC epoch seconds; convert to America/New_York.
+Cash day [09:30,16:00) NY requires an exact real 09:30 M1. Aggregate
+only these real BID M1 bars for daily OHLC. Wilder ATR20 true range is
+max(high-low, abs(high-prior cash close), abs(low-prior cash close)),
+seeded with arithmetic average of first 20 true ranges and then
+recursed (19*prior+TR)/20. An entry uses ATR of the most recent fully
+completed prior cash day no more than four calendar days old; never
+the still-running entry day. No interpolation or generated bars.
+
+CALENDAR, ENTRY, STOP, EXIT
+Candidates are NY Monday-Thursday only, with next calendar day
+Tuesday-Friday. Exclude Thursday before Good Friday, determined
+from computable Easter Sunday minus two days before price inspection.
+Also exclude a candidate whose next-morning 09:30 lies beyond the
+source end. If no exact real 15:55 M1 entry, skip without trade.
+If no exact real next-day 09:30 M1 exit on any other entered date,
+mark UNRESOLVED with no PnL; do not silently skip it. At first real
+15:55 M1 BID open, buy at synthetic ASK = BID+1.50 US100 points.
+Initial hard BID stop = entry ASK - 0.5*prior ATR20. From the minute
+after entry through strictly before next 09:30, if a real BID M1
+open <= stop, sell at worse BID open; else if BID low <= stop, sell
+at stop. Include the overnight maintenance gap and any gap through
+stop. If unstopped, exit at exact next-day 09:30 M1 BID open. One
+trade/night; no target, trail, reentry, short, or weekend hold.
+
+COSTS AND PROP ACCOUNT
+Actual Phase-1 executable quote is approximated from Dukascopy BID,
+so charge fixed 1.50 entry spread plus another 2.50 US100 points per
+roundtrip for native spread deterioration, slippage and source
+difference. Base net=exit BID-entry synthetic ASK; stress net=base
+minus 2.50. FTMO publishes zero index CFD commission. Owner states
+the intended EUR10000 account is swap-free; no financing is charged
+in Phase 1, but actual account swap/administrative postings must be
+reconciled before any validated claim. Native connected Free Trial
+quotes are an execution proxy; its 5% one-phase target is not the
+full 10%+5% 2-Step evaluation. Phase 2 requires connected-account
+native Bid/Ask exact-tick order path, EUR conversion, lot steps,
+floating equity, margin and the full two-stage account replay.
+
+SPLIT, GATES AND STOP
+2020-23 descriptive; 2024 through partial 2026 gated. Report every
+candidate/skip/unresolved reason, year counts and PnL, stops, median
+and mean stressed R relative to 0.5*prior ATR20, and close-only
+180-day account pace as a non-gating diagnostic if Phase 1 passes.
+Circular 20-trade moving-block bootstrap of ordered gated stressed
+points, 10000 draws, numpy default_rng(20261010). No variants after
+results. Any Phase-1 fail gives immutable REPORT FINAL_FAIL, no Phase 2.
+If all Phase-1 gates pass, freeze separate Phase-2 SPEC/GATE before
+native execution and prop replay. At least 150 genuinely unseen
+forward trades and annual sign agreement remain necessary before a
+verified strategy claim.
+
+VERBATIM GATES
+G-ON1: At least 520 fully resolved 2024-2026 US100 overnight trades on distinct NY entry dates, zero unresolved required exits in that period, and all selected source windows are real M1 bars.
+G-ON2: Strictly positive 2024-2026 mean stressed US100 points per trade after 1.50 synthetic entry spread and another 2.50 points stress.
+G-ON3: Twenty-trade circular moving-block bootstrap P(mean stressed US100 points <= 0) at most 0.05 using 10000 draws and seed 20261010.
+G-ON4: Strictly positive stressed US100 point totals separately in complete 2024, complete 2025 and partial 2026.
+G-ON5: If Phase 1 passes, a separately frozen native exact-tick EUR10000 two-stage 180-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts at fixed 2% initial risk.
+G-ON6: Frozen BID source hash, causal prior completed cash ATR20, known Good Friday-eve exclusion, gap-aware real-M1 BID stop, weekday-only overnight flatting, fixed cost stress, and no account orders are verified.
+
+All six gates must pass; Phase-1 PASS alone is not verified.
+FTMO zero index commission: https://ftmo.com/en/blog/zero-commissions-on-indices/
+FTMO Free Trial target: https://ftmo.com/faq/how-about-a-free-trial/

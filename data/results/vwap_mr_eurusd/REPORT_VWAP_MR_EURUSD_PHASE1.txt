@@ -1,0 +1,51 @@
+REPORT: VWAP MEAN REVERSION - EURUSD PHASE 1 SIGNAL-QUALITY SCREEN (HYPOTHESIS #35)
+Generated: 2026-09-23 01:03:29  |  script: evaluate/vwap_mr_eurusd_phase1.py
+SPEC/GATE: data/results/vwap_mr_eurusd/{SPEC,GATE}_VWAP_MR_EURUSD.txt (frozen before code)
+Mechanism: EURUSD session VWAP mean reversion - 08:00 ET session anchor, TP-volume VWAP,
++/-0.25% deviation bands, 30-minute VWAP slope filter, 0.40% max-move trending-day filter,
+first-touch-per-direction excursion walk to the evolving VWAP or 16:00 ET (pre-cost).
+Phase-1 signal-quality screen ONLY (no trade rule, no EA, no tester, no Phase 2 implied).
+
+VERDICT: FAIL   (G-VW1=False, G-VW2=True, G-VW3=True)
+
+1. DATA AND INTEGRITY
+  Tape: data\results\eurusd_onboarding\eurusdtick_m1.csv (2490896 M1 bars, 2020-01-01 17:01:00-05:00 .. 2026-09-18 16:59:00-04:00 NY; Bid, 5-decimal)
+  Session = NY-date M1 bars with open wall in [08:00,16:00) ET: 832562 bars; VWAP/range reset daily.
+  All state causal: VWAP, bands, rolling range and slope at bar t use session bars up to t only.
+  All excursion statistics in pips (1 pip = 0.00010).
+
+2. FUNNEL
+  NY dates: total=2101 | with session (>=2 session bars)=1744 | maxmove-ever-triggered=962
+  signal candidates pre-cap (510<wall<930, slope defined, range ok, band+direction): short=0 long=1
+  fired after first-touch-per-direction-per-day cap: short=0 long=1
+  no-entry drops (next printed bar different NY date or open wall >= 16:00): 0
+  FINAL excursion-qualified signals: 1 | by dir: {'LONG': 1} | by year: 2026:1
+
+3. EXCURSION STATS (pips, pre-cost)
+  AGGREGATE: n=1 MFE=21.50 MAE=3.60 diff=17.90 pips | medians MFE=21.50 MAE=3.60 diff=17.90 | MFE>MAE share=100.0%
+  LONG: n=1 MFE=21.50 MAE=3.60 diff=17.90 pips | medians MFE=21.50 MAE=3.60 diff=17.90 | MFE>MAE share=100.0%
+  SHORT: n=0
+  Exit mix: TARGET=1 TIME=0 | LONG: TARGET=1 TIME=0 | SHORT: TARGET=0 TIME=0
+
+4. COST-FLOOR CONTEXT (descriptive only; Phase 1 stays gross)
+  Verified EURUSD London/NY overlap median spread: 0.3 pips round trip (eurusd_onboarding 2026-09-22).
+  Aggregate vs floor: mean MFE=21.50, mean MAE=3.60, mean (MFE-MAE)=17.90 pips;
+  medians: MFE=21.50, MAE=3.60, (MFE-MAE)=17.90 pips. The mean/median diff must clear the
+  0.3-pip round-trip floor for any residual edge to survive costs; no net gate exists at Phase 1.
+
+5. GATES (frozen verbatim in GATE file)
+  G-VW1 total session-valid signals >= 150: 1 -> False
+  G-VW2 aggregate mean MFE > mean MAE (strict, pips): 21.5000 vs 3.6000 -> True
+  G-VW3 day-block bootstrap P(pooled mean(MFE-MAE)<=0) <= 0.20: 0.0000 (n_day_blocks=1) -> True
+  OVERALL PHASE-1: FAIL
+
+6. NOTES AND CAVEATS
+  - Excursions are pre-cost (gross); the 0.3-pip spread floor is descriptive context only.
+  - US500-tick VWAP-MR lineage is a frozen null (vwap_rr_verdict: 273 trades, expectancy
+    -$0.075, Sharpe -0.048); EURUSD is a new instrument/anchor per SPEC tasking - this is
+    NOT a re-litigation of the US500 verdicts.
+  - No parameter search: band width, slope span, filters, caps, seed frozen in the SPEC;
+    nothing tuned after seeing results.
+  - Null result is final for this artifact; no re-run without a new pre-declared SPEC.
+  - Phase-1 excursions are signal-quality measurements, not tradable results (no
+    spread/swap/slippage modeling beyond the descriptive floor; no walk-forward claim).

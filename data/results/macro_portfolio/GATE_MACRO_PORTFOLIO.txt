@@ -1,0 +1,6 @@
+G1: Each asset x engine cell requires at least 150 closed scored trades entered from 2020 through the available 2026 tape.
+G2: Each asset x engine cell requires positive net expectancy after its strict retail cost floor.
+G3: Each asset x engine cell requires unannualized per-trade net Sharpe > 0.
+G4: Each asset x engine cell requires MBB P(mean net <= 0) <= 0.05 with 10000 resamples, block length 5, seed 20261015.
+G5: Each asset x engine cell requires no negative net entry-cohort total in any full calendar year 2020-2025; partial 2026 is disclosed, not gated.
+G6: Overall four-asset portfolio transfer passes Phase 1 only if all eight cells have complete source coverage and pass G1-G5; any unavailable source makes the overall verdict DATA BLOCKED, regardless of available-asset results.

@@ -1,0 +1,12 @@
+H88 US500 OPEN PERSISTENCE CAUSAL FX — FINAL FAIL
+Predeclared SPEC/GATE unchanged. Native FTMO-Demo raw BID/ASK quotes.
+No account orders or tester strategy trades.
+Source days/quotes/valid opens: (450, 8731206, 445)
+Executed trades/unresolved: (136, [])
+Entry/exit spread p50/p90: (0.56, 0.66, 0.56, 0.66)
+Base/stressed mean points: (-1.9197794117646134, -2.679779411764614)
+Bootstrap: {"0.5": {"n": 136, "mean_stressed_eur": -4.865904326848714, "p_nonpositive": 0.8385, "ci95": [-14.534313471318665, 4.829385328381142]}, "1.0": {"n": 136, "mean_stressed_eur": -9.732667858008455, "p_nonpositive": 0.8384, "ci95": [-29.08664517697071, 9.673226191672518]}}
+Annual stressed EUR: {"0.5": {"2025": {"n": 74, "stressed_total_eur": 73.6026972185861}, "2026": {"n": 62, "stressed_total_eur": -735.3656856700112}}, "1.0": {"2025": {"n": 74, "stressed_total_eur": 147.41641422893989}, "2026": {"n": 62, "stressed_total_eur": -1471.05924291809}}}
+Pace: {"0.5": {"paid_90d": {"starts": 119, "pass": 0, "breach": 0, "timeout": 119, "pass_rate": 0.0, "breach_rate": 0.0, "median_pass_days": null}, "free_14d": {"starts": 132, "pass": 0, "breach": 0, "timeout": 132, "pass_rate": 0.0, "breach_rate": 0.0, "median_pass_days": null}}, "1.0": {"paid_90d": {"starts": 119, "pass": 2, "breach": 20, "timeout": 97, "pass_rate": 0.01680672268907563, "breach_rate": 0.16806722689075632, "median_pass_days": 56.0}, "free_14d": {"starts": 132, "pass": 6, "breach": 0, "timeout": 126, "pass_rate": 0.045454545454545456, "breach_rate": 0.0, "median_pass_days": 10.5}}}
+Gates: {"0.5": {"G-OC1": false, "G-OC2": false, "G-OC3": false, "G-OC4": false, "G-OC5": false, "G-OC6": true}, "1.0": {"G-OC1": false, "G-OC2": false, "G-OC3": false, "G-OC4": false, "G-OC5": false, "G-OC6": true}}
+Historical PASS, if any, is selected exploratory evidence requiring a new frozen native tester study and forward confirmation.

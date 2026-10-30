@@ -1,0 +1,16 @@
+MACROTREND FTMO GOLD PYTHON VS MT5 PARITY - CORRECTED EVENT CLOCK SPEC - 2026-09-29
+
+Purpose
+Correct the v1 audit's event-time alignment. MT5 journal event times can be seconds or minutes after the H1 candle opened; compare all events with the enclosing server H1 candle. Preserve v1 artifacts and its diagnostic finding. Independently recompute the same 2024-2026 FTMO Gold H1 signals and compare the same frozen v1.01 A and B tester runs. Investigate any remaining stop discrepancy without changing the tick tolerance. Null result is a complete outcome.
+
+Inputs and method
+Use FTMO-Demo XAUUSD H1 rates from 2024-01-01 to 2026-09-25, snapshot and hash. Use 20260929.log v1.01 XAUUSD H4 Engine A 18:29:27 run and XAUUSD H1 Engine B 18:37:00 run, snapshot and hash. The tester period is 2025-01-01 to 2026-09-25. Recompute the EA's fieldwise-forward-filled H1, NY-wall H4, 17:00 ET D1 grids, EMA, Wilder ATR/ADX, Supertrend, Keltner and Donchian conditions using only completed bars. Compare all logged OPEN and min-volume skip events to raw Python signals at the enclosing server H1. Compare logged OPEN SL with independently calculated SL using its logged entry. Compare every logged ratchet new SL to the independently calculated completed-bar candidate.
+
+Limitations
+No complete same-feed M1/tick history is available to reconstruct broker fills and intrabar exits. A 0.02 Gold unit ratchet difference appeared in v1 before this spec and must be reported if it remains; no tolerance change or tuning is permitted. This is a code/parity audit, not a profitability validation. The 2024 period has Python signals but no corresponding tester run.
+
+Gate
+G1: H1 has 16,181 ordered valid real rows, first 2024-01-02 01:00, last 2026-09-24 23:00; complete tester segments have 23 A OPEN, 265 A min-volume skips, 106 B OPEN, 248 B min-volume skips.
+G2: Every logged OPEN and min-volume skip matches a Python signal at the same enclosing H1 hour; all OPEN directions agree.
+G3: Every logged OPEN initial SL and every logged ratchet new SL matches the Python calculation within 0.01 Gold unit (one broker tick). Any mismatch fails parity and must be listed.
+G4: Exact fill/exit parity is UNTESTED without complete same-feed M1/tick history; signal parity does not imply performance validation.

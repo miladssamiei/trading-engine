@@ -1,0 +1,88 @@
+REPORT_META_COORDINATOR
+Meta-coordinator (causal day-level ORB+SP2L ensemble), hypothesis #12,
+Phase 1 verdict: BOTH ARMS FAIL (E4) -> project STOPS here
+(no Phase 2, no EA, children remain individually as before)
+
+Run: 2026-08-29. SPEC_META_COORDINATOR.txt and GATE_META_COORDINATOR.txt
+were written BEFORE any ensemble computation. Data: the two eligible
+children's MT5 net-of-spread streams on the common 1,369-day universe
+(reproduction gate PASSED exactly: ORB 447/+470.67/0.337/5.13%,
+SP2L 1,343/+281.84/0.275/4.17%; static anchors S1 0.420 / S2 0.418
+reproduced from the portfolio study's own CSVs). One blocked day
+spot-checked by independent recomputation: trailing-126 Sharpe -0.322
+-> blocked, reason and weights exact.
+
+------------------------------------------------------------------------
+WHAT THE COORDINATOR DID (mechanics, from ensemble_daily_pnl.csv)
+
+Meta-rules as pre-declared: R1 activation (causal trailing 126-day
+Sharpe > 0 AND trailing DD < 8%; 2021 H1+H2 = 126-day ungated burn-in),
+R2 conflict veto, R3 caps (structurally inert with two children).
+
+- R1 gated 912 of 2,486 post-burn-in child-days (36.8%): ORB blocked
+  491 days, SP2L 421. The drawdown leg of R1 never fired (0 days) -
+  every gating decision was the trailing-Sharpe condition.
+- R2 vetoed 67 conflict days (both children trading opposite net
+  directions); 601 days had both children active.
+- Arm B (causal equal-risk weights) behaved almost identically to Arm A
+  (the 1.00-lot cap binds for the lower-vol child, keeping weights near
+  equal) - arms differ by < 0.01 Sharpe and ~8% of net.
+
+------------------------------------------------------------------------
+RESULTS (2.00-lot max book, base $10k, 2021-01..2026-04)
+
+|                     | ORB   | SP2L  | static S1 | ARM A   | ARM B   |
+|---------------------|-------|-------|-----------|---------|---------|
+| Sharpe              | 0.337 | 0.275 | 0.420     | 0.631   | 0.625   |
+| max drawdown        | 5.13% | 4.17% | 8.02%     | 5.17%   | 5.19%   |
+| total net (pts)     | 470.7 | 281.8 | 752.5     | 782.1   | 724.0   |
+| traded days         | -     | -     | -         | 612     | 612     |
+| 2023 share of net   | -     | -     | 71.9%     | 73.0%   | 74.1%   |
+| 2025 net            | -228  | -260  | -488      | -378    | -392    |
+| full years positive | -     | -     | 3/5       | 4/5     | 4/5     |
+
+Gates: E1 PASS (0.631 > 0.337/0.275 children AND > 0.420 static;
+B likewise vs 0.418). E2 PASS (5.17% <= 11.29%). E3 PASS (612 >= 150).
+E4 FAIL: 4 of 5 full years positive passes, but 2023 contributes
+73.0% (A) / 74.1% (B) of total net - above the 60% concentration
+bound. VERDICT per GATE: both arms FAIL -> STOP.
+
+------------------------------------------------------------------------
+HONEST READING
+
+1. The Sharpe/DD improvement is real and large (+50% Sharpe over the
+   best static combination, drawdown roughly halved vs static S1,
+   same net). Trailing-Sharpe gating did exactly what it is designed
+   to do: it kept the book out of each child's multi-month losing
+   stretches (ORB 491 days, SP2L 421 days skipped; 2024 flipped from
+   -53 static to +106 gated; 2025 loss trimmed from -488 to -378).
+2. It did NOT change the profit's shape, and shape was the gated
+   criterion: the profit is still a 2022-2023 machine (2023 alone =
+   73%, slightly WORSE than static S1's 71.9% concentration), 2025 is
+   still negative, and the SPEC named 2025 as the stress case a
+   passing claim had to survive. The E4 concentration guard exists
+   precisely to catch "better Sharpe by trading less on the same
+   one-good-year stream" - and that is what it caught.
+3. The coordinator's effective behavior is a coarse regime filter
+   ("skip a child after a losing half-year"), not a diversification
+   mechanism; with only two eligible children there is no agreement
+   information to exploit (67 conflict days out of 601 co-active days)
+   and no third vote to break shape concentration.
+4. Per the stop rules: no Phase 2 code, no master EA, no exploratory
+   T-window or bound variants (barred as rescues). The children remain
+   exactly as validated (ORB standalone; SP2L with its own caveats).
+   A future re-test has two legitimate paths, both outside this SPEC:
+   post-2026-04 data where the children's regime mix differs, or a
+   genuinely third validated child - neither exists today.
+
+------------------------------------------------------------------------
+ARTIFACTS (data/results/meta_coordinator/)
+
+SPEC_META_COORDINATOR.txt, GATE_META_COORDINATOR.txt (both
+pre-declared), child_streams.csv (normalized child daily PnL),
+ensemble_daily_pnl.csv (per-day gating decisions, reasons, weights,
+both arms' PnL), yearly_breakdown.csv, contributions.csv,
+phase1_stats.json (reproduction, gates, tallies),
+evaluate/meta_coordinator_phase1.py, REPORT_META_COORDINATOR.txt.
+
+END OF REPORT_META_COORDINATOR

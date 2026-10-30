@@ -1,0 +1,78 @@
+GATE_TICK_MODEL_REVALIDATION
+Gates for the tick-model revalidation (Model=4 real-tick re-measurement
+of hypothesis #13's Phase-2 execution layer)
+
+Status: written 2026-08-30 before any script. Verbatim extraction of
+every gate in SPEC_TICK_MODEL_REVALIDATION sections 3 and 4. Nothing
+here may be relaxed after revalidation output exists.
+
+    Part 1 - full-range probe gates (infrastructure; pass/fail)
+
+P1. Real-tick sync succeeds for the ENTIRE 2021-01..2026-04 range with
+zero months falling back to synthetic generation:
+  - the "generating based on real ticks" tester log line appears for
+    every batch covering the range, AND
+  - "real ticks begin from" never lags the requested start date by
+    more than the documented probe tolerance of 1 trading day (the
+    tape's first tick date is 2021-01-03/04).
+
+P2. Total synchronized tick count across the probe batches is within
+1% of the independently computed sum of ticks across the 64 monthly
+.tkc files in the terminal Custom base (edge effects at month/batch
+boundaries included in the tolerance).
+
+P1 or P2 failure -> STOP. No Part 2. The affected sub-periods keep the
+old synthetic-tick caveat; partial failures are not averaged away.
+
+    Part 2 - regime rotation Phase 2 re-reconciliation gates
+    (reproduced verbatim from GATE_REGIME_ROTATION.txt G1/G2; the ONLY
+    change from the original run is Model=4 instead of Model=0)
+
+G1. Consistency: MT5 ensemble Sharpe within +/- 0.15 (absolute) and
+MT5 max drawdown within +/- 20% (relative) of the offline Phase-1
+reference numbers (Sharpe 0.720, maxDD 1.80%) for Arm P, over the same
+window.
+
+G2. Execution integrity:
+  - zero trades by a child disabled under the OFFLINE schedule on any
+    day (by trade open date),
+  - MT5 month-decision schedule matches the offline reference on
+    >= 95% of months, every mismatch classified,
+  - every trade attributed to exactly one child,
+  - automatic ungated-reproduction check: embedded children must
+    reproduce their validated trade sets exactly (any difference is
+    an automatic G2 failure).
+
+PASS = G1 AND G2, both exactly as originally defined. PASS means the
+regime-rotation controller (Arm P) is VALIDATED under Model=4
+real-tick execution. FAIL keeps the original Model=0 verdict standing:
+controller remains NOT validated, with the new failure mode reported
+precisely.
+
+    Additional reported gate (not a pass/fail condition)
+
+R1. 2025-05 label match: report whether the Model=4 tester-derived
+label for 2025-05 equals RANGE (offline reference) or still disagrees,
+plus the new trend_rel value either way. If it still disagrees,
+diagnose whether the residual is the same 0.041pp EMA200 distance
+discrepancy as the original Model=0 finding or a new cause. R1 is
+reported as part of the verdict narrative; G1 and G2 are the binding
+gates.
+
+    Honesty rules
+
+    - This is a re-measurement of hypothesis #13's execution layer,
+      not a new hypothesis; no renumbering.
+    - Prior SPEC/GATE/REPORT files (including the Model=0 Phase-2
+      FAIL verdict) are not edited or superseded.
+    - No tolerance relaxation anywhere.
+    - Real-tick spread variability is reported honestly even if it
+      hurts the result; no silent cost-model substitution into the
+      gates.
+    - A PASS here validates ONLY the regime-rotation controller under
+      Model=4. ORB, SP2L, VWAP MR, meta-coordinator, calendar
+      effects, and meta-labeling each require their OWN separately
+      pre-declared Model=4 re-reconciliations before any of their
+      verdicts can be revisited.
+
+END OF GATE_TICK_MODEL_REVALIDATION

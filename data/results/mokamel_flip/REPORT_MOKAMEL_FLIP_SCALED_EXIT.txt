@@ -1,0 +1,96 @@
+REPORT — MOKAMEL FLIP SCALED-EXIT AMENDMENT (HYPOTHESIS #16, AMENDMENT 1)
+=========================================================================
+Date: 2026-09-03. Verdict at the top: BOTH scaled arms FAIL GATE
+B1-AMENDED on clause (i) (expectancy_after_cost -0.5323 pts, deeply
+negative). Clauses (ii) and (iii) PASS. The amendment stops here per
+its own rules: no Stage C for the scaled arms, no third scaling
+method, the original 40/80 Stage-B result is not reopened.
+
+DOW DATA SOURCING DECISION (resolved before any derivation)
+No Dow Jones / US30 / DJI data exists in this project (terminal
+bases: US500.c, four FX pairs, XAUUSD, US500-tick, USA500_Tick; no
+US30/DJI series anywhere in the data tree; the config.py /
+ExportM1Data.mq5 mentions are legacy plumbing). Task owner decision:
+adopt the numbers for US500 — the only instrument with validated
+data. No Dow series was sourced or fabricated; the price-level anchor
+is therefore the brief-stated public 7-9x band (LOWER-RIGOR anchor,
+flagged), and the volatility anchor is US500-native and fully
+measured.
+
+DERIVATION (Methods 1 and 2, both computed, neither chosen by
+performance; full audit trail in dow_us500_ratio_derivation.csv)
+- Method 1 (price-level ratio): R_price = 8.0 (midpoint of the
+  brief's 7-9x band) -> stop 40/8 = 5.00, target 80/8 = 10.00.
+- Method 2 (volatility anchor, US500-native): stop = 1.0 x median
+  ATR14(M5) at Stage-A trigger candles = 1.0 x 4.782 -> rounds to
+  5.0; target = 2 x stop = 10.0.
+- CONVERGENCE: both independent anchors land on the identical cell
+  STOP 5.0 pt / TARGET 10.0 pt (1:2 shape preserved; rounding rule
+  stop-to-nearest-0.5 then double). The untested band edges (7x ->
+  5.5, 9x -> 4.5) are context only. The value is NOT taken from the
+  unit ring (5-pt stop lies outside the ring's 20-60 pt space) and
+  not from any performance number.
+
+RESULTS (identical machinery to the original Stage B; only the
+stop/target distances changed; lots = 20.0 = $100 risk on $10,000)
+- n = 2,223 trades (both arms; numerically identical, reported as
+  separately-labeled arms per the amendment).
+- Win rate 33.0% after cost; gross expectancy -0.0223 pts/trade;
+  expectancy_after_cost -0.5323 pts (0.51 pt binding cost);
+  Sharpe -1.5444; total net -$23,666 (maxDD 242% of the fixed $10,000
+  base — the no-compounding convention keeps the simulation running
+  past a realistic account death; stated for completeness).
+- Yearly net $: 2021 -6,877, 2022 -4,820, 2023 -2,760, 2024 +789,
+  2025 -6,961, 2026 -3,038. Negative in 5 of 6 years.
+
+CLAUSE-BY-CLAUSE (each arm separately; identical values):
+  (i)   expectancy_after_cost > 0: -0.5323 ......... FAIL
+  (ii)  n_trades >= 150: 2,223 ..................... PASS
+  (iii) time_exit share < 60%: 2.7% (60/2,223) ..... PASS
+
+IS THE 78% TIME-EXIT SYMPTOM RESOLVED? YES — decisively. Exits now:
+stop_loss 1,292 + stop_gap 71 = 58.1% stops; target 676 +
+target_gap 11 = 30.9% targets; time_exit 60 (2.7%); filter_exit 113
+(5.1%). The scaled levels fully engage US500's intraday range; the
+day-close rule now fires (81 days closed: 19 by 3 wins, 62 by 3
+losses; 45 subsequent signals blocked) and conservative mode is
+active (625 of 2,223 entries). The course's money management works
+mechanically at this scale — it simply does not make money.
+
+WHY IT FAILS (the honest diagnosis)
+- Gross expectancy is essentially ZERO (-0.022 pts): at a 1xATR stop
+  the flip entry has no exploitable gross edge on US500 — the
+  Stage-A excursion edge (+0.42 pts mean MFE-MAE over 60 minutes,
+  itself below the cost floor) is consumed by intrabar wiggle before
+  a 5-pt/10-pt bracket can capture it. The 0.51 pt real-tick cost
+  then makes it decisively negative. This is the scalping-screen
+  cost-floor lesson repeating exactly, one more pattern family.
+- Together with the original Stage B, the two ends now bracket the
+  mechanism on US500: 40/80 = an enter-on-flip, hold-to-close drift
+  capture with thin positive expectancy carried entirely by 2021
+  (walk-forward window 2022+ is -$101); 5/10 = fully engaging levels
+  with zero gross edge. The non-binding unit ring (20-60 pt stops)
+  was positive after cost but is non-promotable by pre-declaration —
+  and selecting it now would be exactly the post-hoc choice the
+  GATEs forbid.
+- The presenter's Dow-Jones-only domain claim remains untested on
+  its own instrument (no Dow data); what IS now established is that
+  on US500 neither the literal video numbers nor a properly scaled,
+  independently-derived adaptation of them survive realistic costs.
+  A failure on US500 is consistent with the presenter's own claim.
+
+ARTIFACTS (data/results/mokamel_flip/, originals untouched)
+SPEC_MOKAMEL_FLIP_AMENDMENT_SCALED_EXIT.txt,
+GATE_MOKAMEL_FLIP_AMENDMENT_SCALED_EXIT.txt (both written before any
+scaled-arm code ran), dow_us500_ratio_derivation.csv,
+matrix_scaled_arms.csv, trades_scaled_arms.csv,
+stage_b_scaled_stats.json, this report. Script:
+evaluate/mokamel_flip_stage_b_scaled.py (reuses the original
+Stage-B simulate/metrics machinery unchanged).
+
+STATUS: Amendment 1 complete; scaled arms FAIL clause (i); no third
+scaling. The only remaining open path in the study is Stage C
+(no-selection walk-forward, C1-C3) on the original binding 40/80 arm,
+whose Stage-B pass is 2021-carried and whose 2022+ window nets
+-$101 — on current numbers C1/C3 are expected to FAIL. Awaiting
+explicit confirmation either way.

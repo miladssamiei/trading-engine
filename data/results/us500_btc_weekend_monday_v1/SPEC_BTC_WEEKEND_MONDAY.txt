@@ -1,0 +1,70 @@
+HYPOTHESIS 77: BITCOIN WEEKEND RETURN -> MONDAY US500 CASH-SESSION RETURN
+Declared 2026-09-25 before source acquisition code, evaluation code, or Phase-1 run.
+
+MECHANISM AND LIMITS
+Mourey, Shahrour and Soiman, A Crypto-Stock Weekend Effect (2025),
+https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5382090,
+report that negative weekend cryptocurrency returns predict poorer
+Monday stock returns, especially after mid-2022. This study tests the
+unproven transfer from that stock-return result to a tradable US500
+CFD cash-session return after Monday's opening repricing. A symmetric
+positive/negative sign rule is a prespecified extrapolation, not a
+finding asserted by the paper. Null results are complete deliverables.
+
+SOURCE AND AS-KNOWN SIGNAL
+Download public Binance spot BTCUSDT monthly 1h kline zip files from
+2021-01 through 2026-04 inclusive at
+https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/1h/.
+Keep original zip bytes and a SHA256 manifest. Binance documents the
+1h kline schema and the 2025 switch of spot timestamp units from
+milliseconds to microseconds at
+https://github.com/binance/binance-public-data.
+Reject duplicate or invalid hour-open timestamps, nonpositive prices,
+or bars with nonpositive traded volume or trade count. For each Monday
+NY date, compare the close of the immediately preceding Friday
+[16:00,17:00) America/New_York 1h bar with the close of the immediately
+preceding Sunday [16:00,17:00) NY 1h bar. Both completed bars are known
+at Sunday 17:00 NY. BUY US500 if Sunday BTC close > Friday BTC close;
+SELL if below; zero change skips. No return magnitude, year, volatility,
+holiday, prior-US500, news, or side filter. BTCUSDT venue and USDT basis
+noise are source limitations.
+
+US500 PHASE-1 SAME-DAY EXECUTION PROXY
+Use the verified real-tick-derived US500-tick BID M5 CSV at
+data/results/orb_2021_present/us500tick_m5.csv, SHA256
+a8ee68f1a0010a1be9704c0d59fd5382aa798846cdae4d519b799ae21ec66c2d.
+Interpret epoch seconds as UTC and convert to America/New_York. Require
+real M5 bars at 09:30 and 15:55 NY on that Monday. Enter at the 09:30
+BID bar open, exit at the 15:55 BID bar open, one trade per Monday,
+always flat before the 16:00 cash-session cutoff. Gross points are
+direction times exit-minus-entry BID. Subtract 0.51 point per trade
+for the owner's US500 round-trip spread proxy, and another 0.51 point
+for execution stress. No stop, target, substitute timestamp, overnight
+hold, or parameter search in Phase 1. The BID-open/fixed-spread proxy
+does not establish executable fills, floating loss, or FTMO suitability.
+
+SAMPLE, STATISTICS, AND DECISION
+2021-2022 are descriptive calibration years. Gate Monday entries from
+2023-01-01 through 2026-04-30 inclusive, with complete years 2023,
+2024, 2025 checked individually. Report source coverage/skips, trade
+count by year and side, base/stressed point mean and sum, and win rate.
+Bootstrap gated Monday dates with replacement 10000 times, seed
+20261013, and report P(mean base net <= 0). Because this is the 77th
+historical hypothesis after extensive project search, use p<=0.01;
+even a historical PASS requires independent forward confirmation.
+
+GATES FROZEN BEFORE PHASE 1
+G-BW1: At least 150 executed 2023-2026 distinct Monday cash dates with causal nonzero Bitcoin weekend signals and exact real 09:30/15:55 US500 BID M5 bars.
+G-BW2: The gated mean net US500 points remains strictly positive after the base 0.51 spread proxy and an additional 0.51 execution stress.
+G-BW3: The 10000-resample Monday-date bootstrap P(mean base net <= 0) is at most 0.01 with seed 20261013.
+G-BW4: Base 0.51-cost net US500 point totals are strictly positive in each complete gated year 2023, 2024 and 2025.
+All four gates are required for Phase-1 PASS. Otherwise FAIL is final
+for this artifact. A PASS permits only a new predeclared native
+Model=4 execution, stop/risk and FTMO pace study, not account trading.
+Do not retune side, threshold, source, clock, year or cost after results.
+Do not edit existing frozen SPEC/GATE/REPORT artifacts.
+
+OUTPUTS
+Save the source zip files, SHA256 manifest, signal/trade CSV, run
+metadata, and REPORT regardless of verdict. Append SPEC/GATE, Phase-1
+run, and verdict stages to PROGRESS.md. REPORT is immutable.

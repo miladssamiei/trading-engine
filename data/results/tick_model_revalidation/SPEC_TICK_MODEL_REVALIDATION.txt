@@ -1,0 +1,220 @@
+SPEC_TICK_MODEL_REVALIDATION
+Re-measurement of the regime-rotation Phase-2 execution layer under
+Model=4 real-tick testing, plus a full-range real-tick probe
+(data-fidelity correction applied to hypothesis #13; NOT a new
+hypothesis)
+
+Status: SPEC written 2026-08-30 BEFORE any script runs. The companion
+GATE_TICK_MODEL_REVALIDATION (artifact list, section 6) must be
+created as a verbatim extraction of every gate in sections 3 and 4
+BEFORE the first script runs. Nothing here may be changed after
+revalidation output exists.
+
+------------------------------------------------------------------------
+1. PURPOSE AND NATURE
+
+This is NOT a new hypothesis about market behavior and is NOT
+renumbered in the project's hypothesis sequence. It is a
+re-measurement of an EXISTING, already-passed-Phase-1 hypothesis
+(regime rotation, hypothesis #13, Arm P) under a corrected
+data-fidelity condition: the tester tick model changes from Model=0
+("every tick", M1-derived synthetic ticks) to Model=4 ("every tick
+based on real ticks"), which the prior diagnostic
+(data/results/diag_tester_tick_fidelity/DIAGNOSTIC_TESTER_TICK_FIDELITY.txt)
+established as available on this build and verified tick-exact on a
+sampled window.
+
+NOT re-opened here: the regime rotation mechanism, the Arm P mapping,
+the D1 label taxonomy, the UTC-midnight causal cutoff, the offline
+Phase-1 result (Sharpe 0.720, maxDD 1.80%, all 5 full years positive,
+2025 flipped positive from every baseline's negative), and the
+validated children (ORB, SP2L). Only the MT5 execution layer's
+fidelity to that offline result is re-measured.
+
+Continuity rules (binding):
+  - SPEC_REGIME_ROTATION.txt, GATE_REGIME_ROTATION.txt,
+    REPORT_REGIME_ROTATION.txt,
+    REPORT_REGIME_ROTATION_PHASE2.txt (the Model=0 FAIL verdict), and
+    every other prior SPEC/GATE/REPORT are NOT deleted, edited, or
+    superseded in place. They remain accurate historical records of
+    what happened under Model=0. This work produces new artifacts
+    under a new name and a new, dated report.
+  - A PASS here does NOT retroactively validate any OTHER
+    hypothesis's Model=0 results. Explicitly out of scope: ORB, SP2L,
+    VWAP MR, meta-coordinator, calendar effects, meta-labeling - each
+    would require its OWN separately pre-declared Model=4
+    re-reconciliation before any of their verdicts can be revisited.
+  - If the probe gates fail for any sub-period, that period keeps the
+    old synthetic-tick caveat; partial failures are not averaged away
+    into an optimistic overall conclusion.
+  - Real-tick spread variability is reported honestly even if it
+    hurts the result; a higher measured spread than the synthetic
+    fixed 0.41 pt is surfaced explicitly, never smoothed over.
+
+------------------------------------------------------------------------
+2. INPUTS (all frozen, unchanged from the original Phase 2)
+
+  - ea/RegimeController.mq5, RegimeControllerUngated.mq5, body and
+    embedded children: byte-identical to the original Phase-2 build
+    (no recompilation, no edits).
+  - Offline reference: data/results/regime_rotation/phase2/
+    reference_armP_daily.csv (Arm P offline daily PnL; Sharpe 0.720,
+    maxDD 1.80%, net +852.02) - reused as-is, copied into the new
+    results dir.
+  - Offline labels: data/results/regime_rotation/regime_labels.csv
+    (corrected UTC-midnight causal cutoff).
+  - Probe EA: ORB_TickProbe (unmodified, exactly as in the prior
+    tick-fidelity diagnostic).
+  - The original Phase-2 extract/compare logic
+    (evaluate/regime_rotation_phase2/regime_rotation_mt5_extract.py,
+    regime_rotation_mt5_compare.py) is reproduced into the new
+    artifact space with the ONLY change being the input/output
+    directory; the gate arithmetic is copied verbatim.
+
+------------------------------------------------------------------------
+3. PART 1 - FULL-RANGE MODEL=4 PROBE
+
+Procedure:
+  - Generate tester configs for US500-tick, Model=4, covering the
+    full studied range 2021-01-01..2026-04-30, Expert=ORB_TickProbe.
+  - Run as a SINGLE continuous batch if the tester accepts it. If the
+    tester's memory/tick-cache limits require chunking (precedent:
+    the original 96,058,645-tick full-range work was run in 6 yearly
+    batches because one year already consumed 768 Mb of tick data),
+    chunk into the minimum number of yearly batches and DOCUMENT why.
+  - Log per batch: the sync lines ("load X Mb of tick data to
+    synchronize", "history ticks synchronized from A to B"), the
+    "generating based on real ticks" line, the "real ticks begin
+    from" line, the tick count, bars, and wall-clock time.
+  - Cross-check: total tick count against the sum of ticks across the
+    64 monthly .tkc files in the terminal Custom base (computed here
+    for the first time; API read offline with a documented binary
+    parse fallback).
+
+PROBE GATES (P1-P2; pass/fail; infrastructure-only - NOT performance
+gates):
+
+  P1  Real-tick sync succeeds for the ENTIRE 2021-01..2026-04 range
+      with zero months falling back to synthetic generation: the
+      "generating based on real ticks" line appears for every batch
+      covering the range, and "real ticks begin from" never lags the
+      requested start date by more than the documented probe
+      tolerance (1 trading day; the tape's first tick date is
+      2021-01-03/04, so 2021-01-01's first real tick may legitimately
+      start there).
+  P2  Total synchronized tick count across the probe batches is
+      within 1% of the independently computed sum over the 64
+      monthly .tkc files (edge effects at month/batch boundaries
+      included in the tolerance).
+
+If P1 or P2 fails: STOP. Do not proceed to Part 2. Report which
+months/periods lack real-tick coverage and keep the old
+synthetic-tick caveat for exactly those ranges.
+
+------------------------------------------------------------------------
+4. PART 2 - REGIME ROTATION PHASE 2 RE-RECONCILIATION (Model=4)
+
+Only if P1 and P2 both pass.
+
+Procedure (identical to the original Phase 2, ONE change):
+  - Re-run the SAME 18 tester batches (ungated M5, ungated M1, gated
+    M1, over the 6 yearly windows; gated windows keep their 2-month
+    overlap starts) with Model=4 instead of Model=0. No other change:
+    same EA binaries, same offline Python reference, same meta-rules,
+    same D1 label thresholds, same UTC-midnight cutoff convention.
+  - Re-extract MT5 trades and regime_days.csv and recompute the MT5
+    ensemble daily PnL exactly as regime_rotation_mt5_extract.py did
+    originally (target-year days only; overlap dropped).
+  - Recompute G1 and G2 exactly as originally defined (below), with
+    NO relaxation of tolerances.
+  - R1: recompute trend_rel for the 2025-05 boundary month from the
+    Model=4 run's regime_days.csv and report whether the
+    tester-derived label now equals the offline RANGE label or still
+    disagrees; if it still disagrees, report the new trend_rel value
+    and diagnose whether the residual is the same 0.041pp EMA200
+    distance discrepancy as the original Model=0 finding or a new
+    cause.
+  - Spread: report both the ORIGINAL fixed-spread 0.41 pt assumption
+    AND the measured real-tick spread (median/mean by period) from
+    the Model=4 tick data. Descriptive/diagnostic only - no cost
+    model is silently substituted into the gates without flagging.
+
+REVALIDATION GATES (reproduced verbatim from GATE_REGIME_ROTATION.txt
+sections G1/G2, unchanged):
+
+  G1  Consistency: MT5 ensemble Sharpe within +/- 0.15 (absolute) and
+      MT5 max drawdown within +/- 20% (relative) of the offline
+      Phase-1 reference numbers (Sharpe 0.720, maxDD 1.80%) for
+      Arm P, over the same window (Model=0 -> Model=4 is the only
+      change).
+  G2  Execution integrity: zero trades by a disabled child on any
+      day; MT5 month-decision schedule matches the offline reference
+      on >= 95% of months with every mismatch classified; attribution
+      complete (every trade to exactly one child). The automatic
+      ungated-reproduction check applies unchanged: embedded children
+      must reproduce their validated trade sets exactly.
+
+ADDITIONAL REVALIDATION GATE:
+
+  R1  The 2025-05 label match: report explicitly whether the Model=4
+      tester-derived label for 2025-05 equals RANGE (matching the
+      offline reference) or still disagrees, and the new trend_rel
+      value either way. R1 is a REPORTED gate, not a pass/fail
+      condition on its own - G1 and G2 are the binding gates; R1's
+      outcome is part of the verdict narrative.
+
+PASS = G1 AND G2 (both, exactly as originally defined). If PASS: the
+regime-rotation controller (Arm P) is VALIDATED under Model=4
+real-tick execution - a materially different and stronger outcome
+than the original Model=0 verdict. If FAIL: report the new failure
+mode precisely (still the May 2025 boundary case, or a new residual
+class introduced by real variable spread or a different tick path
+elsewhere in the tape), and state clearly that the controller remains
+NOT validated, exactly as the original verdict.
+
+------------------------------------------------------------------------
+5. HONESTY RULES
+
+  - Re-measurement, not new hypothesis; no renumbering.
+  - Prior records untouched; this report stands alongside them.
+  - No tolerance relaxation anywhere; gates reproduced verbatim.
+  - Partial probe failures keep per-range caveats.
+  - Real spread reported honestly; no silent cost-model swaps.
+  - A FAIL here reproduces the original verdict's standing, not a
+    downgrade of the Phase-1 pass.
+
+------------------------------------------------------------------------
+6. ARTIFACTS AND LOGGING (data/results/tick_model_revalidation/)
+
+  SPEC_TICK_MODEL_REVALIDATION.txt   this document (before any code)
+  GATE_TICK_MODEL_REVALIDATION.txt   verbatim P1-P2, G1-G2, R1
+                                     extraction (before any script)
+  probe_fullrange_model4.csv         per-batch sync lines, tick
+                                     counts, real-tick-begin dates
+  tkc_monthly_counts.csv             per-month .tkc tick counts +
+                                     sum (P2 comparator)
+  spread_comparison.csv              fixed 0.41 pt assumption vs
+                                     measured real-tick spread by
+                                     period
+  regime_rotation_model4_ensemble.csv    MT5 ensemble daily PnL
+  regime_rotation_model4_regime_days.csv tester regime log (Model=4)
+  phase2_model4/                      18 batch outputs (gated /
+                                     ungated_m1 / ungated_m5)
+  REVALIDATION_REPORT.txt            full verdict: P1/P2, G1/G2/R1,
+                                     comparison to the original
+                                     Model=0 verdict, out-of-scope
+                                     list (ORB/SP2L/VWAP MR/meta-
+                                     coordinator/calendar/
+                                     meta-labeling revalidations as
+                                     separate future work)
+  evaluate/regime_rotation_phase2/
+    reval_probe_fullrange.py, reval_run_batches.py,
+    reval_extract.py, reval_compare.py, reval_tkc_count.py
+
+PROGRESS.md hooks (append per stage, current style):
+  "tick model revalidation - SPEC/GATE pre-declared",
+  "tick model revalidation - Part 1 full-range probe run",
+  "tick model revalidation - Part 2 regime rotation Model=4 re-run",
+  "tick model revalidation - verdict".
+
+END OF SPEC_TICK_MODEL_REVALIDATION

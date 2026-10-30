@@ -1,0 +1,16 @@
+GATE FILE - HYPOTHESIS #55 (crypto_portfolio_kc)
+Frozen 2026-09-24 BEFORE the Phase-1 script ran. Verbatim gate extraction
+from SPEC_CRYPTO_PORTFOLIO.txt section 5. Never edited after the run.
+Gates are applied to the POOLED PORTFOLIO LEDGER (BTCUSD + ETHUSD, Net
+R-Multiple units).
+
+G-PORT1: Total pooled executed trades >= 300.
+
+G-PORT2: Portfolio Net R-Multiple Expectancy > 0.15 R per trade.
+
+G-PORT3: Moving-block bootstrap (10,000 resamples, block=10 trades,
+         seed 20261003) P(mean Net R <= 0) <= 0.10.
+
+VERDICT RULE: OVERALL PASS only if G-PORT1 AND G-PORT2 AND G-PORT3 all PASS.
+Any FAIL is final for this artifact; corrections or re-measurements require
+a new study name.

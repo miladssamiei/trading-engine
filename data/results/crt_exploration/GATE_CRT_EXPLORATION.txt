@@ -1,0 +1,29 @@
+GATE -- CRT EXPLORATION. Verbatim extraction of every gate declared in
+SPEC_CRT_EXPLORATION.txt (written 2026-09-09, BEFORE any script ran).
+Nothing here may be re-negotiated after numbers are seen. A gate clause
+that cannot be evaluated (missing data, degenerate case) counts as FAIL.
+This study is POST-TERMINATION EXPLORATORY: even a full pass has no
+deployment meaning (SPEC section 0).
+
+G-C1 (SAMPLE SIZE):
+  Total measured signals (long + short) >= 150 over the 5.3-year tape.
+
+G-C2 (GROSS EDGE) -- ALL three clauses required:
+  (i)   mean(MFE) > mean(MAE) on raw points (binding);
+        mean(MFE_atr) > mean(MAE_atr) reported alongside;
+  (ii)  threshold dominance: count(MFE >= t * ATR14) >
+        count(MAE >= t * ATR14) at EVERY t in {0.50, 0.75, 1.00};
+  (iii) day-block bootstrap P(mean(MFE - MAE) <= 0) <= 0.20:
+        DAY MEANS of (MFE - MAE) resampled with replacement,
+        10,000 draws, seed 20260909; ATR-normalized variant reported
+        alongside, non-binding.
+
+INFORMATIONAL COST CHECK (non-binding):
+  If mean(MFE - MAE) < 0.51 pt (confirmed real-tick spread floor),
+  flag the strategy ECONOMICALLY DEAD BEFORE COSTS in the report.
+
+VERDICT RULES:
+  G-C1 AND G-C2 (all clauses) must hold for any "pass" language.
+  Any FAIL is final for this artifact. Null results are complete,
+  expected deliverables. No Phase 2, no EA, no re-tests may follow
+  from this study regardless of outcome (Path C violation, SPEC 0.2).

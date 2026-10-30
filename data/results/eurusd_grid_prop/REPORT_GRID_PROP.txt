@@ -1,0 +1,157 @@
+EURUSD H1 GRID PROP CONTROLS V1 - REPORT - 2026-10-05
+VERDICT: NOT_ADOPTED
+EUR10,000, 1% basket/daily equity bailout,9% internal static loss guard, fixed5-level/0.30-lot caps.
+DEVELOPMENT2020-2023 selects ONE primary case; VALIDATION2024-2026 tests it on a fresh account.
+Source: 2020-01-01T22:01:00+00:00 to 2026-09-18T20:59:00+00:00; 2,490,896 real M1 bars.
+All profit exits are H1-close proxies; all risk exits use M1 adverse quotes and actual opening gaps.
+
+PRIMARY ENVIRONMENT: 0.7pips all-inclusive plus frozen current swap sensitivity
+Period       Base  Restart   Closed Wins%    MarkedEUR  Bail  Halt EquityDD% DailyLoss%  MBBp
+DEVELOPMENT 0.01 NEXT_DAY    412  94.66      -514.04    22     0     7.216      1.000  0.8462
+DEVELOPMENT 0.01 24H         400  94.25      -649.92    23     0     8.878      1.000  0.8785
+DEVELOPMENT 0.01 72H         390  94.36      -617.22    22     0     8.588      1.000  0.8886
+DEVELOPMENT 0.02 NEXT_DAY    511  92.56       143.46    38     0     9.632      1.000  0.4188
+DEVELOPMENT 0.02 24H         350  90.29      -900.00    34     1    10.646      1.000  0.9035
+DEVELOPMENT 0.02 72H         470  92.77       272.93    34     0     7.999      1.000  0.3284
+DEVELOPMENT 0.05 NEXT_DAY    319  82.45      -900.00    56     1    11.772      1.000  0.8372
+DEVELOPMENT 0.05 24H         571  82.84      -748.68    98     0    11.012      1.000  0.7664
+DEVELOPMENT 0.05 72H         515  83.50      -190.91    85     0     9.221      1.000  0.5824
+VALIDATION  0.01 NEXT_DAY    214  96.73       206.09     7     0     2.415      1.000  0.1460
+VALIDATION  0.01 24H         210  96.67       179.53     7     0     2.640      1.000  0.1695
+VALIDATION  0.01 72H         211  96.68       187.38     7     0     2.756      1.000  0.1474
+VALIDATION  0.02 NEXT_DAY    261  91.95       -71.47    21     0     3.620      1.000  0.5129
+VALIDATION  0.02 24H         248  90.32      -501.33    24     0     7.485      1.000  0.8125
+VALIDATION  0.02 72H         238  90.34      -455.36    23     0     7.060      1.000  0.7890
+VALIDATION  0.05 NEXT_DAY    112  75.89      -900.00    27     1    12.479      1.000  0.9536
+VALIDATION  0.05 24H         214  78.50      -900.00    46     1    13.704      1.001  0.8903
+VALIDATION  0.05 72H         189  78.31      -900.00    41     1    10.823      1.001  0.9042
+FULL        0.01 NEXT_DAY    626  95.37      -302.18    29     0     7.216      1.000  0.6304
+FULL        0.01 24H         610  95.08      -464.62    30     0     8.878      1.000  0.7153
+FULL        0.01 72H         601  95.17      -424.07    29     0     8.588      1.000  0.7006
+FULL        0.02 NEXT_DAY    771  92.22       -46.33    60     0     9.632      1.000  0.4903
+FULL        0.02 24H         350  90.29      -900.00    34     1    10.646      1.000  0.8975
+FULL        0.02 72H         700  91.71      -345.28    58     0     7.999      1.000  0.6378
+FULL        0.05 NEXT_DAY    319  82.45      -900.00    56     1    11.772      1.000  0.8362
+FULL        0.05 24H         598  82.61      -900.00   104     1    11.774      1.000  0.7664
+FULL        0.05 72H         622  82.32      -900.00   110     1    12.099      1.000  0.7785
+
+DEVELOPMENT SELECTION
+{
+  "selected_case_id": 23,
+  "reason": "development-only highest marked net among eligible primary cases",
+  "selected_development_metrics": {
+    "case_id": 23,
+    "period": "DEVELOPMENT",
+    "environment": "ALLIN_07_CURRENT_SWAP",
+    "base_lots": 0.02,
+    "restart": "72H",
+    "closed_baskets": 470,
+    "open_baskets": 1,
+    "win_rate": 0.9276595744680851,
+    "mean_net_eur": 0.5960817577638763,
+    "net_sharpe": 0.02070079427932712,
+    "mbb_p": 0.3284,
+    "realized_net_eur": 280.15842614902186,
+    "terminal_open_eur": -7.229963578379217,
+    "marked_net_eur": 272.9284625706427,
+    "monthly_marked_eur": 5.697594962872427,
+    "target_exits": 436,
+    "bailouts": 34,
+    "basket_bailouts": 0,
+    "daily_bailouts": 34,
+    "buffer_halts": 0,
+    "firm_daily_breach_days": 0,
+    "firm_total_breach_days": 0,
+    "max_equity_dd_pct": 7.998594166471904,
+    "max_daily_loss_pct": 1.0000000000000182,
+    "max_basket_loss_eur": 100.00000000000242,
+    "worst_closed_eur": -100.00000000000242,
+    "max_bailout_overshoot_eur": 2.4158453015843406e-12,
+    "adverse_gap_exits": 0,
+    "max_depth": 4,
+    "max_total_lots": 0.15,
+    "max_estimated_margin_eur": 500.0,
+    "swap_usd": -179.8086,
+    "spread_usd": 131.46,
+    "blocked_cooldown": 485,
+    "blocked_caps": 0,
+    "ignored_opposite": 2830,
+    "phase1_target_epoch": null,
+    "phase1_target_days": null,
+    "annual_exit_pnl_eur": {
+      "2020": -184.80923973987484,
+      "2021": 14.118482211865098,
+      "2022": 137.4713490143353,
+      "2023": 313.3778346626964
+    },
+    "period_months": 47.90239817837921
+  }
+}
+
+SELECTED VALIDATION
+{
+  "case_id": 23,
+  "period": "VALIDATION",
+  "environment": "ALLIN_07_CURRENT_SWAP",
+  "base_lots": 0.02,
+  "restart": "72H",
+  "closed_baskets": 238,
+  "open_baskets": 0,
+  "win_rate": 0.9033613445378151,
+  "mean_net_eur": -1.91327796290355,
+  "net_sharpe": -0.05887990840637459,
+  "mbb_p": 0.789,
+  "realized_net_eur": -455.3601551710449,
+  "terminal_open_eur": 0.0,
+  "marked_net_eur": -455.3601551710449,
+  "monthly_marked_eur": -13.986198669222583,
+  "target_exits": 215,
+  "bailouts": 23,
+  "basket_bailouts": 0,
+  "daily_bailouts": 23,
+  "buffer_halts": 0,
+  "firm_daily_breach_days": 0,
+  "firm_total_breach_days": 0,
+  "max_equity_dd_pct": 7.060498037732941,
+  "max_daily_loss_pct": 1.0000000000000364,
+  "max_basket_loss_eur": 100.00000000000335,
+  "worst_closed_eur": -100.00000000000335,
+  "max_bailout_overshoot_eur": 3.353761712787673e-12,
+  "adverse_gap_exits": 0,
+  "max_depth": 4,
+  "max_total_lots": 0.15,
+  "max_estimated_margin_eur": 500.0,
+  "swap_usd": -195.3811,
+  "spread_usd": 73.85,
+  "blocked_cooldown": 268,
+  "blocked_caps": 0,
+  "ignored_opposite": 1851,
+  "phase1_target_epoch": null,
+  "phase1_target_days": null,
+  "annual_exit_pnl_eur": {
+    "2024": -432.8552201709336,
+    "2025": 113.18069453633109,
+    "2026": -135.68562953644238
+  },
+  "period_months": 32.55782117360384
+}
+
+GATES
+{
+  "G1": "PASS",
+  "G2": "PASS",
+  "G3": "PASS",
+  "G4": "FAIL",
+  "G5": "FAIL"
+}
+
+LIMITS: Current swaps are applied across history as a sensitivity, not dated historical financing.
+Lot/contract/leverage snapshot and NY17 rollover are assumptions; account conversion uses BID EURUSD.
+Virtual intraminute stop fills exclude execution latency/slippage; gaps and stop overshoots remain in ledgers.
+Full replay stops permanently at the internal total buffer. Flat periods after that halt are not a recovered account.
+MBB is conditional basket-mean uncertainty, not a prop pass-rate guarantee. Historical control selection remains exploratory.
+Daily equity DD is measured at M1 opens/adverse held marks/closes, not all actual tick peaks.
+Other environments/all case matrices and yearly exits are in case_matrix.csv and metadata.json.
+Public2-Step limits checked2026-10-05: https://ftmo.com/en/trading-objectives/
+Swing specs: https://ftmo.com/en/faq/what-are-the-account-specifications/
+No live orders, activation, account purchase or payout economics are included.

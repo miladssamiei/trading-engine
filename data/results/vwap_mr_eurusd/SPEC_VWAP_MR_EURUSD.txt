@@ -1,0 +1,102 @@
+SPEC_VWAP_MR_EURUSD.txt
+
+VWAP MEAN REVERSION - EURUSD PHASE 1 SIGNAL-QUALITY SCREEN
+Hypothesis #35 (owner-tasked, 2026-09-22). Phase-1 MFE/MAE excursion screen
+ONLY: no trade rule beyond first-touch excursions, no EA, no tester, no
+Phase 2 implied by any outcome.
+
+1. TASKING AND LINEAGE
+- EURUSD transplant of the VWAP mean-reversion family per task-owner
+  instruction. The family is a frozen null on US500-tick (vwap_rr_verdict:
+  walk-forward 273 trades, expectancy -$0.075, Sharpe -0.048; 2025-2026
+  negative under every configuration). EURUSD is a new instrument with a
+  different session anchor (08:00 ET London/NY overlap open vs the US500
+  studies' 09:30 cash open), percentage bands scaled to FX, and a new cost
+  floor. This is a NEW pre-declared artifact, NOT a re-litigation of the
+  US500 verdicts. Null result pre-accepted as a complete deliverable.
+
+2. DATA
+- Tape: data/results/eurusd_onboarding/eurusdtick_m1.csv (verified
+  onboarding 2026-09-22: 2,490,896 M1 bars, 2020-01-01 17:01 NY ..
+  2026-09-18 16:59 NY, Bid OHLC + tick_volume, epoch-UTC open times,
+  no-tick buckets skipped).
+- Timezone: America/New_York (DST-aware), computed from epoch UTC.
+- Trading day = NY calendar date. Session = M1 bars of that NY date with
+  open wall minute in [08:00, 16:00) ET (wall in [480, 960)). Session open
+  price = open of the session's first printed bar (wall >= 480).
+
+3. STATE MACHINE (PER NY DATE, SESSION BARS IN ORDER)
+- VWAP: TP = (High + Low + Close) / 3; VWAP[t] = cumsum(TP * tick_volume) /
+  cumsum(tick_volume) over session bars from the 08:00 anchor; cumulative
+  sums reset at the session's first bar. VWAP keeps updating through the
+  walk bars (state machine never pauses inside the session).
+- 30-minute slope: slope[t] = VWAP[t] - VWAP[ref(t)] where ref(t) = the
+  LAST session bar with open time <= t_open - 1800 s. If no such bar
+  exists (sparse morning), slope is UNDEFINED and no signal can fire at t.
+  (A bar strictly after 08:30 always satisfies the 30-minutes-elapsed
+  condition relative to the 08:00 anchor; the reference-bar rule handles
+  sparse tapes.)
+- Deviation bands: upper = VWAP * 1.0025, lower = VWAP * 0.9975 (0.25%).
+- Session range: rolling Max High / Min Low over session bars so far
+  (inclusive of the current bar).
+- Max-move (trending-day) filter: if (rolling Max High - Min Low) >
+  0.0040 * session open price, the session is INVALIDATED for mean
+  reversion from that bar onward (signal generation only; already-open
+  walks are unaffected). Strictly greater-than; evaluated sequentially
+  and inclusively at each bar.
+
+4. SIGNAL GENERATION
+- Signal window: M1 bars with open wall strictly inside (08:30, 15:30) ET
+  (510 < wall < 930), slope defined, max-move filter not yet triggered
+  (range through the signal bar inclusive <= 0.40%).
+- SHORT (revert down to VWAP): Close > upper band AND slope <= 0.
+- LONG (revert up to VWAP): Close < lower band AND slope >= 0.
+- First-touch cap: only the FIRST valid signal per direction per NY date
+  (max one SHORT + one LONG per day; later candidates of an already-fired
+  direction are counted in the funnel and dropped).
+- Entry: the OPEN of the next printed M1 bar after the signal bar, if it
+  has the same NY date and open wall < 960; otherwise the signal is a
+  no-entry (dropped, counted).
+
+5. EXCURSION WALK (PRE-COST)
+- From the entry bar (entry price = its open) over session bars (same NY
+  date, wall < 960), in order, until the FIRST of:
+  TARGET: VWAP touched - SHORT: bar Low <= VWAP[bar]; LONG: bar High >=
+          VWAP[bar] (inclusive; the entry bar itself can be the target).
+  TIME:   session end (last session bar with wall < 960; 16:00 ET close).
+- MFE = (max High - entry) for LONG / (entry - min Low) for SHORT;
+  MAE = (max High - entry) for SHORT / (entry - min Low) for LONG; over
+  the walk bars in pips (1 pip = 0.00010). The target bar counts toward
+  both excursions.
+- Descriptive cost context ONLY (Phase 1 stays gross): the verified EURUSD
+  London/NY overlap median spread is 0.3 pips (onboarding 2026-09-22);
+  mean/median MFE, MAE and MFE-MAE are compared against this floor in the
+  report. No net gate exists at Phase 1.
+
+6. GATES (FROZEN IN GATE_VWAP_MR_EURUSD.TXT BEFORE ANY CODE EXISTS)
+G-VW1   total session-valid signals >= 150.
+G-VW2   aggregate mean MFE > mean MAE (strict, pips).
+G-VW3   day-block bootstrap: resample NY dates with replacement (10,000
+        resamples, numpy.random.default_rng(20260921)); statistic = pooled
+        mean of (MFE - MAE) in pips over resampled signals;
+        P(statistic <= 0) <= 0.20.
+OVERALL PASS requires all three. Any FAIL is final for this artifact.
+
+7. HONESTY / ANTI-LEAK RULES
+- All state is causal: VWAP, bands, rolling range and filter status at bar
+  t use session bars up to and including t only; entries use only bars
+  after the signal bar; the walk uses the evolving VWAP strictly forward.
+- No parameter search: band width, slope span, filters, caps, thresholds,
+  seed are frozen in this SPEC; nothing tuned after seeing results.
+- Null pre-accepted; US500 VWAP-MR nulls documented as lineage context.
+- Phase-1 excursions are signal-quality measurements, not tradable
+  results (no spread/swap/slippage modeling beyond the descriptive floor
+  comparison; no walk-forward claim).
+
+8. ARTIFACTS (data/results/vwap_mr_eurusd/)
+- SPEC_VWAP_MR_EURUSD.txt, GATE_VWAP_MR_EURUSD.txt (written BEFORE code)
+- REPORT_VWAP_MR_EURUSD_PHASE1.txt (funnel, pips expectancy, cost-floor
+  comparison, gate evaluation, verdict)
+- vwap_mr_eurusd_signals.csv (one row per executed signal)
+- run_meta.json (frozen parameters, counts, gate outcomes)
+- PROGRESS.md section logged as Hypothesis #35.

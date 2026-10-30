@@ -1,0 +1,36 @@
+REPORT: HYPOTHESIS 76 VXX MORNING LEAD
+Written 2026-09-25. SOURCE QUALIFICATION: INCOMPLETE, NO PHASE-1 RESULT.
+
+SPEC_VXX_MORNING_LEAD.txt and verbatim GATE_VXX_MORNING_LEAD.txt were
+frozen before any source download attempt or evaluation code.
+
+REQUIRED SOURCE
+The SPEC requires a nonempty Dukascopy vxxususd BID M5 export for
+2021-01-01 through 2026-05-01. The dukascopy-node instrument page
+advertises historical data from 2017:
+https://www.dukascopy-node.app/instrument/vxxususd
+
+OBSERVED ACQUISITION RESULTS
+Using the documented npx dukascopy-node CLI on 2026-09-25, the
+2021-01-01..2026-05-01 M5 request exited 0 and wrote a 0-byte CSV
+after 28.5 seconds. Single-day M5 probes on 2021-03-19,
+2022-03-18, 2023-03-17, 2024-03-19 and the page's example
+2025-03-19 each also exited 0 and wrote a 0-byte CSV. These six
+files are kept in source/ and source/probe/ as acquisition evidence.
+No valid VXX bar, source SHA for a nonempty tape, VXX signal,
+US500 entry, trade or performance statistic was produced.
+
+GATE STATUS
+G-VL1: UNTESTED, because the specified VXX source is empty.
+G-VL2: UNTESTED, because there are no executable signals.
+G-VL3: UNTESTED, because there are no trade returns.
+G-VL4: UNTESTED, because there are no annual trade totals.
+OVERALL: INCOMPLETE. This is a source/environment failure, not a
+strategy FAIL and not evidence that VXX lacks predictive content.
+
+STOP / NEXT DEPENDENCY
+No Phase-1 script, MT5 run or prop-pace simulation was executed.
+If the same Dukascopy instrument later provides nonempty history,
+qualify and hash it before a first Phase-1 run. Any substitute
+provider or different VIX/VXX instrument requires a new named SPEC
+and verbatim GATE. No source substitution occurred here.

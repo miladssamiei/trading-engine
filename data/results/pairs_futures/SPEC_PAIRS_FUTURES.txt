@@ -1,0 +1,48 @@
+SPEC_PAIRS_FUTURES
+Study: pairs_futures (Hypothesis #20)
+Status: pre-declared 2026-09-11, before any code for this study was executed
+Sibling of data/results/pairs_us500_usa30/ (Hypothesis #19, CFD tape, VERDICT FAIL)
+
+MOTIVATION
+Hypothesis #19 showed a gross relative-value edge between US500 and USA30 (+$87.37/trade gross expectancy, 18 trades) that was killed by the CFD cost stack: net Sharpe -0.8344, with the US500 swap (-20/night long, 56-night average holds) making long-spread trades unfinanceable. The closure note required any re-test to use a swap-neutral structure. CME E-mini futures are exactly that: zero overnight financing, central-limit spreads, and the ES/YM cross is the classic institutional implementation of the same trade. This study re-tests the identical statistical rule family on pristine continuous CME futures data pulled from the Refinitiv Eikon API.
+
+DATA
+- Source: Refinitiv Eikon Data API via the python package 'eikon'. App key read from environment variable EIKON_APP_KEY; if unset the script prompts for it via input().
+- RICs: ESc1 (E-mini S&P 500 continuous), YMc1 (E-mini Dow continuous). Field CLOSE, interval daily.
+- Window: 2016-01-01 .. 2026-09-01, pulled per calendar year then concatenated, index de-duplicated, sorted ascending.
+- Alignment: inner join on dates, then dropna, giving a perfectly aligned calendar of trading days. Backup of the raw aligned panel saved to data/results/pairs_futures/raw_eikon_data.csv.
+- Execution-failure rule: if the eikon package, the app key, or the Refinitiv Workspace/Eikon desktop is unavailable, the run terminates with verdict INCOMPLETE (environment failure, NOT a strategy FAIL) and the reason is recorded in REPORT_PAIRS_FUTURES.txt. No substitute data source may be used without a new pre-declared SPEC.
+
+MODEL (same family as Hypothesis #19)
+- Lookback L = 252 trading days. For each day t, OLS over the window [t-L, t-1]:
+  ln(P_ES) = alpha_t + beta_t * ln(P_YM) + eps
+- Out-of-sample spread for day t: s_t = ln(P_ES,t) - (alpha_t + beta_t * ln(P_YM,t)).
+- Z-score: z_t = s_t / sigma_eps,t, where sigma_eps,t is the sample standard deviation (ddof=1) of the in-window regression residuals.
+- Every z_t is out-of-sample by construction (the regression window ends at t-1); there is no full-sample fitting anywhere.
+
+EXECUTION STATE MACHINE (end-of-day, fills at the day-t close)
+- Flat and z_t >= +2.0: enter SHORT spread = short 1 ES + long N YM.
+- Flat and z_t <= -2.0: enter LONG spread = long 1 ES + short N YM.
+- Open: exit both legs when z_t crosses 0 (z_t <= 0 for a short-spread, z_t >= 0 for a long-spread) or when |z_t| >= 4.0 (hard stop breakdown).
+- Maximum one active spread position; no pyramiding. An exit and a new entry cannot occur on the same day (the exit branch takes precedence).
+
+CME FUTURES ECONOMIC MODEL (ZERO SWAP)
+- Multipliers: ES $50 per index point, YM $5 per index point.
+- Sizing: base leg exactly 1 ES contract. YM contracts fixed at entry:
+  YM_Contracts = round((1.0 * P_ES * 50) / (P_YM * 5) * beta_t)
+- Transaction costs, charged once per round trip (half booked at the entry day, half at the exit day):
+  ES spread 0.25 index point = $12.50 per contract; YM spread 1.0 index point = $5.00 per contract; commission $4.00 round trip per contract on both legs.
+- Overnight financing: $0.00 (CME futures charge no retail overnight swap).
+- Reporting base: 1 position, USD, no compounding (project convention).
+
+GATES (single pre-declared configuration; no parameter search of any kind)
+- G-F1 cointegration density: Augmented Dickey-Fuller p-value < 0.05 on at least 30% of rolling 252-day windows of the out-of-sample spread series (windows stepped 21 trading days).
+- G-F2 net edge: total Net Profit in USD after all spreads and commissions > 0.
+- G-F3 risk-adjusted return: annualized net Sharpe ratio > 0.50 (daily PnL including flat days; mean/std ddof=1 x sqrt(252)).
+- Overall PASS requires all three gates.
+
+STOP RULES AND HONESTY RULES
+- Single configuration; no sweep over L, entry/exit thresholds, or sizing; no model-family search; no post-hoc re-tuning.
+- Null or negative results are complete, expected deliverables; a FAIL verdict is final for this artifact.
+- The zero-swap benefit is quantified as a counterfactual (the same trades charged the Hypothesis-#19 US500 CFD swap schedule: -20/night on a long ES leg, +2/night on a short ES leg, Wednesday x5) and reported, not gated.
+- This SPEC and GATE_PAIRS_FUTURES.txt are never edited after the Phase-1 script runs.

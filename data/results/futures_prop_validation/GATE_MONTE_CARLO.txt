@@ -1,0 +1,8 @@
+ENGINE A PORTFOLIO MONTE CARLO - PREDECLARED VALIDITY GATE
+Written before prop_firm_monte_carlo.py exists or runs.
+
+Require exactly the specified A_KC GC/BTC/ETH filter, a finite positive
+Initial_Risk for every included trade, finite net and R, 10000 independent
+paths per specified risk profile, and PASS + RUIN + CENSORED = 10000 at each
+profile. Report all four profiles without post-hoc selection. This is a
+simulation-integrity gate, not a profitability or funding qualification gate.

@@ -1,0 +1,19 @@
+GATE FILE — YOUTUBE_HYBRID_SCALPING
+Verbatim extraction of all gates from SPEC_YOUTUBE_HYBRID_SCALPING.txt.
+Frozen BEFORE evaluate/youtube_hybrid_scalping.py ran. The script refuses to
+execute if this file or the SPEC is missing.
+
+G-Y1 (Sample Size): The combined strategy must generate >= 150 trades on each
+    instrument.
+
+G-Y2 (Cost-Floor Survival): The NET expectancy per trade for the Combined
+    strategy must be > 0 on at least one of the three instruments.
+
+OVERALL VERDICT RULE: G-Y1 AND G-Y2 must both pass for a PASS; any failure is a
+FAIL and is final for this artifact. No Phase 2 (MT5 execution) is authorized by
+this study regardless of verdict.
+
+Instruments in scope: US500-tick, USA30-tick, XAUUSD-tick.
+Combined = union of the Long-Only and Short-Only trade streams.
+NET = GROSS minus the fixed median round-trip spread per trade
+     (US500 0.51 pt, USA30 2.28 pt, XAUUSD 0.41 pt).

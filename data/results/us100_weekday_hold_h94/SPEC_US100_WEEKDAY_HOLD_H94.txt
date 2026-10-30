@@ -1,0 +1,73 @@
+HYPOTHESIS 94: US100 MONDAY CASH-OPEN TO THURSDAY-MORNING HOLD
+Declared 2026-09-25 before H94 code or H94 trade-return run.
+Null/FAIL is complete. No account orders.
+
+LINEAGE AND MECHANISM
+This is a single-instrument cross-index translation of the frozen
+H93 US500 weekday equity-risk-premium rule. H93 had positive
+historical points but failed three required Thursday source exits
+and its permissive challenge pace. Do not modify H93 records or
+infer H94 success from higher US100 volatility. Identical entry,
+stop, exit and calendar rules are retained; only the instrument
+and its observed spread proxy change. No variants or optimization.
+
+SOURCE
+Verified Dukascopy USTECH BID M1 at
+data/results/virgin_assets/ustech_m1.csv, SHA256
+152f9c995b370e5391cb7da99b64a8002ceee5e52cc68899ddca409ac7e15e39.
+Time is M1 open epoch seconds UTC, converted to America/New_York.
+Cash day=[09:30,16:00) NY, eligible iff exact 09:30 real
+M1 exists. Aggregate only real cash M1 to daily OHLC. Prior
+Wilder ATR20 uses true range high-low/high-prevclose/low-prevclose,
+first-20 average seed then recursive (19*prior+TR)/20.
+No synthetic entry, stop, or exit quote.
+
+ENTRY/EXIT - H93 VERBATIM RULE
+Each NY Monday with eligible cash open and finite ATR20 from
+the most recent completed valid cash day no more than four
+calendar days old: buy at first real M1 open [09:30,09:35).
+Initial stop=executable entry-2*prior ATR20. From entry M1
+onward, fill a stop gap at worse actual BID open if open<=stop;
+otherwise fill BID stop if actual M1 BID low<=stop. No short,
+target, trailing stop, Monday re-entry or overlap. If unstopped,
+exit at first real M1 open Thursday NY [11:00,11:15).
+If no required Thursday M1 quote, UNRESOLVED and no PnL.
+Exclude an incomplete final week, reporting it. Flat before
+Friday/weekend on every resolved trade. News holds allowed.
+
+COSTS AND ACCOUNT
+Connected FTMO-Demo US100.cash live read-only quote on
+2026-09-25: BID 30648.58, ASK 30650.03, spread 1.45 index
+points, contract size $1/point/lot. Use synthetic ASK=BID+1.45
+entry, BID exit. Index commission zero per FTMO's published
+terms. Base net=exit BID-entry ASK; stress net=base minus
+another 1.45 spread and 0.25 slippage round trip. Zero swap
+by owner instruction. A single live spread is a proxy, not
+historical native variable Bid/Ask; any Phase-1 pass requires
+separate exact FTMO quote testing. EUR conversion and actual
+account risk are deferred to Phase 2.
+
+SPLIT, GATES AND STOP
+2020-23 descriptive; 2024 through source end partial 2026
+gated. Report all trades/coverage, annual base/stress sums,
+stops and hold time. Circular 5-week moving-block bootstrap
+of ordered OOS stressed points, 10000 draws,
+numpy default_rng(20261004). Phase-1 FAIL is final; G-WU5
+NOT_RUN. If Phase 1 passes, a separate frozen Phase-2 SPEC/GATE
+must run native FTMO Bid/Ask, exact EUR conversion, floating
+daily equity and full two-stage EUR10000 180-calendar-day
+challenge on fixed 0.5%,1%,2% initial risk rows, with 10%/5%
+targets, four trading days per stage, 5% daily and 10% overall
+loss limits. At least 150 genuinely unseen forward trades and
+year-sign agreement are still required before claiming a
+verified system.
+
+VERBATIM GATES
+G-WU1: At least 120 fully resolved 2024-2026 Monday-to-Thursday US100 trades on 120 distinct NY entry dates, zero unresolved exits and only real M1 fills.
+G-WU2: Strictly positive 2024-2026 stressed mean index points per trade after 1.45 executable spread plus another 1.45 spread and 0.25 slippage.
+G-WU3: Five-week circular moving-block bootstrap P(mean stressed points <= 0) at most 0.05 using 10000 draws and seed 20261004.
+G-WU4: Strictly positive stressed US100 point totals separately in complete 2024, complete 2025 and partial 2026.
+G-WU5: If Phase 1 passes, a separately frozen two-stage EUR10000 180-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts in one fixed risk row.
+G-WU6: Source hash, prior completed ATR, real M1 fills, no weekend exposure, zero swap and fixed predeclared costs are verified with no account orders.
+
+All six gates must pass; Phase-1 PASS alone is not verified.

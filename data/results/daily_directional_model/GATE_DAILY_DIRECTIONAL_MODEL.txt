@@ -1,0 +1,53 @@
+GATE_DAILY_DIRECTIONAL_MODEL
+Verbatim extraction from SPEC_DAILY_DIRECTIONAL_MODEL.txt (frozen
+2026-09-08, before any script exists). These clauses and ONLY these decide
+Pass/Fail.
+
+G-M1 (MINIMUM IC FLOOR): the mean OOS IC of at least one (model, horizon)
+configuration must be >= 0.025 (the break-even IC from the research memo,
+which already embeds the multiple-configuration selection burden). If no
+configuration reaches 0.025, the study STOPS IMMEDIATELY: the features do
+not contain a tradable directional edge; remaining gates are not run.
+
+G-M2 (PROBABILITY OF BACKTEST OVERFITTING): build the 15x8 performance
+matrix of path ICs (15 paths x 2 models x 4 horizons). For each path rank
+the 8 configurations; relative rank omega = rank / 9; logit
+lambda = ln(omega / (1 - omega)); PBO of a configuration = fraction of
+paths with lambda < 0 (i.e., the configuration ranks in the bottom half of
+that path). The configuration selected for G-M3 (among G-M1 passers, the
+one with the highest mean path IC) must have PBO <= 0.20. The full matrix,
+per-path ranks, logits, PBO per configuration, and a Deflated Sharpe Ratio
+(Bailey & Lopez de Prado, number of trials = 8, skew and kurtosis of the
+selected configuration's OOS strategy returns) are written to
+pbo_evaluation.json. DSR is reported, not gated.
+
+G-M3 (NET ECONOMIC VIABILITY): for the selected configuration only:
+  - Per row, average its OOS predictions across the paths that tested it
+    (each row is tested in exactly 5 paths); signal s_t = +1 if the average
+    prediction > 0, -1 if < 0, 0 if exactly 0.
+  - Evaluate NON-OVERLAPPING trades: take rows t0, t0+h, t0+2h, ... from
+    the first dataset row; trade gross return in index points =
+    s_t * (P_{t+h} - P_t).
+  - Costs per trade: 0.51 index points round-trip spread, plus overnight
+    financing under the documented project convention: swap_long -20
+    points/night held, swap_short +2 points/night held, Wednesday nights
+    charged x5 (calendar nights of the actual hold). Net trade return =
+    gross - 0.51 - financing_points(s_t).
+  - Annualized net Sharpe = mean/net-std(ddof=1) * sqrt(252/h). GATE:
+    net Sharpe > 0. Gross Sharpe, total costs, and the per-year net PnL
+    split are reported alongside.
+
+STOP RULES (SPEC section 5, binding on the gates above):
+- No G-M1 passer -> STOP; complete null deliverable; no feature changes,
+  no group-count changes (N=6 frozen), no Random Forest / neural network /
+  library substitution, no threshold relaxation.
+- Config selection for G-M3 is frozen: among (G-M1, G-M2) passers, the
+  highest mean path IC; none pass both -> study FAILS at the highest gate
+  reached and stops.
+- No post-hoc re-runs with different seeds, folds, embargo lengths, costs,
+  or signal rules; a gate failure is final for this artifact; corrections
+  require a NEW study under a NEW name.
+- All 8 configurations' results are written to cpcv_ic_results.csv;
+  nothing hidden by selection. OOS predictions (oos_predictions.csv) and
+  G-M3 trade series (g3_net_returns.csv) archived for independent
+  recomputation.

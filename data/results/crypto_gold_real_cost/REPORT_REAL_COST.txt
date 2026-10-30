@@ -1,0 +1,38 @@
+CRYPTO/GOLD ENGINE A/B REAL-COST PORTFOLIO - REPORT
+OVERALL PHASE-1 GATE: PASS
+Owner-specified fixed historical friction and annual financing scenario.
+Common source end: 2026-09-01 20:59 UTC; scored entries from 2020-03-01 UTC.
+USD is per one BTC, ETH or troy ounce; R is per executable initial-stop risk.
+
+ASSET | ENGINE | CLOSED | WIN% | GROSS USD/TR | NET USD/TR | SWAP PAID USD ALL | NET R/TR | R SHARPE
+BTCUSD | A_KC | 168 | 33.33 | 352.05 | 242.74 | 11996.46 | 0.2605 | 0.1590
+BTCUSD | B_DONCHIAN | 610 | 31.48 | -1.42 | -81.29 | 26995.06 | 0.0472 | 0.0280
+ETHUSD | A_KC | 167 | 40.72 | 15.72 | 10.56 | 519.17 | 0.2222 | 0.1442
+ETHUSD | B_DONCHIAN | 588 | 35.88 | 7.23 | 3.25 | 1140.90 | 0.0964 | 0.0606
+XAUUSD | A_KC | 189 | 34.92 | 4.91 | 3.50 | 157.49 | 0.0248 | 0.0231
+XAUUSD | B_DONCHIAN | 553 | 37.61 | 5.86 | 4.72 | 305.27 | 0.0894 | 0.0672
+
+SWAP TOTALS BY ASSET (USD PER ONE BASE ASSET UNIT; BOTH ENGINES)
+ASSET | CLOSED SWAP PAID | OPEN-END ACCRUED | TOTAL PAID | ROLLOVERS | WEIGHTED ROLLOVERS
+BTCUSD | 38991.52 | 0.00 | 38991.52 | 1816 | 1816
+ETHUSD | 1659.05 | 1.01 | 1660.07 | 1764 | 1764
+XAUUSD | 461.91 | 0.85 | 462.76 | 1374 | 1928
+
+POOLED ONE-R-PER-ENTRY SERIES
+Closed 2275; scored entries 2277; mean net R 0.09691; total net R 220.482; per-trade R Sharpe 0.06370; MBB p 0.0119; peak simultaneous positions 6.
+Gates: {'G1': True, 'G2': True, 'G3': True, 'G4': True, 'G5': True}
+
+SOURCE AND FINANCING AUDIT
+BTCUSD A_KC: 3132520 observed M1, 96648 carried removed, UTC 2020-01-01 00:00:00+00:00..2026-09-01 20:59:00+00:00, gaps>3h 231 (max 120.0h), SHA256 b9b4f43ad75466a944206f577e098c8dc2c95c01d251612792a6733940053e57; open_end 0, rollover max stale mark 48.0h, funnel {'candidates': 1465, 'shadowed': 1280, 'no_real_entry_bar': 16}
+BTCUSD B_DONCHIAN: 3132520 observed M1, 96648 carried removed, UTC 2020-01-01 00:00:00+00:00..2026-09-01 20:59:00+00:00, gaps>3h 231 (max 120.0h), SHA256 b9b4f43ad75466a944206f577e098c8dc2c95c01d251612792a6733940053e57; open_end 0, rollover max stale mark 48.0h, funnel {'candidates': 2365, 'shadowed': 1738, 'no_real_entry_bar': 0}
+ETHUSD A_KC: 3213287 observed M1, 130285 carried removed, UTC 2020-01-01 00:00:00+00:00..2026-09-01 20:59:00+00:00, gaps>3h 157 (max 96.0h), SHA256 5646970f33c8378fe9de792815967f70f90b9ec6f3de14b22261c3d51277605a; open_end 0, rollover max stale mark 72.0h, funnel {'candidates': 1467, 'shadowed': 1282, 'no_real_entry_bar': 18}
+ETHUSD B_DONCHIAN: 3213287 observed M1, 130285 carried removed, UTC 2020-01-01 00:00:00+00:00..2026-09-01 20:59:00+00:00, gaps>3h 157 (max 96.0h), SHA256 5646970f33c8378fe9de792815967f70f90b9ec6f3de14b22261c3d51277605a; open_end 1, rollover max stale mark 96.0h, funnel {'candidates': 2363, 'shadowed': 1756, 'no_real_entry_bar': 0}
+XAUUSD A_KC: 2335270 observed M1, 2268 carried removed, UTC 2020-01-01 23:00:00+00:00..2026-09-01 20:59:00+00:00, gaps>3h 396 (max 76.3h), SHA256 a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f; open_end 0, rollover max stale mark 72.0h, funnel {'candidates': 1708, 'shadowed': 1451, 'no_real_entry_bar': 67}
+XAUUSD B_DONCHIAN: 2335270 observed M1, 2268 carried removed, UTC 2020-01-01 23:00:00+00:00..2026-09-01 20:59:00+00:00, gaps>3h 396 (max 76.3h), SHA256 a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f; open_end 1, rollover max stale mark 72.0h, funnel {'candidates': 2514, 'shadowed': 1950, 'no_real_entry_bar': 0}
+
+LIMITATIONS
+FTMO announced 0.0325% crypto commission per side from 2025-07-28; the requested 0.065% of entry price is applied counterfactually to all years and differs from exit-notional billing.
+The specified annual swap rates and spread floors are owner scenarios, not verified historical broker charges. Both sides pay negative swaps here.
+Swap marks use the strictly prior available BID close; gaps can make marks stale. M1 OHLC cannot order all intraminute events.
+The cumulative R curve assumes one initial-risk unit per trade despite overlapping positions, and is not cash account equity or FTMO challenge EV.
+No lot sizing, contract conversion, variable spread, slippage, broker ticks or live account drawdown checks are modeled.

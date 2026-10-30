@@ -1,0 +1,4 @@
+G-PR1: At least 150 executed 2023-2026 Sunday trades with all four as-known input prices and the exact real 23:30 XAUUSD exit BID bar.
+G-PR2: The gated mean stress net gold units is strictly positive after the 0.41 spread proxy and an additional 0.41 execution cost.
+G-PR3: The 10000-resample Sunday-date bootstrap P(mean base net <= 0) is at most 0.01 with seed 20261011.
+G-PR4: The base 0.41-cost net gold-unit total is strictly positive in each complete gated year 2023, 2024 and 2025.

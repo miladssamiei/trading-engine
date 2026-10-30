@@ -1,0 +1,6 @@
+G-LB1: At least 300 fully resolved distinct London 2024-2026 Tuesday-Thursday XAUUSD auction-window trades, zero unresolved required native tick windows in that period, and strictly ordered valid real Bid/Ask ticks for every fill.
+G-LB2: Strictly positive 2024-2026 mean stressed gold units per trade after native variable Bid/Ask and another 0.41 gold units stress.
+G-LB3: Fifteen-trade circular moving-block bootstrap P(mean stressed gold units <= 0) at most 0.05 using 10000 draws and seed 20261011.
+G-LB4: Strictly positive stressed gold-unit totals separately in complete 2024, complete 2025 and partial 2026.
+G-LB5: If Phase 1 passes, a separately frozen exact-native EUR10000 two-stage 180-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 complete starts at fixed 2% initial risk.
+G-LB6: Official auction clock, fixed pre-known weekday/year-end calendar, causal prior-20 risk, executable native BID/ASK stop path, no overnight hold, raw quote source hashes and no account orders are verified.

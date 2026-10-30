@@ -1,0 +1,74 @@
+GATE — MOKAMEL FLIP. Verbatim extraction of every gate declared in
+SPEC_MOKAMEL_FLIP.txt (written 2026-09-03, BEFORE any script ran).
+Nothing here may be re-negotiated after numbers are seen. A gate
+clause that cannot be evaluated (missing data, degenerate case)
+counts as FAIL.
+
+STAGE A — GATE A1 (all three clauses required):
+  (i) n >= 150 eligible signals;
+  (ii) count(MFE >= t) > count(MAE >= t) at EVERY binding threshold,
+       t in {0.50, 0.75, 1.00} x ATR14(trigger M5 bar, continuous
+       tape);
+  (iii) day-block bootstrap P(mean(e) <= 0) <= 0.20, e = (MFE -
+       MAE) / ATR14, resampling DAY MEANS with replacement, 10,000
+       draws, seed 20260903.
+  FAIL => STOP, null result, no R:R stage.
+
+STAGE B — GATE B1 (binding arm = literal 40.00-pt stop / 80.00-pt
+target, full money machine; ALL of):
+  (i) expectancy_after_cost > 0 (0.51 pt cost);
+  (ii) NEIGHBORHOOD: VACUOUS BY Q2 RESOLUTION (single exogenous
+       cell, no grid neighbors). The non-binding unit ring
+       {20/40, 30/60, 50/100, 60/120} pt (1:2 shape preserved) is
+       REPORTED IN ITS PLACE, non-gating: it can neither rescue nor
+       fail the binding arm, and promoting any ring cell to binding
+       is FORBIDDEN under this SPEC (requires a NEW SPEC);
+  (iii) n_trades >= 150 on the binding arm.
+  FAIL => STOP, null result (ring results still reported).
+
+STAGE C — walk-forward (frozen rule — no selection exists; burn-in
+2021, folds 2022H1..2026H1 recorded; the video's "backtest 2025 /
+recent 2026 only" window is EXPLICITLY REJECTED):
+
+  GATE C1: WF Sharpe > 0 AND >= 150 WF trades.
+
+  GATE C2: >= 4 of 5 years (2022, 2023, 2024, 2025, 2026-partial)
+       net positive AND no year > 60% of total net (concentration
+       clause only when total net > 0).
+
+  GATE C3: WF mean expectancy_after_cost (0.51 pt, BINDING) > 0
+       (0.80 pt legacy reported alongside, non-binding).
+
+  ANY fail => STOP, documented reason.
+
+STAGE D — MT5 execution check, MODEL=4 ONLY, Stage-C passers only:
+
+  GATE D1: MT5 WF Sharpe within +/- 0.15 of the Python WF
+       reference.
+
+  GATE D2: per-trade reconciliation agreement >= 85%, every
+       residual classified.
+
+  Model=0 is used NOWHERE in this study. If no arm reaches Stage D,
+  Stage D is not run and the funnel records that fact — an empty
+  Stage D is a complete outcome.
+
+FROZEN INTERPRETATIONS THE GATES DEPEND ON (SPEC sec 1; may not be
+re-negotiated): Q1 US500-tick only; Q2 literal 40/80 pt as the sole
+binding exit; Q3 day closes at 3 TOTAL TPs or 3 TOTAL SLs; Q4
+indecision filter body/range < 0.10 on the trigger candle; Q5 entry
+window NY wall [570, 870); I-6 conservative mode requires the
+trigger candle to CLOSE beyond the level (entry at that close);
+I-7 wick-breach close-inside candles make no state change; I-8 base
+frozen while pending; I-9 same-M1-bar probe+breach => no entry
+offline; I-10 filter/forced exits count as neither win nor loss, any
+net-negative trade switches to CONSERVATIVE; I-11 fixed 2.5 lots (1%
+risk at 40-pt stop, $10,000 base, no compounding); I-12 forced exit
+at the open of the 15:55 M1 bar, never overnight.
+
+Multiple-testing context (declared, non-waivable): ONE binding
+hypothesis; 4 non-binding ring cells reported for unit-robustness
+context only; Stage A tests a single signal population. Narrow-margin
+passes are reported with skepticism; the presenter's win-rate,
+profitability, and Dow-Jones-only domain claims are UNVERIFIED and
+are measured, not assumed.

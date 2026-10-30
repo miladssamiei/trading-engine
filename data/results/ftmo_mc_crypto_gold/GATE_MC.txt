@@ -1,0 +1,5 @@
+G1: Exact input row count, hash, finite R, mean tolerance, and cumulative-R identity pass.
+G2: Exactly 10,000 paths are accounted for in each of four profiles, with legal phase transitions and no sampled path passing after a failure or unresolved cap.
+G3: Cash PnL, receipt, probability, quantile, and EV identities recompute from the saved path ledger within stated floating-point tolerances; no receipt occurs without 30 funded trades, funded survival, and positive funded PnL.
+G4: Unresolved paths at the 20,000-trade phase cap are disclosed and excluded from pass rates. Their presence does not invalidate correctly censored estimates.
+No profitability gate is imposed on an account-path scenario; the gate checks input and simulation integrity.

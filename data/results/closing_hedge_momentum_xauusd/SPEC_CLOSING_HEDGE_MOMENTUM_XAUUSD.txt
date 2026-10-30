@@ -1,0 +1,62 @@
+HYPOTHESIS 60: XAUUSD COMEX-CLOSE HEDGING MOMENTUM
+Declared 2026-09-25 before gold strategy code or any gold Phase-1 run.
+
+1. MECHANISM AND SOURCE
+Baltussen, Da, Lammers, and Martens, Journal of Financial Economics 142
+(2021) 377-403, https://academicweb.nd.edu/~zda/intramom.pdf , report
+that the prior close to final-half-hour move predicts the last-half-hour
+move across futures. Their gold COMEX GC trading window is 08:20-13:30
+New York time and their individual GC result is positive in data ending
+2020. Close-related hedging or rebalancing is the proposed mechanism.
+This tests transfer to the broker's XAUUSD CFD in 2020-2026, not an
+exact GC futures replication. The US500 transfer test in hypothesis 59
+has already failed; its result supplies no gold parameter or direction
+choice. This gold rule uses the gold hours printed in the paper.
+
+2. DATA AND CLOCK
+Use verified Bid OHLC M5 at data/results/xauusd_onboarding/
+xauusdtick_m5.csv. Convert epoch UTC to America/New_York. A gold
+session date requires an exact printed 08:20 bar. To trade, require
+exact printed 12:55, 13:00, 13:05, 13:10, 13:15, 13:20, and 13:25
+bars and the immediately preceding gold session date's exact 13:25
+close. Do not substitute an older date if the prior session's close
+is missing. Missing or early-close days are skipped and counted.
+
+3. CAUSAL RULE AND COST
+At 13:00, compare the just-completed 12:55 Bid close with the prior
+gold session's 13:25 Bid close. Higher means LONG, lower means SHORT,
+ties mean no trade. Enter one lot at the printed 13:00 Bid open and
+exit at the 13:25 Bid close, flat before 13:30. One trade per date;
+no stop, target, filter, re-entry, overnight position, or swap.
+Gross = direction * (exit Bid - entry Bid) in gold price units.
+Base net = gross - 0.41 (the project's verified full-tape median CFD
+spread); double-cost stress net = gross - 0.82. Bid M5 prices are
+bar proxies, not verified executable fills; variable actual spreads,
+slippage, and market impact are not modeled. Report gross and both
+net measures, win share, drawdown, side and year breakdowns.
+
+4. PARTITION AND INFERENCE
+Use 2020-01-01 through 2023-12-31 as diagnostic calibration and
+2024-01-01 through the tape end (2026-09-01) as the frozen test block.
+New York dates determine year. The 2026 year is partial. There is no
+training, tuning, or subset search. This is a fixed historical block,
+not virgin data: other project studies exposed the gold tape.
+Resample test-block session dates with replacement 10,000 times,
+seed 20260926, to estimate P(mean base net <= 0); one trade/date
+means each date is a block. Report descriptive bootstrap 95% quantiles.
+
+5. GATES, FROZEN BEFORE PHASE 1
+G-GH1: At least 150 executed trades in the 2024-2026 test block.
+G-GH2: Test-block mean net gold units under double 0.82-unit cost is strictly greater than zero.
+G-GH3: Test-block bootstrap P(mean base net <= 0) is at most 0.05, using 10,000 date-block resamples and seed 20260926.
+G-GH4: Each complete test-block calendar year, 2024 and 2025, has strictly positive total base net gold units.
+Overall Phase-1 PASS requires all four gates. FAIL is final for this
+artifact. No direction subset, price-move threshold, alternate close
+window, or different cost can rescue a FAIL without a new SPEC.
+
+6. STOP AND HONESTY
+No MT5 tester run unless this Phase 1 passes; a PASS would require a
+new execution SPEC/GATE and Model=4 tick validation before any system
+can be called a walk-forward-confirmed result. Offline positive mean
+alone is not deployability. Freeze this SPEC and GATE before writing
+gold Phase-1 code. Always write a REPORT, including for a null result.

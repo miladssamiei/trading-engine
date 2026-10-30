@@ -1,0 +1,122 @@
+SPEC_ADDENDUM_MOKAMEL_FLIP_USA30_NATIVE_RETEST.txt
+Written 2026-09-05, BEFORE any USA30 re-test code was written or run.
+
+0. WHAT THIS IS
+
+MOKAMEL_FLIP (USA30 native re-test). This is a DATA-DOMAIN re-test of
+hypothesis #16 (originally SPEC_MOKAMEL_FLIP.txt, 2026-09-03, US500-tick),
+not a new hypothesis and not a rule change. The pattern's presenter claimed
+a Dow-Jones-only domain; the original test ran on US500 and closed NULL with
+an explicit "tested outside the claimed domain" caveat. This addendum
+removes that caveat by re-running the EXISTING, UNMODIFIED state machine
+and stage scripts on native USA30 data:
+- evaluate/mokamel_flip_state_machine.py  (byte-identical, imported as-is)
+- evaluate/mokamel_flip_stage_a.py        (byte-identical; paths/params
+                                           injected via module attributes)
+- evaluate/mokamel_flip_stage_b.py        (byte-identical; paths/params
+                                           injected via module attributes)
+No SPEC/GATE/REPORT file is modified. Mechanism, thresholds, window logic,
+bootstrap, money machine: all identical to the frozen originals except the
+instrument-specific re-declarations in sections 2-6 below, each of which is
+REQUIRED by the domain-re-test mandate (reusing a US500 number for USA30
+would be a silent unearned assumption).
+
+1. DATA (verified 2026-09-05, data/results/usa30_onboarding/)
+
+- M5 signal tape: data/results/usa30_onboarding/usa30tick_m5.csv
+  (233,857 bars, BID OHLC, open-time epoch seconds, M1->M5 agreement
+  identical). M1 flip tape: usa30tick_m1.csv (1,167,943 bars).
+- Full tape 2020-01-01 23:00 UTC -> 2026-09-01 23:59:50 UTC, Dukascopy
+  USA30.IDX-USD, 143,822,709 ticks, 0 duplicates/monotonic violations/
+  spread inversions; 2024-12-31 vendor hole patched same-source.
+- BINDING WINDOW: 2025-07-01 .. 2026-08-31 (task-owner decision
+  2026-09-05). Reason: the vendor archive has scattered empty hours in the
+  US cash session before 2025H2 (mean 21-42 of 60 M5 bars/day in the
+  machine window across 2020-2024; essentially complete from 2026; full
+  per-month coverage table in the onboarding REPORT). The exclusion of
+  2020-01..2025-06 was fixed on coverage grounds ONLY, before any strategy
+  number existed for any window. Coverage in the binding window
+  (mean M5 bars/day in [570,870), days with wall-570 bar):
+  2025-07 48.7 (18d) / 2025-08 42.8 (13d) / 2025-09 49.3 (18d) /
+  2025-10 53.5 (22d) / 2025-11 48.5 (17d) / 2025-12 52.8 (18d) /
+  2026-01 58.0 (21d) / 2026-02 59.1 (20d) / 2026-03 60.0 (22d) /
+  2026-04 60.0 (21d) / 2026-05 59.1 (21d) / 2026-06 59.0 (22d) /
+  2026-07 59.4 (21d) / 2026-08 59.4 (20d).
+- Day universe: data/results/mokamel_flip_usa30_retest/usa30_days_binding.csv
+  = rows of usa30_onboarding/usa30_days.csv with ny_date in the binding
+  window AND (session_open>0 OR prev_close>0) - the same ORB-convention
+  universe filter the stage scripts apply to mt5_days.csv. The state
+  machine runs the full tape unchanged; eligibility (Stage A) and the
+  zero-fill universe (Stage B) are restricted by this file.
+
+2. POINT CONVENTION (Q2 resolution)
+
+One USA30 index point = 1.0 price units. The literal exit arm 40/80 =
+40.00 / 80.00 index points (STOP/TARGET). Dollar convention: $1 per point
+per lot (project convention), binding sizing 2.5 lots => $100 risk at the
+40-pt stop, identical economics to the original arm.
+
+3. COST FLOORS (Q4 resolution - US500 numbers NOT reused)
+
+Measured on the raw USA30 tape (onboarding REPORT):
+- COST_PRIMARY = 2.282 pts (median ask-bid, cash window [09:30,16:00) NY)
+  -> binding for every after-cost gate and reported metric.
+- COST_WIDE    = 2.558 pts (cash p90) -> replaces the US500 0.80 "legacy"
+  layer; reported alongside, non-gating.
+(The original scripts' COST_PRIMARY/COST_LEGACY attributes are set to
+these values by the driver; gross expectancy is additionally compared
+against 2.282 explicitly in the REPORT.)
+
+4. SESSION (verified, not assumed)
+
+USA30.IDX-USD trades the NY cash session 09:30-16:00 with overnight hours.
+The machine window [570,870) NY wall minutes, the wall-570 cash-day
+definition, the DST-aware epoch->NY conversion, and the 15:55 forced-exit
+wall (955) are IDENTICAL to the frozen originals and are valid unchanged
+for USA30 (same NY session clock as US equity indices).
+
+5. STAGE A (gates identical to GATE_MOKAMEL_FLIP.txt; re-declared values)
+
+Population: every AGGRESSIVE-fill flip entry, eligible = trigger index
+>= WARMUP 200 AND ny_date in the binding universe; binding population =
+post-indecision-filter (body/range < 0.10). Thresholds 0.50/0.75/1.00 x
+ATR14(trigger M5, continuous tape); e = (MFE-MAE)/ATR14; direction-native
+60-minute M1 walk, E-XTM first-bar convention; day-block bootstrap 10,000
+draws seed 20260903.
+GATE A1 (binding_filtered population): (i) n >= 150; (ii) count(MFE>=t) >
+count(MAE>=t) at ALL three ATR thresholds; (iii) bootstrap p <= 0.20.
+Unfiltered population reported alongside, non-gating. Comparisons vs the
+US500 run (mean e, direction asymmetry, yearly shape) are REPORTED, never
+gated.
+
+6. STAGE B (gates identical to GATE_MOKAMEL_FLIP.txt; re-declared values)
+
+BINDING arm: literal 40/80 index points (genuinely in-domain now - no
+scaling amendment applies). Ring {20/40, 30/60, 50/100, 60/120} pt at
+constant 1:2 NON-BINDING, promotion forbidden (Q2 of the original GATE).
+Money machine identical (first trade aggressive; net-loss trade ->
+conservative close-confirmed; cumulative day R >= 0 -> aggressive; day
+closes at 3 total TPs or 3 total SLs; one position; filter/forced exits
+neutral). Exits on M1 with the established conventions; 15:55-bar-open
+forced exit; no overnight.
+GATE B1 (binding arm only): (i) expectancy_after_cost > 0 at
+COST_PRIMARY=2.282; (ii) neighborhood clause VACUOUS exactly as
+pre-declared in the original (single exogenous cell; unit ring reported
+non-binding); (iii) n_trades >= 150.
+Reported (non-gating): half-year net split 2025H2 / 2026H1 / 2026H2;
+2026-only sensitivity sub-run (days 2026-01-01..2026-08-31, output to
+stage_b_2026only/); exit-reason mix (the 78%-time-exit question: does the
+symptom found on US500 also occur on USA30 at the native 40/80 scale, or
+do stops/targets engage as the price-level match predicts).
+
+7. HONESTY / ANTI-LEAK RULES
+
+- The original US500 artifacts are frozen history; nothing there changes.
+- If Stage A fails or Stage B fails, that NULL is a STRONGER null than the
+  US500 result (it removes the wrong-domain excuse entirely) and is
+  reported with the same directness. No re-tuning, no third window, no
+  re-scaling on USA30. Stage C does not exist in this addendum.
+- The 2020-01..2025-06 exclusion is data-adequacy only; no binding-window
+  number was seen before it was fixed.
+- MT5/Model=4 work happens only if BOTH Stage A and Stage B pass
+  (task-owner bar, 2026-09-05). Model=0 is not used anywhere in this task.

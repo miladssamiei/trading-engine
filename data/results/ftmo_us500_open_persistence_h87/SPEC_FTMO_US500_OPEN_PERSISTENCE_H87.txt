@@ -1,0 +1,92 @@
+HYPOTHESIS 87: FTMO US500 OPENING DIRECTIONAL PERSISTENCE
+Declared 2026-09-25 before H87 evaluation code, signal returns or run.
+Null/FAIL is a complete deliverable. No post-result parameter change.
+
+1. MECHANISM AND SOURCE
+The hypothesis is that unusually large and directional first-half-hour
+cash price discovery persists into the late morning. It is an original
+one-rule CFD inference from research on opening-period volatility and
+intraday momentum, not a reproduction of a published profitable CFD
+strategy. The project has already exposed many US500 price patterns;
+historical success here is selected evidence requiring independent
+forward confirmation. Source is the connected FTMO-Demo native
+US500.cash BID/ASK real-tick API, not custom TenTrade bars. Source-
+fidelity audit 2026-09-25 observed 97/604380 M1 bars discarded by
+Model=4 on 2025-03-21 alone; exclude that date from both signals and
+lookback. Do not use generated tester ticks. Archive source coverage,
+daily read counts, raw quote digest and code/config hashes.
+
+2. TIME, BAR AND EVENT DEFINITIONS
+Analyze NY cash dates 2025-01-02 through 2026-09-24 inclusive. MT5
+native tick epoch is broker server wall stamped as UTC: broker is GMT+2
+in European winter, GMT+3 in European summer. For each NY date,
+convert exact NY 09:30, 10:00, 12:00 and 12:05 to UTC with zoneinfo,
+then add the contemporaneous broker offset to form MT5 query epochs.
+This handles US/Europe DST mismatch weeks. Use all COPY_TICKS_ALL rows
+in [09:30,12:05] server time; sort chronologically by time_msc and
+original row index, and reject inverted/nonpositive Bid/Ask. A valid
+opening session has a quote by 09:31 and by 10:01, and at least one
+quote in every completed 09:30..09:59 minute. The first quote at or
+after 10:00 and before 10:01 is the actionable entry quote. Do not
+require any future quote to decide whether to signal or enter; missing
+post-entry path/12:00 exit is unresolved and fails source coverage.
+Opening mid is (Bid+Ask)/2. First-mid F, last mid strictly before
+10:00 L, maximum H and minimum B over opening quotes; range Q=H-B.
+Past sessions are prior NY cash dates with a valid opening only, not
+calendar days. At least 20 prior valid sessions are required.
+
+3. SINGLE FROZEN SIGNAL AND EXECUTION
+At 10:00 trade if Q is at least the median Q of 20 preceding valid
+opening sessions, Q>0, and abs(L-F)/Q >= 0.50. Direction is sign(L-F).
+No side/date/volatility/news filter or second trade. Entry BUY at the
+first post-10:00 ASK or SELL at BID. The initial stop distance in
+index points D=max(Q/2,1.00), rounded UP to the 0.01 tick grid.
+BUY stop = entry ASK-D, target = entry ASK+2D; SELL stop=entry BID+D,
+target=entry BID-2D, all rounded to 0.01. Walk subsequent real quotes
+chronologically: BUY stop triggers BID<=stop and exits at observed BID,
+target triggers BID>=target and exits at observed BID; SELL stop
+triggers ASK>=stop and exits at observed ASK, target triggers ASK<=target
+and exits at observed ASK. Stop takes precedence if a quote could
+satisfy both. If neither triggers, exit at first real quote at or
+after NY 12:00 and before 12:05, at BID for BUY or ASK for SELL.
+Every exit uses actual observed quote, including adverse gaps.
+Positions must open and close on the same NY and Prague date.
+
+4. COST, INFERENCE AND FTMO PACE
+Executed BID/ASK P/L already includes actual variable spread; do not
+subtract 0.51 again. FTMO states simulated indices have zero commission.
+Report actual entry/exit spreads p50/p90 and points per trade. Apply
+an ADDITIONAL 0.51 index point per trade spread stress plus 0.25 point
+round-trip slippage stress to each base P/L. Report all three levels.
+Broker contract is USD1/point/lot; EUR account conversion uses native
+EURUSD quote at exit, profit USD divided by its ASK, loss USD divided
+by its BID, plus an additional conservative 0.7% of absolute converted
+P/L for possible FTMO currency adjustment. If conversion quote is
+missing, fail challenge gate rather than impute.
+For each risk row 0.5% and 1.0% of initial EUR10000 per position,
+lots=floor((risk EUR * EURUSD entry BID)/D /0.01)*0.01, capped by
+available initial EUR10000 and 1:15 index leverage at entry price,
+with 0.01 min/step; no compounding. This is a conservative fractional
+lot proxy, not an MT5 margin guarantee. Replay all 90-calendar-day
+rolling starts with complete follow-up, daily Prague-midnight balance
+minus EUR500 floating-equity floor and EUR9000 static floor. Observe
+worst BID/ASK path on every open trade; breach takes precedence.
+Pass at closed balance >=EUR11000 after four distinct Prague trading
+dates. Report PASS/BREACH/TIMEOUT, median pass days and 14-day 5%
+Free Trial diagnostic. Use date-block 10000 bootstrap draws, seed
+20260929, on 2025-2026 stressed EUR net/trade, resampling NY dates.
+2025 complete and 2026 partial signs both required. Even a Phase-1
+PASS only licenses a new frozen native Model=4 EA/tick reconciliation
+and subsequent independently recorded forward validation. No live or
+demo account orders.
+
+5. VERBATIM GATES
+G-OP1: At least 150 executed 2025-2026 FTMO-native US500.cash real-Bid/Ask trades on 150 distinct NY dates, with zero unresolved post-entry exits, zero unknown conversion quotes, and no source-mismatch day used.
+G-OP2: Strictly positive mean EUR net/trade in one fixed risk row after actual Bid/Ask and conversion plus additional 0.51-point spread and 0.25-point slippage stresses.
+G-OP3: NY-date bootstrap P(mean stressed EUR net/trade <= 0) at most 0.05 with 10000 draws and seed 20260929 in the same fixed risk row.
+G-OP4: Strictly positive stressed EUR net totals in complete 2025 and partial 2026 in the same qualifying risk row.
+G-OP5: At least 150 fully observed rolling paid 90-calendar-day starts, with pass rate at least 0.70 and floating-equity breach rate at most 0.10 in the same qualifying risk row.
+G-OP6: All trades use only causal completed opening quotes, exact observed Bid/Ask execution, positive tick-grid stop distance, same NY/Prague date flat, and frozen source/configuration with no account orders.
+
+All six must PASS in the SAME risk row. Any failure is FINAL for H87;
+write REPORT regardless, never edit SPEC/GATE/REPORT afterward.

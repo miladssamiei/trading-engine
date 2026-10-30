@@ -1,0 +1,27 @@
+GATE_SALEH_DONCHIAN.txt - HYPOTHESIS #57 PHASE 1 GATES (frozen 2026-09-24,
+BEFORE the Phase 1 script ran; verbatim extraction from
+SPEC_SALEH_DONCHIAN.txt section 7)
+
+Population: all executed trades of the single pre-declared machine pass over
+data/results/xauusd_onboarding/xauusdtick_m1.csv (full tape), one
+configuration: 4H Supertrend(10,3.0) anchor, 1H Donchian(20) breakout entries
+at the 1H open, ADX14 >= 20, 4xATR(14) initial stop, close-based 4xATR
+trailing stop, fixed spread 0.41 embedded in fills. Net PnL per trade in
+price units as defined in SPEC section 5.
+
+G-SAL1: Total executed trades >= 30.
+
+G-SAL2: Net Sharpe Ratio > 0.
+        Net Sharpe = mean(trade Net PnL) / std(trade Net PnL, ddof=1),
+        event-indexed per trade, not annualized.
+
+G-SAL3: Moving-block bootstrap P(mean Net PnL <= 0) <= 0.20.
+        10,000 resamples, block = 5 trades, seed 20261005.
+        Algorithm: n = trade count; per resample draw ceil(n/5) block starts
+        uniformly from {0..n-5}, concatenate the 5-trade blocks, truncate to
+        n, take the mean; P = fraction of the 10,000 resample means <= 0.
+        (If n < 5, P is undefined and G-SAL3 is scored FAIL.)
+
+Verdict rule: OVERALL PASS iff G-SAL1 AND G-SAL2 AND G-SAL3 all PASS. Any
+FAIL -> OVERALL FAIL, final for this artifact; no re-runs. A PASS is not a
+validated result under validation_discipline and does not authorize Phase 2.

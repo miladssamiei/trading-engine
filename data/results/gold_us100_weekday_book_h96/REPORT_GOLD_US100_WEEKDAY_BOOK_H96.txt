@@ -1,0 +1,10 @@
+H96 GOLD+US100 WEEKDAY BOOK - FINAL_FAIL
+Dukascopy BID M1 fixed-spread proxy, known-holiday early exits, no orders.
+Sources/SPEC/GATE/script SHA256: {"GOLD": "a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f", "US100": "152f9c995b370e5391cb7da99b64a8002ceee5e52cc68899ddca409ac7e15e39"} / 73640494b2f7ef752fed27dd36ea81b18ffda2896ef6d7e80c99e084eca56421 / e3a65fd88424ed470c0dfc5526dbd81b1d995934a3f6189d5046f6ac7e5c1221 / ed3a4c7cf1e9ea5fb5b5f0bd78c1ebf1297d4dfab81ff40779c10621273daa22
+Leg/common/evaluation trades: (331, 344, 330, 136)
+Evaluation unresolved/unilateral: (3, ['2024-01-01', '2024-09-23'])
+Evaluation stressed EUR mean/total/bootstrap P/correlation: (43.94457123077833, 5976.461687385853, 0.0023, 0.07540013900719712)
+Annual: {"2024": {"n": 51, "gold_r": 3.6807306076743673, "us100_r": 4.438434395930776, "eur": 1623.8330007210286}, "2025": {"n": 51, "gold_r": 10.685800252560606, "us100_r": 6.748815426702261, "eur": 3486.9231358525726}, "2026": {"n": 34, "gold_r": 1.8785939840898525, "us100_r": 2.449933769971404, "eur": 865.7055508122507}}
+Exits: {"GOLD": {"THURSDAY_FLAT": 120, "STOP": 13, "HOLIDAY_FLAT": 3}, "US100": {"THURSDAY_FLAT": 116, "STOP": 16, "HOLIDAY_FLAT": 4}}
+Gates: {"G-GB1": false, "G-GB2": true, "G-GB3": true, "G-GB4": true, "G-GB5": "NOT_RUN", "G-GB6": false}
+Component tape outcomes were exposed; no unseen confirmation or native prop replay.

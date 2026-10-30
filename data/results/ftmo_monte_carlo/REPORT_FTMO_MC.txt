@@ -1,0 +1,32 @@
+FTMO 10K TWO-STEP GOLD TRADE-R MONTE CARLO - REPORT
+SIMULATION VALIDITY GATE PASS
+10,000 IID-with-replacement purchased paths per fixed-dollar risk profile; 2020-2026 strict 0.585-cost A/B executed trades.
+Owner scenario: $10,000 initial, $175 paid fee, 80% profit split, +$1,000/+500 phase targets, -$1,000 static closed-loss cutoff, 30 funded trades.
+R uses exact fill-to-initial-stop risk where available; no average-risk approximation.
+Pooled trade R: {'trades': 754, 'mean_r': 0.11005853183137655, 'median_r': -0.2677273458116334, 'min_r': -1.2199210558889173, 'max_r': 10.546904002308912, 'std_r': 1.3116214454716364, 'r_below_minus_one': 2, 'a_share': 0.2519893899204244, 'b_share': 0.7480106100795756}.
+Engine source details: [{'engine': 'A_KC', 'path': 'C:\\Users\\Milad\\Desktop\\RR\\data\\results\\gold_ensemble_real_cost\\trades_A_KC_strict.csv', 'sha256': '07853faf1baaea9567ec8c232237ffcd71a08c29ec6a45d7a5369dc1ee847b74', 'trades': 190, 'mean_initial_risk_units': 41.24509272733006, 'median_initial_risk_units': 30.874493355294817, 'mean_r': 0.05427560438207624, 'median_r': -0.2677273458116334, 'min_r': -1.0, 'max_r': 6.799147192216304, 'r_below_minus_one': 0, 'net_total_gold_units': 841.301392620785, 'yearly_count': {'2020': 21, '2021': 25, '2022': 33, '2023': 32, '2024': 30, '2025': 31, '2026': 18}}, {'engine': 'B_DONCHIAN', 'path': 'C:\\Users\\Milad\\Desktop\\RR\\data\\results\\gold_ensemble_real_cost\\trades_B_DONCHIAN_strict.csv', 'sha256': '74d9070affe06766491f6ee67094cb629a64e1c0b0afe41c60987fa85ae16062', 'trades': 564, 'mean_initial_risk_units': 29.11895637676838, 'median_initial_risk_units': 20.968812909198164, 'mean_r': 0.12885065278060895, 'median_r': -0.26865725997467504, 'min_r': -1.2199210558889173, 'max_r': 10.546904002308912, 'r_below_minus_one': 2, 'net_total_gold_units': 3187.943222944875, 'yearly_count': {'2020': 71, '2021': 86, '2022': 93, '2023': 88, '2024': 94, '2025': 85, '2026': 47}}].
+
+RISK 0.5% ($50 initial cash risk/trade) | 10,000 paths
+  Phase 1 pass 95.55% (9555); Phase 2 pass conditional on Phase 1 96.21%, unconditional 91.93% (9193).
+  First positive payout probability from purchase 59.98% (5998); Wilson 95% Monte Carlo interval [0.5901606439140208, 0.6093627071954171]; funded blow count 1.
+  Expected gross receipt $278.87; paid fee $175.00; NET EV per challenge $103.87; Monte Carlo SE $2.87; 95% MC interval [98.25597920597609, 109.492322785224]; positive-EV signal YES.
+  Model-implied independent accounts for >=95% chance of >=1 payout: 4 (not a guarantee or purchase recommendation).
+  Phase 1 trades median/p90 142/358; Phase 2 conditional trades median/p90 66.0/215.0; unresolved P1/P2 0/0.
+
+RISK 1.0% ($100 initial cash risk/trade) | 10,000 paths
+  Phase 1 pass 82.54% (8254); Phase 2 pass conditional on Phase 1 86.02%, unconditional 71.00% (7100).
+  First positive payout probability from purchase 46.47% (4647); Wilson 95% Monte Carlo interval [0.45493987725980395, 0.4744872340211263]; funded blow count 155.
+  Expected gross receipt $350.59; paid fee $175.00; NET EV per challenge $175.59; Monte Carlo SE $4.84; 95% MC interval [166.10909427756798, 185.06291233751665]; positive-EV signal YES.
+  Model-implied independent accounts for >=95% chance of >=1 payout: 5 (not a guarantee or purchase recommendation).
+  Phase 1 trades median/p90 54/146; Phase 2 conditional trades median/p90 28.0/86.0; unresolved P1/P2 0/0.
+
+RISK 2.0% ($200 initial cash risk/trade) | 10,000 paths
+  Phase 1 pass 66.52% (6652); Phase 2 pass conditional on Phase 1 74.83%, unconditional 49.78% (4978).
+  First positive payout probability from purchase 30.45% (3045); Wilson 95% Monte Carlo interval [0.29555666533858455, 0.31359348354022204]; funded blow count 1155.
+  Expected gross receipt $415.88; paid fee $175.00; NET EV per challenge $240.88; Monte Carlo SE $8.00; 95% MC interval [225.20567326387618, 256.5494852575603]; positive-EV signal YES.
+  Model-implied independent accounts for >=95% chance of >=1 payout: 9 (not a guarantee or purchase recommendation).
+  Phase 1 trades median/p90 19/51; Phase 2 conditional trades median/p90 12.0/31.0; unresolved P1/P2 0/0.
+
+CRITICAL RULE GAP: The owner-defined simulator checks only closed-trade -10% loss. Actual FTMO Challenge: 2-Step also enforces a 5% daily EQUITY-loss limit and minimum trading days; intratrade floating losses, swap and timing are absent here. The simulated pass/payout rates and EV must not be treated as real FTMO probabilities.
+Official objectives: https://ftmo.com/en/trading-objectives/ ; FTMO 2-Step fee refund terms: https://ftmo.com/en/faq/is-the-entry-fee-refunded/ .
+The $175 fee is supplied by the owner, not verified current pricing. Accounts trading the same strategy are correlated, so the binomial independent-account count cannot guarantee a payout. Historical R sampling from 754 prior-researched trades ignores regime concentration, strategy decay, leverage, overlapping A/B positions and actual account-specific execution.

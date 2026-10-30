@@ -1,0 +1,19 @@
+US500 M15 WILLIAMS %R MEAN-REVERSION - REPORT
+GATE: FAIL (>=50 closed trades and Net Sharpe >0)
+Tape: data\results\vwap_2021_2026\us500tick_m1.csv; 1791504 M1 rows; 2021-01-03T23:00:00+00:00 through 2026-04-30T23:59:00+00:00
+Tape SHA256: 29ad8f8b25b43be43a87c4ac39575c3cd280d557661c31f8e691990949087453
+Continuous M15 grid: 186532 bars, 121486 real
+Long ask entry=bid open+0.51; stop=ask entry-10.0; TP=ask entry+50.0; M1 stop priority; no time limit.
+
+Trade Count (closed): 1017; total entries 1017; OPEN_END 0
+Net Expectancy: -0.113604 index points/trade; Net Total: -115.535 index points
+Net Sharpe: -0.005024 (unannualized per trade); Win Rate: 16.72%
+Stop Losses: 847; Take Profits: 170
+Adverse stop gaps: 29; same-M1 exits: 5; M1 stop/TP ties: 0
+Entries following filled M15 signal bars: 52; NY overnight entries: 441
+OPEN_END last-close mark (excluded from closed stats): 0.000 points; max closed-trade drawdown: 842.873 points
+Funnel: {'candidates': 2847, 'busy': 1830, 'no_real': 0, 'same_m1_ties': 0}
+Annual NY entry cohorts: {"2021": {"net": 149.57499999999982, "trades": 147}, "2022": {"net": -358.538, "trades": 258}, "2023": {"net": 289.482999999997, "trades": 167}, "2024": {"net": 295.752999999997, "trades": 153}, "2025": {"net": -539.6430000000009, "trades": 215}, "2026": {"net": 47.835000000000036, "trades": 77}}
+
+Limits: Full-tape retrospective bid-only proxy with a fixed 0.51 CFD spread. M1 OHLC cannot establish exact bid/ask fills or intraminute order; stop wins ties.
+No time limit permits overnight/weekend holdings, but swap was not measured and is excluded. No FTMO account-dollar sizing, equity-limit simulation, or walk-forward confirmation.

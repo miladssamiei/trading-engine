@@ -1,0 +1,69 @@
+EURUSD TICK ONBOARDING REPORT
+generated_utc: 2026-09-22T21:24:23.114958+00:00
+tool: evaluate/eurusd_onboarding.py
+
+=== SOURCE ===
+file: C:\Users\Milad\download\eurusd-tick-2020-01-01-2026-09-20.csv
+size_bytes: 5,096,942,628
+sha256: 23376d5ffd9d5f287f92875faa4df303032162158fff20387c4c284894a8e3b1
+rows: 171,175,617
+
+=== VOLUME AND BOUNDS ===
+raw ticks: 171,175,617
+kept ticks: 171,172,153
+exact same-ts duplicates dropped: 0
+conflicting same-ts quotes kept: 0
+first tick UTC: 2020-01-01 22:01:12.821000+00:00   NY: 2020-01-01 17:01:12.821000-05:00
+last tick UTC: 2026-09-18 20:59:59.872000+00:00   NY: 2026-09-18 16:59:59.872000-04:00
+kept ticks per NY year:
+  2020: 32,763,888
+  2021: 16,796,341
+  2022: 36,919,979
+  2023: 27,547,258
+  2024: 20,411,520
+  2025: 23,403,962
+  2026: 13,329,205
+
+=== INTEGRITY ===
+HARD ASSERT 1 PASSED: monotonic violations == 0
+non-positive quote rows excluded: 0
+spread inversions (ask<bid) excluded: 3,464
+spread rows clipped at histogram ceiling: 0
+
+=== GAPS >= 3h ===
+rule: gap is weekend closure iff total extent outside [Fri 17:00, Sun 17:00] America/New_York (DST-aware) <= 2h
+threshold: 3.0 h
+weekend gaps excluded: 347
+non-weekend gaps: 8
+start UTC | end UTC | hours | start weekday | NY start -> end
+2020-12-25 07:59:13.751000+00:00 | 2020-12-27 22:06:36.584000+00:00 | 62.12 | Friday | 2020-12-25 02:59:13.751000-05:00 -> 2020-12-27 17:06:36.584000-05:00
+2020-12-31 21:59:59.120000+00:00 | 2021-01-03 22:00:00.040000+00:00 | 72.0 | Thursday | 2020-12-31 16:59:59.120000-05:00 -> 2021-01-03 17:00:00.040000-05:00
+2023-12-25 07:58:11.446000+00:00 | 2023-12-25 22:04:02.627000+00:00 | 14.1 | Monday | 2023-12-25 02:58:11.446000-05:00 -> 2023-12-25 17:04:02.627000-05:00
+2023-12-29 21:59:59.385000+00:00 | 2024-01-01 22:00:12.108000+00:00 | 72.0 | Friday | 2023-12-29 16:59:59.385000-05:00 -> 2024-01-01 17:00:12.108000-05:00
+2024-12-25 07:59:59.760000+00:00 | 2024-12-25 22:04:01.571000+00:00 | 14.07 | Wednesday | 2024-12-25 02:59:59.760000-05:00 -> 2024-12-25 17:04:01.571000-05:00
+2024-12-31 21:59:58.249000+00:00 | 2025-01-01 22:00:14.647000+00:00 | 24.0 | Tuesday | 2024-12-31 16:59:58.249000-05:00 -> 2025-01-01 17:00:14.647000-05:00
+2025-12-25 07:57:49.545000+00:00 | 2025-12-25 22:04:00.527000+00:00 | 14.1 | Thursday | 2025-12-25 02:57:49.545000-05:00 -> 2025-12-25 17:04:00.527000-05:00
+2025-12-31 21:58:59.891000+00:00 | 2026-01-01 22:04:01.135000+00:00 | 24.08 | Wednesday | 2025-12-31 16:58:59.891000-05:00 -> 2026-01-01 17:04:01.135000-05:00
+
+=== SPREAD - COST FLOOR ===
+convention: 1 pip = 0.00010, 1 point/pipette = 0.00001 (5-decimal pricing)
+full tape points: n=171,172,153 median=3 mean=3.8623 p10=2 p90=6 p99=15 max=344
+full tape pips: median=0.3 mean=0.3862 p90=0.6
+overlap [08:00,11:00) ET points: n=42,409,163 share_pct=24.7757 median=3 mean=3.3432 p10=2 p90=5 p99=8 max=285
+overlap [08:00,11:00) ET pips: median=0.3 mean=0.3343 p90=0.5
+optimal intraday cost floor (London/NY overlap median): 3 points = 0.3 pips
+
+=== AGGREGATION ===
+M1 bars: 2,490,896 (BID, keyed by ts//60000, time = bucket open UTC epoch seconds, OHLC + tick_volume)
+M5 bars: 500,814 (BID, keyed by ts//300000, built directly from kept ticks, OHLC only)
+D1 days: 1,748
+D1 convention: day D = (D-1 17:00 ET, D 17:00 ET], labeled by NY date of the 17:00 ET close
+HARD ASSERT 1 PASSED: monotonic violations == 0
+HARD ASSERT 2 PASSED: M1 -> M5 identical (m5_rows=500,814, m5_from_m1_rows=500,814, value_mismatches=0)
+
+=== ARTIFACTS ===
+C:\Users\Milad\Desktop\RR\data\results\eurusd_onboarding\eurusdtick_m1.csv rows=2,490,896
+C:\Users\Milad\Desktop\RR\data\results\eurusd_onboarding\eurusdtick_m5.csv rows=500,814
+C:\Users\Milad\Desktop\RR\data\results\eurusd_onboarding\eurusdtick_d1.csv rows=1,748
+C:\Users\Milad\Desktop\RR\data\results\eurusd_onboarding\onboarding_stats.json (1 json object)
+C:\Users\Milad\Desktop\RR\data\results\eurusd_onboarding\REPORT_EURUSD_ONBOARDING.txt (this report)

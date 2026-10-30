@@ -1,0 +1,4 @@
+G-MP1: Both input streams reproduce the corrected Model=4 report's trade counts and USD totals, with every trade on one New York date inside the common session universe.
+G-MP2: The 2024+ combined extra-0.51-per-trade stressed daily mean is strictly positive and its 10000-resample date-bootstrap P(mean<=0) is at most 0.05.
+G-MP3: Both complete gated years 2024 and 2025 have strictly positive combined extra-0.51-per-trade stressed USD totals.
+G-MP4: At least one fixed common scale k in {1,2,4,8,16,32} has at least 70% first-Challenge passes and at most 10% close-based breaches among all complete 180-calendar-day 2024+ rolling starts.

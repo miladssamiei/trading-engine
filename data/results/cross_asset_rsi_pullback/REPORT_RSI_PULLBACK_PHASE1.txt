@@ -1,0 +1,88 @@
+REPORT - HYPOTHESIS #52: TREND-ALIGNED BOLLINGER BAND PULLBACK (4h anchor / 15m limit execution)
+Generated: 2026-09-23T22:51:27.933839+00:00  |  OVERALL VERDICT: FAIL
+Mechanics: strong-trend pullback - 4h RSI(14) > 70 (< 30) + Supertrend(10,3.0) direction + 4h ADX > 40 +
+15m ADX > 20 gates; one-bar limit order at the prior 15m BB Lower/Upper (fill = min/max(Open, band),
+equality fills); SL = fill -/+ 6.0*ATR15(t-1); TP = opposite band; worst-case same-bar ordering
+(SL before TP), honest gap fills, FORCED_EOD included; continuous forward-filled grids per
+SPEC_RSI_PULLBACK.txt.
+
+=== US500 (cost floor 0.51 points RT) ===
+1. DATA: 1791504 M1 rows -> 186532 15m bars (65046 synthetic = 34.9%) / 11659 4h bars, 2021-01-03 18:00:00 .. 2026-04-30 19:45:00
+   tape sha256 29ad8f8b25b43be4...
+2. FUNNEL (setups vs limit fills): armed bars=186092  setups L/S=5195/4302 (total 9497, one-bar validity)
+   fills (executed)=4005  unfilled=5492  fill rate=42.2%  setups ignored-while-open=7777
+3. NET ECONOMICS (points): mean=1.356/trade  median=-0.510  total=5431.9  win=39.4%  Net Sharpe=1.698
+   excursion asymmetry: mean MFE=7.28 vs mean MAE=3.24  (MFE/MAE=2.24)
+   sides: LONG: n=2234 mean=-0.00  SHORT: n=1771 mean=3.07
+   exit mix: {'TP': 3921, 'SL': 84}
+   year-by-year net:
+      2021: n=1040  total=    1454.4  mean=   1.398
+      2022: n= 843  total=    2040.7  mean=   2.421
+      2023: n= 639  total=     198.7  mean=   0.311
+      2024: n= 341  total=    -255.6  mean=  -0.750
+      2025: n= 980  total=    1612.1  mean=   1.645
+      2026: n= 162  total=     381.4  mean=   2.355
+4. GATES (independent, frozen in GATE_RSI_PULLBACK.txt):
+   G-MR1 executed >= 30          :  4005          -> PASS
+   G-MR2 Net Sharpe > 0           :     1.698    -> PASS
+   G-MR3 MBB P(mean<=0) <= 0.20   :    0.0000    -> PASS  (block=5, 10000 resamples, seed 20260930)
+   US500 VERDICT: PASS
+
+=== EURUSD (cost floor 0.3 pips RT) ===
+1. DATA: 2490896 M1 rows -> 235388 15m bars (68406 synthetic = 29.1%) / 14713 4h bars, 2020-01-01 17:00:00 .. 2026-09-18 16:45:00
+   tape sha256 e578692f3b02d985...
+2. FUNNEL (setups vs limit fills): armed bars=234944  setups L/S=3834/3958 (total 7792, one-bar validity)
+   fills (executed)=1591  unfilled=6201  fill rate=20.4%  setups ignored-while-open=5978
+3. NET ECONOMICS (pips): mean=0.908/trade  median=-0.300  total=1444.0  win=32.9%  Net Sharpe=0.865
+   excursion asymmetry: mean MFE=7.99 vs mean MAE=5.71  (MFE/MAE=1.40)
+   sides: LONG: n=982 mean=0.27  SHORT: n=609 mean=1.94
+   exit mix: {'TP': 1490, 'SL': 93, 'TP_GAP': 6, 'SL_GAP': 1, 'FORCED_EOD': 1}
+   year-by-year net:
+      2020: n= 595  total=     599.4  mean=   1.007
+      2021: n= 208  total=    -169.6  mean=  -0.815
+      2022: n= 192  total=    1296.3  mean=   6.752
+      2023: n= 210  total=    -485.6  mean=  -2.312
+      2024: n= 192  total=     205.4  mean=   1.070
+      2025: n=  32  total=     -22.1  mean=  -0.690
+      2026: n= 162  total=      20.1  mean=   0.124
+4. GATES (independent, frozen in GATE_RSI_PULLBACK.txt):
+   G-MR1 executed >= 30          :  1591          -> PASS
+   G-MR2 Net Sharpe > 0           :     0.865    -> PASS
+   G-MR3 MBB P(mean<=0) <= 0.20   :    0.0153    -> PASS  (block=5, 10000 resamples, seed 20260930)
+   EURUSD VERDICT: PASS
+
+=== XAUUSD (cost floor 0.41 price units RT) ===
+1. DATA: 2337538 M1 rows -> 233752 15m bars (77868 synthetic = 33.3%) / 14611 4h bars, 2020-01-01 18:00:00 .. 2026-09-01 16:45:00
+   tape sha256 a8c4c1d6551d27f3...
+2. FUNNEL (setups vs limit fills): armed bars=233312  setups L/S=6450/3452 (total 9902, one-bar validity)
+   fills (executed)=2734  unfilled=7168  fill rate=27.6%  setups ignored-while-open=8341
+3. NET ECONOMICS (price units): mean=-0.268/trade  median=-0.410  total=-733.7  win=37.5%  Net Sharpe=-0.326
+   excursion asymmetry: mean MFE=3.80 vs mean MAE=3.16  (MFE/MAE=1.20)
+   sides: LONG: n=1737 mean=-0.39  SHORT: n=997 mean=-0.05
+   exit mix: {'TP': 2615, 'SL': 115, 'TP_GAP': 4}
+   year-by-year net:
+      2020: n= 223  total=    -207.9  mean=  -0.932
+      2021: n= 313  total=    -243.6  mean=  -0.778
+      2022: n= 341  total=     147.3  mean=   0.432
+      2023: n= 559  total=      29.8  mean=   0.053
+      2024: n= 793  total=    -286.6  mean=  -0.361
+      2025: n= 126  total=    -326.4  mean=  -2.590
+      2026: n= 379  total=     153.7  mean=   0.406
+4. GATES (independent, frozen in GATE_RSI_PULLBACK.txt):
+   G-MR1 executed >= 30          :  2734          -> PASS
+   G-MR2 Net Sharpe > 0           :    -0.326    -> FAIL
+   G-MR3 MBB P(mean<=0) <= 0.20   :    0.8219    -> FAIL  (block=5, 10000 resamples, seed 20260930)
+   XAUUSD VERDICT: FAIL
+
+OVERALL VERDICT: FAIL (requires all three instruments to pass G-MR1..G-MR3 independently)
+
+HONESTY NOTES
+- Continuous forward-fill convention: synthetic flat bars fill no-tick minutes, maintenance breaks, holidays
+  and weekends; the ADX15>20 and 4h ADX>40 gates decay across flat runs and suppress degenerate collapsed-band
+  equality fills, while Wilder ATR decay tightens the 6xATR stop for post-gap fills (SPEC 2.2/9.3) - declared
+  consequences, not post-hoc fixes.
+- Limit fills are same-bar with honest gap pricing (fill = min/max(Open, band)); the entry bar participates
+  in the exit walk with worst-case SL-before-TP ordering (SPEC 4.2/5.3).
+- Single pre-declared parameterization (owner-supplied); no optimization, no re-runs; sides, years and
+  instruments reported as run. Phase-1 screen is in-sample by construction; MFE/MAE are exploratory
+  descriptors, never results. Phase 2 (MT5 execution) only on overall PASS; any FAIL is final here.

@@ -1,0 +1,41 @@
+REPORT: US500/USA30 INTRADAY RELATIVE VALUE - PHASE 1 (HYPOTHESIS #39)
+Generated: 2026-09-23 17:33:57  |  script: evaluate/index_pairs_intraday_phase1.py
+SPEC/GATE: data/results/index_pairs_intraday/{SPEC,GATE}_PAIRS_INTRADAY.txt (frozen before code)
+
+VERDICT: FAIL   (G-P1=True, G-P2=False, G-P3=False)
+
+1. FUNNEL
+   us500 tape bars: 1791504  |  usa30 tape bars: 1167943 (data/results/usa30_onboarding/usa30tick_m1.csv - tasked vwap_2021_2026 path does not exist, substitution declared in SPEC)
+   joined session bars (09:30..15:55): 262237
+   cash days (09:30 anchor present): 710
+   days without |Z|>2 breach in signal window: 101
+   signal days: 609  (SHORT_DIV 308 / LONG_DIV 301)
+   no-entry drops: 2
+   FINAL SIGNALS: 607
+   by year: 2021=64, 2022=75, 2023=87, 2024=123, 2025=175, 2026=83
+
+2. AGGREGATE PAIR EXCURSIONS ($, unlevered $10k/leg, gross pre-cost)
+   n=607  MFE 4.11 vs MAE 7.79  diff -3.67
+   medians: MFE 3.40 vs MAE 4.62  MFE>MAE share 44.0%
+   LONG_DIV: n=300  MFE 4.19 vs MAE 8.68  diff -4.49  exit -1.05
+   SHORT_DIV: n=307  MFE 4.03 vs MAE 6.91  diff -2.88  exit +0.19
+
+3. EXIT MIX AND GROSS EDGE
+   REVERSION: 541 (89.1%)  mean exit PnL +0.51
+   TIME: 66 (10.9%)  mean exit PnL -8.04
+   gross exit PnL/trade -0.42 (median +2.03, win 60.0%), median walk 35 bars
+   descriptive cost floor: 1.48 $/pair round trip (0.51pt US500 + 2.28pt USA30 spreads at median signal prices) -> gross mean does NOT clear the floor
+
+4. GATES (frozen verbatim in GATE file)
+   G-P1 >= 150 signals: 607 -> True
+   G-P2 mean MFE > mean MAE (strict, $): 4.11 vs 7.79 -> False
+   G-P3 bootstrap P(mean(MFE-MAE)<=0) <= 0.20: 1.0000 (n_day_blocks=607) -> False
+   OVERALL PHASE-1: FAIL
+
+5. NOTES AND CAVEATS
+   - Pre-cost gross screen: both legs assumed filled at printed next-bar opens, zero slippage;
+     the CFD-spread cost floor is reported alongside, never netted into gates.
+   - MFE/MAE on per-bar closes (synchronous intrabar pair extremes unobservable from M1 OHLC).
+   - Frozen archetype parameters (60-bar rolling Z, |Z|>2, 10:30/15:30 window, 15:55 exit); no search.
+   - Daily pairs line (#19) verdict unaffected; this is a different (intraday, session-anchored) mechanism.
+   - Null result is final for this artifact.

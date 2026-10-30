@@ -1,0 +1,14 @@
+GATE FILE: XAUUSD MACRO-CONDITIONED HOLDS - PHASE 1
+Frozen 2026-09-21 BEFORE evaluate/xauusd_macro_holds_phase1.py existed.
+
+G-X1: Total executed signals >= 150.
+
+G-X2: Gross expectancy at h=5 or h=21 >= $0.82 (2.0x the $0.41 binding cost floor) to ensure survivability against spread + swap.
+
+G-X3: Block-bootstrap (10,000 iterations, seed 20260921) P(mean net profit <= 0) <= 0.20.
+
+Pre-declared mechanical interpretation (frozen together with the gates):
+- Executed signal (per horizon) = signal date whose h-day forward window completes inside the data; G-X1 counts the h=5 executed signals; the h=21 expectancy uses its own complete-window subset.
+- G-X2 evaluated per horizon on the gross $/oz mean per executed signal; PASS if either horizon is >= $0.82.
+- G-X3 evaluated per horizon on the net $/oz per-signal series (after the $0.41 spread and the swap drag proxy); circular moving-block bootstrap over the time-ordered series, block length = h, 10,000 draws, numpy default_rng(20260921); PASS if P(mean net <= 0) <= 0.20 for that horizon.
+- OVERALL PHASE-1 PASS = G-X1 AND (exists h in {5, 21} such that G-X2(h) AND G-X3(h)).

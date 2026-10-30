@@ -1,0 +1,93 @@
+GATE_MACRO_QUALIFICATION.txt
+Verbatim extraction of every gate from SPEC_MACRO_QUALIFICATION.txt
+(written 2026-09-06), created BEFORE any qualification script ran.
+Frozen bindings referenced by the gates: window 2021-01-01..2026-04-30
+UTC with the single pre-declared fallback extension to 2020-01-01..
+2026-08-31 (SPEC section 1); binding cost floor $0.41/oz; buffers
+T+30s / T+90s; horizons T+300s / T+900s; families NFP / RETAIL /
+DURABLE only; simultaneous frozen-family releases excluded (both);
+zero-surprise events excluded from directional measurement and counted
+separately.
+
+--------------------------------------------------------------------------
+GATE G-Q1. PASS requires ALL of:
+(a) primary source frozen and documented (name, access method,
+    retrieval dates, hashes); secondary audit source named;
+(b) field coverage >= 95% of the OFFICIAL schedule count of the three
+    families in the window (schedule counts from the BLS/Census
+    schedule pages, logged) with all three required fields present;
+    every missing/excluded event listed with a reason code (delayed,
+    shutdown-affected, missing consensus, revised-only, other);
+(c) provenance audit: 12 stratified sampled events (4 per family, at
+    least one per year of the window) checked against agency primary
+    documents - scheduled date/time vs the agency schedule page, first
+    actual vs the agency press release / ALFRED first vintage. Each
+    discrepancy (wrong period, wrong unit, wrong value) removes that
+    event from the dataset; more than 3 discrepant events of 12 ->
+    G-Q1 FAIL (source untrustworthy; the mechanism dies here unless a
+    DIFFERENT primary source is qualified in a NEW, separately
+    documented pass BEFORE any price data is read - and only if the
+    original failure was a sourcing failure, not a coverage failure of
+    the universe itself);
+(d) the archived dataset is complete and loadable (macro_event_dataset
+    _raw.csv) with per-field provenance columns.
+Any of (a)-(d) failing -> G-Q1 FAIL, STOP: complete deliverable.
+
+--------------------------------------------------------------------------
+GATE G-Q2. PASS requires: zero unresolved timestamp-suspect events
+beyond the logged isolated exclusions, the DST invariant holding for
+every retained event, the 6 manual spot-checks clean, and every
+retained event having valid entry/exit ticks under the rules above.
+Anything else -> G-Q2 FAIL, STOP: complete deliverable.
+
+(DST invariant, verbatim from SPEC section 4: the three families
+release at 08:30 ET, so the UTC time must be 12:30 (EDT) or 13:30
+(EST) consistent with that date's DST calendar. Violations are
+timestamp-suspect: isolated -> event EXCLUDED (logged); systematic
+(> 10% of events) -> G-Q2 FAIL. Entry tick for a buffer B in {30s,
+90s} = FIRST tick with ts >= T+B; if that tick's ts > T+120s the event
+is EXCLUDED as non-quoting. Exit tick for horizon H in {300s, 900s} =
+LAST tick with ts <= T+H; if no tick exists in [T+H-60s, T+H] the
+event is EXCLUDED. ANY timezone ambiguity, DST offset mismatch, or
+unexplained gap found in the 6 manual spot-checks -> G-Q2 HARD FAIL.)
+
+--------------------------------------------------------------------------
+GATE G-Q3. PASS requires: >= 150 usable events AND >= 150 unique NY
+calendar dates carrying at least one usable event, in the primary
+window (with the single pre-declared fallback extension of section 1
+if needed). The count script prints the counts BEFORE computing any
+price difference, and the counts are logged. Fewer than 150 after the
+fallback -> G-Q3 FAIL, STOP: complete deliverable. No event family may
+be added to raise the count.
+
+--------------------------------------------------------------------------
+GATE G-Q4. PASS requires ALL of:
+(i) PRIMARY-cell mean gross directional move across all usable events
+    >= $0.82/oz (2.0x the $0.41 binding floor). If the entire
+    published move occurs inside the un-tradeable 30-second jump
+    window, the executable edge is zero and the hypothesis FAILS -
+    explicitly the expected possible outcome per Smales-Yang (majority
+    of the gold reaction complete within ~90 seconds);
+(ii) family robustness: the PRIMARY-cell mean is positive in >= 2 of
+    the 3 families AND the pooled mean remains > 0 after removing the
+    single best family;
+(iii) year robustness: no single calendar year contributes > 50% of
+    the total positive PRIMARY-cell move.
+Failure of any clause -> G-Q4 FAIL: the mechanism is abandoned.
+
+(PRIMARY cell, verbatim from SPEC section 6: entry T+30s -> exit
+T+300s. SECONDARY cells reported non-binding: T+30s->T+900s, T+90s->
+T+300s, T+90s->T+900s. Direction d_i = -sign(standardized surprise);
+mid = (bid+ask)/2; gross move = d_i * (mid_exit - mid_entry). No price
+movement from T=0 to the buffer end is EVER credited, in any cell, in
+any reported number that feeds a gate.)
+
+--------------------------------------------------------------------------
+STOP RULES (verbatim from SPEC section 7): a failure at any gate
+G-Q1..G-Q4 is a COMPLETE deliverable and terminates the hypothesis.
+Null qualification = valid result. No substituting other event
+families (CPI, FOMC, PCE, ...) if the frozen three fail or lack
+power. No measuring the jump from T=0 and claiming it as executable.
+If this qualification fails at any gate, the project accepts the
+2026-09-06 triage verdict: single-instrument CFD-tape intraday edges
+are exhausted; no 19th pattern will be invented to fill the gap.

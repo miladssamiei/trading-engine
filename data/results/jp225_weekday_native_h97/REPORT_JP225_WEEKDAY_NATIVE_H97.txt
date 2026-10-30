@@ -1,0 +1,10 @@
+H97 NATIVE JP225 WEEKDAY HOLD - FINAL_FAIL
+Connected FTMO-Demo tick-derived native M1 variable Ask/Bid; no orders.
+Source/SPEC/GATE/script SHA256: 7930268680aad61134831c48a0223499990dd9a9470dd7662b383f888aac84a1 / ae49f952309f13a70b14740e7d1fc3fd877ff00608ea6ae55163ef57966b73c0 / 91fe289ae03c4617f4c41c7fa57bd0331166b2f7ea2e1b096f6b07b2b94cb155 / 756f9d944b82d1d0195fd89f6ea80d694b961899cb3236235d8e13700a471ae6
+All/evaluation trades/unresolved: (238, 141, 0)
+Coverage/exits: {"EXECUTED": 238, "NO_PRIOR_ATR": 4, "NO_REAL_ENTRY": 4, "INCOMPLETE_TAPE_WEEK": 1} / {"THURSDAY_FLAT": 124, "STOP": 12, "HOLIDAY_FLAT": 5}
+Entry spread: {"median": 6.0, "p90": 10.0}
+Evaluation stressed mean/total/mean R/bootstrap P: (141.254893170909, 19916.93993709817, 0.06855933460545126, 0.0896)
+Annual: {"2024": {"n": 52, "base_sum": 121.44966659255078, "stress_sum": -478.6303334074474}, "2025": {"n": 52, "base_sum": 9067.327607774172, "stress_sum": 8467.24760777417}, "2026": {"n": 37, "base_sum": 12355.302662731447, "stress_sum": 11928.322662731443}}
+Gates: {"G-JP1": true, "G-JP2": true, "G-JP3": false, "G-JP4": false, "G-JP5": "NOT_RUN", "G-JP6": true}
+M1 stop paths still need exact tick-order and EURJPY/lot/equity Phase 2.

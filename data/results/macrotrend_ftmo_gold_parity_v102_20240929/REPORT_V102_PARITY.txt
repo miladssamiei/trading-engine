@@ -1,0 +1,34 @@
+FTMO GOLD EA V1.02 VS INDEPENDENT PYTHON - 2024 TO 2026
+Verdict: FAIL
+G1 source/run: PASS; broker H1 bars 16181; 2024-01-02 01:00:00+00:00 to 2026-09-24 23:00:00+00:00
+G2 signal/minimum-lot: FAIL
+G3 initial/ratchet stops: FAIL
+G4 tester exits accounted: PASS
+G5 independent same-feed tick fills and intrabar exits: UNTESTED
+
+Engine A: Python raw signals 634; MT5 opens 84 (min-lot opens 34); override attempts 34; risk-cap blocks 0; ratchets 1125; stop exits 83; market closes 1; open at test end 0; overlapping opens 0; orphan exits 0; panic 0; post-fill risk closures 0; rejects 0; final tester balance EUR 10321.44; parity failures 4.
+  Python signals: 80 with logged action; 554 while position open; 0 without a logged action or known occupancy.
+Engine B: Python raw signals 1156; MT5 opens 244 (min-lot opens 43); override attempts 43; risk-cap blocks 0; ratchets 2064; stop exits 243; market closes 0; open at test end 1; overlapping opens 0; orphan exits 0; panic 0; post-fill risk closures 0; rejects 0; final tester balance EUR 11909.41; parity failures 12.
+  Python signals: 242 with logged action; 914 while position open; 0 without a logged action or known occupancy.
+
+Divergent logged events: 16
+  A 2024-01-17 11:00:00 OPEN: logged SL 2040.74, Python SL nan, error nan; CS	0	22:19:00.059	MacroTrendEnsemble_FTMO (XAUUSD,H4)	2024.01.17 11:00:00   MTE: OPEN SELL engine=A lots=0.0200 entry=2021.44000000 SL=2040.74000000 spread=0.08000000 planned_stop_risk=35.52 min_lot_override=no retcode=10009 done at 2021.44
+  A 2024-01-31 19:00:00 OPEN: logged SL 2030.82, Python SL nan, error nan; CS	0	22:19:06.305	MacroTrendEnsemble_FTMO (XAUUSD,H4)	2024.01.31 19:00:00   MTE: OPEN BUY engine=A lots=0.0200 entry=2050.08000000 SL=2030.82000000 spread=0.07000000 planned_stop_risk=35.49 min_lot_override=no retcode=10009 done at 2050.08
+  A 2024-02-01 19:00:00 OPEN: logged SL 2035.06, Python SL nan, error nan; CS	0	22:19:06.568	MacroTrendEnsemble_FTMO (XAUUSD,H4)	2024.02.01 19:00:00   MTE: OPEN BUY engine=A lots=0.0200 entry=2059.62000000 SL=2035.06000000 spread=0.12000000 planned_stop_risk=45.21 min_lot_override=no retcode=10009 done at 2059.62
+  A 2024-02-13 19:00:00 OPEN: logged SL 2022.91, Python SL nan, error nan; CS	0	22:19:08.068	MacroTrendEnsemble_FTMO (XAUUSD,H4)	2024.02.13 19:00:00   MTE: OPEN SELL engine=A lots=0.0100 entry=1994.91000000 SL=2022.91000000 spread=0.07000000 planned_stop_risk=26.12 min_lot_override=no retcode=10009 done at 1994.91
+  B 2024-01-02 08:00:00 OPEN: logged SL 2065.3, Python SL nan, error nan; CS	0	22:23:07.238	MacroTrendEnsemble_FTMO (XAUUSD,H1)	2024.01.02 08:00:00   MTE: OPEN BUY engine=B lots=0.0500 entry=2074.55000000 SL=2065.30000000 spread=0.10000000 planned_stop_risk=41.92 min_lot_override=no retcode=10009 done at 2074.55
+  B 2024-01-02 12:00:00 RATCHET: logged SL 2066.21, Python SL 2062.55, error 3.6599999999998545; CS	0	22:23:11.751	MacroTrendEnsemble_FTMO (XAUUSD,H1)	2024.01.02 12:00:00   MTE: ratcheted ticket=2 SL 2065.30000000 -> 2066.21000000
+  B 2024-01-03 14:00:00 OPEN: logged SL 2064.01, Python SL nan, error nan; CS	0	22:23:11.979	MacroTrendEnsemble_FTMO (XAUUSD,H1)	2024.01.03 14:00:00   MTE: OPEN SELL engine=B lots=0.0300 entry=2047.56000000 SL=2064.01000000 spread=0.13000000 planned_stop_risk=45.19 min_lot_override=no retcode=10009 done at 2047.56
+  B 2024-01-03 15:00:00 RATCHET: logged SL 2062.78, Python SL 2063.27, error 0.4899999999997817; CS	0	22:23:11.994	MacroTrendEnsemble_FTMO (XAUUSD,H1)	2024.01.03 15:00:00   MTE: ratcheted ticket=4 SL 2064.01000000 -> 2062.78000000
+  B 2024-01-03 16:00:00 RATCHET: logged SL 2059.54, Python SL 2060.0, error 0.4600000000000364; CS	0	22:23:12.013	MacroTrendEnsemble_FTMO (XAUUSD,H1)	2024.01.03 16:00:00   MTE: ratcheted ticket=4 SL 2062.78000000 -> 2059.54000000
+  B 2024-01-03 17:00:00 RATCHET: logged SL 2057.84, Python SL 2058.26, error 0.42000000000007276; CS	0	22:23:12.033	MacroTrendEnsemble_FTMO (XAUUSD,H1)	2024.01.03 17:00:00   MTE: ratcheted ticket=4 SL 2059.54000000 -> 2057.84000000
+  B 2024-01-03 18:00:00 RATCHET: logged SL 2056.13, Python SL 2056.53, error 0.40000000000009095; CS	0	22:23:12.055	MacroTrendEnsemble_FTMO (XAUUSD,H1)	2024.01.03 18:00:00   MTE: ratcheted ticket=4 SL 2057.84000000 -> 2056.13000000
+  B 2024-01-03 19:00:00 RATCHET: logged SL 2055.68, Python SL 2056.05, error 0.3700000000003456; CS	0	22:23:12.072	MacroTrendEnsemble_FTMO (XAUUSD,H1)	2024.01.03 19:00:00   MTE: ratcheted ticket=4 SL 2056.13000000 -> 2055.68000000
+  B 2024-01-05 09:00:00 RATCHET: logged SL 2055.11, Python SL 2055.14, error 0.02999999999974534; CS	0	22:23:12.490	MacroTrendEnsemble_FTMO (XAUUSD,H1)	2024.01.05 09:00:00   MTE: ratcheted ticket=4 SL 2055.68000000 -> 2055.11000000
+  B 2024-01-05 12:00:00 RATCHET: logged SL 2052.48, Python SL 2052.5, error 0.01999999999998181; CS	0	22:23:12.527	MacroTrendEnsemble_FTMO (XAUUSD,H1)	2024.01.05 12:00:00   MTE: ratcheted ticket=4 SL 2055.11000000 -> 2052.48000000
+  B 2025-04-07 04:00:00 RATCHET: logged SL 3034.29, Python SL 3034.31, error 0.01999999999998181; CS	0	22:24:50.905	MacroTrendEnsemble_FTMO (XAUUSD,H1)	2025.04.07 04:00:00   MTE: ratcheted ticket=248 SL 3047.60000000 -> 3034.29000000
+  B 2025-04-11 13:00:00 RATCHET: logged SL 3159.15, Python SL 3159.13, error 0.01999999999998181; CS	0	22:24:52.490	MacroTrendEnsemble_FTMO (XAUUSD,H1)	2025.04.11 13:00:00   MTE: ratcheted ticket=252 SL 3154.40000000 -> 3159.15000000
+
+Python raw signals include those shadowed by an open position and are not expected to equal executed trades.
+Tester real ticks may be discarded due M1 price mismatch; MT5 cash PnL and exact fills/exits are observations, not independent Python confirmations.
+Minimum-lot override can exceed 0.5% target risk, up to the configured 3.5% cap; concurrent risk and slippage are not controlled by this parity audit.

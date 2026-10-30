@@ -1,0 +1,71 @@
+REPORT_FTMO10K_QUALIFICATION
+Generated 2026-09-11 after the final offline verification run.
+SPEC: SPEC_FTMO10K_QUALIFICATION.txt
+GATE: GATE_FTMO10K_QUALIFICATION.txt
+
+OVERALL VERDICT
+
+INCOMPLETE. The offline qualification and account-risk infrastructure is implemented and its bounded tests pass. Authentic FTMO account, symbol, quote, cost and independent-review evidence is absent. downstream_model_allowed=false. No feature, model, EA, tester strategy or account rollout is authorized by this artifact.
+
+ACCOUNT AND ENVIRONMENT SCOPE
+
+The owner stated that the intended account is FTMO 10000, 2-Step, Swing, first Challenge, on MT5. The installed terminal currently uses a demo account and imported ticks for Strategy Tester research. That environment is retained as research infrastructure and is not treated as evidence of the FTMO execution feed, account identity, symbol economics, spreads, swaps or fills.
+
+No MT5 initialization or login, terminal/tester process control, broker connection, order, dependency installation, EA modification, model fit or strategy test occurred in this milestone. A source scan of the two modules and tests found no MetaTrader5, terminal process, network or order-sending imports/calls.
+
+IMPLEMENTED ARTIFACTS
+
+- configs/prop/ftmo_2step_swing_10k_v1.json: offline policy manifest. MT5 and the owner-stated program/type/phase are recorded. Expected account fingerprint and exact server remain null. downstream_model_allowed is false.
+- evaluate/ftmo10k_qualification_v1.py: standard-library local snapshot/quote validation, credential-field rejection, immutable output-directory behavior, sanitized diagnostics, fixed-name raw archives and SHA-256 files. It always refuses downstream model permission in v1.
+- evaluate/ftmo_account_replay_v1.py: pure offline Decimal-based FTMO floor calculations, Prague reset reconstruction, independently reviewed identity contract, all-account open/pending risk allowances, lot rounding, cost helpers, target checks and namespaced persisted-state validation.
+- tests/test_ftmo10k_qualification_v1.py and tests/test_ftmo_account_replay_v1.py: 19 tests covering malformed/missing evidence, future timestamps, credential rejection before archival, output protection, quote summaries, Prague rollover assignment, FTMO floor arithmetic, DST, reset reconstruction, stale state, pending risk, sizing, target conditions and cost conventions.
+- INPUT_SCHEMA.md, SNAPSHOT_TEMPLATE.json, QUOTES_TEMPLATE.csv and OFFLINE_OPERATING_NOTES.md: preparation and operating instructions. Templates are synthetic documentation and are never qualification evidence.
+- readiness_20260911_offline_v1/: actual missing-evidence CLI output, including the hashed manifest and audit.json.
+
+GATE VERDICTS
+
+G-I1 PASS. SPEC was written before new implementation. GATE contains the nine G- lines extracted verbatim before implementation. Existing historical SPEC/GATE/REPORT artifacts and frozen ORB/SP2L EAs were not edited by this milestone.
+
+G-I2 PASS. The final targeted pytest run completed 19 passed in 0.16 seconds with the project interpreter. Standard-library compile/import checks passed. No prohibited terminal, broker, order, dependency, deployment or model action occurred.
+
+G-D1 INCOMPLETE. The owner stated the account product and platform, but no independently reviewed authentic snapshot establishes the non-secret account fingerprint, exact FTMO server, USD account currency and matching current phase. A self-declared JSON field or file hash cannot establish origin.
+
+G-D2 INCOMPLETE. No authentic FTMO symbol snapshot was supplied. Tick size/value, contract size, volume limits, margin, stops/freeze levels, filling modes, trading sessions, swap mode/rates and rollover multipliers therefore remain unresolved. The importer now distinguishes absent/null critical fields (INCOMPLETE) from malformed, contradictory, nonfinite or identity-mismatched supplied values (FAIL).
+
+G-D3 INCOMPLETE. No FTMO bid/ask quote file was supplied. Coverage is zero dates/observations for the New York 09:30-09:40 window, Prague 23:55-00:05 rollover window and New York 15:55-16:05 stress window. Imported custom ticks do not satisfy this broker-specific gate.
+
+G-D4 INCOMPLETE. Independent provenance review, actual execution/slippage/commission reconciliation, financing reconciliation, historical-coverage limitations and Account MetriX/rule agreement remain unresolved. Test fixtures and source_kind strings cannot satisfy this gate.
+
+G-R1 PASS. Tests cover the fixed 500 daily allowance, moving daily floor, static 9000 total floor, equality as zero new-risk headroom, Challenge 11000 and Verification 10500 absolute balance targets, four unique Prague trading dates, flat-account completion, floating loss already represented in equity, Prague DST start/end and the US/Europe mismatch period, exact reset observations, complete ledger reconstruction, duplicate events and missing history refusal.
+
+G-R2 PASS. Tests cover the separate 10 per-position, 50 aggregate, 100 daily, 200 weekly, 300 strategy and 150 firm-floor-reserve controls; complete open/manual/partial/pending exposure; unknown and negative risk refusal; stale/unreviewed identity refusal; zero headroom; down-rounded volume steps including maximum volume; below-minimum zero size; nonfinite/boolean/currency rejection; midpoint spread accounting versus actual-fill costs; and additional liquidation reserve validation.
+
+G-F1 INCOMPLETE. This REPORT lists every gate. Because G-D1 through G-D4 are unresolved, the required overall result is INCOMPLETE and downstream_model_allowed=false. There is no statistical or trading-performance claim.
+
+FINAL COMMAND EVIDENCE
+
+Test command:
+C:\Users\Milad\miniconda3\envs\reinforce_rl\python.exe -m pytest tests\test_ftmo10k_qualification_v1.py tests\test_ftmo_account_replay_v1.py -q
+Result: 19 passed in 0.16s.
+
+Readiness command:
+C:\Users\Milad\miniconda3\envs\reinforce_rl\python.exe evaluate\ftmo10k_qualification_v1.py --manifest configs\prop\ftmo_2step_swing_10k_v1.json --output-dir data\results\ftmo10k_qualification_v1\readiness_20260911_offline_v1 --as-of 2026-09-11T12:00:00Z
+Result: exit 2, status INCOMPLETE, downstream_model_allowed false, zero quote coverage, no validation errors, missing authentic snapshot/quotes and four reconciliation/review categories.
+
+Static checks:
+- compileall passed for both evaluate modules.
+- git diff --check passed for the milestone paths.
+- graphify update . completed: 1021/1021 files extracted, 2069 nodes, 2974 edges and 248 communities.
+- SPEC G- lines and GATE contents were inspected together after the run.
+
+DEFECT DISCLOSURE
+
+The first executor drafts were not accepted. Initial tests exposed stale API assumptions. Independent probes then found unhandled null/list snapshot sections, an invalid-first-quote failure, missing as-of enforcement, incorrect negative-swap rejection, rollover-date ambiguity and incomplete gate-state reporting. The implementation and tests were corrected before this REPORT. The final 19-test result is the governing infrastructure evidence; the earlier draft results are not qualification evidence.
+
+ORCHESTRATION DISCLOSURE
+
+GPT-6 Astra created and froze the coordinated SPEC/GATE and assigned the snapshot auditor and risk engine to two GPT-5.6 Luna executors as requested. Astra reached its session usage limit during integration. The root agent retained the frozen contract, independently reproduced defects, corrected the implementation/tests and performed the final verification. This model workflow does not change the evidence standard or verdict.
+
+NEXT DEPENDENCY
+
+Prepare sanitized authentic local evidence using INPUT_SCHEMA.md without passwords, login numbers, tokens, private keys or full account identifiers. Populate a copied manifest with the exact server and a non-secret account fingerprint only after independent review. Collect existing/forward FTMO quotes and cost information without opening trades to manufacture data. Run each import into a new output directory. Until G-D1 through G-D4 are resolved in a new reviewed artifact, corrected daily-feature work, model research, EA work and account rollout remain stopped.

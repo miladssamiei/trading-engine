@@ -1,0 +1,4 @@
+G1: Closed trades >=100.
+G2: Net expectancy >0 in both net R and native price units after the specified once-embedded cost floor.
+G3: Unannualized per-trade net R Sharpe >0.
+G4: Chronological moving-block bootstrap P(mean net R<=0)<=0.05 using10000 resamples, block5 and seed20261014.

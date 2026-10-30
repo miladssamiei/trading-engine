@@ -1,0 +1,47 @@
+REPORT_LS9_PHASE1
+Generated: 2026-09-21T20:57:14
+
+PREMISE: mechanical interpretation of the LS7/LS9 Liquidity Hunt video rules on the
+USA30 M15 tape (M5 -> M15 aggregation), session 12:00-19:45 Iran Time = [08:30,
+16:15) UTC setup window, excursion walk to 20:00 UTC. Phase-1 MFE/MAE signal-
+quality screen ONLY: no costs (USA30 RT spread is 2.28 pt, NOT subtracted), no
+exit logic, MFE/MAE not simultaneously achievable. Descriptive regardless of
+verdict; downstream_model_allowed=false, live_execution_allowed=false; the
+closed intraday families are not reopened by this screen.
+
+FUNNEL
+  M15 bars in window:            24196
+  swing highs formed/invalidated:6232 / 3952
+  swing lows formed/invalidated: 6236 / 3709
+  session LS signals (trigger):  1010
+  dropped (no walk):             0
+  excursion-valid signals:       1010
+
+RAW EXCURSION STATISTICS
+  AGG    n=1010  MFE  220.34pt / 5.789atr   MAE  218.96pt / 5.602atr   diff +0.187atr
+  LONG   n= 506  MFE  225.62pt / 5.946atr   MAE  215.60pt / 5.629atr   diff +0.318atr
+  SHORT  n= 504  MFE  215.03pt / 5.630atr   MAE  222.33pt / 5.575atr   diff +0.056atr
+
+G-A2 THRESHOLD TABLE  mean((MFE_atr - tau)+) vs mean((MAE_atr - tau)+)
+   scope   tau  MFE_exc  MAE_exc   ok
+     AGG  0.50   5.3104   5.1249  True
+     AGG  0.75   5.0853   4.9008  True
+     AGG  1.00   4.8683   4.6851  True
+    LONG  0.50   5.4667   5.1589  True
+    LONG  0.75   5.2397   4.9370  True
+    LONG  1.00   5.0173   4.7235  True
+   SHORT  0.50   5.1536   5.0907  True
+   SHORT  0.75   4.9302   4.8644  True
+   SHORT  1.00   4.7186   4.6466  True
+
+GATES
+G-A1 SAMPLE SIZE: 1010 excursion-valid signals >= 150 -> PASS
+G-A2 EXCURSION EDGE: all 9 threshold comparisons (agg/long/short x 0.5/0.75/1.0 ATR) -> PASS
+G-A3 DAY-BLOCK BOOTSTRAP: P(mean(MFE_atr - MAE_atr) <= 0) = 0.2437 <= 0.20 -> FAIL (10000 resamples, seed 20260921, 279 UTC-date blocks)
+OVERALL VERDICT: FAIL (final for this artifact)
+
+CAVEATS: single window 2025-07..2026-08, in-sample; excursions are upper bounds
+on tradable edge (no exit logic, no spread/financing); mechanical choices per
+SPEC 2.1-2.4/4.4 (doji handling, trigger-then-update order, 3-swing recency cap,
+strict inequalities, 20:00 UTC walk bound, dropped no-walk signals); M15 buckets
+with 1-2 M5 bars retained; ATR Wilder on the full continuous tape.

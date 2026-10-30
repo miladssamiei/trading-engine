@@ -1,0 +1,11 @@
+H91 WEEKLY GOLD MOMENTUM - FINAL_FAIL
+Dukascopy BID M1 proxy; owner-stated zero swap; news holds allowed. No orders.
+Source/SPEC/GATE SHA256: a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f / 7029c6d5e1be5c8ab9d4439f383a4c8de65a0738f84e920e265c7f227ee63bae / 265039f1d6c3ddcc6fd1805aeebf59b7a7bce78ce0136e41bc6b21c62faf324f
+M1/daily rows: (2337538, 2058)
+All/OOS trades/unresolved: (23, 9, 0)
+Coverage: {'NO_CAUSAL_SIGNAL': 316, 'EXECUTED': 23, 'NO_REAL_ENTRY': 8, 'INCOMPLETE_TAPE_WEEK': 1}
+OOS stressed mean/total/bootstrap P: (-6.439102309358393, -57.951920784225535, 0.7556)
+OOS annual: {"2024": {"n": 2, "stress_sum": 26.311281420000725}, "2025": {"n": 4, "stress_sum": -89.34158223422695}, "2026": {"n": 3, "stress_sum": 5.078380030000687}}
+Matched-week always-long benchmark: (9, -18.355008189999122)
+Gates: {"G-WT1": false, "G-WT2": false, "G-WT3": false, "G-WT4": false, "G-WT5": "NOT_RUN", "G-WT6": true}
+Historical exposed tape is not independent forward confirmation.

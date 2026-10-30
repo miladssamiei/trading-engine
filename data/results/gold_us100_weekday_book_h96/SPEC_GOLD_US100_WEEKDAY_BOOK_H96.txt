@@ -1,0 +1,90 @@
+HYPOTHESIS 96: GOLD AND US100 WEEKDAY RISK BOOK WITH HOLIDAY EARLY EXIT
+Declared 2026-09-25 before H96 evaluator code or H96 return calculation.
+Null/FAIL is complete. No account orders.
+
+LINEAGE AND HONESTY
+Gold and US100 combine distinct sources of risk with weak historical
+matched-week correlation. The prior exposed H92 always-long gold benchmark
+plus H94 US100 descriptive close-only book passed 59/110 six-month starts
+at 2%+2%, below its declared 70% target. H96 is a separate executable
+mechanism: gold now has a hard initial stop, and a deterministic known
+Thursday holiday moves both exits to Wednesday. The prior component
+returns and combined diagnostic were observed before declaring H96;
+therefore all H96 2024-26 numbers are exploratory historical evaluation,
+not genuinely unseen walk-forward confirmation. H92/H94 records stay frozen.
+No parameter search, risk grid or after-result repair inside H96.
+
+SOURCES, CLOCK AND ATR
+Gold: verified Dukascopy BID M1
+data/results/xauusd_onboarding/xauusdtick_m1.csv SHA256
+a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f.
+US100: verified Dukascopy USTECH BID M1
+data/results/virgin_assets/ustech_m1.csv SHA256
+152f9c995b370e5391cb7da99b64a8002ceee5e52cc68899ddca409ac7e15e39.
+Epoch UTC -> America/New_York wall clock. Gold daily bars are real M1
+grouped by NY wall time plus seven wall hours: 17:00 NY trading-day
+boundary. Gold prior completed Thursday/Friday daily bar must exist.
+US100 cash days are [09:30,16:00) NY and require exact 09:30 real M1.
+Prior valid US100 cash day must be <=4 calendar days old.
+For each asset ATR20 is classic Wilder true range: max(high-low,
+abs(high-prev close),abs(low-prev close)), initial mean of first 20
+valid bars, then (19*prior ATR+TR)/20. Use only prior completed day.
+No synthetic source bar may fill an order or stop.
+
+FIXED WEEKLY ORDERS
+Every NY Monday with both source entries and both finite fresh ATRs:
+buy gold at first real M1 open [00:00,00:05) at BID+0.41 and buy
+US100 at first real M1 open [09:30,09:35) at BID+1.45. Each leg has
+one initial stop at executable entry minus 2*prior ATR20. From its
+entry M1 onward, fill a BID open below stop at the worse open, else
+fill at stop when actual BID low touches. No reentry, short, target,
+trailing stop or overlap; independent stops for the two legs.
+On a normal week, unstopped gold exits at first real M1 open Thursday
+[14:00,14:15) NY, and US100 at first real Thursday [11:00,11:15)
+M1 open. If the Thursday NY date is Jan 1, July 4, Dec 25, or the
+fourth Thursday of November (US Thanksgiving), BOTH unstopped legs
+exit at first real Wednesday [15:55,16:00) NY M1 open instead. This
+holiday calendar is computable before entry; no same-week future price.
+If either required quote is absent, week is UNRESOLVED and neither
+leg's book PnL is counted. Incomplete final week excluded. Every
+resolved leg is flat before Friday. News holds allowed by owner.
+
+COSTS AND ACCOUNT
+Gold synthetic ASK entry=BID+0.41, BID exit, commission per side
+0.000007*executable price in gold units per gold unit, stressed PnL
+subtracts another 0.66 gold units. US100 synthetic ASK=BID+1.45,
+BID exit, zero index commission per FTMO publication, stressed PnL
+subtracts another 1.70 US100 points. These are fixed spread proxies;
+native historical variable FTMO Bid/Ask and fees must be checked later.
+Owner-stated zero swap, unverified against actual postings. Normalize
+each leg stressed PnL by its own 2*prior ATR20 initial stop distance.
+Fixed account book risk: EUR200 per 1R on EACH leg, based on EUR10000
+initial account (2%+2%, total 4% planned). No compounding. EUR weekly
+proxy PnL=200*(gold stressed R+US100 stressed R). This ignores actual
+EURUSD conversion and lot steps, which must be handled in Phase 2.
+
+SPLIT, GATES AND STOP
+2020-23 descriptive. Evaluate 2024 through shorter gold source end,
+partial 2026. Report all eligible Monday coverage, independent stop
+reasons, annual leg/book stressed sums, source gaps, correlated R,
+hold times, trading days and both 90/180-calendar-day pace.
+For 2024-26 book EUR weekly proxy PnL, circular five-week moving-block
+bootstrap 10000 draws seed 20261006; test P(mean<=0). Phase-1 pass
+requires every phase-1 gate. If Phase 1 fails, immutable REPORT FINAL_FAIL
+and no Phase 2. If it passes, separately freeze Phase-2 SPEC/GATE before
+native FTMO real Bid/Ask, current commission, EUR conversion, floating
+daily equity, Prague reset, lot steps, margin and full two-stage 180-day
+challenge at the single fixed 2%+2% initial risk. Require >=70% full
+two-stage pass and <=10% equity breach over >=50 fully observed starts.
+No Phase-1 finding alone is a verified strategy. At least 150 genuinely
+unseen forward trades and year-sign agreement remain necessary.
+
+VERBATIM GATES
+G-GB1: At least 120 fully resolved 2024-2026 common Monday books on distinct NY dates, with zero unresolved required exits and only real M1 order fills.
+G-GB2: Strictly positive 2024-2026 mean stressed EUR proxy PnL per common book after both fixed spread, commission and extra stress costs at fixed EUR200 per R per leg.
+G-GB3: Five-week circular moving-block bootstrap P(mean stressed EUR book PnL <= 0) at most 0.05 using 10000 draws and seed 20261006.
+G-GB4: Strictly positive stressed EUR book totals separately in complete 2024, complete 2025 and partial 2026.
+G-GB5: If Phase 1 passes, a separately frozen exact-native two-stage EUR10000 180-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts at fixed 2%+2% initial leg risk.
+G-GB6: Both source hashes, causal prior ATRs, correctly sided actual M1 stop/exit paths, deterministic holiday early exits, no weekend exposure, zero-swap assumption and fixed costs are verified with no account orders.
+
+All six gates must pass; Phase-1 PASS alone is not verified.

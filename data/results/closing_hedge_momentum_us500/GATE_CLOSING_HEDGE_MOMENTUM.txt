@@ -1,0 +1,4 @@
+G-CH1: At least 150 executed trades in the 2024-2026 test block.
+G-CH2: Test-block mean net points under double 1.02-point cost is strictly greater than zero.
+G-CH3: Test-block bootstrap P(mean base net <= 0) is at most 0.05, using 10,000 date-block resamples and seed 20260925.
+G-CH4: Each complete test-block calendar year, 2024 and 2025, has strictly positive total base net points.

@@ -1,0 +1,18 @@
+GATE_VOL_TARGET_STRESS
+Verbatim extraction of SECTION 4 gates of SPEC_VOL_TARGET_STRESS.txt
+(frozen 2026-09-21, BEFORE any script for this study existed).
+
+G-V1 DATA/VOL INTEGRITY: both inputs load; exactly 458 trades; all dates on
+the D1 grid; swap-free point total equals 2,467.60 within 0.01; RV20
+computable at every trade entry day; every DynamicLots within [0.5, 15.0];
+rolling coverage pass + fail + unresolved equals the start-date count.
+
+G-V2 ROLLING PASS RATE: rolling-start pass rate over RESOLVED runs >= 50%.
+
+G-V3 MONTE-CARLO ROBUSTNESS: MC pass rate over RESOLVED runs >= 50% AND
+95th-percentile peak drawdown < 10.0%.
+
+OVERALL: PASS iff G-V1..G-V3 all PASS. FAIL is a complete, final answer:
+volatility targeting does not make the #23 replay robust. PASS means only
+that the sizing overlay survived THIS stress at the tested targets - no
+strategy validation.

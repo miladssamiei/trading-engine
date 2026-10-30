@@ -1,0 +1,34 @@
+FUTURES PROP VALIDATION INTRADAY - RE-MEASUREMENT V2 SPEC
+Date: 2026-09-26. Frozen before the V2 runner is written or run.
+
+V1 remains a historical report. V2 corrects two additional mechanical edge
+cases found by ledger audit; it makes no parameter, cost, gate, tape, engine
+choice, prop distance or bootstrap change. Re-run all nine asset-engine rows.
+
+1. H56 short entry minute: entry at that M1 bar's high is below the
+structural ask stop by positive initial risk, but bid high plus the floor can
+still reach the ask stop if risk <= floor. V1 skipped all entry-minute stops
+for short extreme entries. V2 checks the short ask stop when risk <= floor;
+the stop fills at its structural ask level as the H56 SPEC requires. The
+long entry-minute stop remains unreachable because entry is at the bar low
+and initial risk > 0. Same-bar stop precedes target. No H56 source-code
+low-versus-short-stop defect is copied; V2 remains literal SPEC mechanics.
+
+2. H52 NQ indicator warmup: the source H52 Wilder ADX seed at index 27 is
+NaN if its first 14 DX observations include zero-range/zero-direction flat
+bars. Its recursive continuation then stays NaN for the entire NQ tape,
+making the 15m engine inert. V2 preserves the H52 TR/DM Wilder smoothing and
+the 14-finite-DX seed rule but moves the seed to the first index with 14
+consecutive finite DX values when the original index-27 seed is undefined.
+Where the original seed is finite (GC/ES), indicator values are unchanged.
+The seed uses only completed past bars, so there is no lookahead. The
+continuous 15m forward-filled grid and NY 4h anchor remain unchanged.
+
+Everything else is as predeclared in the original intraday SPEC and the V1
+correction SPEC: bid-only proxy tapes, GC/NQ/ES floors 0.13/0.39/0.30,
+H56 C, H52 D52 and H53 D53 separate and unselected, static brackets,
+M1 peak marked net equity, 2.5x initial-risk floor, close-based
+PROP_LIQUIDATION, 24-hour signal shadow, stop-priority intraminute tie,
+same-bar and same-minute diagnostics, zero swap, and all honesty limits.
+The initial and V1 REPORT files must not be overwritten; V2 is the
+authoritative corrected proxy measurement for this request.

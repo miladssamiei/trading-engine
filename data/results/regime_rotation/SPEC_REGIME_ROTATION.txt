@@ -1,0 +1,273 @@
+SPEC_REGIME_ROTATION
+Slow regime-rotation controller on US500: monthly D1-label switching
+of strategy families (hypothesis #13, project hypothesis numbering)
+
+Status: SPEC written 2026-08-29 BEFORE any code or run. The companion
+GATE_REGIME_ROTATION (artifact list, section 8) must be created as a
+verbatim extraction of every R and G gate in sections 6 and 7 BEFORE
+any Phase-1 script runs. Nothing here may change after rotation output
+exists; additions are exploratory and labeled.
+
+------------------------------------------------------------------------
+1. GOAL, MECHANISM, DISTINCTNESS
+
+A slow controller that decides, at each month boundary, which strategy
+family may trade on US500 during the coming month, using only simple
+causal D1 regime labels. The question: can MONTHLY family rotation
+improve robustness and risk shape over "always run ORB" / "always run
+SP2L" / the static portfolio combinations, without inventing a new
+raw-tape edge and without touching child exits.
+
+Distinctness and priors, stated honestly:
+
+  - Not a new price-pattern mechanism: all edges are inherited from
+    the children; the controller reads D1 features only, never
+    intraday tape.
+  - Not the meta-coordinator (hypothesis #12): that controller gated
+    children DAILY on their own trailing P&L (Sharpe 0.631, DD 5.17%,
+    but FAILED its concentration gate - 2023 = 73% of net, 2025 still
+    negative; null, not validated). This controller is SLOWER
+    (monthly), uses market-state labels instead of child performance,
+    and is deliberately complementary rather than stacked. The
+    coordinator's failure pattern is a warning: improving Sharpe
+    without changing the profit's shape fails the year gates here too.
+  - Not the HMM regime filter (orb_regime, 2026-08-24): that learned
+    hidden states and failed 0/3. Here labels are three transparent
+    D1 thresholds, fixed in advance, with no fitting.
+
+------------------------------------------------------------------------
+2. ELIGIBLE CHILDREN AND BASELINES
+
+Admission rule identical to SPEC_META_COORDINATOR (native EA +
+zero-unexplained reconciliation + own S-gate pass). Today exactly two
+children qualify:
+
+  CHILD 1 - ORB. EA: ea/ORB_Strategy.mq5. Stream:
+    data/results/orb_2021_present/mt5_trades.csv (447 trades,
+    +470.67 pts, Sharpe 0.337, maxDD 5.13% at 1 lot, 2021-01..2026-04).
+  CHILD 2 - SP2L spike/gap. EA: ea/SP2L_SpikeGap.mq5 (FROZEN file -
+    never edited under this SPEC). Stream:
+    data/results/sp2l_2021_2026/mt5_trades.csv (1,343 trades,
+    +281.84 pts, Sharpe 0.275 on the common day universe, maxDD 4.17%
+    at 1 lot). Its documented fragility (tester-tape sensitivity,
+    XAUUSD point-convention band, negative 2025) travels with it.
+
+Daily momentum and every other studied family are NOT eligible (none
+passed its own gates). A future child may join only via a pre-declared
+amendment to this SPEC, never mid-analysis.
+
+Baselines the rotation must confront (all documented, none recomputed
+in Phase 1 beyond reproduction checks):
+  ORB alone (0.337 / 5.13% / 2025 -228.03); SP2L alone (0.275 / 4.17%
+  / 2025 -260.25); static S1 equal-notional (0.420 / 8.02% / 2025
+  -488.28, 2023 = 71.9% of net); S2 equal-risk (0.418); S3 ORB-75
+  (0.398); and the unvalidated coordinator pattern (0.631 but 2023 =
+  73.0%, context only - it is not a passing baseline). Mandatory
+  stress cases, named in advance: 2023 profit concentration and the
+  2025 joint-loss year.
+
+Day universe: the common 1,369-day ORB session-day universe
+(portfolio-study convention), zero-filled child P&L, $10,000 base,
+$1/pt/lot, no compounding.
+
+------------------------------------------------------------------------
+3. REGIME LABELS (monthly, three thresholds, fully causal)
+
+Data: verified US500.c D1 history
+(data/results/momentum_multihorizon/us500c_d1.csv, 2014-06..2026-08;
+daily-return correlation 0.969 vs the verified tape - the documented
+substitution). Features are computed on COMPLETED D1 bars only; the
+label for month M uses data through the last completed D1 bar before
+the first cash day of month M (in practice: through month M-1's last
+trading day). US500.c provides 6.5+ years of D1 history before 2021,
+so EMA200 and the trailing vol median are fully converged for every
+label month in 2021-01..2026-04; no burn-in window is needed, and this
+is verified (not assumed) in Phase 1.
+
+Features (per label date):
+  trend_rel = (close / EMA200(close) - 1) x 100, in percent.
+  vol20     = std (ddof=1) of the last 20 D1 log returns x sqrt(252)
+              x 100 (annualized percent).
+  vol_med   = trailing median of vol20 over the prior 252 completed
+              D1 bars strictly before the label date (causal; no
+              full-sample statistics anywhere).
+
+Taxonomy (evaluated in this order):
+  RANGE      : |trend_rel| < 1.0                    (regardless of vol)
+  UP-CALM    : trend_rel >= +1.0 AND vol20 <= vol_med
+  UP-VOL     : trend_rel >= +1.0 AND vol20 >  vol_med
+  DOWN-CALM  : trend_rel <= -1.0 AND vol20 <= vol_med
+  DOWN-VOL   : trend_rel <= -1.0 AND vol20 >  vol_med
+
+Threshold rationale (pre-declared, not fitted): the +/-1.0% EMA200
+band gives a monthly taxonomy a non-trivial RANGE bucket (a +/-0.5%
+band would starve it on this tape); the median split is the simplest
+causal two-state vol classifier. Skew/kurtosis features are declared
+OUT of the taxonomy (small-rule discipline; not computed, not
+reported, not available for rescue).
+
+Every cash day in month M inherits month M's label. Labels and
+features are logged to regime_labels.csv BEFORE any P&L is joined to
+them (artifact ordering enforces causality).
+
+------------------------------------------------------------------------
+4. ROTATION MAPPING (fixed; two pre-declared arms, both reported)
+
+Structural reasoning, fixed in advance from documented behavior only:
+ORB is a displacement strategy whose documented regime evidence (the
+orb_regime HMM study) says its winners historically sat in LOW-vol
+conditions and high-vol filtering DEGRADED it -> ORB belongs in CALM
+months, not VOL months. SP2L is a volatility-event strategy (spike and
+gap ARE vol events) -> it is the natural VOL-month family. RANGE
+months by construction lack both the calm-trend displacement ORB wants
+and the vol events SP2L wants -> risk-off. No per-regime child P&L was
+consulted to build this mapping, and none may be consulted to change
+it.
+
+  ARM P (complementary rotation, PRIMARY):
+      UP-CALM   -> ORB only
+      DOWN-CALM -> ORB only
+      UP-VOL    -> SP2L only
+      DOWN-VOL  -> SP2L only
+      RANGE     -> no trading
+  ARM Q (vol-gated stack, SECONDARY):
+      UP-CALM   -> ORB + SP2L
+      DOWN-CALM -> ORB + SP2L
+      UP-VOL    -> SP2L only
+      DOWN-VOL  -> SP2L only
+      RANGE     -> no trading
+
+Weights: every enabled child trades at exactly 1.00 lot (as
+validated); caps per day: 1.00 lot per child, 2.00 lots total
+(structurally inert with two children - verified, not tuned). Arm Q
+differs from Arm P only by also running SP2L in calm months.
+
+Rotation frequency: MONTHLY, decisions at month boundaries. A weekly
+variant is declared OUT of scope (not computed) to keep the mechanism
+slow and the analysis single-armed per schedule. State: the controller
+is MEMORYLESS beyond the current month's label - no trailing-P&L
+gating, no hidden state, no ML, no feedback loop. (This is the
+deliberate opposite of the coordinator, whose daily trailing-Sharpe
+gate produced its Sharpe lift and its concentration failure.)
+
+Anti-swap rule: the mapping may NOT be inverted or reassigned after
+results are seen (the same rule that rejected the HMM inverse filter).
+Both arms are evaluated as declared; neither can be replaced by the
+other's better result post hoc beyond the pre-declared
+"at least one arm passes" pass condition.
+
+------------------------------------------------------------------------
+5. PHASE 1 - OFFLINE REGIME-ROTATION QUALITY
+
+Procedure: compute regime labels for 2021-01..2026-04 (regime_labels.csv
+written first). Join child daily P&L streams (reproduction gate: exact
+child totals/Sharpe/DD vs documented values, portfolio-study
+tolerances - abort on failure). For each day, apply the arm's mapping:
+a disabled child's PnL that day is treated as zero (simulated no-trade
+- the child's own trades are simply not taken); enabled children's
+PnLs sum to the ensemble day PnL. Every disabled-child-day is tallied.
+
+Metrics per arm: Sharpe (mean/std ddof=1 x sqrt(252), zero-filled
+common universe), max drawdown from the true cumulative curve, total
+net, traded days, per-regime Sharpe/net/day-count, yearly net and
+shares, correlation of ensemble daily PnL vs each child and vs static
+S1/S2.
+
+PHASE 1 GATES (R1-R4; an arm passes only if ALL hold):
+
+  R1  Sharpe > 0 AND strictly greater than every child's Sharpe
+      (> max(0.337, 0.275)) AND strictly greater than the best static
+      portfolio Sharpe (> 0.420).
+  R2  Max drawdown <= 11.29% (1.10 x the worst child's 2.00-lot-book
+      drawdown, the same bound as the coordinator SPEC).
+  R3  Traded days >= 150.
+  R4  Year shape: at least 4 of 5 full years (2021-2025) net positive
+      AND no single year > 60% of total net AND the 2025 stress case:
+      arm 2025 net >= 0 OR arm 2025 net strictly better than EVERY
+      baseline's 2025 net (i.e., > -228.03 pts, the best baseline
+      2025). 2026 partial: reported only.
+
+PASS = R1-R4 for arm P or arm Q -> Phase 2. Both fail -> STOP at
+REPORT_REGIME_ROTATION: no Phase 2, no EA, no mapping changes. A null
+result is a complete deliverable.
+
+------------------------------------------------------------------------
+6. PHASE 2 - MT5 IMPLEMENTATION (only on pass)
+
+Implementation model: a RegimeController master EA on one chart,
+embedding faithful copies of both children's signal/exit logic with
+validated parameters (the frozen SP2L file itself is never edited;
+the embedded copy must reproduce the child's validated trade set
+exactly when ungated - automatic G-gate failure otherwise). External
+toggle scripts (attach/detach EAs monthly) are the documented
+fallback only if embedding proves infeasible; the choice is made
+before any Phase-2 code, with cause recorded.
+
+MT5 constraints: one EA per chart; per-child magic numbers
+(MAGIC_BASE + i); regime decisions and per-trade child attribution
+logged to regime_days.csv (label, features, enabled children per day,
+month decision). The EA computes labels ITSELF from D1 bars
+(copy_rates, completed bars only, same thresholds/threshold history
+conventions as Phase 1) - no Python-side schedule file is imported at
+runtime.
+
+PHASE 2 GATES:
+
+  G1  Consistency: MT5 ensemble Sharpe within +/- 0.15 (absolute) and
+      MT5 max drawdown within +/- 20% (relative) of the offline
+      Phase-1 numbers for the same arm over the same window
+      (Model=0 yearly batches, 2021-01..2026-04; tolerances sized by
+      the documented SP2L cross-tape residuals).
+  G2  Execution integrity: zero trades by a disabled child on any day;
+      MT5 month-decision schedule matches the offline reference on
+      >= 95% of months with every mismatch classified; attribution
+      complete (every trade to exactly one child).
+
+G-failure rejects the controller; children remain individually as
+validated.
+
+------------------------------------------------------------------------
+7. HONESTY AND ANTI-LEAK RULES
+
+  - Child EAs stay frozen: no entry, exit, lot, or parameter changes
+    under this SPEC, in Phase 1 or Phase 2.
+  - Labels, taxonomy thresholds, mappings, arms, and gates are fixed
+    before any rotation metric is computed. Post-hoc variants are
+    labeled EXPLORATORY, cannot rescue a failed gate, and cannot be
+    promoted silently.
+  - No mapping inversion after seeing results (anti-swap rule; HMM
+    inverse precedent). No per-regime child-P&L peeking to redesign
+    the mapping; per-regime tables are OUTPUTS, never inputs.
+  - All label statistics are causal (completed D1 bars only; trailing
+    median; no full-sample quantiles). Burn-in adequacy is verified,
+    not assumed.
+  - A null result (rotation not demonstrably better than children and
+    static baselines on the pre-declared gates) is a complete
+    deliverable: SPEC, GATE, labels, stats, report.
+
+------------------------------------------------------------------------
+8. ARTIFACTS AND LOGGING (data/results/regime_rotation/)
+
+  SPEC_REGIME_ROTATION.txt      this document (before any code)
+  GATE_REGIME_ROTATION.txt      verbatim R/G gate extraction (before
+                                any code)
+  regime_labels.csv             per-month labels + features +
+                                thresholds (written BEFORE P&L join)
+  child_streams_regime.csv      child daily PnL + per-day label and
+                                enabled flags per arm
+  ensemble_regime_pnl.csv       per-day rotation PnL per arm
+  yearly_breakdown_regime.csv   per-arm per-year net/share + per-regime
+                                Sharpe/net tables
+  phase1_regime_stats.json      reproduction, metrics, gates, tallies
+  REPORT_REGIME_ROTATION.txt    Phase-1 verdict, regardless of outcome
+  phase2/ artifacts (only on pass): RegimeController EA source,
+                                regime_days.csv, reconciliation logs
+
+PROGRESS.md hooks (append per stage, current style):
+  "regime rotation - SPEC/GATE pre-declared",
+  "regime rotation - Phase 1 run",
+  "regime rotation - Phase 1 verdict",
+  and on pass: "regime rotation - MT5 execution design",
+  "regime rotation - reconciliation verdict".
+
+END OF SPEC_REGIME_ROTATION

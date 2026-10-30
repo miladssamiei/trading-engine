@@ -1,0 +1,21 @@
+GATE_PAIRS_US500_USA30
+Verbatim extraction from SPEC_PAIRS_US500_USA30.txt (pre-declared 2026-09-10).
+Every gate below is evaluated by evaluate/pairs_us500_usa30.py exactly as written.
+
+G-P1 (Structural Mean Reversion)
+  The Augmented Dickey-Fuller (ADF) test p-value of the 252-day rolling
+  spread must be < 0.05 on at least 40% of the rolling windows.
+
+G-P2 (Gross Economic Edge)
+  The gross expectancy (total points captured across both legs before
+  costs) must be > 0.
+
+G-P3 (Net Viability)
+  Annualized Net Sharpe Ratio (after the 0.51/2.28 spreads and both
+  instrument swaps) must be > 0.
+
+VERDICT RULE
+  PASS iff G-P1 AND G-P2 AND G-P3 all pass. Any failure is final for
+  this artifact; null results are complete deliverables.
+
+END OF GATE FILE.

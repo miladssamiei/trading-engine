@@ -1,0 +1,444 @@
+SPEC — MOKAMEL FLIP (MECHANICAL FAILED-BREAKOUT FLIP CONTINUATION) ON US500-TICK
+Hypothesis #16. Status: SPEC written 2026-09-03 BEFORE any code exists.
+
+SOURCE AND STATUS OF CLAIMS (read first):
+The mechanism is sourced from a Persian-language trading-course
+transcript/video (channel: "Mokamel", recorded ~2026-08-25). ONLY the
+mechanical rule is borrowed. EVERY numeric claim in that source — the
+claimed win rate, the "40 pip stop / 80 pip target", the claimed
+profitability, and the claimed Dow-Jones-only domain — is UNVERIFIED
+marketing until independently measured on this project's data, exactly
+as the VWAP trend-pullback SPEC excluded its own video source's stop,
+target, and win-rate values ("NOT from the source video, whose point
+values are excluded by the task definition"). The literal 40/80-point
+exit arm exists in this study because the task owner explicitly
+selected it in the Q2 resolution below — NOT because it was ever
+validated. The 40/80 values are asserted by the presenter, never
+independently derived, and "pip" is not a standard unit for an index
+(the same class of unit ambiguity that broke SP2L's PGAP/MAX_SL
+conversion).
+
+The presenter states the pattern is taught and only claimed to work
+on Dow Jones (US30/DJI) and explicitly disclaims other instruments
+(his "SMT" pattern, he says, works on gold/EUR/anything; "mokamel"
+does not). This study tests it on US500-tick — OUTSIDE its claimed
+domain (Q1 resolution). Both outcomes are informative: a failure is
+consistent with the presenter's own claim; a success is a genuinely
+interesting finding to be flagged prominently. The final REPORT
+addresses the domain claim explicitly regardless of outcome.
+
+DEViation NOTE: where the originating task text and the task owner's
+Q1-Q5 answers conflict, the answers win. Specifically the task text's
+default "ATR grid primary + literal 40/80 comparison arm" is REPLACED
+by Q2's "literal 40/80 points only" as the sole binding exit; a small
+NON-BINDING descriptive unit-ring (sec 7) preserves unit-robustness
+context without being selectable.
+
+
+SECTION 1 — INTERPRETATION DECISIONS (Q1-Q5 RESOLUTIONS PLUS FURTHER
+JUDGMENT CALLS; ALL FROZEN BEFORE ANY CODE, NEVER REVISED AFTER
+RESULTS ARE SEEN)
+
+1.1 Q1 — INSTRUMENT: US500-tick ONLY (custom symbol, verified
+exports, 0.51 pt real-tick cost baseline). The DJI-only claim is
+treated as untested folklore per this project's convention for
+unverified claims. No DJI/US30 onboarding occurs in this study.
+
+1.2 Q2 — EXIT UNITS: LITERAL 40.00-point stop / 80.00-point target,
+read as raw US500 index points, as the SOLE BINDING exit
+specification. No ATR exit grid is run. Compensating controls: the
+non-binding unit ring (sec 7.3) and the walk-forward gates C1-C3.
+
+1.3 Q3 — DAY-CLOSE RULE: SYMMETRIC TOTALS. The day closes for new
+entries once 3 TOTAL take-profits OR 3 TOTAL stop-losses have been
+realized (consecutive or interspersed, identical treatment both
+sides), matching the unambiguous loss-side statement.
+
+1.4 Q4 — INDECISION FILTER: body/range < 0.10. body = |close-open|,
+range = high-low of the ENTRY-TRIGGER candle. This is an
+INTERPRETATION, not a verbatim rule (the video gives no number), in
+the same class as SP2L's PGAP conversion and ORB's IVTS omission.
+
+1.5 Q5 — TRADING WINDOW: derived with THIS PROJECT'S verified
+DST-aware epoch->America/New_York machinery, anchored to the verified
+cash open, NOT to the presenter's manual Iran-time arithmetic. Entry
+window = NY wall minutes [570, 870) = 09:30 to 14:30, i.e. cash open
+plus 5 hours. Rationale: Iran (UTC+3:30, no DST) 17:00-22:00 maps to
+09:30-14:30 NY only during US DST; a fixed-Iran-clock reading would
+drift the window one hour in winter. Cash-open anchoring is the
+faithful reading of "trade the US open" and is DST-safe by
+construction (a cash day is defined by its 09:30 wall bar).
+
+1.6 I-6 — CONSERVATIVE-MODE ENTRY (INTERPRETATION; the transcript's
+examples are the only source): AGGRESSIVE mode enters at the breach
+tick (level fill). CONSERVATIVE mode demands the additional
+confirming close: the trigger candle must CLOSE beyond the violated
+level, and entry occurs at that close. The wick-through alone (the
+flip's most permissive form) is NOT sufficient in conservative mode.
+
+1.7 I-7 — WICK-BREACH CLOSE-INSIDE CANDLES: a candle that closes
+inside the base's extremes but wicks beyond one of them makes NO
+state change when no pending exists (it cannot arm — the arming rule
+explicitly excludes opposite-extreme breach, wick or body — and it
+cannot become the new base, having violated an extreme).
+
+1.8 I-8 — BASE FROZEN WHILE PENDING: rolling base updates (T3/T5
+below) apply only in the no-pending state. While pending is armed,
+the base changes only via the T1 cancel/reset transition.
+
+1.9 I-9 — SAME-M1-BAR PROBE+BREACH: if one M1 bar contains both the
+probe (beyond R.high for a short) and the breach (beyond R.low), the
+intra-bar order is unknowable offline: NO ENTRY from that bar (the
+bar still marks the probe as done). The MT5 Model=4 phase measures
+what true ticks do differently.
+
+1.10 I-10 — NEUTRAL EXITS: filter exits and forced 15:55 exits count
+as neither win nor loss for the day-close tallies. For the mode
+machine, a "losing trade" = ANY closed trade with realized net
+points < 0 (including negative neutral exits).
+
+1.11 I-11 — SIZING: fixed 2.5 lots = $100 risk (1% of the fixed
+$10,000 base) / 40.00-pt stop / $1-per-pt-per-lot. No compounding
+(the video's percentage-of-growing-account sizing is NOT simulated;
+declared deviation, project no-compounding convention). Ring arms
+size analogously: lots = 100 / stop_points.
+
+1.12 I-12 — NO OVERNIGHT HOLDS: any open position is force-closed at
+the OPEN of the 15:55 M1 bar (wall 955), project convention.
+
+1.13 Ambiguities are NOT bugs: every transition not specified above
+is pre-resolved here. Implementation bugs (code that contradicts
+this SPEC) are fixed and the affected stage re-run in full with the
+fix disclosed (the scalping-screen RSI-sign-bug precedent); the SPEC
+and GATE are never edited after numbers are seen.
+
+
+SECTION 2 — DATA, INSTRUMENT, TIME, COSTS
+
+2.1 Instrument US500-tick (custom symbol). Window 2021-01-03 ..
+2026-04-30. Time: epoch UTC -> America/New_York wall minutes
+(project convention).
+2.2 Bars: M5 signals from data/results/orb_2021_present/
+us500tick_m5.csv (364,330 bars, verified); ALL flip-path and
+exit-path reconstruction walks the M1 tape
+data/results/vwap_2021_2026/us500tick_m1.csv (1,791,504 bars,
+verified), per the SP2L/Bollinger-MR/scalping-screen intrabar
+discipline. M5 is the ONLY signal timeframe (per the video's explicit
+statement); no other timeframe is tested.
+2.3 Indicators: ATR(14) Wilder on the CONTINUOUS M5 tape (no
+per-session reset; overnight bars feed it), seeded at dataset start;
+first 200 M5 bars of the dataset excluded from signals (warmup).
+This is the only indicator in the study, used for Stage-A threshold
+scaling — never for exits.
+2.4 Cash day = NY date whose 09:30 (wall 570) M5 bar exists.
+Portfolio day universe = the ORB session-day universe
+data/results/orb_2021_present/mt5_days.csv (1,369 days), zero-filled
+for daily PnL.
+2.5 Costs (frozen, per round trip): PRIMARY/BINDING 0.51 pt (the
+Model=4-confirmed real median spread, children-revalidation
+finding); SECONDARY/informational 0.80 pt (legacy). $1/pt/lot,
+$10,000 base, no compounding. Point-based expectancies are
+per-1-lot-normalized; dollar Sharpe uses actual lots (sec 5.4).
+2.6 Sharpe = mean/std(ddof=1) x sqrt(252) on zero-filled daily PnL
+over the 1,369-day universe. maxDD_pct on cumulative daily PnL vs
+$10,000. Years are NY entry-date years; 2026 is the Jan-Apr partial.
+2.7 Entry window: NY wall minutes [570, 870) on cash days (Q1/5
+resolutions). Eligible entry timestamps have wall minute <= 870.
+Excursion measurement (Stage A) may run past 870 (entries <= 870 +
+60 min < 955, so the forced-exit bar never binds in Stage A).
+
+
+SECTION 3 — THE BASE-CANDLE STATE MACHINE (BINDING OPERATIONALIZATION)
+
+3.0 Definitions (per cash day; everything resets at the start of
+each cash day):
+- B = current base candle (open/high/low/close of one M5 candle).
+- pending = {direction DOWN|UP, reference candle R} or none. R is
+  the directional-close candle whose high/low define the flip levels.
+- Inside(C,B): C.high <= B.high AND C.low >= B.low (no wick beyond
+  B's extremes).
+- CloseBeyond(C,B): C.close > B.high OR C.close < B.low.
+- Down-close vs B: C.close < B.close; up-close: C.close > B.close;
+  flat: equal.
+- Tick breach of a level L: a trade STRICTLY above (below) L.
+  Offline reconstruction walks M1 bars (sec 3.3); the MT5 Phase-D EA
+  uses real ticks.
+
+3.1 Per-day initialization: state = NO_BASE. The first completed
+in-window M5 candle (start minute in [570,870)) becomes B; state =
+BASE.
+
+3.2 Candle-close transitions, evaluated at each completed in-window
+M5 candle C (tick-phase events inside C are processed as they occur,
+sec 3.3; then C's close is classified in the listed precedence):
+  T1 CANCEL/RESET (pending armed): if pending = DOWN (mirror UP)
+     and CloseBeyond(C,B): pending = none; B = C. [The confirmation
+     candle closed beyond the base without a completed flip: the
+     setup cancels and C itself becomes the new base.]
+  T2 RESET (no pending): if CloseBeyond(C,B): B = C; pending = none.
+  T3 ARM DOWN: if no pending, NOT CloseBeyond(C,B), C.high <= B.high
+     (no breach of the base high, wick or body — the source's
+     explicit condition; C.low MAY breach B.low), and C.close <
+     B.close: pending = DOWN with R = C; ADDITIONALLY, if
+     Inside(C,B) then B = C (rolling tighten: "a new base is set
+     whenever a candle closes without violating the base"; if C
+     wicked below B.low the base is NOT updated — I-7).
+  T4 ARM UP (mirror): no pending, NOT CloseBeyond(C,B),
+     C.low >= B.low, C.close > B.close: pending = UP with R = C;
+     if Inside(C,B) then B = C.
+  T5 FLAT INSIDE: no pending, Inside(C,B), C.close == B.close:
+     B = C (rolling update, no arm).
+  T6 NO-OP: any other close-inside candle (wick breaching an
+     extreme without arming, or a non-directional close with a wick
+     breach): NO state change (I-7).
+  While pending is armed, B is frozen except via T1 (I-8).
+
+3.3 Tick phase — flip monitoring, for pending = DOWN (mirror UP).
+Walk M1 bars strictly after R's completion, in time order:
+  P1 PROBE: an M1 bar m with m.high > R.high sets probe_done.
+  P2 SAME-BAR GUARD: if m.high > R.high AND m.low < R.low, the
+     intra-bar order is unknowable offline: NO entry from m (I-9);
+     m still sets probe_done.
+  P3 FLIP TRIGGER: an M1 bar m with m.low < R.low, probe_done
+     already set by an EARLIER bar, and not the P2 case, is the
+     ENTRY-TRIGGER bar; the trigger candle T is the M5 candle
+     containing m.
+  P4 AGGRESSIVE FILL: entry price = R.low (level fill); if m opens
+     below R.low, fill at m.open (gap-through convention). Entry
+     timestamp = m's time.
+  P5 CONSERVATIVE FILL: no entry at m; at T's close, if T.close <
+     R.low: entry at T.close; else NO entry (setup consumed).
+  P6 ELIGIBILITY: entry timestamps must have wall minute <= 870 on
+     the cash day. Ineligible (past cutoff), day closed (sec 5.2),
+     or position already open (Stage B/C/D occupancy): the signal is
+     SKIPPED, not queued; pending = none (setup consumed); the
+     machine continues from the current B.
+  P7 BREACH WITHOUT PROBE: an M1 bar with m.low < R.low while
+     probe_done is false and m.high <= R.high is NOT an entry; the
+     pending state survives until a candle-close transition (T1, or
+     re-arming on later closes) resolves it.
+
+3.4 The machine runs continuously through the window on every cash
+day, including while a position is open (skipped signals are logged
+for audit). Stage A samples ALL signals (no occupancy — declared
+approximation, the VWAP-R:R/scalping-screen convention); Stage B/C/D
+apply occupancy.
+
+3.5 DISTINCTNESS FROM ALL PRIOR HYPOTHESES (required statement):
+- NOT ORB (#1): no opening-range levels; a rolling base candle
+  updates continuously through the session, vs one fixed morning
+  range.
+- NOT trend-pullback (#6) and NOT Al Brooks H1/H2 (#10/#11): no
+  trend filter of any kind (no EMA, no ADX, no leg counting) — a
+  pure candle-close-and-reversal state machine.
+- NOT SP2L (#5): no spike/gap ratio, no ADX/EMA60 context filter.
+- NOT any P1-P8 scalping-screen pattern: none tracks a rolling base
+  or a probe-then-reverse flip sequence.
+
+3.6 AUDIT TRACE: every T1-T6 and P1-P7 event appends one row to
+base_candle_state_log.csv (ny_date, m5_bar_start, event_code,
+fields). The state machine is complex enough that this trace is a
+required deliverable, not a debug aid.
+
+
+SECTION 4 — ENTRY BOOKKEEPING AND THE INDECISION FILTER
+
+4.1 Trigger candle T = the M5 candle containing the entry-trigger
+M1 bar (both modes).
+4.2 Filter (at T's close): body = |T.close - T.open|; range =
+T.high - T.low. range <= 0 is degenerate and FILTERED (tallied).
+FILTERED iff body/range < 0.10 (Q4).
+4.3 AGGRESSIVE: enter per P4; if T is filtered, EXIT IMMEDIATELY at
+T.close (filter exit; neutral classification per I-10).
+4.4 CONSERVATIVE: enter only if T.close is beyond the violated level
+(P5) AND T is not filtered; entry at T.close.
+4.5 Occupancy (Stage B/C/D): one position at a time; signals while
+holding are skipped, not queued. Stage A: no occupancy.
+
+
+SECTION 5 — MONEY-MANAGEMENT DAY MACHINE (Stage B/C/D; NOT applied
+in Stage A)
+
+5.1 Reset at each cash day start: mode = AGGRESSIVE; wins = 0;
+losses = 0; day_closed = false.
+5.2 Classification and day close: a trade resolved at the TARGET
+increments wins; at the STOP increments losses; filter exits and
+forced exits increment neither (I-10). After each closed trade, if
+wins >= 3 OR losses >= 3 (Q3, totals) then day_closed = true: no
+further entries that day. The closing trade is already flat
+(occupancy), so no liquidation is implied.
+5.3 Mode machine: after each closed trade, realized R is measured in
+units of the 40.00-pt risk unit (target = +2.0R, stop = -1.0R, other
+exits = realized_points/40, signed). If realized net points < 0
+(any exit type — I-10): mode = CONSERVATIVE. Else if day cumulative
+R >= 0: mode = AGGRESSIVE. Else: mode unchanged. First trade of the
+day is always AGGRESSIVE (5.1).
+5.4 Sizing (I-11): binding arm = fixed 2.5 lots; ring arms lots =
+100/stop_points; $1/pt/lot; fixed $10,000 base, no compounding.
+5.5 Exits (binding arm): stop = fill +/- 40.00 pt, target = fill
+-/+/ 80.00 pt (short/long). The exit walk follows M1 bars from the
+fill timestamp (entry bar inclusive): first-crossing order decides;
+same-bar both-level ambiguity => STOP FIRST (conservative); bar-open
+gap through a level => fill at the open; forced exit at the OPEN of
+the 15:55 M1 bar (wall 955); if the tape ends earlier, exit at the
+last available bar's close (tallied); never overnight (I-12).
+Validation invariants asserted per trade: stop outcome => adverse
+excursion >= stop distance; target outcome => favorable excursion >=
+target distance; forced exit => neither level crossed on the walk.
+
+
+SECTION 6 — STAGE A: EXIT-FREE SIGNAL QUALITY (gate A1)
+
+6.1 Population: every AGGRESSIVE-fill flip entry (P4 fill
+definition) with eligible timestamp (sec 2.7) on a cash day, after
+warmup; no occupancy; no exits simulated.
+6.2 Direction-native MFE/MAE from the execution timestamp over the
+next 60 minutes of M1 bars (truncated at data end if shorter).
+First-bar E-XTM convention (SP2L, scalping screen): on the fill M1
+bar, MFE = max(close - entry, 0) for longs (mirrored shorts), MAE =
+max(entry - low, 0) (mirrored); full high/low on subsequent bars.
+6.3 Binding threshold set (ATR-scaled, scalping-screen convention
+for comparability): t in {0.50, 0.75, 1.00} x ATR14(T) (trigger M5
+candle, continuous tape, sec 2.3). Descriptive alongside: fixed t in
+{0.10, 0.15, 0.20}% of entry price.
+6.4 Statistic e_i = (MFE_i - MAE_i) / ATR14(T).
+6.5 GATE A1 (all three clauses required):
+  (i) n >= 150 eligible signals;
+  (ii) count(MFE >= t) > count(MAE >= t) at EVERY binding threshold;
+  (iii) day-block bootstrap P(mean(e) <= 0) <= 0.20, resampling DAY
+       MEANS with replacement (10,000 draws, seed 20260903; the
+       Bollinger-MR gate convention).
+Failing A1 = STOP, null result, no R:R stage.
+
+
+SECTION 7 — STAGE B: LITERAL 40/80 EXIT ARM (gate B1)
+
+7.1 BINDING ARM: stop 40.00 pt / target 80.00 pt (Q2), full
+money-machine (sec 5), full window 2021-01-03..2026-04-30 in-sample
+context. The exits are EXOGENOUS (video-asserted), so in-sample
+contamination of the exit numbers is not a concern; the state-machine
+interpretations are likewise exogenous (sec 1).
+7.2 Reporting: matrix_master.csv, scalping-screen schema (arm |
+n_trades | win_rate | expectancy_pts | expectancy_after_cost |
+Sharpe | max_DD_pct | best_year_share_pct | years_positive_of_5 |
+expectancy_after_cost_legacy08 | source_stage), sorted by
+expectancy_after_cost descending; per-trade file signals.csv.
+expectancy_after_cost = expectancy_pts - 0.51.
+7.3 NON-BINDING UNIT RING (declared, not gated, not selectable):
+stop/target pairs {20/40, 30/60, 50/100, 60/120} pt — the video's
+1:2 SHAPE preserved, the UNIT scaled by {0.5, 0.75, 1.25, 1.5}. This
+directly probes the pip-convention ambiguity (the SP2L PGAP lesson)
+without turning it into a tuning grid. The ring can neither rescue
+nor fail the binding arm. PROMOTION OF ANY RING CELL TO BINDING IS
+FORBIDDEN under this SPEC; that would require a NEW pre-declared
+SPEC.
+7.4 GATE B1 (binding arm; ALL of):
+  (i) expectancy_after_cost > 0 (0.51 pt cost);
+  (ii) NEIGHBORHOOD: VACUOUS BY Q2 RESOLUTION — a single exogenous
+       cell has no grid neighbors; the non-binding ring (7.3) is
+       reported in its place as context only;
+  (iii) n_trades >= 150.
+Failing B1 = STOP, null result (ring results still reported).
+
+
+SECTION 8 — STAGE C: WALK-FORWARD (gates C1-C3; only on B1 pass)
+
+8.1 There is NO parameter to select (exogenous exits, frozen
+interpretations). The identical machine runs over
+2022-01-01..2026-04-30 with fold boundaries 2022H1..2026H1 (project
+convention, burn-in 2021) recorded for reporting; daily resets and
+same-day-only trades mean no state crosses fold boundaries.
+HONESTY NOTE: a walk-forward without selection is WEAKER than the
+project's selecting walk-forwards; its function here is C2's
+year-consistency and the reporting structure, and the report says so.
+8.2 The video's own suggested backtest window ("just backtest 2025,
+or the recent months of 2026") is EXPLICITLY REJECTED as a single
+cherry-pickable slice — the session-transfer, regime-rotation, and
+meta-coordinator studies all documented single-period false
+positives. The full multi-year window is used, as always in this
+project.
+8.3 GATE C1: WF Sharpe > 0 AND >= 150 WF trades.
+8.4 GATE C2: >= 4 of 5 years (2022, 2023, 2024, 2025, 2026-partial)
+net positive AND no year > 60% of total net (concentration clause
+only when total net > 0).
+8.5 GATE C3: WF mean expectancy_after_cost (0.51 pt, BINDING) > 0;
+the 0.80 pt legacy number is reported alongside, non-binding.
+Fail any C gate => STOP, documented reason.
+
+
+SECTION 9 — STAGE D: MT5 EXECUTION CHECK, MODEL=4 ONLY (gates
+D1-D2; only on C pass)
+
+9.1 NON-NEGOTIABLE: Model=4 ("every tick based on real ticks"),
+NEVER Model=0 anywhere in this study (tick-model revalidation +
+children revalidation lesson). If no arm reaches Stage D, Stage D is
+not run and that fact is recorded — an empty Stage D is a complete
+outcome.
+9.2 Build ea/MokamelFlip.mq5 (minimal native EA) implementing the
+sec 3-5 machine with FROZEN constants (40.00/80.00, 0.10 filter,
+[570,870) window, 3/3/1%/2.5-lot rules) — no optimizer inputs.
+Reuse the ORB/SP2L conventions: 0.01-grid NormPrice on ALL order
+prices (the 40.00/80.00 offsets are already on-grid; entry stops and
+targets derived from market prices must still be rounded — the
+ea_price_rounding constraint), session/DST handling, agent CSV
+export, /config batches with ShutdownTerminal=1, kill terminal64 AND
+metatester64 before/after every batch, agent MQL5\Files CSVs copied
+per batch and stitched with tickets renumbered.
+9.3 Reconcile against the Python WF reference with the project's
+standard tolerance bands.
+9.4 GATE D1: MT5 WF Sharpe within +/- 0.15 of the Python WF
+reference.
+9.5 GATE D2: per-trade reconciliation agreement >= 85%, every
+residual classified.
+
+
+SECTION 10 — HONESTY AND ANTI-LEAK RULES
+
+10.1 Everything in sections 1-9 is frozen BEFORE Stage A runs. No
+threshold tuning, no reinterpretation of the state machine, no
+re-runs with new constants after seeing results.
+10.2 Every numeric claim from the video (win rate, 40/80
+stop/target, profitability) is UNVERIFIED until independently
+measured here; the REPORT restates this in its header.
+10.3 The Dow-Jones-only domain claim is addressed explicitly in the
+REPORT regardless of outcome (tested OUTSIDE the claimed domain;
+failure is consistent with the claim, success is a flagged finding).
+10.4 Multiple-testing statement: ONE binding hypothesis; 4
+NON-BINDING ring cells reported for unit-robustness context only;
+Stage A tests a single signal population (no multi-arm screening
+multiplicity). Any narrow-margin pass is reported with skepticism
+(margin = distance to gate boundaries and bootstrap percentile).
+10.5 A null result is a complete, expected, valuable deliverable,
+consistent with this project's record: the large majority of
+video/pattern-sourced hypotheses failed on this instrument's
+real-tick economics (VWAP trend-pullback, Al Brooks H1/H2 and
+H2/IBS, the 50-combination scalping screen), and the confirmed cost
+floor (~0.5 pt/trade gross expectancy needed) stands.
+10.6 This SPEC and the GATE file are never edited after numbers are
+seen; corrections/re-measurements go under a NEW study name.
+10.7 On FAIL, MOKAMEL_FLIP joins the null-result list; no re-run
+without a genuinely new pre-declared SPEC.
+
+
+SECTION 11 — ARTIFACTS AND LOGGING (data/results/mokamel_flip/)
+
+SPEC_MOKAMEL_FLIP.txt, GATE_MOKAMEL_FLIP.txt (verbatim gate
+extraction, written before any script runs), base_candle_state_log.csv
+(full T1-T6/P1-P7 state-machine trace for manual audit, sec 3.6),
+signals.csv (per-trade records incl. mode, trigger candle, filter
+flag, R realized), matrix_master.csv (binding arm + unit ring side
+by side), yearly_breakdown.csv, REPORT_MOKAMEL_FLIP.txt (readable
+without opening any CSV; states the Q1-Q5 resolutions and the
+DJI-domain paragraph at the top).
+Scripts (named now, written only after the GATE exists):
+evaluate/mokamel_flip_stage_a.py, evaluate/mokamel_flip_stage_b.py,
+evaluate/mokamel_flip_stage_c.py; Stage-D EA + reconciliation
+scripts only if survivors exist.
+PROGRESS.md hooks in the existing style: "mokamel flip - open
+questions resolved (Q1-Q5)", "mokamel flip - SPEC/GATE
+pre-declared", "mokamel flip - Phase 1 run", "mokamel flip - Phase 1
+verdict", and on pass: "mokamel flip - R:R + WF", "mokamel flip -
+MT5 Model=4 verdict".
+
+
+END OF SPEC — frozen 2026-09-03, before any study code was written.

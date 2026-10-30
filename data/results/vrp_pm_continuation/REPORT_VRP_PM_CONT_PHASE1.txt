@@ -1,0 +1,41 @@
+REPORT: VRP-CONDITIONED PM CONTINUATION BREAKOUT - PHASE 1 (HYPOTHESIS #44)
+Generated: 2026-09-23 19:29:44  |  script: evaluate/vrp_pm_continuation_phase1.py
+SPEC/GATE: data/results/vrp_pm_continuation/{SPEC,GATE}_VRP_PM_CONT.txt (frozen before code)
+
+VERDICT: FAIL   (G-PM1=True, G-PM2=True, G-PM3=False)
+
+1. FUNNEL
+   Arm A dates (from #31 artifact): 171 (2022-12-22 .. 2026-03-18)
+   days without [13:00,13:15) OR bars: 0
+   candidates: LONG 128 / SHORT 129
+   dropped: degenerate 0, no-entry 0
+   EXECUTED TRADES: 257 (LONG 128 / SHORT 129)
+   by year: 2022=5, 2023=122, 2024=58, 2025=49, 2026=23
+   exit mix: STOP=145, STOP_GAP=4, TIME=108
+
+2. NET ECONOMICS (points; net = gross - 0.51 spread floor)
+   n=257  net/trade +0.57 (median -5.61, total +147.5, win 36.6%)
+   MFE 12.76 vs MAE 7.77 pt  |  Net Sharpe (per-trade x sqrt252) 0.565
+   LONG: n=128 win 38% net +1.01  MFE 12.07 vs MAE 7.42
+   SHORT: n=129 win 35% net +0.14  MFE 13.45 vs MAE 8.11
+   exit STOP: 145 (56.4%) mean net -9.02
+   exit STOP_GAP: 4 (1.6%) mean net -13.49
+   exit TIME: 108 (42.0%) mean net +13.98
+
+3. OVERLAP WITH THE AM ORB (#31 Arm A same-date NY-cash trades)
+   direction agreement with same-date AM ORB trade: 135/257 (52.5%)
+   mean net | agree +1.84 vs disagree -0.82 pt
+
+4. GATES (frozen verbatim in GATE file)
+   G-PM1 >= 50 executed: 257 -> True
+   G-PM2 Net Sharpe > 0: 0.565 -> True
+   G-PM3 bootstrap P(mean Net <= 0) <= 0.20: 0.2783 (n_day_blocks=171) -> False
+   OVERALL PHASE-1: FAIL
+
+5. NOTES AND CAVEATS
+   - Arm A date set is in-sample conditioning realized through #31 trade dates; all metrics
+     inherit that optimism; #31's overall FAIL (G-VRP3) stands, not re-litigated.
+   - Net = gross - 0.51 pt verified spread floor; no swap (intraday).
+   - MFE/MAE include the exit bar's full M1 bar; gap-through stops fill at the open.
+   - Frozen archetype parameters (PM OR window, signal window, stop rule); no search.
+   - Null result is final for this artifact.

@@ -1,0 +1,41 @@
+H100 US100 CASH-CLOSE TO NEXT CASH-OPEN LONG - PHASE 1 FINAL_FAIL
+2026-09-25. Frozen plain-text SPEC and verbatim GATE preceded code/run.
+No account orders. No Phase 2 for this failed artifact.
+
+SOURCE AND COVERAGE
+Frozen Dukascopy USTECH BID M1 SHA256 matched
+152f9c995b370e5391cb7da99b64a8002ceee5e52cc68899ddca409ac7e15e39.
+The source has 2,936,100 M1 rows and 1,743 valid 09:30-start cash
+days. H100 produced 1,370 descriptive and gated trades 2020-2026.
+Coverage: 1,370 trades, 16 no prior ATR, eight no exact entry, seven
+pre-Good-Friday skips, four unresolved exits in 2020-22 calibration,
+one incomplete last date. Gated 2024-26 has 565 distinct overnight
+trades and zero unresolved exits. All resolved positions end by their
+next 09:30 NY cash open; no Friday entry or weekend hold. Trade CSV
+SHA256 08711e187c184fa88d85d6a4eb8690d3884df186260a9c5f3462012d8f76fcf5.
+
+GATED RESULTS
+Actual Dukascopy BID plus 1.50 synthetic ASK entry gives mean base
+net +6.717735 US100 points/trade. After a further frozen 2.50 points
+stress, mean +4.217735, median +4.91, mean +0.029246R based on the
+0.5*prior ATR20 initial stop. There were 145 regular stop fills and
+six gap stop fills among 565 gated trades (26.73% stopped). Twenty-
+trade circular moving-block bootstrap P(mean stressed <=0)=0.2529.
+Stressed year totals: complete 2024 208 trades +1171.979 points;
+complete 2025 207 trades -260.970; partial2026 150 trades +1472.012.
+The descriptive 2022 year also lost -3977.023 stressed points on
+203 trades. Native variable Ask/Bid, actual spread around the close,
+swap/administrative postings, EUR conversion and floating account
+equity have not been applied. This is an optimistic approximation,
+not account execution evidence.
+
+VERDICT AGAINST FROZEN GATES
+G-ON1 PASS: 565>=520 gated real-M1 trades and zero unresolved exits.
+G-ON2 PASS: positive mean stressed points +4.217735.
+G-ON3 FAIL: bootstrap probability 0.2529 exceeds 0.05.
+G-ON4 FAIL: complete 2025 stressed total is negative.
+G-ON5 NOT_RUN because Phase 1 failed.
+G-ON6 PASS at Phase-1 scope: source hash, prior ATR, calendar rule,
+gap-aware BID stop, overnight flatting and fixed stress recorded.
+FINAL_FAIL. The positive pooled mean cannot support a verified
+intra-week prop-account strategy or justify a paid Challenge.

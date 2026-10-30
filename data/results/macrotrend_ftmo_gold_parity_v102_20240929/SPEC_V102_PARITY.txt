@@ -1,0 +1,20 @@
+MACROTRENDENSEMBLE FTMO V1.02 GOLD PYTHON VS MT5 PARITY - FROZEN SPEC - 2026-09-29
+
+Purpose
+Check the newly installed minimum-lot v1.02 Expert Advisor against an independent Python Engine A/B calculation on the FTMO-Demo Gold broker H1 history. Find and report suspicious divergences. A failed or incomplete check is a complete audit result; do not tune signals or tolerances after execution.
+
+Fixed inputs and run window
+Use FTMO-Demo XAUUSD H1 rates from 2024-01-01 through 2026-09-25, using terminal bar labels as server time. Run the installed v1.02 EX5 separately as Engine A on H4 and Engine B on H1, tester FromDate=2024-01-01, ToDate=2026-09-25, Model=4, EUR 10,000 starting balance, leverage 1:100, risk 0.5%, minimum-lot override enabled, minimum-lot risk cap 3.5%, other EA defaults unchanged. Save exact set/ini files, source/binary hashes and complete tester log segments. Use the FTMO account history already connected to the local terminal; no live orders.
+
+Independent calculation
+Snapshot H1 data and build a continuous server H1 grid by fieldwise forward-fill, then NY-wall [00,04) H4 and 17:00 ET daily grids. Reproduce v1.02's completed-bar Keltner/EMA/Wilder ATR and Donchian/ADX/Supertrend conditions with no tester trades or exits fed into signals. Match tester OPEN, MIN_LOT_OVERRIDE, minimum-lot block and ratchet events to the enclosing H1 bar. For every OPEN, calculate initial SL from the logged entry price and independently calculated completed-bar indicator; for every ratchet, calculate the completed-bar stop candidate. Compare actual logged minimum-lot risk with its 3.5% cap. The 2024-2026 test is a fresh tester run, not the historical 2025-2026 v1.01 journal.
+
+Limits
+The terminal API previously lacked complete same-feed Gold M1/ticks, and tester logs reported many real ticks discarded because prices conflicted with M1 bars. Therefore exact Python replication of the tester's first-tick entries, intrabar stop exits, cash PnL and live profitability is not claimed. Report observed MT5 exits separately. A signal or stop parity pass would not validate execution quality or prop-account safety.
+
+Gate
+G1: Two complete v1.02 XAUUSD tester segments cover 2024-01-01 through 2026-09-25, one A/H4 and one B/H1, and the frozen independent H1 snapshot is ordered, valid and covers the available 2024-2026 broker history.
+G2: Every MT5 OPEN and MIN_LOT_OVERRIDE has a same-hour, same-direction independent Python signal. Every minimum-lot override logs 0.01 lots and a planned initial-stop risk <= 3.5% of balance. No unexplained minimum-lot blocks.
+G3: Every MT5 OPEN initial SL and every logged ratchet new SL agrees with the independently calculated level within 0.01 Gold unit. List each violation with time and values.
+G4: All observed MT5 opens pair with an observed close or are explicitly open at test end; report execution exceptions, panic closes and post-fill risk closures separately.
+G5: Same-feed tick-fill and intrabar-exit parity is UNTESTED unless complete broker M1/tick history becomes available; no profitability validation claim follows from this audit.

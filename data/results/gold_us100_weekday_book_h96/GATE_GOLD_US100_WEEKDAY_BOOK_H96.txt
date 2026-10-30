@@ -1,0 +1,6 @@
+G-GB1: At least 120 fully resolved 2024-2026 common Monday books on distinct NY dates, with zero unresolved required exits and only real M1 order fills.
+G-GB2: Strictly positive 2024-2026 mean stressed EUR proxy PnL per common book after both fixed spread, commission and extra stress costs at fixed EUR200 per R per leg.
+G-GB3: Five-week circular moving-block bootstrap P(mean stressed EUR book PnL <= 0) at most 0.05 using 10000 draws and seed 20261006.
+G-GB4: Strictly positive stressed EUR book totals separately in complete 2024, complete 2025 and partial 2026.
+G-GB5: If Phase 1 passes, a separately frozen exact-native two-stage EUR10000 180-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts at fixed 2%+2% initial leg risk.
+G-GB6: Both source hashes, causal prior ATRs, correctly sided actual M1 stop/exit paths, deterministic holiday early exits, no weekend exposure, zero-swap assumption and fixed costs are verified with no account orders.

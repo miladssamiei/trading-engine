@@ -1,0 +1,14 @@
+GATE FILE: MONDAY RANGE STRATEGY - PHASE 1
+Frozen 2026-09-22 BEFORE evaluate/monday_range_phase1.py existed.
+
+G-MON1: Total valid signals >= 75 (lowered from 150 because max theoretical signals = ~1 per week over 5.3 years).
+
+G-MON2: Aggregate Gross Expectancy (Average PnL per trade before costs) > 0.
+
+G-MON3: Block bootstrap (10,000 iterations, seed 20260921) P(mean Gross PnL <= 0) <= 0.20.
+
+Pre-declared mechanical interpretation (frozen together with the gates):
+- Valid signals = executed set: first-claim-per-week Tue/Wed/Thu M15 sweep+reclaim, M1 entry found at/before the Friday 15:55 NY cutoff, Initial Risk > 0, non-empty walk.
+- Gross PnL per trade in points pre-cost (long: exit-entry; short: entry-exit); TP/SL fills at the exact level, SL-first when both levels are touched within one M1 bar; time exit at the last walked M1 close.
+- G-MON3: circular moving-block bootstrap over the time-ordered gross series, block length = 5 trades, 10,000 draws, numpy default_rng(20260921).
+- OVERALL PHASE-1 PASS = G-MON1 AND G-MON2 AND G-MON3.

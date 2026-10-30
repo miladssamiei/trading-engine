@@ -1,0 +1,18 @@
+LUCID GC H56 50K FLEX - PREDECLARED GATES
+Frozen before the transfer evaluator or its outputs.
+
+G1: All GC / C_H56_M1 rows have entry/exit on the same New York weekday and
+exit strictly before 16:45 America/New_York. Any violation = FAIL.
+G2: At least 50 complete 180-calendar-day rolling entry-day starts. Otherwise
+FAIL.
+G3: For a fixed sizing/cost row, at least 50% of starts pass 50K Flex within
+180 days with <=10% breaches. Otherwise that row = diagnostic FAIL.
+G4: For a fixed sizing/cost row, 2024 and 2025 full-year and 2026 partial-year
+proxy net dollar sums are each positive. Otherwise that row = diagnostic FAIL.
+G5: A tradeable GO requires genuine CME GC point-in-time Bid/Ask or trade/quote
+history with contract roll handling and Lucid-platform forward fill checks.
+Proxy M1 bars or assumed one-tick spreads do not satisfy this gate. Otherwise
+overall verdict = NO GO regardless of G1-G4.
+
+No parameter search, row selection as proof, post-hoc gate change or
+re-interpretation of a FAIL. All rows and null outcomes must be reported.

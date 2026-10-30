@@ -1,0 +1,153 @@
+REPORT: HYPOTHESIS 73 MODEL=4 ORB+SP2L PROP PORTFOLIO
+{
+  "source": [
+    {
+      "name": "ORB",
+      "path": "data\\results\\execution_safe_model4_v1\\stitched\\orb_execution_safe_trades.csv",
+      "sha256": "dad14a7cc81bbbf1a66833713f771c5c380a0e1fc6ff55b4970790fc56d13edd",
+      "trades": 450,
+      "profit_usd": 383.14,
+      "cross_ny_date": 0,
+      "duplicate_tickets": 0
+    },
+    {
+      "name": "SP2L",
+      "path": "data\\results\\execution_safe_model4_v1\\stitched\\sp2l_execution_safe_trades.csv",
+      "sha256": "7776c246a7baffb595dfc3a4b7101fceb7aa85528e644034142187ddc996523f",
+      "trades": 1342,
+      "profit_usd": 182.75,
+      "cross_ny_date": 0,
+      "duplicate_tickets": 0
+    }
+  ],
+  "universe": {
+    "path": "data\\results\\execution_safe_model4_v1\\stitched\\orb_execution_safe_days.csv",
+    "sha256": "7677472c0fe8e2c88afd33b13812944707ebb81d122af22bf9fd22520f34eb79",
+    "days": 1369
+  },
+  "frozen_spec_sha256": "3997591f6b3c0d6ef37aded6f9ab41367f77e9ee27b7ff2ea5ca605f94c4b0aa",
+  "frozen_gate_sha256": "ba9106b85dcf63a4f27707cec93a14f9b115302a04c43d715fec4b5a54d24554",
+  "out_of_universe": 0,
+  "calibration": {
+    "days": 770,
+    "trades": 1103,
+    "base_total_usd": 916.62,
+    "stressed_total_usd": 354.09,
+    "stressed_daily_mean_usd": 0.4598571428571427,
+    "stressed_daily_sharpe": 0.3861207135049115,
+    "stressed_max_close_drawdown_usd": 336.86
+  },
+  "gated_2024_plus": {
+    "days": 599,
+    "trades": 689,
+    "base_total_usd": -350.73,
+    "stressed_total_usd": -702.12,
+    "stressed_daily_mean_usd": -1.1721535893155262,
+    "stressed_daily_sharpe": -0.7980021737169487,
+    "stressed_max_close_drawdown_usd": 1089.2000000000003
+  },
+  "bootstrap_p_nonpositive": 0.8951,
+  "yearly": {
+    "2021": {
+      "base_usd": 17.47999999999996,
+      "stressed_usd": -115.12000000000002,
+      "trade_count": 260.0
+    },
+    "2022": {
+      "base_usd": 447.61,
+      "stressed_usd": 188.53,
+      "trade_count": 508.0
+    },
+    "2023": {
+      "base_usd": 451.53000000000003,
+      "stressed_usd": 280.67999999999995,
+      "trade_count": 335.0
+    },
+    "2024": {
+      "base_usd": -64.48999999999997,
+      "stressed_usd": -197.09,
+      "trade_count": 260.0
+    },
+    "2025": {
+      "base_usd": -563.8,
+      "stressed_usd": -725.98,
+      "trade_count": 318.0
+    },
+    "2026": {
+      "base_usd": 277.56000000000006,
+      "stressed_usd": 220.95000000000002,
+      "trade_count": 111.0
+    }
+  },
+  "pace": [
+    {
+      "k": 1,
+      "starts": 473,
+      "pass": 0,
+      "breach": 0,
+      "timeout": 473,
+      "pass_rate": 0.0,
+      "breach_rate": 0.0,
+      "median_days_to_pass": null
+    },
+    {
+      "k": 2,
+      "starts": 473,
+      "pass": 0,
+      "breach": 91,
+      "timeout": 382,
+      "pass_rate": 0.0,
+      "breach_rate": 0.1923890063,
+      "median_days_to_pass": null
+    },
+    {
+      "k": 4,
+      "starts": 473,
+      "pass": 52,
+      "breach": 234,
+      "timeout": 187,
+      "pass_rate": 0.1099365751,
+      "breach_rate": 0.4947145877,
+      "median_days_to_pass": 124.5
+    },
+    {
+      "k": 8,
+      "starts": 473,
+      "pass": 90,
+      "breach": 383,
+      "timeout": 0,
+      "pass_rate": 0.1902748414,
+      "breach_rate": 0.8097251586,
+      "median_days_to_pass": 28.0
+    },
+    {
+      "k": 16,
+      "starts": 473,
+      "pass": 101,
+      "breach": 372,
+      "timeout": 0,
+      "pass_rate": 0.2135306554,
+      "breach_rate": 0.7864693446,
+      "median_days_to_pass": 13.0
+    },
+    {
+      "k": 32,
+      "starts": 473,
+      "pass": 88,
+      "breach": 385,
+      "timeout": 0,
+      "pass_rate": 0.1860465116,
+      "breach_rate": 0.8139534884,
+      "median_days_to_pass": 8.0
+    }
+  ],
+  "gates": {
+    "G-MP1": true,
+    "G-MP2": false,
+    "G-MP3": false,
+    "G-MP4": false
+  },
+  "verdict": "FAIL",
+  "caveat": "Optimistic close-based historical replay; no intraday floating-loss, FTMO feed, simultaneous MT5 portfolio execution, or forward confirmation."
+}
+FINAL PHASE-1 VERDICT: FAIL

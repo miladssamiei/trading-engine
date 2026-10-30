@@ -1,0 +1,71 @@
+HYPOTHESIS 99: NATIVE FTMO USOIL WEDNESDAY EIA REACTION CONTINUATION
+Declared 2026-09-25 before H99 evaluator code or H99 trade-return run.
+Null/FAIL is complete. No account orders.
+
+MECHANISM AND SOURCE
+The standard EIA Weekly Petroleum Status Report posts its summary and
+tables after 10:30 US Eastern time on Wednesday. A price response over
+the first 30 minutes may continue through the US afternoon. Test exactly
+one same-day rule on connected FTMO-Demo USOIL.cash native Bid/Ask ticks.
+The connected account is a EUR10000 Free Trial Swing 2-Step proxy, with
+0.001 price tick, 100-barrel contract per lot and 0.01 lot step. Owner
+states intended account is swap-free. The same-day rule incurs no swap.
+FTMO's public Free Trial is one phase with a 5% target and two minimum
+trading days; the eventual full 2-Step is 10% then 5%, four days each.
+No historical EIA inventory value, consensus, revised figure, future
+quote, or model fitting is used.
+
+CALENDAR AND TICK HANDLING
+Use Wednesdays from 2022-01-01 through last complete week before
+2026-09-25. Standard release is 10:30 America/New_York. Before looking
+at price returns, exclude any week containing a US federal observed
+holiday Monday-Friday (pandas USFederalHolidayCalendar) because the
+release time may shift. The EIA official schedule determines the basic
+clock; this conservative fixed exclusion handles known holiday shifts.
+No alternate release dates are traded. Convert each NY wall time to UTC
+with the IANA timezone. Request MT5 COPY_TICKS_ALL from Wednesday
+10:30 to 15:01 NY. Retain only real ticks with Bid>0 and Ask>=Bid;
+preserve time_msc order. No generated bars or midpoint fills.
+
+ENTRY, STOP, EXIT
+Require at least one real valid tick in [10:30,10:31), [10:59,11:00),
+[11:00,11:01), and [15:00,15:01); otherwise mark week unresolved.
+The signal is the last Bid tick strictly before 11:00 minus the first
+Bid tick at/after 10:30. Positive -> buy first Ask tick at/after 11:00;
+negative -> sell first Bid tick at/after 11:00; zero -> no trade. The
+10:30-11:00 observed Bid high minus low defines range. Require range>0.
+Long stop = entry Ask minus that range; short stop = entry Bid plus range.
+For stops after entry and strictly before 15:00, long closes on first
+Bid<=stop and short on first Ask>=stop at that real executable quote,
+including any gap loss. Otherwise exit on first real quote in
+[15:00,15:01), Bid for long and Ask for short. One trade per eligible
+week, no target/trail/reentry; flat on Wednesday. Exclude incomplete
+final week.
+
+COSTS, SPLIT AND REPORTING
+Base price-unit PnL uses executable native entry and exit Bid/Ask.
+Stressed PnL subtracts a further 0.12 USOIL price units roundtrip
+for slippage, commission uncertainty and spread deterioration.
+Contract PnL is stressed price units * 100 USD/lot before EUR conversion.
+2022 is descriptive; 2023, 2024, 2025 and partial 2026 are gated.
+Report coverage, annual counts/totals, mean/median price-unit net,
+mean R using observed stop distance, native entry spreads, stop rate,
+same-day flat status, exact source hashes, and five-week circular
+moving-block bootstrap with 10000 draws and seed 20261009. No variants
+or after-result changes. Missing required ticks count as unresolved.
+If a Phase-1 gate fails, immutable REPORT FINAL_FAIL and no Phase 2.
+If Phase 1 passes, freeze separate exact-tick/prop-risk SPEC and GATE
+before calculating FTMO account outcomes. The owner seeks a fast full
+2-Step result, so full challenge pace is a distinct required gate.
+At least 150 genuinely unseen forward trades and annual sign agreement
+remain necessary before claiming a verified strategy.
+
+VERBATIM GATES
+G-OI1: At least 140 fully resolved 2023-2026 Wednesday regular-release USOIL trades on distinct NY dates, zero unresolved required entry or exit quotes, and native real Bid/Ask tick fills only.
+G-OI2: Strictly positive 2023-2026 mean stressed USOIL price units per trade after actual variable Bid/Ask spread and another 0.12 price units stress.
+G-OI3: Five-week circular moving-block bootstrap P(mean stressed USOIL price units <= 0) at most 0.05 using 10000 draws and seed 20261009.
+G-OI4: Strictly positive stressed USOIL price-unit totals separately in complete 2023, 2024, 2025 and partial 2026.
+G-OI5: If Phase 1 passes, a separately frozen exact-native EUR10000 two-stage 180-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts at fixed 2% initial risk.
+G-OI6: Source hashes, official regular-release clock and fixed known-holiday exclusions, causal signal, actual executable tick stops, full same-day exit, commission/slippage stress and no account orders are verified.
+
+All six gates must pass; Phase-1 PASS alone is not verified.

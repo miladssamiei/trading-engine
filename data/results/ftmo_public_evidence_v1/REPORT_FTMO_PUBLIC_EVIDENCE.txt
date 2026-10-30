@@ -1,0 +1,61 @@
+REPORT_FTMO_PUBLIC_EVIDENCE
+Generated 2026-09-11 after the archived no-login acquisition and final verification.
+SPEC: SPEC_FTMO_PUBLIC_EVIDENCE.txt
+GATE: GATE_FTMO_PUBLIC_EVIDENCE.txt
+
+OVERALL VERDICT
+
+PARTIAL. The official public FTMO symbol endpoint was acquired without authentication and all public-source gates passed. The exact 232486-byte response is archived with matching SHA-256 64a859eae46d2a3c81e21278330bd0510faca32e15db07730037c45e983c14d0. Account-specific and execution evidence remains incomplete. downstream_model_allowed=false and live_execution_allowed=false.
+
+WHAT THE NO-LOGIN SOURCE ESTABLISHES
+
+At 2026-09-11T16:56:21.851615Z, https://ftmo.com/wp-json/ftmo/symbols returned HTTP 200 application/json directly from the requested HTTPS ftmo.com host. The payload contained exactly one active US500.cash record and five current dated trading intervals. The response and selected metadata were internally consistent and the audit recorded no errors.
+
+The public record identifies US500.cash as S&P 500 Index, Spot CFD. It reports contract size 1, USD margin and profit currencies, margin percentage 2, Standard leverage 50, Swing leverage 15, two price digits, maximum trade volume 1000, zero commission with published type percent, swap long -130.92, swap short -29.24 and swap type points. The platform offset was UTC+3. The five dated sessions ran from 22:05 UTC to 20:50 UTC for 2026-09-06/07 through 2026-09-10/11.
+
+The swap values remain unconverted public point values. The source does not establish the MT5 tick size/value or rollover multiplier needed for account-currency financing. Two public fields were null: initialMargin and expiringContractInstrument. The response's maxTradeVolume does not establish minimum volume or volume step. Its digits field does not prove tick size.
+
+WHAT REMAINS UNRESOLVED
+
+The public endpoint does not authenticate the owner's account fingerprint, assigned server, current balance, equity or phase. It does not provide the required MT5 tick economics, minimum/step volume, stops/freeze levels, filling modes or rollover multiplier schedule. The captured response has no bid/ask history, spread distribution, realized fills or slippage. Independent account/rule and all-in cost reconciliation remain absent.
+
+This evidence narrows the public portion of the earlier G-D2 symbol-metadata gap but cannot make that frozen gate pass. G-D1, G-D3 and G-D4 are unchanged. A later combined qualification must be a new predeclared artifact; the existing qualification REPORT remains untouched.
+
+GATE VERDICTS
+
+P-I1 PASS. The SPEC and its seven-line verbatim GATE existed before the implementation, tests and archived acquisition. Existing SPEC/GATE/REPORT files and frozen EAs were not edited.
+
+P-S1 PASS. The run retrieved HTTP 200 JSON from the allowlisted HTTPS endpoint without authentication, ended on the same allowed host, recorded URLs and UTC retrieval time, archived the exact bounded bytes and wrote a matching SHA-256. No secret-like keys were present.
+
+P-S2 PASS. Exactly one active US500.cash record was present. Required public fields were present and finite, nullable fields were reported, selected hours matched symbol id 75 and code US500.cash, and all selected times parsed as aware instants. No malformed, duplicate or contradictory record was observed.
+
+P-S3 PASS. Retrieval time equalled the run as-of time. The contract active interval contained as-of and the five published weekly schedule rows met the seven-day currentness rule.
+
+P-C1 PASS. public_symbol_evidence.json preserves the selected public fields, units and every matching interval. It separately lists supported facts, nullable fields, interpretation limits and evidence still required. No tick, swap-currency or execution-cost inference was inserted.
+
+P-L1 INCOMPLETE. Account identity/state, exact assigned server, MT5 tick economics and execution constraints, rollover multipliers, bid/ask coverage, fills/slippage, financing reconciliation and independent review remain unresolved. The public capture does not satisfy G-D1, G-D3 or G-D4.
+
+P-F1 PARTIAL. P-I1 through P-C1 passed and P-L1 remains explicitly incomplete, so the predeclared overall result is PARTIAL. downstream_model_allowed=false and live_execution_allowed=false.
+
+IMPLEMENTED ARTIFACTS
+
+- evaluate/ftmo_public_evidence_v1.py: allowlisted standard-library HTTPS fetch, bounded response handling, secret-key refusal, immutable archival, SHA-256 provenance, schema/currentness checks and conservative evidence/audit outputs.
+- tests/test_ftmo_public_evidence_v1.py: nine tests for preservation, duplicate/inconsistent records, currentness, numeric validation, URL/secret rejection, downstream refusal, future retrieval and exact immutable archival.
+- capture_20260911_v1/: raw official response, SHA-256, retrieval metadata, selected public evidence and audit.
+- PUBLIC_EVIDENCE_OPERATING_NOTES.md: refresh command, supported facts, interpretation limits and next offline activity.
+
+FINAL COMMAND EVIDENCE
+
+Acquisition command:
+C:\Users\Milad\miniconda3\envs\reinforce_rl\python.exe evaluate\ftmo_public_evidence_v1.py --output-dir data\results\ftmo_public_evidence_v1\capture_20260911_v1
+Result: exit 2, status PARTIAL, P-I1/P-S1/P-S2/P-S3/P-C1 PASS, P-L1 INCOMPLETE, P-F1 PARTIAL, zero audit errors. Exit 2 is the declared successful-acquisition result with unresolved qualification evidence.
+
+Targeted regression command:
+C:\Users\Milad\miniconda3\envs\reinforce_rl\python.exe -m pytest tests\test_ftmo_public_evidence_v1.py tests\test_ftmo10k_qualification_v1.py tests\test_ftmo_account_replay_v1.py -q
+Result: 28 passed in 0.16s.
+
+Independent Get-FileHash verification matched the recorded SHA-256. Python compileall passed for the collector. git diff --check reported no whitespace errors in the study paths. graphify update . completed after code changes with 1028 files, 2107 nodes, 2967 edges and 270 communities.
+
+HONEST CONCLUSION
+
+The login outage no longer blocks collection of the current public FTMO US500 contract, leverage, published swaps, commission and weekly schedule. It still blocks account authentication and broker-execution qualification. Public values may be used only as timestamped, unit-preserving research inputs and sensitivity labels. They do not justify converting swaps to dollars, certifying lot sizing, promoting a model or trading the Challenge.

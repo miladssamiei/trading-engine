@@ -1,0 +1,241 @@
+REPORT: H84 US500 PREVIOUS-DAY ASYMMETRY - PHASE 1
+{
+  "study": "H84 US500 previous-day cash-range asymmetry",
+  "source": {
+    "sha256": "a8ee68f1a0010a1be9704c0d59fd5382aa798846cdae4d519b799ae21ec66c2d",
+    "m5_rows": 105219,
+    "cash_dates": 1370,
+    "first_cash_date": "2021-01-04",
+    "last_cash_date": "2026-04-30"
+  },
+  "spec_sha256": "7f2e089c3ee1e3ee2dee58a90d6c59c11a9539628634f5a1c1b8a28341d09c9c",
+  "gate_sha256": "adaf13a5f243dfbfd3a05f014d6bf952f91783d7d6ee91df37ae2aa809babe2c",
+  "addendum_sha256": "591cb27d8a3145700825977bdcca5255877e374a5ad3f83e40d16836c69bbfa2",
+  "signal_dates": 1369,
+  "executed_or_marked": 1324,
+  "skip_reasons": {
+    "PREVIOUS_CASH_DAY_INCOMPLETE": 45
+  },
+  "calibration_2021_2023": {
+    "trades": 747,
+    "resolved": 740,
+    "unresolved": 7,
+    "dates": 747,
+    "gross_mean_points": 1.7714202702702637,
+    "base_mean_points": 1.2614202702702635,
+    "base_total_points": 933.4509999999949,
+    "stress_mean_points": 0.7514202702702636,
+    "stress_total_points": 556.050999999995,
+    "base_win_rate": 0.4783783783783784,
+    "stops": 190,
+    "sides": {
+      "SELL": 375,
+      "BUY": 365
+    },
+    "p10_p50_p90_base": [
+      -25.542100000000175,
+      -1.4510000000004857,
+      31.773899999999955
+    ],
+    "worst_floating_stress_r_min": -2.121696373693928
+  },
+  "gated_2024_2026": {
+    "trades": 577,
+    "resolved": 574,
+    "unresolved": 3,
+    "dates": 577,
+    "gross_mean_points": 2.2970409407665446,
+    "base_mean_points": 1.7870409407665444,
+    "base_total_points": 1025.7614999999964,
+    "stress_mean_points": 1.2770409407665437,
+    "stress_total_points": 733.0214999999961,
+    "base_win_rate": 0.48257839721254353,
+    "stops": 154,
+    "sides": {
+      "SELL": 289,
+      "BUY": 285
+    },
+    "p10_p50_p90_base": [
+      -29.639399999999988,
+      -1.1634999999998945,
+      37.02140000000022
+    ],
+    "worst_floating_stress_r_min": -2.6524319442652966
+  },
+  "bootstrap": {
+    "p_mean_nonpositive": 0.0736,
+    "ci95_points": [
+      -0.5862790069686461,
+      4.2302206663763116
+    ]
+  },
+  "yearly": {
+    "2021": {
+      "trades": 249,
+      "resolved": 249,
+      "unresolved": 0,
+      "dates": 249,
+      "gross_mean_points": 2.1045140562248825,
+      "base_mean_points": 1.5945140562248825,
+      "base_total_points": 397.03399999999573,
+      "stress_mean_points": 1.0845140562248825,
+      "stress_total_points": 270.0439999999957,
+      "base_win_rate": 0.46987951807228917,
+      "stops": 65,
+      "sides": {
+        "BUY": 127,
+        "SELL": 122
+      },
+      "p10_p50_p90_base": [
+        -21.57919999999955,
+        -1.2990000000002146,
+        27.263200000000197
+      ],
+      "worst_floating_stress_r_min": -1.9709690426056543
+    },
+    "2022": {
+      "trades": 250,
+      "resolved": 248,
+      "unresolved": 2,
+      "dates": 250,
+      "gross_mean_points": 1.3465463709677084,
+      "base_mean_points": 0.8365463709677086,
+      "base_total_points": 207.4634999999917,
+      "stress_mean_points": 0.3265463709677081,
+      "stress_total_points": 80.98349999999161,
+      "base_win_rate": 0.4637096774193548,
+      "stops": 63,
+      "sides": {
+        "BUY": 125,
+        "SELL": 123
+      },
+      "p10_p50_p90_base": [
+        -36.29825000000001,
+        -2.16300000000002,
+        41.39080000000009
+      ],
+      "worst_floating_stress_r_min": -1.670746249921513
+    },
+    "2023": {
+      "trades": 248,
+      "resolved": 243,
+      "unresolved": 5,
+      "dates": 248,
+      "gross_mean_points": 1.8637181069959163,
+      "base_mean_points": 1.3537181069959154,
+      "base_total_points": 328.95350000000747,
+      "stress_mean_points": 0.8437181069959161,
+      "stress_total_points": 205.0235000000076,
+      "base_win_rate": 0.5020576131687243,
+      "stops": 62,
+      "sides": {
+        "SELL": 130,
+        "BUY": 113
+      },
+      "p10_p50_p90_base": [
+        -21.742999999999995,
+        0.07300000000053841,
+        26.858200000000444
+      ],
+      "worst_floating_stress_r_min": -2.121696373693928
+    },
+    "2024": {
+      "trades": 248,
+      "resolved": 246,
+      "unresolved": 2,
+      "dates": 248,
+      "gross_mean_points": 2.371162601626011,
+      "base_mean_points": 1.8611626016260103,
+      "base_total_points": 457.8459999999985,
+      "stress_mean_points": 1.3511626016260103,
+      "stress_total_points": 332.38599999999855,
+      "base_win_rate": 0.4959349593495935,
+      "stops": 54,
+      "sides": {
+        "BUY": 128,
+        "SELL": 118
+      },
+      "p10_p50_p90_base": [
+        -22.45900000000007,
+        -0.334500000000171,
+        29.472500000000526
+      ],
+      "worst_floating_stress_r_min": -2.1416891324524308
+    },
+    "2025": {
+      "trades": 247,
+      "resolved": 247,
+      "unresolved": 0,
+      "dates": 247,
+      "gross_mean_points": 3.2938198380566783,
+      "base_mean_points": 2.7838198380566794,
+      "base_total_points": 687.6034999999998,
+      "stress_mean_points": 2.2738198380566765,
+      "stress_total_points": 561.6334999999991,
+      "base_win_rate": 0.4898785425101215,
+      "stops": 74,
+      "sides": {
+        "SELL": 131,
+        "BUY": 116
+      },
+      "p10_p50_p90_base": [
+        -32.7616999999998,
+        -1.2999999999999636,
+        42.78560000000004
+      ],
+      "worst_floating_stress_r_min": -2.0748170925670917
+    },
+    "2026": {
+      "trades": 82,
+      "resolved": 81,
+      "unresolved": 1,
+      "dates": 82,
+      "gross_mean_points": -0.9676296296296484,
+      "base_mean_points": -1.47762962962965,
+      "base_total_points": -119.68800000000165,
+      "stress_mean_points": -1.9876296296296492,
+      "stress_total_points": -160.99800000000158,
+      "base_win_rate": 0.41975308641975306,
+      "stops": 26,
+      "sides": {
+        "BUY": 41,
+        "SELL": 40
+      },
+      "p10_p50_p90_base": [
+        -39.61000000000036,
+        -6.007000000000298,
+        50.587000000000664
+      ],
+      "worst_floating_stress_r_min": -2.6524319442652966
+    }
+  },
+  "paid_90d_1pct": {
+    "starts": 513,
+    "pass": 114,
+    "breach": 52,
+    "timeout": 347,
+    "pass_rate": 0.2222222222222222,
+    "breach_rate": 0.10136452241715399,
+    "median_pass_days": 57.0
+  },
+  "free_trial_14d_1pct": {
+    "starts": 565,
+    "pass": 36,
+    "breach": 0,
+    "timeout": 529,
+    "pass_rate": 0.06371681415929203,
+    "breach_rate": 0.0,
+    "median_pass_days": 9.5
+  },
+  "gates": {
+    "G-PA1": false,
+    "G-PA2": true,
+    "G-PA3": false,
+    "G-PA4": true,
+    "G-PA5": false,
+    "G-PA6": true
+  },
+  "verdict": "FAIL",
+  "limitations": "Historical fixed-spread BID M5 proxy on non-FTMO symbol. Source PDF unavailable; rule is a declared transfer inference. No actual FTMO Bid/Ask fill, commission, size tier, EUR conversion, or forward proof."
+}
+FINAL PHASE-1 VERDICT: FAIL

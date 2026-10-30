@@ -1,0 +1,49 @@
+HYPOTHESIS 88: CAUSAL FX-CONVERSION REMEASUREMENT OF H87
+Declared 2026-09-25 after H87 final FAIL and before any H88 code or
+replay. Null/FAIL is complete. H87 SPEC/GATE/REPORT remain untouched.
+
+1. EXACT INHERITED TRADE RULE
+Incorporate sections 1 through 4 of the frozen H87 SPEC at
+data/results/ftmo_us500_open_persistence_h87/
+SPEC_FTMO_US500_OPEN_PERSISTENCE_H87.txt verbatim for source,
+NY/server clocks, 2025-03-21 exclusion, 20-day opening-range median,
+opening efficiency >=0.50, Q >= median, first quote at/after 10:00,
+direction, observed BID/ASK entry/stop/2R target/noon exit,
+0.5%/1.0% risk rows, extra 0.51-point spread +0.25-point slippage,
+EUR 10000 account, 90-day paid/14-day Free Trial replay, 2025/2026
+year signs and 10000 bootstrap draws seed 20260929. No other signal,
+cost, clock, threshold, position or challenge change is allowed.
+H87's 29 FX-resolved trades were a biased subset and cannot be used
+as a directional performance estimate. An H88 PASS remains selected
+historical evidence requiring separate native MT5 and forward proof.
+
+2. ONLY MEASUREMENT CORRECTION
+H87 requested one EURUSD tick from the exact US500 millisecond epoch
+through copy_ticks_from. The MT5 Python API rounded that datetime to
+whole seconds, often returning a tick a few milliseconds BEFORE the
+requested epoch; H87 rejected it as negative delay and dropped 111
+otherwise signaled dates. H88 retrieves all native EURUSD quotes in
+[event_epoch-60 seconds, event_epoch], selects the latest quote with
+time_msc <= the exact event millisecond, and requires age <=60s and
+positive non-inverted BID/ASK. This is causal at both entry sizing
+and exit conversion. Missing conversion still marks a signaled trade
+unresolved and fails coverage; never drop it to improve returns.
+Archived source/code hashes and complete quote coverage are required.
+
+3. STOP AND HONESTY RULES
+Use the same H87 entry/exit and balance-path code except the FX
+retrieval function and artifact namespace. No tuning, source-date
+deletion, conditional correction, side filter or alternate horizon.
+Both 0.5% and 1.0% fixed rows must be reported. Any gate FAIL is
+FINAL for H88; write immutable REPORT on FAIL. No account orders.
+
+4. VERBATIM GATES
+G-OC1: At least 150 executed 2025-2026 FTMO-native US500.cash real-Bid/Ask trades on 150 distinct NY dates, with zero unresolved post-entry exits, zero unknown causal FX-conversion quotes, and no source-mismatch day used.
+G-OC2: Strictly positive mean EUR net/trade in one fixed risk row after actual Bid/Ask and conversion plus additional 0.51-point spread and 0.25-point slippage stresses.
+G-OC3: NY-date bootstrap P(mean stressed EUR net/trade <= 0) at most 0.05 with 10000 draws and seed 20260929 in the same fixed risk row.
+G-OC4: Strictly positive stressed EUR net totals in complete 2025 and partial 2026 in the same qualifying risk row.
+G-OC5: At least 150 fully observed rolling paid 90-calendar-day starts, with pass rate at least 0.70 and floating-equity breach rate at most 0.10 in the same qualifying risk row.
+G-OC6: All trades use only causal completed opening quotes, exact observed Bid/Ask execution, positive tick-grid stop distance, same NY/Prague date flat, and frozen source/configuration with no account orders.
+
+All six must PASS in the SAME risk row. The unchanged H87 source rule
+is newly measured, not retroactively revised in its prior artifact.

@@ -1,0 +1,3 @@
+Recorded: 2026-09-11 before creation of new EA sources
+ea/ORB_Strategy.mq5  SHA-256  093e28f908c7ae1cef237d5245daf84007c3c50ace08a2dfc19d0582641d90d2
+ea/SP2L_SpikeGap.mq5  SHA-256  47a7b535252fee1f897a6970dc62bc301191e6819472f1bbcb522cf5aa34bcee

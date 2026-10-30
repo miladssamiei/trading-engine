@@ -1,0 +1,50 @@
+SPEC: VRP-CONDITIONED ORB (HYPOTHESIS #31)
+Frozen: 2026-09-21, BEFORE any Phase-1 code existed.
+Script (to exist only after this freeze): evaluate/orb_vrp_filter_phase1.py
+Phase: 1 only - offline Python signal-quality / filter screen on a FROZEN trade list. No MT5 execution.
+
+1. MECHANISM AND HYPOTHESIS
+- Institutional filter hypothesis: opening-range-breakout (ORB) PnL may concentrate on days with a high Volatility Risk Premium (implied minus realized volatility). A high VRP marks expensive insurance / rich optionality; if intraday trend persistence is conditionally stronger on such days, filtering the ORB book to high-VRP days should raise per-trade expectancy and Sharpe without touching the strategy itself.
+- This is a DAY-CONDITIONING screen of the frozen, already-validated ORB trade list. It is NOT an ORB re-optimization: entries, stops, targets, exits are untouched; the only operation is selecting which executed trades would have been taken.
+
+2. DATA
+- Trades: data/results/orb_2021_present/py_trades.csv (442 rows, 2021-01-06..2026-04-22, semicolon-delimited; open_time/close_time UTC 'YYYY.MM.DD HH:MM'; 'profit' column = GROSS index points at $1/pt for 1.0 lot; swap and commission columns are 0 in the source).
+- Features: data/results/daily_feature_engineering/daily_features_stationary.csv (1,112 rows, 2022-01-04..2026-04-30, comma-delimited; column 'vrp'; the s->s+1 publication shift was applied during that file's feature engineering - the VRP value aligned to date d is treated as known before day d opens and safe for a day-d trade).
+- Join: INNER on the NY trading date (open_time converted UTC -> America/New_York, date taken). The joined span (2022-01-04..2026-04-22) is the BASELINE timeframe; ORB trades before 2022-01-04 are outside the study by construction.
+
+3. CAUSAL ROLLING PERCENTILES (NO LOOKAHEAD)
+- For each feature date d: P50/P75/P90 are percentiles of the vrp column over the trailing 252 feature-file observations ending AT AND INCLUDING d (inclusive is causal because vrp(d) itself is known by day-d open under the s->s+1 alignment of the source file). Minimum 252 observations, no partial windows, no future data.
+- Consequence (pre-declared): the first 251 feature dates (2022-01-04..~2023-01-03) have no percentile and can be in no arm; those trades remain in the BASELINE and in a descriptive warmup-matched baseline, but not in any arm.
+
+4. FILTER ARMS (frozen; D is the inverted control)
+- Arm A (High VRP):        vrp(d) > trailing_P50   (top 50%)
+- Arm B (Very High VRP):   vrp(d) > trailing_P75   (top 25%)
+- Arm C (Extreme VRP):     vrp(d) > trailing_P90   (top 10%)
+- Arm D (Low/Negative VRP, inverted control): vrp(d) < trailing_P50 (bottom 50%)
+- Ties (vrp exactly equal to a percentile) fall outside the strict arms.
+
+5. ECONOMICS AND METRICS ($ = index points at $1/pt, 1 lot, no compounding)
+- gross = source 'profit' (points). ORB trades are intraday (closed by 20:00 UTC same NY day) -> no overnight swap. net = gross - 0.51 (verified real-tick median round-trip spread).
+- Per set (Baseline-joined, warmup-matched baseline, each arm): Trade Count, Win Rate (share of trades with net > 0), Gross PnL, Net PnL, Average Net PnL/trade, Net Sharpe = mean(net)/std(net, ddof=1) * sqrt(252) (per-trade series; same annualization for every set - comparative, not absolute).
+- Edge Concentration = 100 * (avg_net_arm - avg_net_baseline) / abs(avg_net_baseline), in percent, versus the joined baseline.
+
+6. PHASE-1 GATES (verbatim in GATE_ORB_VRP.txt)
+- G-VRP1: At least one positive VRP filter arm (A, B, or C) retains >= 100 trades.
+- G-VRP2: The best passing arm's Net Sharpe Ratio is strictly > the Baseline ORB Net Sharpe Ratio.
+- G-VRP3: The best passing arm's Win Rate is strictly > the Baseline ORB Win Rate.
+
+7. MECHANICAL INTERPRETATIONS PRE-DECLARED
+- "Passing arm" = arm in {A, B, C} with >= 100 trades (G-VRP1). Arm D never passes G-VRP1 (it is the inverted control).
+- "Best passing arm" = the G-VRP1-qualifying arm with the highest Net Sharpe; ties broken toward the larger trade count.
+- Baseline for G-VRP2/G-VRP3 = the joined inner-join baseline (section 2); the warmup-matched baseline is descriptive only.
+- OVERALL PHASE-1 PASS = G-VRP1 AND G-VRP2 AND G-VRP3.
+
+8. HONESTY / ANTI-LEAK / STOP RULES
+- Trade list frozen; no new backtest; no threshold sweep beyond the four pre-declared arms; percentiles strictly trailing.
+- If no arm qualifies under G-VRP1, the study FAILS and orb_vrp_filtered_trades.csv is written with the full joined baseline list and filter_arm=NONE (null outcome, machine-readable).
+- Null result is a complete, expected deliverable and ends this artifact.
+- The 0.51 spread is the verified Model-4 real-tick median; no cherry-picking between cost conventions.
+
+9. ARTIFACTS
+- data/results/orb_vrp_filter/: SPEC_ORB_VRP.txt (this file), GATE_ORB_VRP.txt, REPORT_ORB_VRP.txt, orb_vrp_filtered_trades.csv, run_meta.json.
+- Script: evaluate/orb_vrp_filter_phase1.py (written only after SPEC and GATE were frozen).

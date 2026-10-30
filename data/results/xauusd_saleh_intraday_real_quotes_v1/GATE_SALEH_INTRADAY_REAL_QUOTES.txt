@@ -1,0 +1,5 @@
+G-SRQ1: At least 150 executed 2024-2026 trades spanning at least 150 distinct New York entry dates.
+G-SRQ2: Strictly positive mean extra-0.41-cost-stress native quote net gold units per gated trade.
+G-SRQ3: Date-bootstrap P(mean native quote net <= 0) at most 0.05, 10000 resamples, seed 20261007.
+G-SRQ4: Strictly positive native quote-net total gold units in each complete gated year 2024 and 2025.
+G-SRQ5: Zero unresolved open-trade exits, no cross-date positions, and no quote-source hash mismatch.

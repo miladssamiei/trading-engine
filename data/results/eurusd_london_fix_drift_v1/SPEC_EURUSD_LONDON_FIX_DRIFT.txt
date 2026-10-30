@@ -1,0 +1,75 @@
+HYPOTHESIS 67: EURUSD POST-LONDON-FIX DOLLAR REVERSAL
+Declared 2026-09-25 before this study's code or Phase-1 run.
+
+1. EXTERNAL MECHANISM AND RULE
+Krohn et al., Foreign Exchange Fixings and Returns around the Clock,
+Journal of Finance 2024, https://doi.org/10.1111/jofi.13306,
+report that the U.S. dollar tends to weaken after the 16:00 London
+FX fix in their 1999-2019 sample; the published post-fix window is
+16:00 London to 17:00 New York. This test takes the fixed direction
+(BUY EURUSD) after the five-minute fix window and closes one hour
+before the New York FX rollover to avoid its spread and financing.
+This is a new external mechanism, not a retuning of prior event or
+US500 calendar failures. The literature result does not establish
+profitability on this broker CFD after current quote costs.
+
+2. DATA AND CALENDAR
+Use only verified raw EURUSD CSV C:/Users/Milad/download/
+eurusd-tick-2020-01-01-2026-09-20.csv, with epoch-ms UTC timestamp,
+askPrice, bidPrice, and source sha256
+23376d5ffd9d5f287f92875faa4df303032162158fff20387c4c284894a8e3b1.
+The onboarding inventory records 171175617 sorted rows, first quote
+2020-01-01 and last 2026-09-18; do not interpolate missing quotes.
+Construct every Monday-Friday Europe/London calendar date from
+2020-01-02 through 2026-09-18 inclusive, independently of prices.
+Entry target = date at 16:05:00 Europe/London; exit target = the
+corresponding same London calendar date at 16:00:00 America/New_York.
+Convert both with IANA time zones; do not assume a fixed UTC offset.
+This yields a same-day roughly four- to five-hour hold and avoids
+17:00 New York rollover even in London/NY DST mismatch weeks.
+
+3. EXECUTION PROXY AND COST
+For each target take the first valid quote at or after target and
+within 10 seconds inclusive. A valid row has finite positive Ask
+and Bid with Ask >= Bid. Exclude and count invalid rows in sampled
+windows; skip and log dates missing either quote. No fallback window,
+stops, targets, news exclusions, or day/month/volatility filters.
+Enter long at Ask and exit at Bid; quote-net pips =
+(exitBid-entryAsk)/0.00010. Midpoint gross pips =
+(exitMid-entryMid)/0.00010. Actual quote spread is already charged.
+Extra-cost stress net pips = quote-net pips - 0.3, a separate
+latency/slippage buffer equal to the user's EURUSD spread floor.
+First-quote fills still omit rejection and market impact; CFD quote
+history is an execution proxy, not proof of fillability.
+
+4. PARTITION, INFERENCE, AND REPORTING
+2020-2023 are descriptive only; 2024-01-01 through 2026-09-18 is
+the untouched rule's gated chronological block. The rule comes
+from published 1999-2019 research; no parameters are selected on
+this broker tape. Report per-year trade count, midpoint and quote-
+net and stress means/totals, win rate, spread distribution, hold
+duration, maximum drawdown, and missing-quote funnel. Keep 2026
+partial separate from complete 2024 and 2025. Bootstrap gated
+London dates with replacement 10000 times, seed 20261003, and
+report P(mean quote-net <= 0) and descriptive 95% quantiles.
+One trade per date means date and trade bootstrap units coincide.
+2024-2026 dates were already accessible to this research project;
+call the test a predeclared historical replication, not virgin OOS.
+
+5. GATES, FROZEN BEFORE PHASE 1
+G-LFD1: At least 150 executed EURUSD trades on distinct 2024-2026 London dates.
+G-LFD2: Strictly positive mean extra-cost stress net pips per executed trade in the gated block.
+G-LFD3: Date-bootstrap P(mean executable quote net <= 0) at most 0.05, 10000 resamples, seed 20261003.
+G-LFD4: Strictly positive executable quote-net total pips in each complete gated year 2024 and 2025.
+All four are required for Phase-1 PASS. Otherwise FAIL is final
+for this artifact. Do not rescue failure by reversing direction,
+changing exit time, excluding dates, or changing cost assumptions.
+
+6. STOP RULE AND DELIVERABLES
+Save roster, executed quotes, skips, run metadata, and REPORT even
+on FAIL. On FAIL do not advance to MT5 tester. On PASS, first freeze
+a separate Model=4 native-Bid/Ask execution SPEC/GATE covering
+order state, actual fills, >=150 trades, positive net expectancy,
+and year-sign agreement. Only such a verified pass may support a
+claim that this CFD system clears the spread. Do not modify any
+prior frozen SPEC/GATE/REPORT.

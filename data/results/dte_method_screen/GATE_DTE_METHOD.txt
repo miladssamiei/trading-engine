@@ -1,0 +1,14 @@
+GATE FILE: DTE METHOD (DELIVERY + EXECUTION) - PHASE 1
+Frozen 2026-09-22 BEFORE evaluate/dte_method_phase1.py existed.
+
+G-DTE1: Total session-valid signals >= 150.
+
+G-DTE2: Mean MFE > Mean MAE at Risk thresholds (0.5R, 1.0R, 1.5R) for aggregate.
+
+G-DTE3: Day-block bootstrap (10,000 iterations, seed 20260921) P(mean(MFE - MAE) <= 0) <= 0.20.
+
+Pre-declared mechanical interpretation (frozen together with the gates):
+- Session-valid signals = excursion-qualified set: M1 formation and displacement bars open in [09:30,15:30) NY, entry bar open <= 15:55 NY same date, displacement close inside/touching an active same-direction M15 FVG (completed buckets only), Risk > 0, non-empty walk.
+- G-DTE2: for each k in {0.5, 1.0, 1.5}: excess_MFE(k) = mean(max(MFE - k*Risk, 0)), excess_MAE(k) = mean(max(MAE - k*Risk, 0)); the gate requires excess_MFE(k) > excess_MAE(k) strictly at ALL three k AND mean(MFE) > mean(MAE), aggregate set.
+- G-DTE3: NY-date day blocks resampled with replacement (10,000 draws, numpy default_rng(20260921)); statistic = pooled per-signal mean of (MFE - MAE); PASS if P(mean <= 0) <= 0.20.
+- OVERALL PHASE-1 PASS = G-DTE1 AND G-DTE2 AND G-DTE3.

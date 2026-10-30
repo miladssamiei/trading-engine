@@ -1,0 +1,77 @@
+HYPOTHESIS 74: WEEKEND PAXG DIRECTION -> SUNDAY XAUUSD INTRADAY CONTINUATION
+Declared 2026-09-25 before data acquisition code, evaluation code or Phase-1 run.
+
+1. MECHANISM AND LIMITING RESEARCH
+PAX Gold trades through the traditional gold weekend closure and can
+incorporate news before XAUUSD reopens. Cong, Mayer and Rabetti (2026),
+https://wifpr.wharton.upenn.edu/wp-content/uploads/2026/05/WIFPR-Tokenizing-Real-World-Assets-Cong-Mayer-and-Rabetti.pdf,
+describe off-hours token price discovery and reopening convergence.
+Castello (2026), https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7174537,
+reports only weak weekend-token prediction of gold's reopening move in
+a short February-June 2026 sample. Neither paper establishes tradable
+post-reopen continuation after CFD costs. This study tests the simple,
+distinct implication that the weekend token move predicts the first
+liquid Sunday-evening XAUUSD intraday return after the CFD has reopened.
+The null is expected and is a complete deliverable.
+
+2. PUBLIC SOURCE AND CAUSAL SIGNAL
+Download Binance's public SPOT PAXGUSDT monthly klines at interval 1h
+for every available month from 2020-08 through 2026-08 inclusive from
+https://data.binance.vision/data/spot/monthly/klines/PAXGUSDT/1h/.
+Keep each original zip and a SHA256 manifest in this new study
+directory. The Binance public-data schema provides bar-open epoch
+timestamps, close, quote-asset volume, and trade count. Epochs in
+2025+ may be microseconds; earlier epochs milliseconds. Reject bad
+timestamps or duplicate hourly opens. A NY weekend signal needs two
+completed 1h bars with positive traded volume and trade count:
+Friday [16:00,17:00) America/New_York and following Sunday
+[16:00,17:00) America/New_York. Both are known at Sunday 17:00 NY,
+before the XAUUSD entry order. BUY if Sunday PAXG close is strictly
+above Friday close, SELL if strictly below, zero-change skip. No
+premium level, magnitude threshold, holiday/event, year, or side
+filter. USDT risk/basis noise is retained as a source limitation.
+
+3. XAUUSD SAME-NY-DATE BID-BAR PHASE-1 EXECUTION PROXY
+Use the verified native-gold BID M1 export at data/results/
+xauusd_onboarding/xauusdtick_m1.csv, SHA256
+a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f.
+Interpret its epoch seconds as UTC. For every eligible Sunday, require
+REAL M1 bars timestamped exactly 18:30 and 23:30 NY on that Sunday.
+Enter at the 18:30 BID bar open and exit at the 23:30 BID bar open.
+This is a five-hour same-New-York-date hold. Long uses entry Ask
+proxy = entry BID+0.41 and exit BID; short uses entry BID and exit
+Ask proxy = exit BID+0.41, so net gold units equal signed BID
+open-to-open move minus 0.41. An extra 0.41 gold unit per trade is
+charged as execution stress. One trade per Sunday, no other entries,
+stop, target or alternate exit. A missing endpoint is logged and
+excluded, never forward-filled or replaced by a later favorable bar.
+This proxy ignores variable Sunday spread, slippage and floating
+losses; any Phase-1 PASS permits only new native Bid/Ask and prop-risk
+studies, not execution or FTMO qualification.
+
+4. TIME SPLIT, STATISTICS, GATES AND STOP RULE
+2020-08 through 2022-12 is calibration/description. Sunday 2023-01
+through the last XAUUSD source date (2026-09-01) is the gated
+historical block. Report eligible source weekends, both-bar quotes,
+skips, per-year trades, gross and base/stressed net units, win rate,
+and date-bootstrap P(mean base net<=0). Bootstrap gated Sunday dates
+with replacement 10,000 times, seed 20261010. Complete gated years
+2023, 2024 and 2025 must each have positive base net. This test is
+historical replication after significant project data exposure;
+even PASS would require an independent forward confirmation, native
+quote execution, fixed stop/risk sizing and Challenge-pace replay.
+
+GATES FROZEN BEFORE PHASE 1
+G-PW1: At least 150 executed gated 2023-2026 Sundays, each with a causal nonzero PAXG signal and exact 18:30/23:30 real XAUUSD BID bars.
+G-PW2: The gated mean net gold units remain strictly positive after the base 0.41 spread proxy and an additional 0.41 execution stress.
+G-PW3: The 10000-resample Sunday-date bootstrap P(mean base net <= 0) is at most 0.05 with seed 20261010.
+G-PW4: Base 0.41-cost net gold-unit totals are strictly positive in each complete gated year 2023, 2024 and 2025.
+All four gates must PASS; otherwise the artifact's Phase-1 verdict is
+FAIL and final. No post-hoc clock, trade threshold, side, source,
+cost, gate, sample-year or exit change. No MT5 native-tick tester or
+prop pace study on FAIL. Do not alter any historical SPEC/GATE/REPORT.
+
+5. OUTPUTS
+Keep zipped source and manifest; save signal/trade CSV, funnel,
+run metadata and REPORT regardless of verdict. Append the SPEC/GATE,
+Phase-1 run and verdict stages to PROGRESS.md. A REPORT is immutable.

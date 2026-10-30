@@ -1,0 +1,153 @@
+REPORT_CALENDAR_EFFECTS
+Phase 1 verdict for hypothesis #14 calendar effects
+(HYPOTHESIS OVERNIGHT and HYPOTHESIS DOW)
+
+Status: written 2026-08-30 after the first Phase-1 run, per
+SPEC_CALENDAR_EFFECTS.txt and GATE_CALENDAR_EFFECTS.txt (PG1-PG3,
+O1-O4, D1-D3 pre-declared). BOTH HYPOTHESES FAIL PHASE 1 and are
+reported as NULL RESULTS. No Phase 2, no EA, no adoption. Per the
+SPEC, a null result for either or both is a complete, expected, and
+valuable deliverable.
+
+------------------------------------------------------------------------
+1. SCOPE
+
+One instrument (US500 index CFD, US500-tick / US500.c mapping), one
+verified tape (2021-01..2026-04: 1,656 M5 dates, 1,370 cash dates,
+1,369 overnight spans / close-to-close days), cash session
+[09:30, 16:00) NY verbatim from ORB/VWAP work, $10,000 base, 1 lot,
+no compounding, 0.8 pt round-trip spread, $1/pt/lot. Financing under
+BOTH project conventions: A documented swap_long -20 $/day/lot
+Wednesday x5, B strict MT5 points -0.20 $/day/lot Wednesday x5.
+Both hypotheses are unconditional static rules - no fitting, no
+thresholds, no lookback windows.
+
+------------------------------------------------------------------------
+2. DATA REPRODUCTION (PG1-PG3) - ALL PASS
+
+  PG1  1,370 cash dates reproduced exactly.
+  PG2  swap anchor reproduced exactly: 1,656 dates, 278 Wednesdays,
+       -$55,360.00 = -20 x (1,656 + 4 x 278).
+  PG3  buy-and-hold reproduction: D1 close-to-close +34.6852% and
+       first-open anchor +34.6601% (the documented +34.66) both
+       inside the 34.66..34.69 band. Third reading (M5 first cash
+       close 15:55 -> last close) +35.1138% is outside the band and
+       is classified, not used: it drops the pre-first-cash-day D1
+       bar (weekend Globex) - the documented first-bar open-vs-close
+       convention residual.
+
+------------------------------------------------------------------------
+3. HYPOTHESIS OVERNIGHT - NULL RESULT (O1-O4 FAIL)
+
+3.1 Descriptive (n = 1,369 spans, always long cash close -> next
+    cash open):
+
+  overnight: mean +1.084 pts (+0.017%/span), median +2.491, std
+  31.064, Sharpe 0.554, win rate 55.15%, skew -0.343.
+  intraday benchmark (same days, not traded): mean +1.403 pts,
+  median +2.891, std 41.659, Sharpe 0.535, win rate 54.35%, skew
+  +0.663.
+
+  The anomaly's premise is REFUTED on this instrument/tape before
+  any gate is consulted: intraday returns are NOT flat/negative in
+  aggregate (mean and Sharpe are comparable to overnight, mean
+  slightly larger), and the overnight premium is a modest, positively
+  skewed-but-left-tailed leg (negative skew: occasional gap losses).
+
+  Gross total +$1,484; net of 0.8 pt round trip +$389 (Sharpe
+  0.145). Financing totals: Convention A -$49,460, Convention B
+  -$494.60. Net totals: A -$49,071 (Sharpe -12.74), B -$106
+  (Sharpe -0.04).
+
+  Yearly gross (full years): 2021 +559.65 (Sh 1.73), 2022 -740.31
+  (-1.33), 2023 +56.15 (0.18), 2024 +1063.62 (2.31), 2025 +613.74
+  (0.90); 2026 partial -68.61. Yearly net-B: +261.06 / -1039.91 /
+  -241.45 / +764.82 / +315.13 (3 of 5 positive); net-A negative in
+  every full year (-8.4k..-10.3k).
+
+3.2 Gates:
+
+  O1 FAIL. Gross mean > 0 holds, but the day-block bootstrap
+  P(mean <= 0) = 0.1552 > 0.10 (10-day moving-block 0.1465;
+  Bonferroni-adjusted 0.3104). The overnight premium on this tape is
+  not significant at the pre-declared bar.
+  O2 FAIL. Net-of-financing Sharpe must be > 0 under BOTH
+  conventions: A -12.74, B -0.04. Under the documented convention
+  the financing cost (14x the gross edge) destroys the premium;
+  under strict-points the strategy is break-even-negative. No
+  convention-shopping: one positive reading would not have saved it.
+  O3 FAIL. Convention A: 0 of 5 full years positive. Convention B:
+  3 of 5 positive but total net negative (share clause degenerate).
+  O4 FAIL. Net Sharpe must exceed 0.337 (ORB) under both
+  conventions: A -12.74, B -0.04. Being positive was never enough.
+
+  Verdict per GATE: HYPOTHESIS OVERNIGHT is a NULL RESULT. STOP: no
+  Phase 2, no EA, no gap-risk-gate evaluation. Consistent with the
+  literature's "cost-fragile overnight premium" expectation - here
+  it is not even significant gross, and the documented financing
+  convention alone is decisive.
+
+------------------------------------------------------------------------
+4. HYPOTHESIS DOW - NULL RESULT (D1 FAILS -> STOP)
+
+4.1 Descriptive (close-to-close r_cc, n = 1,369 days):
+
+  Mon +0.1215% (n=273, median +0.1797, Sharpe 2.16, win 61.9%),
+  Tue +0.0029% (n=276), Wed +0.0871% (n=276), Thu -0.0156% (n=275),
+  Fri +0.0481% (n=269).
+
+  Ranked by mean: Mon > Wed > Fri > Tue > Thu. Monday is the BEST
+  weekday and is positive - the classic "Monday effect" (Monday
+  lowest/negative) is REVERSED on this tape: delta = Monday mean
+  minus pooled Tue-Fri mean = +0.0910pp; bootstrap P(delta >= 0) =
+  0.9266; the reversal one-sided bootstrap P(delta <= 0) = 0.0734
+  <= 0.10 (distinguishable at the pre-declared 0.10 bar).
+  Descriptive per-weekday: Monday P(mean <= 0) = 0.0142 - the best
+  weekday is also the only one distinguishable from zero. These are
+  descriptive outputs; per the SPEC, only the classic claim is
+  gated and NO weekday-specific rule discovered after seeing the
+  data may be adopted.
+
+4.2 Gates:
+
+  D1 FAIL. mean(r_cc | Monday) < pooled mean(r_cc | Tue..Fri)
+  required; observed +0.0910pp (P(no effect) = 0.9266 >> 0.10).
+  STOP RULE TRIGGERED: HYPOTHESIS DOW is written up as a null
+  result immediately. D2 and D3 were NOT RUN (per GATE: no tradeable
+  design is computed beyond what D1 needs).
+  The reversal (Monday outperformance) is a possible NEW hypothesis
+  that would require its own pre-declared SPEC amendment; it cannot
+  be adopted under this SPEC, and this report does not pre-commit
+  to it.
+
+------------------------------------------------------------------------
+5. HONESTY AND ANTI-LEAK NOTES
+
+  - TWO hypotheses were tested in this SPEC. Every bootstrap
+    p-value is reported raw and Bonferroni-adjusted for 2 tests
+    (O1: 0.1552 -> 0.3104; D1: 0.9266 -> 1.0). No gate passed raw,
+    so no fragility label is triggered, but the adjustment is
+    reported as pre-declared.
+  - Both financing conventions are reported everywhere; no
+    convention-specific rescue exists and none was attempted.
+  - No filter, threshold, or conditioning variable was added after
+    Phase-1 output; no combination of OVERNIGHT and DOW was tested
+    (a third hypothesis would require its own SPEC amendment).
+  - Both null results are complete deliverables: the overnight
+    premium is not significant and is financing-dominated on US500
+    CFD; the Monday effect is absent/reversed in 2021-2026, matching
+    the post-2000s fading documented in the literature.
+
+------------------------------------------------------------------------
+6. ARTIFACTS
+
+  data/results/calendar_effects/SPEC_CALENDAR_EFFECTS.txt
+  data/results/calendar_effects/GATE_CALENDAR_EFFECTS.txt
+  data/results/calendar_effects/overnight_returns.csv
+  data/results/calendar_effects/dow_returns.csv
+  data/results/calendar_effects/yearly_breakdown_calendar.csv
+  data/results/calendar_effects/phase1_calendar_stats.json
+  data/results/calendar_effects/REPORT_CALENDAR_EFFECTS.txt (this)
+  evaluate/calendar_effects_phase1.py
+
+END OF REPORT_CALENDAR_EFFECTS

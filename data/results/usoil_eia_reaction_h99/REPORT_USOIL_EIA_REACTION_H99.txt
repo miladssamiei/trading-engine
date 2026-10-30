@@ -1,0 +1,41 @@
+H99 USOIL EIA REACTION CONTINUATION - PHASE 1 FINAL_FAIL
+2026-09-25. Frozen SPEC and verbatim GATE existed before evaluator code and run.
+No account orders. No Phase 2 on this failed artifact.
+
+SOURCE AND COMPLETENESS
+Connected FTMO-Demo USOIL.cash COPY_TICKS_ALL real native Bid/Ask.
+EUR10000 Free Trial Swing 2-Step proxy; symbol 0.001 tick and 100
+barrels/lot. 247 Wednesdays were enumerated 2022-01-05 to 2026-09-23;
+50 were excluded by the fixed federal-holiday-week rule. The other
+197 had complete 10:30, 10:59, 11:00 and 15:00 required quote windows,
+valid ordered ticks, nonzero signals and nonzero event ranges. There
+were 42 descriptive 2022 trades and 155 gated 2023-2026 trades.
+Coverage includes the SHA256 of each raw native tick array. All trade
+exit timestamps follow entry timestamps on the same Wednesday.
+Trade CSV SHA256 afa5d2045833c59663ff1687c1198958b64705550da05757f86a03f4cfb7b952.
+
+RESULTS
+Gated 2023 through 2026: actual Bid/Ask net mean +0.008858 USOIL
+price units/trade before declared additional stress. After 0.12 units
+extra per roundtrip: total -17.227 units, mean -0.111142, median
+-0.349, mean -0.445546 observed-stop R. At 100 barrels/lot the mean
+stressed result is -$11.114 per lot/trade before EUR conversion.
+Median entry spread 0.030; p90 0.0802 price units. Stop rate 71.61%.
+Five-week circular block bootstrap P(mean <=0)=0.9821. Stressed annual
+totals: 2023 41 trades -6.661; 2024 41 -4.957; 2025 41 -0.093;
+partial 2026 32 -5.516. Descriptive 2022 42 trades +0.987 stressed.
+
+VERDICT AGAINST FROZEN GATES
+G-OI1 PASS: 155 >=140 gated trades, no unresolved required quotes.
+G-OI2 FAIL: mean stressed result is negative.
+G-OI3 FAIL: bootstrap probability 0.9821 exceeds 0.05.
+G-OI4 FAIL: each gated year has a negative stressed total.
+G-OI5 NOT RUN: Phase 1 failed, so no full-challenge replay.
+G-OI6 PASS at Phase 1 scope: source hashes, fixed calendar, causal
+signal and executable native tick fills are recorded; no order placed.
+FINAL_FAIL. No verified oil strategy or prop-account pass claim follows.
+Any opposite-direction or different-stop idea needs a new pre-declared
+artifact with untouched forward data; it cannot repair H99.
+
+Official release schedule: https://www.eia.gov/petroleum/supply/weekly/schedule.php
+FTMO Free Trial terms: https://ftmo.com/faq/how-about-a-free-trial/

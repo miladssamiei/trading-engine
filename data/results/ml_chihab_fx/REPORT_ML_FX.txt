@@ -1,0 +1,16 @@
+CHIHAB-STYLE RF + PROBIT HOURLY FX ADAPTATION - DATA-BLOCKED REPORT
+OVERALL THREE-PAIR GATE: NOT EVALUABLE; GBPUSD AND EURGBP FULL TAPES ARE UNAVAILABLE.
+The requested EURUSD/GBPUSD/EURGBP H1 test is an adaptation, not an exact replication of the 2019 paper.
+The script was executed. GBPUSD bulk retrieval failed with HTTP 429 after a partial 2020 file; weekly checkpoint retrieval repeatedly failed for 2020-04-08 through 2020-04-15, and the 2020-04-08 daily request also failed with HTTP 429. A full-period EURGBP bulk request likewise failed with HTTP 429.
+No incomplete GBPUSD/EURGBP file was admitted into model fitting or execution. GBPUSD successful weekly chunks are preserved for a later independent recovery study.
+
+EURUSD ONLY - completed out-of-sample evaluation on the existing documented Dukascopy BID tick-derived M1 tape:
+Source C:\Users\Milad\Desktop\RR\data\results\eurusd_onboarding\eurusdtick_m1.csv; SHA256 e578692f3b02d985a97c17d13f0fbd0f6797e47c9b31a43970667d020f4d7242
+Scored H1 predictions 37878; RF accuracy 50.8791%; Probit accuracy 51.2223%; both-agree accuracy 51.5119%; agreement coverage 69.4968%; train-majority baseline 50.6943%.
+Closed trades 5318; realized win rate 60.3422%; net expectancy 0.0632 pips/trade; total net PnL 336.30 pips; Net Sharpe 0.002887; 10,000-resample 5-trade MBB p-value 0.4190.
+Both-agree accuracy minus executed trade win rate -8.83 percentage points; these use different denominators.
+EURUSD predeclared numerical gate FAIL; full-year sign qualification FAIL; NY overnight entries 1195; OPEN_END 1 excluded from closed statistics.
+Annual entry-cohort net pips: {2020: {'trades': 438, 'net_pips': 581.8}, 2021: {'trades': 721, 'net_pips': 455.4}, 2022: {'trades': 946, 'net_pips': 949.0}, 2023: {'trades': 920, 'net_pips': -800.1}, 2024: {'trades': 934, 'net_pips': -372.8}, 2025: {'trades': 825, 'net_pips': -815.6}, 2026: {'trades': 534, 'net_pips': 338.6}}
+
+GBPUSD: NOT TESTED. EURGBP: NOT TESTED. No three-pair performance or gate verdict can be inferred.
+Zero swaps and fixed spread remain optimistic for positions held overnight; this proxy test does not establish executable account profitability.

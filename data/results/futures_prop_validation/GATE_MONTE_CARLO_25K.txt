@@ -1,0 +1,10 @@
+ENGINE A $25K MONTE CARLO - PREDECLARED VALIDITY GATE
+Written before prop_firm_monte_carlo_25k.py exists or runs.
+
+Require the exact A_KC GC/BTC/ETH filter, finite positive Initial_Risk and
+finite R for all selected trades, exactly 2458 denominator days, 10000
+independent paths per requested profile, and PASS + MAX_RUIN + DAILY_RUIN
++ CENSORED = 10000 at each profile. The analytical four-trade loss bound
+implies DAILY_RUIN count zero on this pool; a nonzero count fails the
+simulation-integrity gate. Report all four profiles with no post-hoc choice.
+This is a validity gate, not an account-qualification gate.

@@ -1,0 +1,50 @@
+H102 XAUUSD PRE-LBMA-AM SHORT PHASE-1 FINAL_FAIL
+{
+  "source": "connected FTMO-Demo native XAUUSD COPY_TICKS_ALL",
+  "source_rows": 5567672,
+  "coverage": {
+    "TRADE": 678,
+    "NO_PRIOR20_RANGE": 42,
+    "YEAR_END_SKIP": 18,
+    "MISSING_REQUIRED_QUOTE_OR_MINUTE": 3
+  },
+  "gated_trades": 392,
+  "gated_unresolved": 3,
+  "base_mean": 0.2836224489795943,
+  "stressed_mean": -0.12637755102040546,
+  "stressed_median": -0.7049999999998453,
+  "mean_r": -0.008780085514906085,
+  "entry_spread_median": 0.25,
+  "entry_spread_p90": 0.5,
+  "stop_rate": 0.04336734693877551,
+  "bootstrap_p": 0.6011,
+  "annual": {
+    "2024": {
+      "n": 148,
+      "stressed_sum": -62.190000000000005,
+      "mean": -0.4202027027027027,
+      "mean_r": -0.04825391922232145
+    },
+    "2025": {
+      "n": 137,
+      "stressed_sum": -1.1999999999942972,
+      "mean": -0.008759124087549615,
+      "mean_r": 0.019577294345563233
+    },
+    "2026": {
+      "n": 107,
+      "stressed_sum": 13.849999999995255,
+      "mean": 0.12943925233640424,
+      "mean_r": 0.009511188763721734
+    }
+  },
+  "gates": {
+    "G-LB1": false,
+    "G-LB2": false,
+    "G-LB3": false,
+    "G-LB4": false,
+    "G-LB5": null,
+    "G-LB6": true
+  }
+}
+Native historical quotes and exposed gold market: historical Phase-1 results are not forward validation. No account orders.

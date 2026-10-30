@@ -1,0 +1,129 @@
+REPORT - HYPOTHESIS #54: UNSEEN-ASSET KELTNER CHANNEL BREAKOUT REPLICATION (4h / D1 17:00 ET)
+Generated: 2026-09-24T10:24:53.945428+00:00  |  OVERALL VERDICT: FAIL
+Mechanics frozen verbatim from #51 (via #50): prior 4h Close beyond KC(EMA29 +/- 2.77*ATR29(4h)) with D1
+EMA(50) direction (17:00 ET anchors from the continuous 1h grid); entry at 4h signal-bar open; initial SL =
+entry -/+ max(|Entry-EMA29|, 1.5*ATR29) ratcheted to the EMA29 baseline at each 4h close (exit checks
+before ratchet); honest gap fills; worst-case same-bar stop; continuous forward-filled grids; one
+continuous walk per instrument, blocks assigned by ENTRY bar wall date (CAL [2020-01-01, 2023-12-31] /
+OOS [2024-01-01, present] - REPORTING ONLY). Gates on the FULL tape: the entire tape is unseen data for
+this mechanic. Costs are owner-estimated floors (no ask side in the M1 BID exports): USTECH 1.0 pt,
+BTCUSD 15.0 u, ETHUSD 2.0 u RT.
+
+=== USTECH (cost floor 1.0 points RT, owner estimate) ===
+1. DATA: 2936100 M1 rows -> 1h base 58992 (9791 synthetic = 16.6%) / 14749 4h bars / 2459 D1 anchors, 2019-12-31 16:00:00 .. 2026-09-23 16:00:00
+   tape sha256 152f9c995b370e53...
+2. FUNNEL: armed 4h bars=14448  D1 direction bull/bear=9924/4524
+   breakouts (prior close beyond band): up=1587 down=1041
+   direction-aligned candidates L/S=1437/648  ignored-while-open=2085  EXECUTED=241  (CAL 141 / OOS 100)
+3. FULL-TAPE NET ECONOMICS (points, GATED): mean=-1.114/trade  median=-47.170  total=-268.6  win=40.7%  Net Sharpe=-0.066  (gross mean=-0.114 vs floor 1.0)
+   excursion asymmetry: mean MFE=294.99 vs mean MAE=180.95  (MFE/MAE=1.63)
+   sides: LONG: n=147 mean=41.86  SHORT: n=94 mean=-68.32
+   exit mix: {'SL': 239, 'SL_GAP': 1, 'FORCED_EOD': 1}
+   year-by-year net (full tape):
+      2020: n=  29  total=     245.8  mean=   8.478
+      2021: n=  36  total=    -880.0  mean= -24.443
+      2022: n=  44  total=   -1901.4  mean= -43.213
+      2023: n=  32  total=    1411.8  mean=  44.120
+      2024: n=  34  total=    3002.3  mean=  88.304
+      2025: n=  38  total=      24.1  mean=   0.635
+      2026: n=  28  total=   -2171.4  mean= -77.550
+4. CAL 2020-01-01..2023-12-31 (reporting only, absorbs warmup)
+   n=141  mean=-7.969/trade  total=-1123.6  win=41.1%  Net Sharpe=-0.604
+   sides: LONG: n=86  SHORT: n=55   exit mix: {'SL': 141}
+   yearly: 2020: +245.8; 2021: -880.0; 2022: -1901.4; 2023: +1411.8
+4. OOS 2024-01-01..present (reporting only)
+   n=100  mean=8.551/trade  total=855.1  win=40.0%  Net Sharpe=0.401
+   sides: LONG: n=61  SHORT: n=39   exit mix: {'SL': 98, 'SL_GAP': 1, 'FORCED_EOD': 1}
+   yearly: 2024: +3002.3; 2025: +24.1; 2026: -2171.4
+5. CAL -> OOS DEGRADATION: mean/trade -7.969 -> 8.551 (+16.520), Sharpe -0.604 -> 0.401 (+1.005)
+6. GATES (full tape, independent, frozen in GATE_UNSEEN_KC.txt):
+   G-REP1 executed >= 30          :   241          -> PASS
+   G-REP2 Net Sharpe > 0           :    -0.066    -> FAIL
+   G-REP3 MBB P(mean<=0) <= 0.20   :    0.5816    -> FAIL  (block=5, 10000 resamples, seed 20261002)
+   USTECH VERDICT: FAIL
+
+=== BTCUSD (cost floor 15.0 price units RT, owner estimate) ===
+1. DATA: 3260989 M1 rows -> 1h base 58992 (4636 synthetic = 7.9%) / 14749 4h bars / 2459 D1 anchors, 2019-12-31 16:00:00 .. 2026-09-23 16:00:00
+   tape sha256 b9b4f43ad75466a9...
+2. FUNNEL: armed 4h bars=14448  D1 direction bull/bear=7794/6654
+   breakouts (prior close beyond band): up=1101 down=646
+   direction-aligned candidates L/S=969/518  ignored-while-open=1487  EXECUTED=172  (CAL 94 / OOS 78)
+3. FULL-TAPE NET ECONOMICS (price units, GATED): mean=328.024/trade  median=-487.607  total=56420.2  win=34.3%  Net Sharpe=1.585  (gross mean=343.024 vs floor 15.0)
+   excursion asymmetry: mean MFE=2941.41 vs mean MAE=1562.98  (MFE/MAE=1.88)
+   sides: LONG: n=102 mean=429.45  SHORT: n=70 mean=180.23
+   exit mix: {'SL': 169, 'SL_GAP': 3}
+   year-by-year net (full tape):
+      2020: n=  25  total=    9878.7  mean= 395.148
+      2021: n=  26  total=    4463.8  mean= 171.686
+      2022: n=  21  total=    8912.7  mean= 424.414
+      2023: n=  22  total=   14181.2  mean= 644.600
+      2024: n=  27  total=   22180.5  mean= 821.500
+      2025: n=  30  total=   -8478.9  mean=-282.630
+      2026: n=  21  total=    5282.2  mean= 251.532
+4. CAL 2020-01-01..2023-12-31 (reporting only, absorbs warmup)
+   n=94  mean=398.260/trade  total=37436.4  win=37.2%  Net Sharpe=2.647
+   sides: LONG: n=59  SHORT: n=35   exit mix: {'SL': 93, 'SL_GAP': 1}
+   yearly: 2020: +9878.7; 2021: +4463.8; 2022: +8912.7; 2023: +14181.2
+4. OOS 2024-01-01..present (reporting only)
+   n=78  mean=243.381/trade  total=18983.8  win=30.8%  Net Sharpe=0.935
+   sides: LONG: n=43  SHORT: n=35   exit mix: {'SL': 76, 'SL_GAP': 2}
+   yearly: 2024: +22180.5; 2025: -8478.9; 2026: +5282.2
+5. CAL -> OOS DEGRADATION: mean/trade 398.260 -> 243.381 (-154.878), Sharpe 2.647 -> 0.935 (-1.711)
+6. GATES (full tape, independent, frozen in GATE_UNSEEN_KC.txt):
+   G-REP1 executed >= 30          :   172          -> PASS
+   G-REP2 Net Sharpe > 0           :     1.585    -> PASS
+   G-REP3 MBB P(mean<=0) <= 0.20   :    0.0655    -> PASS  (block=5, 10000 resamples, seed 20261002)
+   BTCUSD VERDICT: PASS
+
+=== ETHUSD (cost floor 2.0 price units RT, owner estimate) ===
+1. DATA: 3375260 M1 rows -> 1h base 58992 (2731 synthetic = 4.6%) / 14749 4h bars / 2459 D1 anchors, 2019-12-31 16:00:00 .. 2026-09-23 16:00:00
+   tape sha256 5646970f33c8378f...
+2. FUNNEL: armed 4h bars=14448  D1 direction bull/bear=7800/6648
+   breakouts (prior close beyond band): up=1090 down=686
+   direction-aligned candidates L/S=935/543  ignored-while-open=1478  EXECUTED=170  (CAL 96 / OOS 74)
+3. FULL-TAPE NET ECONOMICS (price units, GATED): mean=15.991/trade  median=-14.004  total=2718.5  win=42.4%  Net Sharpe=1.512  (gross mean=17.991 vs floor 2.0)
+   excursion asymmetry: mean MFE=180.56 vs mean MAE=78.87  (MFE/MAE=2.29)
+   sides: LONG: n=93 mean=29.64  SHORT: n=77 mean=-0.49
+   exit mix: {'SL': 164, 'SL_GAP': 6}
+   year-by-year net (full tape):
+      2020: n=  21  total=     196.5  mean=   9.357
+      2021: n=  24  total=      42.0  mean=   1.750
+      2022: n=  26  total=     703.8  mean=  27.068
+      2023: n=  25  total=     132.5  mean=   5.301
+      2024: n=  27  total=     433.3  mean=  16.049
+      2025: n=  27  total=    1180.0  mean=  43.702
+      2026: n=  20  total=      30.4  mean=   1.522
+4. CAL 2020-01-01..2023-12-31 (reporting only, absorbs warmup)
+   n=96  mean=11.196/trade  total=1074.8  win=42.7%  Net Sharpe=1.176
+   sides: LONG: n=59  SHORT: n=37   exit mix: {'SL': 95, 'SL_GAP': 1}
+   yearly: 2020: +196.5; 2021: +42.0; 2022: +703.8; 2023: +132.5
+4. OOS 2024-01-01..present (reporting only)
+   n=74  mean=22.212/trade  total=1643.7  win=41.9%  Net Sharpe=1.873
+   sides: LONG: n=34  SHORT: n=40   exit mix: {'SL': 69, 'SL_GAP': 5}
+   yearly: 2024: +433.3; 2025: +1180.0; 2026: +30.4
+5. CAL -> OOS DEGRADATION: mean/trade 11.196 -> 22.212 (+11.017), Sharpe 1.176 -> 1.873 (+0.696)
+6. GATES (full tape, independent, frozen in GATE_UNSEEN_KC.txt):
+   G-REP1 executed >= 30          :   170          -> PASS
+   G-REP2 Net Sharpe > 0           :     1.512    -> PASS
+   G-REP3 MBB P(mean<=0) <= 0.20   :    0.0934    -> PASS  (block=5, 10000 resamples, seed 20261002)
+   ETHUSD VERDICT: PASS
+
+OVERALL VERDICT: FAIL (requires all three instruments to pass G-REP1..G-REP3 independently on the full tape)
+
+HONESTY NOTES
+- True unseen-instrument replication: mechanics/parameters copied verbatim from #51 (frozen from #50);
+  nothing on these tapes informed the original XAUUSD result. The full-tape gates are first-and-only
+  touch, hence in-sample for these tapes by construction; the CAL/OOS split and year signs are regime
+  diagnostics, not gates.
+- Cost floors are OWNER ESTIMATES (USTECH 1.0 pt / BTCUSD 15.0 u / ETHUSD 2.0 u RT): the M1 BID exports
+  carry no ask side, so no spread distribution exists. Gross means are printed next to net everywhere;
+  a verdict decided inside the floor-uncertainty band is flagged by |gross mean| <~ floor and does not
+  license re-runs with friendlier floors (SPEC 9.2).
+- tick_volume = 0 on all tapes (schema placeholder, vendor exports carry no volume); never used by the
+  mechanics.
+- Continuous forward-fill consequences declared as in #50/#51 (EMA flattens, Wilder ATR decays, flat
+  closes cannot print breakouts, D1 direction persists across flats): mostly moot on 24/7 BTCUSD/ETHUSD
+  printing; binding on USTECH weekends (327 closures in the onboarding census). No bar-skipping fix.
+- Single frozen parameterization; no optimization, no re-runs; sides, years, blocks and instruments
+  reported as run. MFE/MAE are exploratory descriptors, never results. Phase 2 (MT5 execution) only on
+  overall PASS plus standard walk-forward discipline (>=150 trades, year-by-year sign agreement).

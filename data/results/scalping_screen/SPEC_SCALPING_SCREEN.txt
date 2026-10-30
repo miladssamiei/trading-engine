@@ -1,0 +1,364 @@
+SPEC — SCALPING / CLASSICAL TECHNICAL-INDICATOR SCREENING FUNNEL ON US500-TICK
+Hypothesis #14. Status: SPEC written 2026-09-03 BEFORE any code exists.
+
+Design: ONE multi-arm screening funnel, not N separate SPECs. A fixed
+universe of base patterns (sec 2), each crossed with a fixed filter set
+(sec 3), evaluated through a three-stage pre-declared funnel (sec 7):
+Stage A exit-free signal quality -> Stage B in-sample R:R grid ->
+Stage C walk-forward confirmation of survivors -> Stage D MT5 Model=4
+execution check of Stage-C survivors only. Every combination's fate is
+recorded pass or fail. This is the SPEC_CALENDAR_EFFECTS umbrella
+pattern (several tests under one pre-declared, multiple-testing-aware
+protocol), scaled up; it is NOT 50 independent walk-forwards.
+
+NON-NEGOTIABLE EXECUTION RULE: every MT5 execution step in this study
+uses Model=4 ("every tick based on real ticks"), NEVER Model=0. The
+project has proved Model=0 inflates results materially (tick-model
+revalidation + children revalidation, 2026-08/09); re-introducing it
+here would invalidate the study. Offline Python work uses the verified
+real-tick-derived M1/M5 exports (sec 1).
+
+
+SECTION 1 — DATA, UNIVERSE, COSTS, CONVENTIONS
+
+1.1 Instrument US500-tick (custom symbol). Window 2021-01-03 ..
+2026-04-30. Time: epoch UTC -> America/New_York for wall minutes
+(project convention).
+1.2 Bars: M5 export data/results/orb_2021_present/us500tick_m5.csv
+(364,330 bars, terminal-native, verified in prior studies) and M1
+export data/results/vwap_2021_2026/us500tick_m1.csv (1,791,504 bars,
+verified full-range). Signal indicators are computed on the pattern's
+own TF (sec 2); ALL exit-path reconstruction (Stage A excursions and
+Stage B/C exits) walks the M1 tape for intrabar fidelity, per the
+SP2L/Bollinger-MR discipline.
+1.3 Cash day = NY date whose 09:30 (wall 570) bar exists. The
+portfolio day universe is the ORB session-day universe
+data/results/orb_2021_present/mt5_days.csv (session_open>0 or
+prev_close>0; 1,369 days), used for zero-filled daily PnL.
+1.4 Costs (frozen, per round trip): PRIMARY 0.51 pt (the Model=4
+confirmed real median spread, children-revalidation finding);
+SECONDARY/informational 0.80 pt (legacy). Binding gates use 0.51 pt;
+0.80 pt numbers are reported alongside for continuity. $1/pt/lot,
+1 lot, $10,000 base, no compounding.
+1.5 Sharpe = mean/std(ddof=1) x sqrt(252) on zero-filled daily PnL
+over the 1,369-day universe. maxDD_pct on cumulative daily PnL vs
+$10,000. Years are NY entry-date years; 2026 is the Jan-Apr partial.
+
+
+SECTION 2 — BASE PATTERNS (exact mechanical definitions, frozen)
+
+General rules for ALL patterns:
+2.0.1 Indicators run on the CONTINUOUS tape (no per-session reset;
+overnight bars feed them), seeded at the dataset start; the first 200
+bars of the dataset are excluded from signal generation (warmup).
+Formulas: EMA recursive alpha=2/(span+1); SMA simple rolling mean;
+RSI(14) Wilder; MACD(12,26,9): line=EMA12-EMA26, signal=EMA9(line),
+hist=line-signal; Stochastic slow %K(14,3,3): raw
+%K=100*(c-LL14)/(HH14-LL14) (degenerate HH==LL bars excluded from
+signals, tallied), slow %K = SMA3(raw %K); ATR(14) Wilder.
+2.0.2 Timeframe assignment (frozen, not tuned): P1 is tested on BOTH
+M1 and M5 as sub-variants (per the task definition); P2-P8 are tested
+on M5 only. Exit paths always walk M1.
+2.0.3 Entry fill conventions are part of each pattern definition
+below. Close-fill = signal-bar close, execution at the first M1 bar
+boundary at/after the signal-bar end. Next-open fill = open of the
+first M1 bar at/after the next pattern-TF bar's start.
+2.0.4 Signals are sampled per pattern independently; no cross-pattern
+interaction, no occupancy modeling at Stage A/B (declared
+approximation, same as the VWAP R:R Phase 1; Stage C adds occupancy,
+sec 7.3).
+
+P1 EMA CROSS SCALP. EMA(8) vs EMA(21) on the pattern TF. Cross up at
+bar t: EMA8[t] > EMA21[t] AND EMA8[t-1] <= EMA21[t-1]; cross down
+mirrored (strict inequality on the fresh bar only). Direction = cross
+direction. ENTRY: cross bar's CLOSE (close-fill). Sub-variants: P1a =
+M1, P1b = M5.
+
+P2 PIN BAR / HAMMER REVERSAL (M5). Trend side = sign of
+close[t-1] - close[t-6] (5-bar net move; zero => no signal).
+Bearish pin (short): trend up; upper wick = high - max(open,close) >=
+2 x body, body = |close-open| > 0; anti-degeneracy: body >=
+0.10 x (high-low) and high-low > 0; close[t] < high[t-1] AND
+close[t] > low[t-1] (closes back inside the prior bar's range).
+Bullish pin mirrored (lower wick, trend down, close[t] > low[t-1] AND
+close[t] < high[t-1]). ENTRY: next-bar open (next-open fill), reversal
+direction.
+
+P3 ENGULFING REVERSAL (M5). Bearish: prior bar up (close[t-1] >
+open[t-1]), current bar down (close[t] < open[t]), both bodies > 0,
+and current body engulfs prior body: open[t] >= close[t-1] AND
+close[t] <= open[t-1]. Bullish mirrored (prior down, current up,
+open[t] <= close[t-1] AND close[t] >= open[t-1]). ENTRY: next-bar
+open (next-open fill).
+
+P4 N-BAR RANGE BREAKOUT (M5). Long: close[t] > max(high[t-N .. t-1]);
+short: close[t] < min(low[t-N .. t-1]); strict inequality. ENTRY:
+two fill sub-variants — (a) breakout bar's CLOSE (close-fill),
+(b) next-bar open (next-open fill). Sub-variants: P4a = N=10 close,
+P4b = N=10 next-open, P4c = N=20 close, P4d = N=20 next-open.
+
+P5 RSI DIVERGENCE (M5). Pivot machinery (shared by P5-P7): a pivot
+high is bar i with high[i] strictly greater than highs at i-2, i-1,
+i+1, i+2 (ties disqualify); it is CONFIRMED at the close of bar i+2.
+At the confirmation bar t of a new pivot high P2, with P1 the previous
+confirmed pivot high: bearish regular divergence iff high[P2] >
+high[P1] AND RSI14[P2] < RSI14[P1] (oscillator value AT the price
+pivot bar). Signal fires at bar t close; each confirmed pivot pair is
+evaluated exactly once. Pivot lows mirrored (bullish divergence). If a
+bearish and a bullish signal confirm on the same bar, skip the bar
+(conflict, tallied). ENTRY: confirmation bar's CLOSE (close-fill).
+
+P6 MACD DIVERGENCE (M5). Identical pivot machinery; oscillator =
+MACD LINE (12,26,9) at the pivot bars. Bearish: high[P2] > high[P1]
+AND MACDline[P2] < MACDline[P1]. Bullish mirrored on pivot lows.
+ENTRY: confirmation bar's close.
+
+P7 STOCHASTIC DIVERGENCE (M5). Identical pivot machinery; oscillator
+= slow %K(14,3,3) at the pivot bars. Same comparison. ENTRY:
+confirmation bar's close.
+
+P8 SMA/EMA MEAN-REVERSION TOUCH (M5). MA = SMA(50) (sub-variant P8a)
+or EMA(50) (sub-variant P8b), continuous tape. Extension above =
+max(high[j] - MA[j]) over j in [t-12, t-1] >= 1.0 x ATR14[t-1].
+First touch: close[t-1] > MA[t-1] AND low[t-1] > MA[t-1] (previous bar
+did not touch) AND low[t] <= MA[t]. All conditions true at bar t =>
+SHORT at bar t's close (reversion direction: extended above, price
+pulled back to the mean => fade the prior extension downward).
+Bullish mirrored (extension below, close[t-1] < MA[t-1], high[t-1] <
+MA[t-1], high[t] >= MA[t] => LONG at close). ENTRY: touch bar's CLOSE.
+DISTINCTNESS FLAG (required by the task): P8 is mechanically different
+from VWAP MR (#2: VWAP-anchored z-score bands on M1, no MA touch
+condition), from Bollinger MR (#9: 2-sigma band-width extremity on
+M15, no bands here), and from trend-pullback (#6: that study BOUGHT
+pullbacks in the trend direction under a trend filter; P8 FADES the
+extension in the reversion direction with no trend filter, no VWAP,
+no bands — a single naked moving-average touch). No overlap in
+mechanism with any previously tested rule set.
+
+
+SECTION 3 — FILTER VARIANTS (applied identically to every pattern)
+
+Evaluated on the PATTERN's TF at the SIGNAL bar's close (completed
+bar; P2/P3/P4(next-open) use the signal bar, not the fill bar):
+F0 NO FILTER (raw pattern) — baseline.
+F1 RSI FILTER: long requires RSI14 < 70; short requires RSI14 > 30
+(the signal must not fire into an already-overbought/oversold extreme
+AGAINST the trade direction).
+F2 MACD FILTER: long requires MACD hist > 0; short requires
+MACD hist < 0 (trend-agreement).
+F3 RSI + MACD COMBINED: F1 AND F2 simultaneously.
+
+Redundancy rules (pre-declared, per the task): P5 (RSI divergence)
+SKIPS arm F1 (its own oscillator filter would be degenerate); P6
+(MACD divergence) SKIPS arm F2; F3 is retained for both because it
+embeds the OTHER oscillator's condition (P5+F3 = MACD-agree plus a
+non-degenerate RSI extreme guard; P6+F3 = RSI guard plus a
+histogram-sign cross-check that is distinct from line-divergence).
+P7 (stochastic) runs all four arms.
+
+Stage-A population (frozen): P1a,P1b x {F0,F1,F2,F3} = 8; P2 x4 = 4;
+P3 x4 = 4; P4a..P4d x4 = 16; P5 x{F0,F2,F3} = 3; P6 x{F0,F1,F3} = 3;
+P7 x4 = 4; P8a,P8b x4 = 8. TOTAL = 50 pattern+filter combinations.
+
+
+SECTION 4 — MONEY-MANAGEMENT VARIANTS (Stage-B survivors only)
+
+All exits walk the M1 tape bar by bar with the SP2L/Bollinger-MR
+conventions: first-crossing order decides; same-bar both-level
+ambiguity => STOP-LOSS FIRST (conservative); bar-open gap through a
+level => fill at the open; forced exit at the OPEN of the 15:55 M1 bar
+(wall 955; the strategy's life ends 15:55:00); if the tape ends
+earlier, exit at the last available bar's close (tallied); no
+overnight holds. ATR = ATR14 at the signal bar (pattern TF), FROZEN
+for the trade's life. R = stop distance = stop_mult x ATR.
+
+M0 FIXED SL/TP (baseline): stop at stop_mult x ATR, target at
+target_mult x ATR (sec 6 grid). No modification.
+M1 PARTIAL EXIT: close 50% of the position at +1.0R; move stop to
+breakeven on the remainder; remainder runs to the full target (M0
+target). Same-bar pessimism: on a bar that both touches 1R and
+violates the ORIGINAL stop, the stop wins first (no partial); on a bar
+that touches 1R and then (unknowably) returns to entry, book the
+partial at 1R and exit the remainder at breakeven on that same bar.
+PnL points = 0.5 x (+R) + 0.5 x (target | 0 | -stop remainder cases
+per the path).
+M2 RISK-FREE AFTER 1R: no partial; once +1.0R is touched, stop moves
+to breakeven (same-bar pessimism as M1); full position runs to the
+target.
+M3 ATR-TRAILING STOP: no target. Initial stop = cell stop; trailing
+stop = best extreme (best M1 HIGH for longs / LOW for shorts over
+completed bars since entry, excluding the current bar) minus/plus
+1.5 x ATR(frozen), applied from the bar AFTER the extreme is
+completed; effective stop = max(initial, trail) for longs (min for
+shorts); trail only moves in the trade's favor. CELL COLLAPSE: the
+target dimension is inert for M3, so M3 has 4 distinct cells (stop in
+{0.50, 0.75, 1.00, 1.50}); the 4 target rows per stop are reported as
+duplicates and marked, so the effective cell space is 16 + 16 + 16 + 4
+= 52 distinct cells per combination.
+
+
+SECTION 5 — SESSION RESTRICTION (frozen)
+
+PRIMARY (binding): a signal is eligible only if its EXECUTION
+timestamp falls in the union window [08:00, 11:30) NY wall minutes
+(= London-NY overlap 08:00-11:00 UNION NY cash open arm 09:30-11:30;
+the union is a single pre-declared window, not two arms), on a cash
+day. Entries after 11:30 never occur; open trades run to their levels
+or the 15:55 forced exit.
+DESCRIPTIVE (not gated): signal counts and mean direction-native
+excursion by window — [08:00,09:30), [09:30,11:30), the union, full
+cash session [09:30,16:00), and full 24h — for the F0 arm of each
+sub-variant, showing how much of any apparent edge is
+session-dependent (regime-rotation and session-transfer context).
+
+
+SECTION 6 — R:R MATRIX (uniform output structure, frozen)
+
+For every Stage-A survivor: stop in {0.50, 0.75, 1.00, 1.50} x ATR and
+target in {1.00, 1.50, 2.00, 3.00} x ATR => 16 M0 cells (Stage B);
+Stage-B survivors additionally get M1/M2/M3 cells over the same grid
+(M3 collapsed, sec 4) as Stage-C input. Same grid structure as the
+VWAP trend-pullback and Bollinger MR studies.
+
+Bar-path reconstruction per sec 4. Validation invariants asserted on
+every cell (vwap-trend convention): stop_loss outcome => adverse
+excursion >= stop distance; win => favorable excursion >= target;
+forced exit => neither level crossed on the walk.
+
+One master CSV (matrix_master.csv), one consistent schema, every row
+directly comparable:
+pattern | filter | MM_variant | stop_ATR | target_ATR | n_trades |
+win_rate | expectancy_pts | expectancy_after_cost | Sharpe |
+max_DD_pct | best_year_share_pct | years_positive_of_5
+(+ id columns, expectancy_after_cost_legacy08, and source_stage).
+expectancy_pts = gross mean PnL in points per trade (before cost);
+expectancy_after_cost = expectancy_pts - 0.51; win_rate = share of
+trades with net PnL > 0 after the 0.51 pt cost; Sharpe/max_DD on
+zero-filled daily PnL (sec 1.5). Sorted by expectancy_after_cost
+descending. Per-pattern pivots matrix_<pattern>.csv for inspection.
+
+
+SECTION 7 — THREE-STAGE FUNNEL (gates pre-declared)
+
+7.1 STAGE A — exit-free signal quality, per combination:
+Direction-native MFE/MAE from the execution timestamp over the next
+60 minutes of M1 bars (window truncated at data end if shorter;
+executions are <= 11:30 so the 15:55 boundary is never binding).
+First-bar E-XTM convention (SP2L): fill-bar MFE = max(close - entry,
+0) for longs (mirrored shorts), MAE = max(entry - low, 0); full
+high/low on subsequent bars. Threshold set, BINDING (ATR-scaled, per
+the task's session-scaled-equivalent clause, because M1 and M5 ATRs
+differ ~2x and fixed % thresholds would straddle different quantiles
+per TF): t in {0.50, 0.75, 1.00} x ATR14(signal bar, pattern TF).
+DESCRIPTIVE alongside: fixed t in {0.10, 0.15, 0.20}% of entry.
+Statistic e_i = (MFE_i - MAE_i) / ATR14.
+
+GATE A1 (all three clauses required):
+  (i) n >= 150 eligible signals;
+  (ii) count(MFE >= t) > count(MAE >= t) at EVERY binding threshold;
+  (iii) day-block bootstrap P(mean(e) <= 0) <= 0.20, where the
+       bootstrap resamples DAY MEANS with replacement (10,000 draws,
+       seed 20260903; the Bollinger-MR gate convention), slightly
+       looser than the usual 0.10-0.40 range because this is a
+       screening stage; tightened again at Stage C.
+Combinations failing A1 are recorded in funnel_master.csv as DROP-A
+and DROPPED — no R:R grid is run for them.
+
+7.2 STAGE B — in-sample R:R grid (M0 only) for every Stage-A survivor,
+full window 2021-2026, no occupancy (declared approximation).
+
+GATE B1: at least one of the 16 cells satisfies ALL of:
+  (i) expectancy_after_cost > 0 (0.51 pt cost);
+  (ii) STRICT NEIGHBORHOOD (vwap-trend convention): the cell AND every
+       existing orthogonal grid neighbor (edge cells have fewer) has
+       expectancy_after_cost > 0;
+  (iii) n_trades >= 150.
+Combinations failing B1 entirely are recorded as DROP-B and DROPPED
+(the 16-cell grid is still fully reported in matrix_master.csv).
+
+7.3 STAGE C — walk-forward confirmation (Python only) for every
+Stage-B survivor. Cell space = the 52 distinct cells (sec 4). Folds:
+burn-in 2021; 9 non-overlapping half-year folds 2022H1 .. 2026H1 (the
+project convention). At each fold boundary select the cell with the
+best trailing expectancy_after_cost on ALL data strictly before the
+fold (>= 20 trailing trades, else the DEFAULT cell = M0 / stop 1.00 /
+target 1.50, fixed a priori; tie-break: higher trailing expectancy,
+then MM order M0<M1<M2<M3, then lower stop, then lower target). Trade
+the selected cell through the fold. OCCUPANCY: one position at a time;
+signals while holding are skipped, not queued (the trend-pullback
+Step-3 convention; exits are same-day so trades never straddle folds).
+Walk-forward result = stitched selected folds.
+
+GATE C1: WF Sharpe > 0 AND >= 150 WF trades.
+GATE C2: >= 4 of 5 years (2022, 2023, 2024, 2025, 2026-partial) net
+positive AND no year > 60% of total net (the concentration clause
+applies only when total net > 0).
+GATE C3: WF mean expectancy_after_cost (0.51 pt, BINDING) > 0; the
+0.80 pt legacy number reported alongside, non-binding.
+Fail any C gate => DROP-C, stop, documented reason.
+
+7.4 STAGE D — MT5 execution check, MODEL=4 ONLY, Stage-C survivors
+only. For each survivor: build the minimal native EA implementing the
+pattern + filters + the FROZEN per-fold cell schedule from Stage C
+(embedded as constants, the regime-rotation frozen-children pattern),
+reusing the ORB/SP2L conventions (0.01-grid NormPrice, session/DST
+handling, agent CSV export). Run Model=4 batches over the same
+2022-01..2026-04 walk-forward window; kill terminal64/metatester64
+before/after; reconcile against the Python WF reference with the
+project's standard tolerance bands.
+
+GATE D1: MT5 WF Sharpe within +/- 0.15 of the Python WF reference.
+GATE D2: per-trade reconciliation agreement >= 85% (SP2L's own bar;
+scalping patterns are expected to show similar real-wick sensitivity),
+every residual classified.
+Model=0 is used NOWHERE in this study. If no combination reaches
+Stage D, Stage D is not run and the funnel records that fact — an
+empty Stage D is a complete outcome.
+
+
+SECTION 8 — HONESTY AND ANTI-LEAK RULES
+
+8.1 All thresholds, grids, filters, MM variants, session windows, and
+gates above are frozen BEFORE Stage A runs. No pattern-specific
+threshold tuning after seeing results. No re-runs with new constants.
+8.2 Every one of the 50 combinations appears in funnel_master.csv with
+its stage, status (PASS / DROP-A / DROP-B / DROP-C / DROP-D), and
+reason — no silent pruning of unfavorable results; matrix_master.csv
+reports ALL 16 cells for every Stage-B combination, not just the best.
+8.3 Multiple-testing statement (declared up front): 50 combinations at
+Stage A (bootstrap p <= 0.20 => ~10 false passes expected by chance);
+Stage B tests up to 50 x 16 = 800 in-sample cells; Stage C selects
+among up to 52 cells per combination. Some passes at each stage are
+statistically expected under the null; any single narrow-margin
+survivor must be treated with skepticism, and wide-margin survivors
+are prioritized over narrow ones in the report (margin = distance to
+gate boundaries and bootstrap percentile, reported per survivor).
+8.4 Cost model: 0.51 pt binding, 0.80 pt informational (sec 1.4).
+8.5 A funnel where nothing survives Stage C is a complete, valuable,
+EXPECTED deliverable: 12 of 15 prior hypotheses failed, and the two
+survivors lost 50-78% of their edge under real-tick execution. The
+report will say so plainly if it happens.
+8.6 This SPEC and the GATE file are never edited after numbers are
+seen; corrections/re-measurements would go under a NEW study name.
+
+
+SECTION 9 — ARTIFACTS (data/results/scalping_screen/)
+
+SPEC_SCALPING_SCREEN.txt, GATE_SCALPING_SCREEN.txt (verbatim gate
+extraction, written before any script runs), funnel_master.csv,
+matrix_master.csv (+ matrix_<pattern>.csv), stage_a_descriptive.csv,
+stage_c_survivors.csv (+ stage_c_all.csv), signals/ per-combination
+signal+outcome files, stage_d_reconciliation.csv (survivors only),
+REPORT_SCALPING_SCREEN.txt (1-2 page executive summary readable
+without opening any CSV). PROGRESS.md hooks in the existing style:
+"scalping screen - SPEC/GATE pre-declared", "scalping screen - Stage
+A/B run", "scalping screen - Stage C walk-forward", "scalping screen -
+Stage D MT5 Model=4 check (survivors only)", "scalping screen - final
+verdict".
+
+Scripts: evaluate/scalping_screen_stage_ab.py (Stages A+B),
+evaluate/scalping_screen_stage_c.py (Stage C), Stage-D EA +
+reconciliation scripts only if survivors exist.
+
+
+END OF SPEC — frozen 2026-09-03, before any study code was written.

@@ -1,0 +1,96 @@
+XAUUSD H70 NATIVE FLOATING-EQUITY PACE AUDIT
+{
+  "source_trades_sha256": "17d0f1fc14c716c9cc428c6c4283bc13528ce28c4e1853ad4715de00df34107c",
+  "spec_sha256": "4f3d26668bb7ec6abd266423c25df1612165e088c5444dca3700b80b387ade80",
+  "gate_sha256": "28acb11b384a4a246880aa3387c899f608d70c7c1e7fc9b34480eba4204a5f29",
+  "source_files": [
+    {
+      "file": "C:\\Users\\Milad\\download\\xauusd-tick-2020-01-01-2022-12-31.csv",
+      "sha256": "6fde75c46e414dbf0d22c9e7d28dd45a97882954e98596ac2bffc21753e906b3",
+      "rows_inventory": 160134751
+    },
+    {
+      "file": "C:\\Users\\Milad\\download\\xauusd-tick-2023-01-01-2024-12-31.csv",
+      "sha256": "aff3eb622f8c2834ae90a9b9564b18a8ee372c4e0446437cc6cbc4b46c87f99a",
+      "rows_inventory": 91861753
+    },
+    {
+      "file": "C:\\Users\\Milad\\download\\patches\\xauusd-tick-2024-12-31-2025-01-01.csv",
+      "sha256": "3af7e25a69aa284ec74f39dc310e7961084df6bc74d6a6a44a3d5f0760cff54d",
+      "rows_inventory": 170903
+    },
+    {
+      "file": "C:\\Users\\Milad\\download\\xauusd-tick-2025-01-01-2026-09-01T22.csv",
+      "sha256": "5cdbe849c42b574f8fcbff5f278159460468423505ecd06e71af4120ee2bb429",
+      "rows_inventory": 133315718
+    }
+  ],
+  "trades": 321,
+  "unresolved": 1,
+  "intervals_without_ticks": 0,
+  "minimum_path_ticks": 5574,
+  "floating_vs_realized_violations": 0,
+  "worst_float_r_min": -1.1851666388514048,
+  "worst_float_r_median": -0.3179407379603011,
+  "summary": [
+    {
+      "risk_pct": 0.1,
+      "starts": 267,
+      "pass": 0,
+      "breach": 0,
+      "timeout": 267,
+      "pass_rate": 0.0,
+      "breach_rate": 0.0,
+      "median_days_to_pass": null
+    },
+    {
+      "risk_pct": 0.5,
+      "starts": 267,
+      "pass": 0,
+      "breach": 0,
+      "timeout": 267,
+      "pass_rate": 0.0,
+      "breach_rate": 0.0,
+      "median_days_to_pass": null
+    },
+    {
+      "risk_pct": 1.0,
+      "starts": 267,
+      "pass": 27,
+      "breach": 0,
+      "timeout": 240,
+      "pass_rate": 0.10112359550561797,
+      "breach_rate": 0.0,
+      "median_days_to_pass": 139.0
+    },
+    {
+      "risk_pct": 1.5,
+      "starts": 267,
+      "pass": 135,
+      "breach": 25,
+      "timeout": 107,
+      "pass_rate": 0.5056179775280899,
+      "breach_rate": 0.09363295880149813,
+      "median_days_to_pass": 118.0
+    },
+    {
+      "risk_pct": 2.0,
+      "starts": 267,
+      "pass": 192,
+      "breach": 44,
+      "timeout": 31,
+      "pass_rate": 0.7191011235955056,
+      "breach_rate": 0.1647940074906367,
+      "median_days_to_pass": 104.5
+    }
+  ],
+  "gates": {
+    "G-FP1": true,
+    "G-FP2": true,
+    "G-FP3": false,
+    "G-FP4": false
+  },
+  "verdict": "FAIL",
+  "caveat": "Frozen H70 quote execution still FAIL; this is native-quote floating-risk diagnosis, not executable FTMO evidence."
+}
+OVERALL VERDICT: FAIL

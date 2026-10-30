@@ -1,0 +1,6 @@
+G-NA1: At least 150 executed gated trades on at least 150 distinct New York entry dates.
+G-NA2: Strictly positive gated mean extra-cost-stress net US500 points per trade.
+G-NA3: Date-bootstrap P(mean fixed-spread net <= 0) at most 0.05, 10000 resamples, seed 20261008.
+G-NA4: Strictly positive fixed-spread net US500 point totals in each complete gated year 2024 and 2025.
+G-NA5: Every executed trade exits on its New York entry date before 16:00 and has positive initial planned-stop risk distance.
+G-NA6: In the gated 180-day Challenge proxy at 1% planned risk, at least 70% of eligible starts pass and at most 10% breach a close-based floor.

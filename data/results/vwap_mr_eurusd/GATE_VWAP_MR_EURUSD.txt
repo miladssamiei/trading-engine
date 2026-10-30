@@ -1,0 +1,23 @@
+GATE_VWAP_MR_EURUSD.txt
+
+Frozen 2026-09-22 BEFORE any Phase-1 code exists (verbatim extraction of
+SPEC_VWAP_MR_EURUSD.txt section 6). Evaluated only by
+evaluate/vwap_mr_eurusd_phase1.py on data/results/vwap_mr_eurusd/.
+
+G-VW1 (sample size)
+  Total session-valid signals >= 150.
+  PASS/FAIL: __ (filled by the Phase-1 run)
+
+G-VW2 (directional excursion quality, aggregate, strict)
+  Aggregate mean MFE > mean MAE (strict) in pips.
+  PASS/FAIL: __ (filled by the Phase-1 run)
+
+G-VW3 (day-block stability)
+  Bootstrap P(pooled mean(MFE - MAE) <= 0) <= 0.20, where the bootstrap
+  resamples NY dates with replacement (10,000 resamples, one draw of
+  numpy.random.default_rng(20260921)) and the statistic is the pooled mean
+  of (MFE - MAE) in pips over all signals of the resampled dates.
+  PASS/FAIL: __ (filled by the Phase-1 run)
+
+OVERALL: PASS iff G-VW1 AND G-VW2 AND G-VW3. Any FAIL is final for this
+artifact; no re-run without a new pre-declared SPEC.

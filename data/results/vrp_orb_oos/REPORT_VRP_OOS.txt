@@ -1,0 +1,37 @@
+REPORT - HYPOTHESIS #45: VRP-ORB STRICT OUT-OF-SAMPLE WALK-FORWARD VERIFICATION
+Generated: 2026-09-23T18:44:20.344474+00:00  |  Verdict: FAIL
+
+1. DATA INTEGRITY
+   Tape: 1791504 M1 rows, 1370 cash days, 2021-01-04..2026-04-30
+   VIX : yahoo_v8_chart_api (archived vix_yahoo_raw.json sha256=300bb091ef1af4707c3d578fdf92b620a48ee82d8f7c8ed58946c64ff3e12e4d)
+   Session grid: 1335 sessions | P50 valid from 2022-02-03
+   Armed sessions: cal=219 oos=317 | last-bar voids: 0
+
+2. CALIBRATION BLOCK (< 2024-01-01) - EXPLORATORY, NOT GATED
+   trades=219  armed->trade=100.0%
+   net mean/trade=3.0352 pt  total=664.71 pt  win=39.3%  sharpe=1.611
+
+3. OUT-OF-SAMPLE BLOCK (>= 2024-01-01) - GATED
+   trades=317  armed->trade=100.0%
+   net mean/trade=0.9496 pt  total=301.01 pt  win=37.5%  sharpe=0.516
+   exits={'STOP': 176, 'EOD': 137, 'STOP_GAP': 4}  sides={'LONG': 173, 'SHORT': 144}
+
+4. IN-SAMPLE vs OUT-OF-SAMPLE DEGRADATION
+   net mean/trade: cal 3.0352 -> oos 0.9496 pt (delta -2.0856)
+   net sharpe    : cal 1.611 -> oos 0.516 (delta -1.095)
+
+5. YEAR-BY-YEAR OOS NET (sign inspection, per SPEC 9.4)
+   2024: n=120  total=   141.64 pt  mean= 1.1804  win=35.0%
+   2025: n=140  total=   154.69 pt  mean= 1.1049  win=37.9%
+   2026: n= 57  total=     4.68 pt  mean= 0.0822  win=42.1%
+
+6. GATES (frozen in GATE_VRP_OOS.txt, OOS block only)
+   G-OOS1 trades >= 40                     : 317      -> PASS
+   G-OOS2 OOS net Sharpe > 0               :   0.516 -> PASS
+   G-OOS3 bootstrap P(mean<=0) <= 0.20     :  0.2805 -> FAIL  (317 day blocks, 10000 resamples, seed 20260924)
+   VERDICT: FAIL
+
+7. HONESTY NOTES (SPEC 9.3)
+   The 2024+ block is a temporal split, NOT a virgin holdout: the #31 family was
+   screened over the full 2021-2026 tape (verdict FAIL at G-VRP3). A PASS here is
+   necessary-but-not-sufficient; the Phase-2 review reopening path applies in full.

@@ -1,0 +1,50 @@
+H105 US100 NATIVE FTMO WEEKDAY HOLD - FINAL_FAIL
+{
+  "verdict": "FINAL_FAIL",
+  "source_sha256": "f9552440b4af1e6d20fd9934d0c54b89a21131ccf9948d2b2b1f875dad90b9a5",
+  "spec_sha256": "f75c95ac2934100518aeccfd67e8b354e039648f5c9d6f58b1dcf89dcf08fd13",
+  "gate_sha256": "848ea47fc62446b6fa4ecbd06700097b9490513c1292953c6e54aa01922da1d8",
+  "source_m1_rows": 1306785,
+  "cash_days": 964,
+  "all_trades": 186,
+  "gated_trades": 140,
+  "unresolved_oos": 0,
+  "coverage": {
+    "EXECUTED": 186,
+    "NO_PRIOR_ATR": 4,
+    "NO_MONDAY_CASH_OPEN": 3,
+    "PREDECLARED_THURSDAY_CLOSURE_SKIP": 2
+  },
+  "gated_stress_mean": 64.62859482409608,
+  "gated_stress_total": 9048.003275373452,
+  "bootstrap_p_nonpositive": 0.0545,
+  "entry_spread_median_oos": 1.8000000000029104,
+  "snapshot_swap_total_oos": -2659.9728000000005,
+  "annual": {
+    "2024": {
+      "n": 52,
+      "stress_sum": 2389.1772285514216
+    },
+    "2025": {
+      "n": 50,
+      "stress_sum": 4470.50750134773
+    },
+    "2026": {
+      "n": 38,
+      "stress_sum": 2188.318545474301
+    }
+  },
+  "gates": {
+    "G-H105-1": true,
+    "G-H105-2": true,
+    "G-H105-3": false,
+    "G-H105-4": true,
+    "G-H105-5": true,
+    "G-H105-6": "NOT_RUN"
+  },
+  "ledger_sha256": "ed74f84abe8d8a974a3d0434c2b20eb55bdaa169763a2abbfb0a498a050391d3",
+  "coverage_sha256": "f9d2316c6131f57dfb09bfa18d3e3dbb08b8d9e7672379d1ae4189e3d38958af",
+  "phase2": "NOT_RUN"
+}
+Current Swing swap snapshot is a scenario, not historical postings.
+Historical US100 outcomes already exposed; no forward claim or account order.

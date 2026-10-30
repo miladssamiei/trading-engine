@@ -1,0 +1,120 @@
+MACRO ENGINE A/B FOUR-ASSET PORTFOLIO TRANSFER - REPORT
+Requested full 2010-2026 Dukascopy M1 BID sources, 2020-2026 entry-cohort scoring.
+A 4H Keltner; B 1H Saleh Donchian. Fixed owner retail cost floors embedded once.
+OVERALL FOUR-ASSET GATE: FAIL
+
+ACQUISITION STATUS
+XAGUSD: {'command': 'npx dukascopy-node -i xagusd -from 2010-01-01 -to 2026-09-27 -t m1 -f csv --cache', 'cwd': 'C:\\Users\\Milad\\download', 'expected_file': 'C:\\Users\\Milad\\download\\download\\xagusd-m1-bid-2010-01-01-2026-09-27.csv', 'attempted': False, 'status': 'EXISTING_FILE', 'bytes': 305511898, 'produced_file': 'C:\\Users\\Milad\\download\\download\\xagusd-m1-bid-2010-01-01-2026-09-27.csv'}
+GBPJPY: {'command': 'npx dukascopy-node -i gbpjpy -from 2010-01-01 -to 2026-09-27 -t m1 -f csv --cache', 'cwd': 'C:\\Users\\Milad\\download', 'expected_file': 'C:\\Users\\Milad\\download\\download\\gbpjpy-m1-bid-2010-01-01-2026-09-27.csv', 'attempted': True, 'return_code': 0, 'stdout_tail': '----------------------------------------------------\nâˆš File saved: download\\gbpjpy-m1-bid-2010-01-01-2026-09-27.csv (320.4 MB)\n\nDownload time: 7m 24s\n\n', 'stderr_tail': 'npm notice run npx\nnpm notice run dukascopy-cli -i gbpjpy -from 2010-01-01 -to 2026-09-27 -t m1 -f csv --cache\n', 'status': 'DOWNLOADED', 'bytes': 335959939, 'produced_file': 'C:\\Users\\Milad\\download\\download\\gbpjpy-m1-bid-2010-01-01-2026-09-27.csv'}
+USDJPY: {'command': 'npx dukascopy-node -i usdjpy -from 2010-01-01 -to 2026-09-27 -t m1 -f csv --cache', 'cwd': 'C:\\Users\\Milad\\download', 'expected_file': 'C:\\Users\\Milad\\download\\download\\usdjpy-m1-bid-2010-01-01-2026-09-27.csv', 'attempted': True, 'return_code': 0, 'stdout_tail': '----------------------------------------------------\nâˆš File saved: download\\usdjpy-m1-bid-2010-01-01-2026-09-27.csv (309.89 MB)\n\nDownload time: 13m 3s\n\n', 'stderr_tail': 'npm notice run npx\nnpm notice run dukascopy-cli -i usdjpy -from 2010-01-01 -to 2026-09-27 -t m1 -f csv --cache\n', 'status': 'DOWNLOADED', 'bytes': 324940140, 'produced_file': 'C:\\Users\\Milad\\download\\download\\usdjpy-m1-bid-2010-01-01-2026-09-27.csv'}
+EURJPY: {'command': 'npx dukascopy-node -i eurjpy -from 2010-01-01 -to 2026-09-27 -t m1 -f csv --cache', 'cwd': 'C:\\Users\\Milad\\download', 'expected_file': 'C:\\Users\\Milad\\download\\download\\eurjpy-m1-bid-2010-01-01-2026-09-27.csv', 'attempted': True, 'return_code': 0, 'stdout_tail': '----------------------------------------------------\nâˆš File saved: download\\eurjpy-m1-bid-2010-01-01-2026-09-27.csv (318.88 MB)\n\nDownload time: 13m 25s\n\n', 'stderr_tail': 'npm notice run npx\nnpm notice run dukascopy-cli -i eurjpy -from 2010-01-01 -to 2026-09-27 -t m1 -f csv --cache\n', 'status': 'DOWNLOADED', 'bytes': 334373961, 'produced_file': 'C:\\Users\\Milad\\download\\download\\eurjpy-m1-bid-2010-01-01-2026-09-27.csv'}
+
+ASSET | ENGINE | CLOSED | WIN% | GROSS/TRADE | NET/TRADE | TOTAL NET | SHARPE | MBB P | GATE
+XAGUSD | A_KC | 200 | 35.00 | -0.009285 | -0.034285 | -6.8570 | -0.02345 | 0.6009 | FAIL
+XAGUSD | B_DONCHIAN | 740 | 31.08 | 0.006916 | -0.018084 | -13.3825 | -0.01322 | 0.6725 | FAIL
+GBPJPY | A_KC | 194 | 37.63 | -0.053751 | -0.078751 | -15.2777 | -0.04902 | 0.8105 | FAIL
+GBPJPY | B_DONCHIAN | 739 | 35.05 | 0.010383 | -0.014617 | -10.8017 | -0.01307 | 0.6536 | FAIL
+USDJPY | A_KC | 195 | 42.05 | 0.129972 | 0.120972 | 23.5896 | 0.09931 | 0.0978 | FAIL
+USDJPY | B_DONCHIAN | 735 | 35.51 | 0.033511 | 0.024511 | 18.0157 | 0.02888 | 0.2278 | FAIL
+EURJPY | A_KC | 187 | 39.57 | 0.013536 | -0.001464 | -0.2737 | -0.00119 | 0.6167 | FAIL
+EURJPY | B_DONCHIAN | 757 | 35.01 | -0.028590 | -0.043590 | -32.9979 | -0.05303 | 0.9162 | FAIL
+
+ANNUAL ENTRY COHORTS 2020-2026
+XAGUSD A_KC: annual {'2020': {'trades': 22, 'net': 10.032542267282174}, '2021': {'trades': 27, 'net': -1.182304890549414}, '2022': {'trades': 30, 'net': -0.45284830018507094}, '2023': {'trades': 29, 'net': 0.37740309743391975}, '2024': {'trades': 38, 'net': -5.272048496194202}, '2025': {'trades': 30, 'net': 6.679176550188139}, '2026': {'trades': 24, 'net': -17.038951563537104}} | overnight 184 | exits {'SL_INIT': 5, 'SL_TRAIL': 195} | open_end 0 | G1-G5 {'G1': True, 'G2': False, 'G3': False, 'G4': False, 'G5': False} | funnel {'candidates': 3795, 'shadowed': 3246, 'no_real_entry_bar': 107}
+XAGUSD B_DONCHIAN: annual {'2020': {'trades': 92, 'net': 7.787873514335066}, '2021': {'trades': 104, 'net': -8.697626368920197}, '2022': {'trades': 120, 'net': -2.2686505954627556}, '2023': {'trades': 110, 'net': -1.6348987650327764}, '2024': {'trades': 118, 'net': -11.958169745509121}, '2025': {'trades': 115, 'net': -8.023505585130607}, '2026': {'trades': 81, 'net': 11.412469595595375}} | overnight 560 | exits {'SL_INIT': 140, 'SL_TRAIL': 600} | open_end 0 | G1-G5 {'G1': True, 'G2': False, 'G3': False, 'G4': False, 'G5': False} | funnel {'candidates': 5623, 'shadowed': 3918, 'no_real_entry_bar': 0}
+GBPJPY A_KC: annual {'2020': {'trades': 29, 'net': -7.912995528709118}, '2021': {'trades': 29, 'net': 7.036489408544554}, '2022': {'trades': 29, 'net': 1.2053483766740953}, '2023': {'trades': 28, 'net': -8.940454970686375}, '2024': {'trades': 31, 'net': 1.2784990566426586}, '2025': {'trades': 30, 'net': -15.744665862612322}, '2026': {'trades': 18, 'net': 7.800036941733822}} | overnight 185 | exits {'SL_INIT': 0, 'SL_TRAIL': 194} | open_end 1 | G1-G5 {'G1': True, 'G2': False, 'G3': False, 'G4': False, 'G5': False} | funnel {'candidates': 3735, 'shadowed': 3168, 'no_real_entry_bar': 96}
+GBPJPY B_DONCHIAN: annual {'2020': {'trades': 100, 'net': 2.507629220425997}, '2021': {'trades': 107, 'net': 6.817956380690191}, '2022': {'trades': 118, 'net': -1.8319270271910284}, '2023': {'trades': 117, 'net': -11.727982418937586}, '2024': {'trades': 123, 'net': -5.1551625380568}, '2025': {'trades': 102, 'net': -7.573358199459477}, '2026': {'trades': 72, 'net': 6.161187958157882}} | overnight 576 | exits {'SL_INIT': 120, 'SL_TRAIL': 619} | open_end 1 | G1-G5 {'G1': True, 'G2': False, 'G3': False, 'G4': False, 'G5': False} | funnel {'candidates': 7120, 'shadowed': 5345, 'no_real_entry_bar': 0}
+USDJPY A_KC: annual {'2020': {'trades': 30, 'net': 2.843000759262239}, '2021': {'trades': 32, 'net': 1.4890823414480536}, '2022': {'trades': 26, 'net': 17.6596909807311}, '2023': {'trades': 32, 'net': -2.709359657931799}, '2024': {'trades': 26, 'net': 12.020735569339678}, '2025': {'trades': 31, 'net': -7.898401745441021}, '2026': {'trades': 18, 'net': 0.1848032232795731}} | overnight 177 | exits {'SL_INIT': 4, 'SL_TRAIL': 191} | open_end 0 | G1-G5 {'G1': True, 'G2': True, 'G3': True, 'G4': False, 'G5': False} | funnel {'candidates': 4095, 'shadowed': 3495, 'no_real_entry_bar': 124}
+USDJPY B_DONCHIAN: annual {'2020': {'trades': 94, 'net': 0.8550677934391615}, '2021': {'trades': 109, 'net': 1.5988066171970132}, '2022': {'trades': 108, 'net': 12.25036311441437}, '2023': {'trades': 118, 'net': -7.081199490741554}, '2024': {'trades': 109, 'net': 18.21980991535918}, '2025': {'trades': 118, 'net': -4.974175786470795}, '2026': {'trades': 79, 'net': -2.852972640936855}} | overnight 571 | exits {'SL_INIT': 134, 'SL_TRAIL': 601} | open_end 1 | G1-G5 {'G1': True, 'G2': True, 'G3': True, 'G4': False, 'G5': False} | funnel {'candidates': 7165, 'shadowed': 5360, 'no_real_entry_bar': 0}
+EURJPY A_KC: annual {'2020': {'trades': 31, 'net': -1.8530336065901594}, '2021': {'trades': 26, 'net': -1.606961740059802}, '2022': {'trades': 25, 'net': 8.391977645667453}, '2023': {'trades': 28, 'net': -2.9436535487721756}, '2024': {'trades': 25, 'net': 8.137618747083422}, '2025': {'trades': 33, 'net': -14.961147845162117}, '2026': {'trades': 19, 'net': 4.561488427692382}} | overnight 180 | exits {'SL_INIT': 2, 'SL_TRAIL': 185} | open_end 0 | G1-G5 {'G1': True, 'G2': False, 'G3': False, 'G4': False, 'G5': False} | funnel {'candidates': 3753, 'shadowed': 3193, 'no_real_entry_bar': 89}
+EURJPY B_DONCHIAN: annual {'2020': {'trades': 103, 'net': 2.8735978808625333}, '2021': {'trades': 116, 'net': -5.9897796294524}, '2022': {'trades': 120, 'net': -4.845680119274903}, '2023': {'trades': 125, 'net': -11.072952278901909}, '2024': {'trades': 112, 'net': 1.6019499582436652}, '2025': {'trades': 102, 'net': -11.726719484102688}, '2026': {'trades': 79, 'net': -3.838362609336343}} | overnight 574 | exits {'SL_INIT': 121, 'SL_TRAIL': 636} | open_end 0 | G1-G5 {'G1': True, 'G2': False, 'G3': False, 'G4': False, 'G5': False} | funnel {'candidates': 7194, 'shadowed': 5350, 'no_real_entry_bar': 0}
+
+PORTFOLIO NEW TRADES PER MONTH
+Four-asset total evaluable: True. Available-asset 2020-2026 executed entries: 3750; monthly mean 46.296.
+Month | Available-asset new trades | Four-asset total evaluable
+2020-01 | 47 | True
+2020-02 | 45 | True
+2020-03 | 38 | True
+2020-04 | 36 | True
+2020-05 | 40 | True
+2020-06 | 41 | True
+2020-07 | 44 | True
+2020-08 | 42 | True
+2020-09 | 39 | True
+2020-10 | 44 | True
+2020-11 | 42 | True
+2020-12 | 43 | True
+2021-01 | 44 | True
+2021-02 | 35 | True
+2021-03 | 43 | True
+2021-04 | 41 | True
+2021-05 | 49 | True
+2021-06 | 53 | True
+2021-07 | 56 | True
+2021-08 | 41 | True
+2021-09 | 59 | True
+2021-10 | 40 | True
+2021-11 | 50 | True
+2021-12 | 39 | True
+2022-01 | 46 | True
+2022-02 | 38 | True
+2022-03 | 44 | True
+2022-04 | 43 | True
+2022-05 | 52 | True
+2022-06 | 44 | True
+2022-07 | 55 | True
+2022-08 | 50 | True
+2022-09 | 56 | True
+2022-10 | 45 | True
+2022-11 | 49 | True
+2022-12 | 54 | True
+2023-01 | 50 | True
+2023-02 | 52 | True
+2023-03 | 48 | True
+2023-04 | 60 | True
+2023-05 | 48 | True
+2023-06 | 40 | True
+2023-07 | 54 | True
+2023-08 | 51 | True
+2023-09 | 45 | True
+2023-10 | 55 | True
+2023-11 | 38 | True
+2023-12 | 46 | True
+2024-01 | 48 | True
+2024-02 | 51 | True
+2024-03 | 37 | True
+2024-04 | 55 | True
+2024-05 | 48 | True
+2024-06 | 49 | True
+2024-07 | 53 | True
+2024-08 | 35 | True
+2024-09 | 57 | True
+2024-10 | 42 | True
+2024-11 | 53 | True
+2024-12 | 54 | True
+2025-01 | 56 | True
+2025-02 | 48 | True
+2025-03 | 52 | True
+2025-04 | 34 | True
+2025-05 | 47 | True
+2025-06 | 52 | True
+2025-07 | 44 | True
+2025-08 | 43 | True
+2025-09 | 40 | True
+2025-10 | 43 | True
+2025-11 | 45 | True
+2025-12 | 57 | True
+2026-01 | 40 | True
+2026-02 | 44 | True
+2026-03 | 45 | True
+2026-04 | 41 | True
+2026-05 | 40 | True
+2026-06 | 51 | True
+2026-07 | 49 | True
+2026-08 | 42 | True
+2026-09 | 41 | True
+
+LIMITS
+DATA BLOCKED means a required 2010-2026 source could not be acquired/qualified; NA is not a zero-return result.
+Unlike asset price units are never summed as portfolio PnL. Same-month entry counts can be added, with cross-engine overlap allowed.
+Fixed BID/ASK proxy costs, omitted swaps and tick-path uncertainty prevent FTMO-account conclusions.

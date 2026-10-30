@@ -1,0 +1,136 @@
+STUDY ID: youtube_hybrid_scalping
+HYPOTHESIS NUMBER: #22 (the tasking request labeled the mechanism "#20"; renumbered
+  here because PROGRESS.md already assigns #20 to pairs_futures_eikon and #21 to
+  har_risk_scaling_model4_v1. Mechanism per tasking: ATR Band Touch & Pin-Bar
+  Time-Exit.)
+STATUS: POST-TERMINATION EXPLORATORY (owner-tasked descriptive study under the
+  post-Path-C lane). Purpose: quantify gross-to-net spread decay of a
+  YouTube-sourced hybrid scalping rule pair across three instruments.
+  downstream_model_allowed=false and live_execution_allowed=false regardless of
+  outcome. Null results are complete, expected deliverables.
+
+1. DATA SOURCING & ALIGNMENT
+
+1.1 Instruments and verified M5 aggregated tapes (epoch-UTC time, OHLC columns;
+    monotonic, verified by their onboarding audits):
+    - US500-tick : data/results/orb_2021_present/us500tick_m5.csv (2021-01 .. 2026-04)
+    - USA30-tick : data/results/usa30_onboarding/usa30tick_m5.csv (2020-01 .. 2026-09)
+    - XAUUSD-tick: data/results/xauusd_onboarding/xauusdtick_m5.csv (2020-01 .. 2026-09)
+
+1.2 D1 tapes for the Short daily filter:
+    - No pre-built D1 CSV exists for USA30/XAUUSD. For ALL three instruments the
+      D1 filter candle is therefore aggregated in-script from the same M5 tape by
+      America/New_York calendar date (open = first M5 open of the NY date,
+      high = max, low = min, close = last M5 close). "Previous D1 candle" for an
+      M5 bar on NY date d = the candle of the previous distinct NY date present
+      in the tape (Friday for Monday; first tape date has no previous -> no short
+      signals that date). This makes the daily filter align with the NY cash
+      session day exactly as the tasking requires.
+    - data/results/momentum_multihorizon/us500tick_d1.csv (verified Dukascopy D1
+      import) is loaded as a NON-GATING sanity anchor only: its daily closes are
+      compared descriptively against the US500 M5-derived NY-date D1 closes
+      (median abs diff reported; boundaries differ by construction, so no pass
+      threshold is attached).
+
+1.3 Timezones: epoch UTC -> America/New_York wall time for all session logic.
+    Cash-open candle = the wall-minute-570 (09:30 NY) M5 bar.
+
+2. LONG MODEL (ATR LIMIT TOUCH)
+
+2.1 Indicator: 14-period ATR on the continuous M5 tape, Wilder smoothing
+    (TR_i = max(H-L, |H - C_prev|, |L - C_prev|); ATR seeded with the mean of the
+    first 14 TRs; first valid ATR index = 13; first entry candidate index = 14).
+
+2.2 Setup and entry: for each M5 candle i with valid ATR[i-1]:
+      LowerBand = Close[i-1] - (3.1 * ATR14[i-1])
+    If Low[i] <= LowerBand -> Long entry recorded at exactly LowerBand (limit
+    fill; gap-through bars also record the band price per tasking, no open-price
+    improvement is taken).
+
+2.3 Exits:
+      Target     = Entry + (2.0 * ATR14[i-1])
+      Stop Loss  = Entry - (1.5 * ATR14[i-1])
+    Exit scan starts on the entry bar itself and walks forward bar by bar:
+      - if Low[j]  <= Stop  -> exit at Stop   (checked FIRST: pessimistic)
+      - elif High[j] >= Target -> exit at Target
+    If one bar satisfies both Target and Stop (any bar, entry bar included),
+    assume the Stop was hit first (tasking pessimistic collision rule).
+    If the tape ends before either level is hit -> mark-close at the final M5
+    close, exit_reason=end_of_tape (flagged in the trades CSV).
+
+2.4 Position rule: single Long position per instrument; entry signals occurring
+    while a Long trade is open are skipped (not queued). After an exit on bar j,
+    new signals are scanned from bar j+1.
+
+2.5 Filter: no entries on the exact NY cash-session opening candle
+    (wall-minute 570, 09:30-09:35 ET). No other session filter: the tape is the
+    full ~24h day, overnight band touches are valid signals.
+
+3. SHORT MODEL (SHOOTING STAR & TIME EXIT)
+
+3.1 Daily filter: short signals on NY date d are accepted only if the previous
+    D1 candle (definition 1.2) closed red (Close < Open).
+
+3.2 Pattern trigger on M5 candle i:
+      body       = abs(Close - Open)
+      upper_wick = High - max(Close, Open)
+      lower_wick = min(Close, Open) - Low
+      condition  : upper_wick >= (2.0 * body)  AND  lower_wick <= (0.10 * upper_wick)
+    Zero-body candles: body=0, condition reduces to upper_wick >= 0 (true) and
+    lower_wick <= 0.10*upper_wick; evaluated mechanically as written.
+
+3.3 Entry: market Short at the exact Open price of the next M5 candle (i+1).
+    Exit: market Buy-to-cover at the exact Close of that same entry candle —
+    exactly a 5-minute hold. Pattern on the final tape bar (no i+1) is skipped.
+    No session filter for shorts (declared by tasking; daily filter only).
+
+4. COST MODEL & PERMUTATIONS
+
+4.1 Per instrument, three combinations: Long-Only, Short-Only, Combined
+    (Combined = the union of both independent trade streams; the two models run
+    concurrently and do not block each other).
+
+4.2 GROSS: 0 spread, 0 slippage. NET: subtract the verified median round-trip
+    spread from EVERY trade's point PnL regardless of direction:
+      US500 = 0.51 pt, USA30 = 2.28 pt, XAUUSD = 0.41 pt.
+    No swap/financing is modeled (tasking specifies spread-only decay; Long
+    trades may hold overnight and are still charged spread only — documented
+    limitation).
+
+4.3 Metrics: expectancy per trade (points) and win rate, each reported GROSS and
+    NET. Trade PnL in points: Long = exit - entry; Short = entry - exit.
+
+5. GATES (verbatim in GATE_YOUTUBE_HYBRID_SCALPING.txt, frozen before any run)
+
+G-Y1 (Sample Size): The combined strategy must generate >= 150 trades on each
+    instrument.
+G-Y2 (Cost-Floor Survival): The NET expectancy per trade for the Combined
+    strategy must be > 0 on at least one of the three instruments.
+
+Overall verdict rule: G-Y1 AND G-Y2 must both pass for a PASS; any failure is a
+FAIL and is final for this artifact. No Phase 2 (MT5 execution) is authorized by
+this study regardless of verdict.
+
+6. ARTIFACTS
+
+- data/results/youtube_hybrid_scalping/SPEC_YOUTUBE_HYBRID_SCALPING.txt (this file)
+- data/results/youtube_hybrid_scalping/GATE_YOUTUBE_HYBRID_SCALPING.txt (frozen
+  before the run; the script refuses to execute if either file is missing)
+- data/results/youtube_hybrid_scalping/hybrid_scalp_trades.csv (every trade:
+  instrument, model Long/Short, direction, signal/entry/exit times, prices,
+  exit_reason, ATR reference, NY date, gross and net PnL)
+- data/results/youtube_hybrid_scalping/REPORT_YOUTUBE_HYBRID_SCALPING.txt
+  (3x3 matrix Instrument x Model: Gross vs Net expectancy, win rates, trade
+  counts, spread decay, gate verdicts) — written regardless of outcome.
+
+7. HONESTY / ANTI-LEAK RULES
+
+- All numeric constants (3.1, 2.0, 1.5, 2.0x body, 0.10x upper wick, 14 ATR,
+  spread medians) are fixed by the tasking before the run; no parameter search,
+  no threshold tuning, no instrument cherry-picking beyond reporting all three.
+- Entry prices are the mechanical rule prices (band / next open); no look-ahead:
+  entries use only bar i-1 information (Long) or bar i information (Short);
+  exits use only subsequent bar extremes with the pessimistic collision rule.
+- The trades CSV is the single source of truth for every reported number.
+- This is a descriptive spread-decay study; a FAIL verdict closes the mechanism
+  and it joins the closed families list.

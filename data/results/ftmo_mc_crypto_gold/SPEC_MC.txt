@@ -1,0 +1,30 @@
+FTMO CRYPTO + GOLD POOLED-R MONTE CARLO - FROZEN SPEC - 2026-09-29
+
+Purpose
+Estimate the distribution of an owner-specified $10,000 FTMO-like two-step evaluation and first payout using the pre-existing, net-of-modeled-cost pooled BTCUSD, ETHUSD, and XAUUSD Engine A/B trade R values. This is an exploratory account-path scenario, not a broker fill or actual FTMO rule validation.
+
+Frozen input
+data/results/crypto_gold_real_cost/pooled_R_curve.csv. Require exactly 2,275 rows, finite net_r, arithmetic mean within 0.000001 of 0.09691495204712176, and SHA256 d11585c778f7d638ba209cc595361fb07d15203528400da2f8c4ae2bc120e4fb. Verify cumulative_net_r equals cumulative net_r within 0.000001. Draw from all 2,275 net_r values with replacement; retain the empirical tails and relative instrument mix. Input trade chronology is not reproduced in the IID simulation.
+
+Account and risk model
+Initial balance $10,000. Four risk fractions 0.005, 0.010, 0.015, 0.020 of INITIAL balance: fixed cash risk $50, $100, $150, $200 per sampled trade, respectively. No compounding or position-size rounding. Each trade cash PnL = sampled net_r x fixed cash risk. No further spread, commission, or swap deduction because net_r already includes the owner-specified cost scenario. PnL starts at $0 and resets to $0 on each phase transition.
+
+Monte Carlo schedule
+10,000 paths per risk fraction. NumPy PCG64 seed 20261031 plus 1000 times the zero-based risk-profile index; each profile has an independent reproducible stream. Each phase permits at most 20,000 sampled trades per path. Any unresolved path at the cap is counted separately and does not pass.
+
+Phase 1: after each sampled trade, fail if its cash PnL <= -$500 (single-trade daily-loss proxy) or phase cumulative PnL <= -$1,000; otherwise pass if phase cumulative PnL >= +$1,000. On simultaneous failure conditions, classify the loss as SINGLE_TRADE first. Phase 2 uses the same rules with a +$500 target, only for Phase-1 passers. Track exact sampled-trade counts for both phases and total evaluation trades for all paths that pass both.
+
+Funded phase: only paths passing both phases enter. Reset PnL to $0. Sample exactly 30 trades, stopping early if funded cumulative PnL <= -$1,000. The funded-phase rule in this owner scenario is static loss only; the single-trade proxy applies to the evaluation phases. A first payout occurs only if the account survives all 30 trades and ending PnL > $0. Gross receipt then equals 0.80 x ending PnL + $175 refunded fee. All other paths receive $0. Net EV per purchased challenge = mean gross receipt across all 10,000 original paths minus the $175 purchase fee. No second purchase, withdrawal threshold, taxes, or future payout is modeled.
+
+Reporting definitions
+Phase-1 pass rate = Phase-1 passes / 10,000. Phase-2 conditional pass rate = Phase-2 passes / Phase-1 passes; also report unconditional two-phase pass rate = Phase-2 passes / 10,000. First-payout probability = first-payout paths / 10,000. Median and 95th percentile of total evaluation trades are calculated only among paths passing both phases, using NumPy linear quantiles; if none pass, report NA. Calendar-month equivalents divide each trade-count quantile by the user-specified 29.1 pooled trades per month. Report loss reasons, unresolved caps, mean gross receipt, and EV so accounting is auditable. Save one full path ledger, a summary CSV, run metadata, and a plain-text report.
+
+Limitations fixed before seeing results
+The single-trade <=-$500 rule is only a proxy for daily loss; it misses combined same-day losses and intraday unrealized equity. IID sampling ignores serial dependence, six possible concurrent positions, shared market stress, trade timing, and phase calendar deadlines. 29.1 trades/month is a fixed historical average, not a simulated clock. The input edge is from retrospective proxy data and owner-specified historical cost assumptions, not independent live execution. Neither positive simulated EV nor a payout probability is a guarantee or a recommendation to purchase accounts.
+
+Gate
+G1: Exact input row count, hash, finite R, mean tolerance, and cumulative-R identity pass.
+G2: Exactly 10,000 paths are accounted for in each of four profiles, with legal phase transitions and no sampled path passing after a failure or unresolved cap.
+G3: Cash PnL, receipt, probability, quantile, and EV identities recompute from the saved path ledger within stated floating-point tolerances; no receipt occurs without 30 funded trades, funded survival, and positive funded PnL.
+G4: Unresolved paths at the 20,000-trade phase cap are disclosed and excluded from pass rates. Their presence does not invalidate correctly censored estimates.
+No profitability gate is imposed on an account-path scenario; the gate checks input and simulation integrity.

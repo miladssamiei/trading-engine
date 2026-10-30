@@ -1,0 +1,4 @@
+G-AB1: At least one instrument has at least 150 executed trades in its 2024-2026 test block.
+G-AB2: At least one instrument with at least 150 test-block trades has strictly positive mean double-cost net per trade.
+G-AB3: At least one instrument satisfying G-AB1 and G-AB2 has date-bootstrap P(mean base net <= 0) at most 0.025, using 10,000 resamples and seed 20260927.
+G-AB4: The same instrument satisfying G-AB1 through G-AB3 has strictly positive base-net total in each complete test-block year 2024 and 2025.

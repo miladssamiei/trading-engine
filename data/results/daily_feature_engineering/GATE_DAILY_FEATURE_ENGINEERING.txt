@@ -1,0 +1,39 @@
+GATE_DAILY_FEATURE_ENGINEERING
+Verbatim extraction from SPEC_DAILY_FEATURE_ENGINEERING.txt (frozen 2026-09-08,
+before any script exists). These clauses and ONLY these decide Pass/Fail.
+
+G-F1 (STRICT STATIONARITY): every engineered feature in the final candidate
+set must pass the ADF test (constant, no trend, AIC lag; p-value < 0.05,
+equivalent to statistic < -2.86) over its non-NaN dates in the primary window
+2022-01-04..2026-04-30 (holdout included: testing is acceptance, not fitting).
+A feature that fails is DROPPED ENTIRELY from the dataset. Dropped features
+and their statistics are recorded in REPORT_FEATURE_ENGINEERING.txt.
+
+G-F2 (ORTHOGONALITY BUDGET): compute the Spearman rank correlation matrix over
+the rows where all surviving features are non-NaN. NO pairwise |rho| may
+exceed 0.70. For each violating pair, the feature with the LOWER variance
+after min-max normalization to [0,1] over the primary window is automatically
+dropped; ties are broken by dropping the later feature in the Section 3 order
+(F7 before F6 ... F1). The matrix is recomputed after each drop until no
+violation remains. The final matrix is written to correlation_matrix.csv. No
+feature may be added, transformed, or re-parameterized to resolve a violation.
+
+G-F3 (CAUSALITY AUDIT): a seeded RNG (seed = 20260908, numpy default_rng)
+samples 5 dates from the final dataset rows. For each sampled date the script
+writes to feature_sync_audit.txt, for EVERY final feature: the feature value,
+each raw input value used, the input's source publication date, and its
+availability date under the SPEC 1.3 shift rules. PASS iff for all 5 dates,
+every input of every feature was available by the close of the feature date.
+Any violation is a G-F3 HARD FAIL; there is no partial credit.
+
+STOP RULES (SPEC section 5, binding on the gates above):
+- Fewer than 3 features surviving G-F1 and G-F2 -> SPEC FAILS; the project
+  accepts that the selected features do not form a viable orthogonal basis;
+  no rescue, no relaxation of thresholds.
+- No new features after the correlation matrix is viewed; the Section 3 list
+  is frozen; FFD-excluded series are not replaced.
+- No post-hoc parameter changes (d*, l, ADF critical value, 0.70 budget,
+  tie-break, windows, shift rules). A gate failure is final for this artifact;
+  corrections require a NEW study under a NEW name.
+- The 2024-01-01..2026-04-30 holdout is never used to choose anything; proven
+  leakage into it voids the study (re-run under a new name).

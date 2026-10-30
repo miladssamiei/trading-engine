@@ -1,0 +1,7 @@
+GATE: VRP-CONDITIONED PM CONTINUATION BREAKOUT ON US500 - PHASE 1 (HYPOTHESIS #44)
+Frozen verbatim from SPEC_VRP_PM_CONT.txt on 2026-09-23, before any Phase-1 code.
+
+G-PM1 total executed trades >= 50.
+G-PM2 Net Sharpe Ratio > 0.
+G-PM3 day-block bootstrap (10,000 resamples, seed 20260924) P(mean Net PnL <= 0)
+    <= 0.20.

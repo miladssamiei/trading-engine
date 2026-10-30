@@ -1,0 +1,1 @@
+Gate: For each engine independently, at least 50 trades, net Sharpe >0, and moving-block bootstrap P(mean net price-unit PnL<=0)<=0.20. Bootstrap uses 10,000 trade-order resamples of five-trade blocks, fixed seed 20260926. Gate pass and velocity target are distinct verdicts. Neither alone proves a 45-day FTMO pass.

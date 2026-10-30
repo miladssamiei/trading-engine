@@ -1,0 +1,70 @@
+CHIHAB-STYLE RF + PROBIT HOURLY CROSS-ASSET ADAPTATION - REPORT
+OVERALL GATE: FAIL
+The original Chihab et al. (2019) study concerns intraweek FX; this is the user-defined hourly GC/NQ/ES adaptation, not an exact paper replication.
+https://onlinelibrary.wiley.com/doi/10.1155/2019/8342461
+V2 removes a redundant MACD histogram from the failed V1 rank-deficient design. Frozen 7 features, 64-tree depth-5 RF and Probit GLM; rolling six prior UTC months train, next UTC month test; no test-label leakage into fitting.
+Bid-only CFD proxy tapes; futures costs/guard are hypothetical transfers. No structural stop or TP was specified. MBB uses 10000 five-trade blocks, seed 20260927.
+
+TAPE GC: data/results/xauusd_onboarding/xauusdtick_m1.csv | M1 2337538 | H1 real 38988/58438 | 2020-01-01T23:00:00+00:00 through 2026-09-01T20:59:00+00:00
+SHA256 a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f
+OOS classification: predictions 36058, scored real-next-H1 34081, UP base rate 0.5060, train-majority baseline 0.5080
+RF accuracy 0.5019; Probit accuracy 0.5032; both-agree accuracy 0.5037, coverage 0.6889, correct/incorrect 11827/11652
+OOS accuracy by year: {"2020": {"agree_accuracy": 0.5027472527472527, "agree_count": 2184, "probit_accuracy": 0.5045422781271838, "rf_accuracy": 0.4996505939902166, "scored": 2862}, "2021": {"agree_accuracy": 0.49373368146214097, "agree_count": 3830, "probit_accuracy": 0.4985785358919687, "rf_accuracy": 0.49289267945984366, "scored": 5628}, "2022": {"agree_accuracy": 0.49890795631825274, "agree_count": 3205, "probit_accuracy": 0.4967930029154519, "rf_accuracy": 0.501846452866861, "scored": 5145}, "2023": {"agree_accuracy": 0.5119957817031373, "agree_count": 3793, "probit_accuracy": 0.5093357271095152, "rf_accuracy": 0.5070017953321364, "scored": 5570}, "2024": {"agree_accuracy": 0.5017939518195798, "agree_count": 3902, "probit_accuracy": 0.4975914362176628, "rf_accuracy": 0.5049063336306869, "scored": 5605}, "2025": {"agree_accuracy": 0.5114986100581248, "agree_count": 3957, "probit_accuracy": 0.5110512129380054, "rf_accuracy": 0.5053009883198563, "scored": 5565}, "2026": {"agree_accuracy": 0.504217791411043, "agree_count": 2608, "probit_accuracy": 0.5056664867781975, "rf_accuracy": 0.5002698327037237, "scored": 3706}}
+
+TAPE NQ: data/results/virgin_assets/ustech_m1.csv | M1 2936100 | H1 real 49201/58992 | 2020-01-01T00:00:00+00:00 through 2026-09-23T23:59:00+00:00
+SHA256 152f9c995b370e5391cb7da99b64a8002ceee5e52cc68899ddca409ac7e15e39
+OOS classification: predictions 45550, scored real-next-H1 45216, UP base rate 0.4252, train-majority baseline 0.5748
+RF accuracy 0.5728; Probit accuracy 0.5681; both-agree accuracy 0.5917, coverage 0.7682, correct/incorrect 20553/14183
+OOS accuracy by year: {"2020": {"agree_accuracy": 0.5767581475128645, "agree_count": 2332, "probit_accuracy": 0.5397649631046734, "rf_accuracy": 0.5580759770429079, "scored": 3659}, "2021": {"agree_accuracy": 0.6021823562049196, "agree_count": 5407, "probit_accuracy": 0.5787444933920705, "rf_accuracy": 0.5733755506607929, "scored": 7264}, "2022": {"agree_accuracy": 0.5882253994953742, "agree_count": 5945, "probit_accuracy": 0.5719049604001667, "rf_accuracy": 0.5738502153675142, "scored": 7197}, "2023": {"agree_accuracy": 0.5943740232679284, "agree_count": 5759, "probit_accuracy": 0.574580269182739, "rf_accuracy": 0.5762453170528653, "scored": 7207}, "2024": {"agree_accuracy": 0.6061783203847577, "agree_count": 5406, "probit_accuracy": 0.5744186046511628, "rf_accuracy": 0.5826265389876881, "scored": 7310}, "2025": {"agree_accuracy": 0.5783456624075319, "agree_count": 5948, "probit_accuracy": 0.5616588849217248, "rf_accuracy": 0.5663279318868443, "scored": 7282}, "2026": {"agree_accuracy": 0.5877126174155877, "agree_count": 3939, "probit_accuracy": 0.5589956579195772, "rf_accuracy": 0.5714555408721919, "scored": 5297}}
+
+TAPE ES: data/results/vwap_2021_2026/us500tick_m1.csv | M1 1791504 | H1 real 31382/46633 | 2021-01-03T23:00:00+00:00 through 2026-04-30T23:59:00+00:00
+SHA256 29ad8f8b25b43be43a87c4ac39575c3cd280d557661c31f8e691990949087453
+OOS classification: predictions 28455, scored real-next-H1 27205, UP base rate 0.5230, train-majority baseline 0.5230
+RF accuracy 0.5131; Probit accuracy 0.5174; both-agree accuracy 0.5207, coverage 0.7402, correct/incorrect 10485/9653
+OOS accuracy by year: {"2021": {"agree_accuracy": 0.5242896425297892, "agree_count": 2182, "probit_accuracy": 0.5188181498417165, "rf_accuracy": 0.5184664087231797, "scored": 2843}, "2022": {"agree_accuracy": 0.49532967032967035, "agree_count": 3640, "probit_accuracy": 0.49884853852967226, "rf_accuracy": 0.4951284322409212, "scored": 5645}, "2023": {"agree_accuracy": 0.5245098039215687, "agree_count": 4080, "probit_accuracy": 0.5196794300979519, "rf_accuracy": 0.5159394479073909, "scored": 5615}, "2024": {"agree_accuracy": 0.5346514047866805, "agree_count": 4805, "probit_accuracy": 0.5309452030501862, "rf_accuracy": 0.5281078205355559, "scored": 5639}, "2025": {"agree_accuracy": 0.5226143141153081, "agree_count": 4024, "probit_accuracy": 0.5181430096051227, "rf_accuracy": 0.5142298114549982, "scored": 5622}, "2026": {"agree_accuracy": 0.5159914712153518, "agree_count": 1407, "probit_accuracy": 0.5219989136338946, "rf_accuracy": 0.5024443237370994, "scored": 1841}}
+
+GC / CFD | cost 0.41 | GATE FAIL
+Closed trades 4974; net expectancy -0.716441 price units/trade; total net PnL -3563.576; Net Sharpe -0.039608; MBB p 0.9983; win rate 52.65%
+Accuracy minus trade win rate -2.28 percentage points (different denominators: scored H1 labels versus closed trades)
+Exits {'MODEL_WARNING': 4974, 'PROP_LIQUIDATION': 0, 'OPEN_END': 1}; overnight entries 1150; maximum signal-to-next-open gap 73.0 hours
+Complete-year sign gate FAIL; annual NY entry cohorts {"2020": {"net_total": -320.11400000000003, "trades": 344}, "2021": {"net_total": -381.4550000000101, "trades": 938}, "2022": {"net_total": -772.0909999999991, "trades": 932}, "2023": {"net_total": -380.11800000000625, "trades": 825}, "2024": {"net_total": -305.6090000000008, "trades": 701}, "2025": {"net_total": -672.6370000000009, "trades": 729}, "2026": {"net_total": -731.5519999999922, "trades": 505}}
+OPEN_END last-close mark excluded from closed stats -37.680; funnel {'actions': 36057, 'no_next_m1_open': 1, 'flat_disagreement': 7060, 'entries': 4975, 'model_warning_exits': 4974, 'prop_liquidations': 0, 'same_open_reversal_suppressed': 755}
+
+GC / FUTURES | cost 0.13 | GATE FAIL
+Closed trades 5149; net expectancy -0.495979 price units/trade; total net PnL -2553.796; Net Sharpe -0.027772; MBB p 0.9805; win rate 54.65%
+Accuracy minus trade win rate -4.28 percentage points (different denominators: scored H1 labels versus closed trades)
+Exits {'MODEL_WARNING': 4921, 'PROP_LIQUIDATION': 228, 'OPEN_END': 1}; overnight entries 1179; maximum signal-to-next-open gap 73.0 hours
+Complete-year sign gate FAIL; annual NY entry cohorts {"2020": {"net_total": -236.97739916416418, "trades": 367}, "2021": {"net_total": -194.84144550383292, "trades": 965}, "2022": {"net_total": -534.327483596418, "trades": 948}, "2023": {"net_total": -112.76579888758724, "trades": 859}, "2024": {"net_total": -62.961685019842186, "trades": 729}, "2025": {"net_total": -610.6107340693645, "trades": 754}, "2026": {"net_total": -801.3117374442547, "trades": 527}}
+OPEN_END last-close mark excluded from closed stats -37.400; funnel {'actions': 36057, 'no_next_m1_open': 1, 'flat_disagreement': 7110, 'entries': 5150, 'model_warning_exits': 4921, 'prop_liquidations': 228, 'same_open_reversal_suppressed': 752}
+
+NQ / CFD | cost 1.00 | GATE FAIL
+Closed trades 2962; net expectancy -4.904794 price units/trade; total net PnL -14527.999; Net Sharpe -0.034061; MBB p 0.9605; win rate 49.83%
+Accuracy minus trade win rate 9.34 percentage points (different denominators: scored H1 labels versus closed trades)
+Exits {'MODEL_WARNING': 2962, 'PROP_LIQUIDATION': 0, 'OPEN_END': 1}; overnight entries 974; maximum signal-to-next-open gap 51.0 hours
+Complete-year sign gate FAIL; annual NY entry cohorts {"2020": {"net_total": -1632.9549999999927, "trades": 319}, "2021": {"net_total": -5605.35, "trades": 544}, "2022": {"net_total": 2872.207000000022, "trades": 384}, "2023": {"net_total": -4831.788000000004, "trades": 373}, "2024": {"net_total": 2702.137000000015, "trades": 555}, "2025": {"net_total": -8410.633000000005, "trades": 368}, "2026": {"net_total": 378.3830000000453, "trades": 419}}
+OPEN_END last-close mark excluded from closed stats -66.812; funnel {'actions': 45549, 'no_next_m1_open': 1, 'flat_disagreement': 7800, 'entries': 2963, 'model_warning_exits': 2962, 'prop_liquidations': 0, 'same_open_reversal_suppressed': 166}
+
+NQ / FUTURES | cost 0.39 | GATE FAIL
+Closed trades 3329; net expectancy -4.479768 price units/trade; total net PnL -14913.148; Net Sharpe -0.034377; MBB p 0.9752; win rate 47.85%
+Accuracy minus trade win rate 11.32 percentage points (different denominators: scored H1 labels versus closed trades)
+Exits {'MODEL_WARNING': 2901, 'PROP_LIQUIDATION': 428, 'OPEN_END': 1}; overnight entries 1080; maximum signal-to-next-open gap 51.0 hours
+Complete-year sign gate FAIL; annual NY entry cohorts {"2020": {"net_total": -1345.4707276244733, "trades": 333}, "2021": {"net_total": -4927.979843718843, "trades": 590}, "2022": {"net_total": 2054.143067035004, "trades": 447}, "2023": {"net_total": -4950.176221110554, "trades": 446}, "2024": {"net_total": 2964.4957709183745, "trades": 608}, "2025": {"net_total": -8534.533055503529, "trades": 449}, "2026": {"net_total": -173.62730994955984, "trades": 456}}
+OPEN_END last-close mark excluded from closed stats -66.202; funnel {'actions': 45549, 'no_next_m1_open': 1, 'flat_disagreement': 7856, 'entries': 3330, 'model_warning_exits': 2901, 'prop_liquidations': 428, 'same_open_reversal_suppressed': 161}
+
+ES / CFD | cost 0.51 | GATE FAIL
+Closed trades 2616; net expectancy 0.302500 price units/trade; total net PnL 791.341; Net Sharpe 0.009952; MBB p 0.2874; win rate 52.45%
+Accuracy minus trade win rate -0.38 percentage points (different denominators: scored H1 labels versus closed trades)
+Exits {'MODEL_WARNING': 2616, 'PROP_LIQUIDATION': 0, 'OPEN_END': 1}; overnight entries 819; maximum signal-to-next-open gap 73.0 hours
+Complete-year sign gate FAIL; annual NY entry cohorts {"2021": {"net_total": 662.583000000001, "trades": 255}, "2022": {"net_total": -1512.0799999999876, "trades": 731}, "2023": {"net_total": 758.3559999999972, "trades": 593}, "2024": {"net_total": 1077.6780000000085, "trades": 328}, "2025": {"net_total": 18.557999999999687, "trades": 505}, "2026": {"net_total": -213.75399999999738, "trades": 204}}
+OPEN_END last-close mark excluded from closed stats 61.590; funnel {'actions': 28454, 'no_next_m1_open': 1, 'flat_disagreement': 4989, 'entries': 2617, 'model_warning_exits': 2616, 'prop_liquidations': 0, 'same_open_reversal_suppressed': 223}
+
+ES / FUTURES | cost 0.30 | GATE FAIL
+Closed trades 2817; net expectancy 0.451153 price units/trade; total net PnL 1270.897; Net Sharpe 0.015208; MBB p 0.1992; win rate 51.58%
+Accuracy minus trade win rate 0.49 percentage points (different denominators: scored H1 labels versus closed trades)
+Exits {'MODEL_WARNING': 2577, 'PROP_LIQUIDATION': 240, 'OPEN_END': 1}; overnight entries 886; maximum signal-to-next-open gap 73.0 hours
+Complete-year sign gate FAIL; annual NY entry cohorts {"2021": {"net_total": 643.6879552109375, "trades": 277}, "2022": {"net_total": -1142.1610277066845, "trades": 756}, "2023": {"net_total": 904.558610951874, "trades": 626}, "2024": {"net_total": 1156.2221245638234, "trades": 398}, "2025": {"net_total": -30.263523823517506, "trades": 549}, "2026": {"net_total": -261.1472990506001, "trades": 211}}
+OPEN_END last-close mark excluded from closed stats 61.800; funnel {'actions': 28454, 'no_next_m1_open': 1, 'flat_disagreement': 5022, 'entries': 2818, 'model_warning_exits': 2577, 'prop_liquidations': 240, 'same_open_reversal_suppressed': 217}
+
+Interpretation: Directional classification accuracy is not a trading edge after entry/exit timing and bid/ask costs. The accuracy-minus-win-rate comparison has different units and denominators, so it is a diagnostic gap only.
+Realized trades may span nights/weekends; swap and financing are unmeasured. Futures executions use CFD-derived bars rather than native CME quotes, and the prop guard is per position rather than a firm account-wide equity rule.
+The walk-forward model predictions are out of sample for training, but feature architecture and these tapes have prior research exposure. No live execution or prop challenge pass is established.

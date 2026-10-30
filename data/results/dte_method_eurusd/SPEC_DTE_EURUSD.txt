@@ -1,0 +1,122 @@
+SPEC_DTE_EURUSD.txt
+
+DTE METHOD (DELIVERY + EXECUTION) - EURUSD PHASE 1 SIGNAL-QUALITY SCREEN
+Hypothesis #34 (owner-tasked, 2026-09-22). Phase-1 MFE/MAE excursion screen
+ONLY: no trade rule beyond first-touch excursions, no EA, no tester, no
+Phase 2 implied by any outcome.
+
+1. TASKING AND LINEAGE
+- Mechanical transplant of Hypothesis #32 (dte_method_screen, US500-tick M1,
+  OVERALL FAIL 2026-09-22: aggregate MFE 17.21 vs MAE 18.28 pt, bootstrap
+  P=0.9359) to the newly onboarded EURUSD tape, per task-owner instruction.
+  New instrument, new session structure (24h FX tape vs US cash session),
+  new cost floor: a new artifact, NOT a re-litigation of #32. Discretionary
+  elements (liquidity-target trendlines, oscillator confluence) remain
+  deliberately omitted, as in #32.
+
+2. DATA
+- Tape: data/results/eurusd_onboarding/eurusdtick_m1.csv (verified
+  onboarding 2026-09-22: 2,490,896 M1 bars, 2020-01-01 22:01 UTC ..
+  2026-09-18 20:59 UTC, Bid OHLC, epoch-UTC open times, no-tick buckets
+  skipped). Bid prices throughout.
+- Timezone: America/New_York (DST-aware), computed from epoch UTC.
+- M15: aggregated from the M1 tape per tasking (bucket = floor(epoch/900)
+  *900; buckets with >= 1 M1 bar only; open = first M1 open, high = max
+  high, low = min low, close = last close). The project "M15 from M5"
+  convention is explicitly overridden by tasking (same as #32);
+  sparse-bucket integrity (mean M1 bars per bucket, share of buckets with
+  < 15 bars) is measured and reported.
+- Session: setup candles = M1 displacement candles with OPEN wall minute
+  strictly inside [08:00, 16:00) ET (wall in [480, 960)).
+- Excursion walk: to the 17:00 ET Forex daily close of the entry bar's NY
+  date (M1 bars with same NY date and open wall < 1020; the 17:00 bar
+  belongs to the next FX trading day and is excluded).
+
+3. [D] DELIVERY STATE MACHINE (M15 FAIR VALUE GAPS)
+- Bullish M15 FVG forms at completed bucket i when Low[i] > High[i-2];
+  active interval (High[i-2], Low[i]); mitigated/invalidated when any later
+  M15 bucket CLOSES below High[i-2].
+- Bearish M15 FVG forms when High[i] < Low[i-2]; active interval (High[i],
+  Low[i-2]); invalidated when an M15 bucket closes above Low[i-2].
+- A bucket is completed at its close time (bucket open + 900 s). Active
+  lists update once per completed bucket, in the order: (a) remove gaps
+  mitigated by THIS bucket's close, then (b) append gaps newly formed at
+  this bucket. Lists persist across days and weekend/holiday closures.
+- FVG triples use consecutive PRINTED buckets (wall-clock adjacency not
+  required); gaps spanning weekend closures are allowed (tape reality).
+
+4. [E] EXECUTION STATE MACHINE (M1 INVERTED FVG / V-SPIKE)
+- M1 FVGs form over three consecutive PRINTED bars (i-2, i-1, i), same
+  inequalities as section 3 applied to M1 bars.
+- Short setup (bearish IFVG): fresh bullish M1 FVG whose bottom High[i-2]
+  is CLOSED BELOW (strict inequality) by printed bar j with j - i in
+  {1..6}; the FIRST qualifying bar is the displacement.
+- Long setup (bullish IFVG): fresh bearish M1 FVG whose top Low[i-2] is
+  closed above (strict) within the same 6-printed-bar rule.
+- Entry: the OPEN of the next printed M1 bar after the displacement bar
+  (bar time > t[j]) whose NY date equals the displacement bar's NY date and
+  whose open wall < 1020. If no such bar exists: no-entry (dropped,
+  counted).
+- Session validity: the displacement bar's open wall in [480, 960).
+- Each M1 FVG yields at most one signal (first qualifying displacement);
+  one displacement bar may carry signals from several distinct gaps; every
+  signal is recorded separately with its own stop and walk.
+
+5. CONTEXT JOIN (D + E)
+- A short signal is valid iff the displacement bar's CLOSE lies inside or
+  touches (inclusive bounds) an ACTIVE, completed, same-direction (bearish)
+  M15 FVG, where "active" means the M15 state as of the last bucket whose
+  close time <= the displacement bar's close time (t[j] + 60 s).
+- Long signals join bullish M15 FVGs symmetrically.
+- The matched gap (earliest-formed when several match) is recorded in the
+  signal CSV; unmatched signals are counted in the funnel and dropped.
+
+6. INITIAL RISK (LOCAL EXTREME STOP)
+- Short: SL = highest high of the printed M1 bars i-2 .. j inclusive.
+- Long: SL = lowest low of the printed M1 bars i-2 .. j inclusive.
+- Risk = |Entry - SL| in price; reported in pips (1 pip = 0.00010).
+  Signals with Risk <= 0 are degenerate and dropped (counted).
+
+7. EXCURSIONS (PRE-COST)
+- From the entry bar (entry price = its open) through every printed M1 bar
+  with the same NY date and open wall < 1020 (entry bar included):
+  MFE = (max high - entry) for longs / (entry - min low) for shorts;
+  MAE = (max high - entry) for shorts / (entry - min low) for longs; both
+  in pips. R-normalized multiples MFE/Risk and MAE/Risk are also reported.
+- Descriptive cost context ONLY (Phase 1 stays gross): the verified EURUSD
+  London/NY overlap median spread is 0.3 pips (onboarding 2026-09-22);
+  mean/median MFE, MAE and MFE-MAE are compared against this floor in the
+  report. No net gate exists at Phase 1.
+
+8. GATES (FROZEN IN GATE_DTE_EURUSD.TXT BEFORE ANY CODE EXISTS)
+G-DTE1  total session-valid signals >= 150.
+G-DTE2  aggregate mean MFE > mean MAE STRICTLY at each of 0.5R, 1.0R, 1.5R,
+        operationalized as excess excursions: for T in {0.5, 1.0, 1.5}:
+        mean(max(MFE - T*Risk, 0)) > mean(max(MAE - T*Risk, 0)) pips.
+        PASS requires ALL THREE strict inequalities.
+G-DTE3  day-block bootstrap: resample NY dates with replacement (10,000
+        resamples, numpy.random.default_rng(20260921)); statistic = pooled
+        mean of (MFE - MAE) in pips over resampled signals;
+        P(statistic <= 0) <= 0.20.
+OVERALL PASS requires all three. Any FAIL is final for this artifact.
+
+9. HONESTY / ANTI-LEAK RULES
+- All state lookups causal: M15 context is strictly the state as of the
+  last bucket closed at or before the displacement close; entries, stops
+  and walks use only bars at or after their causal time.
+- No parameter search: window, thresholds, bar counts, seed frozen here;
+  nothing tuned after seeing results; no post-hoc model or filter changes.
+- Null result pre-accepted as a complete deliverable. Family context: the
+  fvg_continuation and dte families are null on US500-tick (frozen
+  verdicts); EURUSD is a new domain per tasking, not a rescue attempt.
+- Phase-1 excursions are signal-quality measurements, not tradable
+  results (no spread/swap/slippage modeling beyond the descriptive floor
+  comparison; no walk-forward claim).
+
+10. ARTIFACTS (data/results/dte_method_eurusd/)
+- SPEC_DTE_EURUSD.txt, GATE_DTE_EURUSD.txt (written BEFORE any code)
+- REPORT_DTE_EURUSD_PHASE1.txt (funnel, raw-pip and R-normalized
+  excursion tables, cost-floor comparison, gate evaluation, verdict)
+- dte_eurusd_signals.csv (one row per executed signal)
+- run_meta.json (frozen parameters, counts, gate outcomes)
+- PROGRESS.md section logged as Hypothesis #34.

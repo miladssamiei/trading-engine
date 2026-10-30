@@ -1,0 +1,34 @@
+GATE_SHORT_TERM_REVERSAL
+Verbatim extraction from SPEC_SHORT_TERM_REVERSAL.txt (frozen 2026-09-08,
+before any script exists). These clauses and ONLY these decide Pass/Fail.
+
+G-R1 (OOS IC FLOOR): on the 2021-01-01..2026-04-30 test window, the
+Spearman IC between predictions and y_{t,h} must be >= 0.025 for at
+least one (model, horizon) of the 6 configurations. One-sided positive:
+negative or near-zero IC is a failure. If no configuration passes,
+the study FAILS at G-R1 and G-R2 is not evaluated.
+
+G-R2 (NET ECONOMIC VIABILITY): among G-R1 passers, the configuration
+with the highest test IC is selected (selection by IC only, BEFORE any
+economics are computed). Signal s_t = sign(prediction) (+1/-1/0 at
+exactly zero); NON-OVERLAPPING trades t0, t0+h, ... from the first test
+row; gross = s_t * (P_{t+h} - P_t) in D1-close points; costs = 0.51 pt
+round-trip spread + financing at the documented convention (swap_long
+-20 pt/night, swap_short +2 pt/night, Wednesday-night starts x5, on
+calendar nights of the actual hold); annualized net Sharpe =
+mean/std(ddof=1) * sqrt(252/h) must be > 0 on the test window. Gross
+Sharpe, total costs, and per-year net points are reported alongside.
+
+STOP RULES (SPEC section 7, binding on the gates above):
+- No sign inversion: a strongly negative best test IC is a FAILURE, not
+  an edge; flipping signs after viewing test results is the forbidden
+  post-hoc rescue.
+- Failure at G-R1 or G-R2 -> the report carries "TRANSITION TO PATH C:
+  RESEARCH EXHAUSTED" - absolute termination of strategy research on the
+  US500/XAUUSD CFD tapes; no further pattern or ML SPEC may be proposed.
+- No re-runs with different windows, grids, costs, seeds, or feature
+  subsets after any test-window metric is viewed; a gate failure is
+  final.
+- INFEASIBLE (distinct from Path C): only if the US500.c D1 tape cannot
+  support the study; feature-level exclusions (no passing d*, missing
+  USA30.c) are recorded and the study proceeds with survivors.

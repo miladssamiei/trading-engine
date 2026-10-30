@@ -1,0 +1,148 @@
+HYPOTHESIS #54 SPEC: UNSEEN-ASSET KELTNER CHANNEL BREAKOUT REPLICATION (4h execution / D1 17:00 ET anchor)
+Study ID: unseen_asset_kc
+Date frozen: 2026-09-24, before any evaluation code was written or run.
+Status: frozen. Corrections or re-measurements require a NEW study name.
+Lineage: #50 (cross_asset_kc_breakout) FAILED overall but passed on XAUUSD;
+#51 (xauusd_kc_oos) delivered a bounded PASS whose disposition explicitly
+named "a genuinely unseen-instrument/time OOS replication" as one of two
+compliant follow-ups. This study IS that path, owner-tasked: the #51
+mechanics are frozen verbatim and run on three instruments whose tapes
+have never been touched by any study in this program - USTECH (Nasdaq-100
+CFD-style index), BTCUSD, ETHUSD. No parameter is re-fitted; nothing about
+these tapes informed #50/#51.
+
+1. DATA
+1.1 Tapes (standard schema time,open,high,low,close,tick_volume; time =
+    epoch-UTC seconds; onboarded 2026-09-24 by
+    evaluate/virgin_assets_onboarding.py from Dukascopy-style M1 BID bar
+    exports in C:\Users\Milad\download; source sha256 pinned in
+    data/results/virgin_assets/onboarding_stats.json; monotonicity and
+    M1->M5 consistency HARD-ASSERTED there; 0 integrity drops on all
+    three tapes):
+    - USTECH: data/results/virgin_assets/ustech_m1.csv  (2,936,100 bars, points)
+    - BTCUSD: data/results/virgin_assets/btc_m1.csv     (3,260,989 bars, price units)
+    - ETHUSD: data/results/virgin_assets/eth_m1.csv     (3,375,260 bars, price units)
+    All three span 2020-01-01 00:00 UTC .. 2026-09-23 23:59 UTC.
+1.2 Timezone America/New_York (EST/EDT) for all wall-time logic.
+1.3 COST FLOORS ARE OWNER-SUPPLIED ESTIMATES, NOT MEASUREMENTS (declared):
+    the M1 BID exports carry no ask side, so no spread distribution
+    exists. Round-trip floors: USTECH 1.0 points, BTCUSD 15.0 price
+    units, ETHUSD 2.0 price units; subtracted once per trade from gross.
+    Gate margins smaller than plausible floor error are flagged by also
+    reporting gross-side statistics in the report.
+1.4 tick_volume is 0 on all three tapes (vendor export carries no
+    volume); it is a schema placeholder, never interpreted downstream.
+
+2. MULTI-TIMEFRAME AGGREGATION (identical machinery to #50/#51)
+2.1 1h base: M1 epochs floored to 3600s slots; open=first, high=max,
+    low=min, close=last per slot; reindexed to the FULL continuous 3600s
+    grid first..last slot; missing hours forward-filled OHLC = prior
+    close, volume = 0 (synthetic flat bars). NY wall 1h boundaries align
+    exactly with the epoch grid.
+2.2 4h execution bars: NY WALL buckets [00:00-04:00), [04:00-08:00), ...
+    built from the continuous 1h grid; DST-transition buckets span 23 or
+    5 real hours; buckets contiguous. n4 = wall - (wall mod 4h).
+2.3 D1 anchors: NY WALL buckets [17:00 -> next 17:00) from the continuous
+    1h grid (dkey = wall - ((wall - 17h) mod 24h)); D1 close = last 1h
+    close of the bucket; the D1 bar COMPLETES at its 17:00 ET boundary.
+    For a 4h bar t the mapped D1 input is the last bucket whose key is
+    <= (4h bucket key - ((key - 17h) mod 24h) - 24h) - strictly completed
+    BEFORE the 4h bucket; never the bucket containing t.
+2.4 Crypto tapes print weekend minutes, so BTCUSD/ETHUSD have few
+    synthetic bars; USTECH closes Fri..Sun (327 weekend closures in the
+    onboarding census) and its weekends are forward-filled flats - the
+    #50/#51 declared flat-bar consequences apply unchanged there.
+
+3. STATE MACHINE (frozen #50/#51 mechanics; all inputs strictly completed)
+3.1 D1 anchor trend: EMA(50) on D1 closes (ewm span=50, adjust=False;
+    first 49 values NaN). Bullish iff D1 Close > EMA(50); Bearish iff
+    D1 Close < EMA(50); equality = neither.
+3.2 4h execution channels: EMA(29) on 4h closes (first 28 NaN); Wilder
+    ATR(29) on 4h H/L/C (seed = mean of first 29 TRs, RMA after);
+    Upper = EMA29 + 2.77*ATR29; Lower = EMA29 - 2.77*ATR29.
+3.3 Armed at 4h bar t iff prior-bar Close, EMA29, ATR29, Upper, Lower
+    (all t-1) are non-NaN AND the mapped D1 bar exists with non-NaN
+    EMA(50). Warm-up (first ~29 4h bars and first 49 D1 buckets,
+    i.e. roughly Feb 2020) is absorbed inside the CAL block.
+
+4. SIGNALS, EXECUTION AND EXIT
+4.1 At the open of each 4h bar t while flat:
+    LONG  iff Close(t-1) > Upper(t-1) AND mapped D1 is Bullish;
+    SHORT iff Close(t-1) < Lower(t-1) AND mapped D1 is Bearish.
+    Entry = Open(t), market. Max ONE open trade per instrument; trades
+    occupy [entry_bar, exit_bar]; signals while open are counted
+    (ignored-while-open) and not acted on.
+4.2 Initial stop: SL = Entry - max(|Entry - EMA29(t-1)|, 1.5*ATR29(t-1))
+    for LONG; Entry + same for SHORT.
+4.3 EMA-riding trail: on every 4h bar j of the walk (entry bar included),
+    AFTER that bar's exit checks, SL ratchets to EMA29(j) - LONG:
+    SL = max(SL, EMA29(j)); SHORT: SL = min(SL, EMA29(j)); only tightens;
+    NaN EMA29 skipped.
+4.4 Exit walk (long case; short mirrored), checks in order per bar j:
+    a) Open(j) <= SL -> exit at Open(j), SL_GAP (honest gap fill);
+    b) Low(j) <= SL -> exit at SL, reason SL (worst-case same-bar
+       default: stop checked before any ratchet);
+    c) else apply 4.3 and continue.
+    No take-profit. If nothing hits by the final 4h bar, exit at its
+    close, reason FORCED_EOD, included in results.
+4.5 MFE/MAE recorded over [entry..exit] in instrument units, descriptive
+    only. R multiple = side*(Exit-Entry)/initial_risk_distance.
+
+5. ECONOMICS
+5.1 Gross = side*(Exit - Entry) (scale 1.0 for all three; units: USTECH
+    points, BTCUSD/ETHUSD price units). Net = Gross - cost floor (1.0 /
+    15.0 / 2.0), one round trip per trade.
+5.2 Net Sharpe (per-trade convention): mean(Net)/std(Net, ddof=1)*sqrt(252)
+    over executed trades of the instrument.
+
+6. TEMPORAL BLOCKS (REPORTING ONLY - never gated)
+6.1 One continuous walk per instrument over the full tape; each trade is
+    assigned a block by its ENTRY bar NY wall date:
+    CAL [2020-01-01, 2023-12-31] / OOS [2024-01-01, present].
+6.2 The report shows both blocks (n, mean, Sharpe, sides, exits, yearly)
+    and the CAL->OOS degradation direction, mirroring #51's regime-
+    stability presentation. Gates are evaluated on the FULL tape only:
+    the entire tape is unseen data for this mechanic, so the full tape IS
+    the replication test; the split is diagnostic, not a gate.
+
+7. PHASE 1 GATES (applied INDEPENDENTLY to each instrument, on the FULL
+   TAPE; frozen verbatim in GATE_UNSEEN_KC.txt)
+    G-REP1: Total executed trades >= 30.
+    G-REP2: Net Sharpe Ratio > 0.
+    G-REP3: Moving-block bootstrap (10,000 resamples, block=5 trades,
+           seed 20261002) P(mean Net PnL <= 0) <= 0.20.
+    VERDICT RULE: an instrument PASSES only if G-REP1 AND G-REP2 AND
+    G-REP3 all PASS. OVERALL PASS only if ALL THREE instruments PASS. Any
+    FAIL is final for this artifact; corrections require a new study
+    name. Null results are complete, expected deliverables.
+
+8. OUTPUTS (data/results/unseen_asset_kc/)
+    SPEC_UNSEEN_KC.txt (this file), GATE_UNSEEN_KC.txt (written before
+    the run), REPORT_UNSEEN_KC.txt (funnel, full-tape economics, CAL/OOS
+    block degradation, gates), unseen_kc_signals.csv (all instruments,
+    asset + block columns), run_meta.json (sha256 lineage of tapes and
+    script, funnel, gates, verdict).
+
+9. HONESTY / ANTI-LEAK RULES
+9.1 Mechanics, parameters and walk logic are copied verbatim from #51
+    (itself frozen from #50): prior-bar indicator inputs only, completed
+    D1 anchors only, worst-case same-bar stop, honest gap fills, exit
+    checks before ratchet. No adaptation to the new tapes beyond the
+    declared cost-floor estimates.
+9.2 Cost floors are owner estimates (1.3): a pass/fail decided inside
+    the floor-uncertainty band is reported as such (gross mean and
+    cost-free bootstrap are printed alongside) and does NOT license a
+    re-run with friendlier floors.
+9.3 Continuous forward-fill consequences declared as in #50/#51: on flat
+    runs EMA flattens toward the last close, Wilder ATR decays (channels
+    narrow), flat closes cannot print new breakouts, D1 direction
+    persists; accepted, no bar-skipping fix. Crypto 24/7 printing makes
+    these mostly moot on BTCUSD/ETHUSD; they bind on USTECH weekends.
+9.4 Single frozen parameterization; no optimization, no re-runs, no
+    post-hoc filtering; sides, years, blocks and instruments reported as
+    run. The full-tape gates are in-sample for these tapes by
+    construction (first and only touch); the CAL/OOS split and
+    year-by-year signs are inspected for regime stability but not gated.
+    MFE/MAE are exploratory descriptors, never results. Phase 2 (MT5
+    execution) only on overall PASS plus standard walk-forward
+    discipline (>=150 trades, year-by-year sign agreement).

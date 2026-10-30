@@ -1,0 +1,174 @@
+SPEC_DAILY_DIRECTIONAL_MODEL
+Study dir: data/results/daily_directional_model/
+Pre-declared: 2026-09-08, BEFORE any script exists.
+Lineage: direct consumer of data/results/daily_feature_engineering/
+daily_features_stationary.csv (VERDICT PASS 2026-09-08: 5 features, 1,112
+rows, G-F1..G-F3 clean). That SPEC's condition "model SPEC only after all
+gates PASS" is satisfied. This SPEC trains and evaluates PREDICTIVE MODELS
+under selection-bias and serial-correlation controls. It defines no EA, no
+tester import, no live deployment. Phase 2 (MT5 reconciliation) may only be
+proposed after a full PASS here, under a NEW SPEC.
+
+SECTION 0. SCOPE AND NON-GOALS
+
+0.1 Objective: measure whether the 5 orthogonal features (ffd_log_us500,
+ffd_log_spdj, vrp, tslope_d21, dfii10_d21) have out-of-sample predictive
+Information Coefficient (IC) for US500 forward returns at horizons
+h in {1, 2, 3, 5} days, and whether that translates to positive net Sharpe
+after documented trading costs. Null outcome is a COMPLETE deliverable.
+
+0.2 Non-goals: no new features, no third model class, no hyperparameter
+grids beyond those pre-declared below, no walk-forward re-optimization, no
+ensemble of A+B, no per-horizon feature selection.
+
+SECTION 1. DATA (frozen inputs)
+
+1.1 Features: daily_features_stationary.csv exactly as written (1,112 rows,
+2022-01-04..2026-04-30, 5 columns). Read-only. If the file changes, this
+SPEC is void and must be re-declared.
+
+1.2 Prices: US500 cash closes P_t derived from
+data/results/orb_2021_present/us500tick_m5.csv by the SAME rule as the
+feature pipeline (last M5 bar close before 16:00 ET per NY cash date;
+half-days handled; wall minutes in base-60). The feature row dates index
+the price series; the 21 rows before 2022-01-04 from the same close series
+supply the trailing-volatility warmup. No other price source.
+
+1.3 Target: y_{t,h} = ln(P_{t+h} / P_t) / (sigma_t * sqrt(h)), where
+sigma_t = std(ddof=1) of the last 20 daily log returns r_t..r_{t-19}
+(r_t = ln(P_t/P_{t-1}) is known at the close of t). Rows lacking P_{t+h}
+are dropped for that horizon and the count is reported. h in {1, 2, 3, 5}.
+
+SECTION 2. MODELS (exactly two classes, all parameters frozen)
+
+Model A - ElasticNet (sklearn ElasticNet):
+  - Feature standardization inside each training fold only (train-fold
+    mean/std; test rows transformed with train statistics).
+  - Hyperparameters chosen by inner leave-one-group-out CV over the 4
+    training groups (inner score = mean Spearman IC): alpha in
+    {0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1.0}, l1_ratio in
+    {0.1, 0.5, 0.9}. Chosen per outer path, refit on all 4 train groups.
+  - max_iter=10000, tol=1e-8, random_state fixed.
+
+Model B - LightGBM regressor (lightgbm 4.6.0, already in the env; version
+recorded in the report):
+  - max_depth=3; min_data_in_leaf=ceil(0.05 * n_train_rows) computed per
+    training fold; feature_fraction=0.8; n_estimators=200;
+    learning_rate=0.05; min_gain_to_split=0.0; bagging_fraction=1.0;
+    random_state=42; deterministic (num_threads recorded). NO hyperparameter
+    search: the constraints ARE the pre-declared tuning.
+  - Features used raw (tree model; no standardization).
+
+Global seed 42 everywhere. No seed search. No other estimator may be
+substituted if a class fails; if LightGBM cannot run in the environment,
+Model B is recorded INFEASIBLE and the study proceeds with Model A (this is
+an environmental fact, not a rescue).
+
+SECTION 3. VALIDATION: COMBINATORIAL PURGED CV (frozen)
+
+3.1 Groups: the 1,112 rows in chronological order split into N=6 contiguous
+groups by np.array_split semantics (186,186,186,186,184,184).
+
+3.2 Paths: all C(6,2)=15 test-group pairs; train = the remaining 4 groups.
+Each path produces OOS predictions for its 2 test groups.
+
+3.3 Purging (serial-correction part 1): with rows indexed chronologically
+0..1111 and the test groups' index ranges [g_start, g_end], a training row
+i is DROPPED iff i lies in [g_start - h, g_end + h] for ANY test group g
+(its label window {i, i+h} overlaps the test label windows). Applied per
+horizon h.
+
+3.4 Embargo (part 2): additionally drop the embargo window: floor(0.01 *
+1112) = 11 rows immediately following each purged span, i.e. rows
+(g_end + h, g_end + h + 11] for each test group g.
+
+3.5 Every (model, horizon, path) fit uses ONLY surviving training rows.
+Test rows are never transformed by information outside their own features
+(except Model A standardization from train statistics).
+
+SECTION 4. METRICS AND GATES (verbatim-extracted into
+GATE_DAILY_DIRECTIONAL_MODEL.txt)
+
+4.1 OOS IC per path = Spearman rank correlation between predictions and
+y_{t,h} over the path's test rows. Primary statistic per (model, horizon):
+the MEAN of the 15 path ICs; significance reported as t-stat =
+mean / (std(ddof=1)/sqrt(15)), df=14 (reported, not gated). A pooled
+all-paths IC is reported as secondary only (rows repeat across paths; it
+is not the test statistic).
+
+G-M1 (MINIMUM IC FLOOR): the mean OOS IC of at least one (model, horizon)
+configuration must be >= 0.025 (the break-even IC from the research memo,
+which already embeds the multiple-configuration selection burden). If no
+configuration reaches 0.025, the study STOPS IMMEDIATELY: the features do
+not contain a tradable directional edge; remaining gates are not run.
+
+G-M2 (PROBABILITY OF BACKTEST OVERFITTING): build the 15x8 performance
+matrix of path ICs (15 paths x 2 models x 4 horizons). For each path rank
+the 8 configurations; relative rank omega = rank / 9; logit
+lambda = ln(omega / (1 - omega)); PBO of a configuration = fraction of
+paths with lambda < 0 (i.e., the configuration ranks in the bottom half of
+that path). The configuration selected for G-M3 (among G-M1 passers, the
+one with the highest mean path IC) must have PBO <= 0.20. The full matrix,
+per-path ranks, logits, PBO per configuration, and a Deflated Sharpe Ratio
+(Bailey & Lopez de Prado, number of trials = 8, skew and kurtosis of the
+selected configuration's OOS strategy returns) are written to
+pbo_evaluation.json. DSR is reported, not gated.
+
+G-M3 (NET ECONOMIC VIABILITY): for the selected configuration only:
+  - Per row, average its OOS predictions across the paths that tested it
+    (each row is tested in exactly 5 paths); signal s_t = +1 if the average
+    prediction > 0, -1 if < 0, 0 if exactly 0.
+  - Evaluate NON-OVERLAPPING trades: take rows t0, t0+h, t0+2h, ... from
+    the first dataset row; trade gross return in index points =
+    s_t * (P_{t+h} - P_t).
+  - Costs per trade: 0.51 index points round-trip spread, plus overnight
+    financing under the documented project convention: swap_long -20
+    points/night held, swap_short +2 points/night held, Wednesday nights
+    charged x5 (calendar nights of the actual hold). Net trade return =
+    gross - 0.51 - financing_points(s_t).
+  - Annualized net Sharpe = mean/net-std(ddof=1) * sqrt(252/h). GATE:
+    net Sharpe > 0. Gross Sharpe, total costs, and the per-year net PnL
+    split are reported alongside.
+
+SECTION 5. HONESTY AND STOP RULES
+
+5.1 No G-M1 passer -> STOP; complete null deliverable. No feature changes,
+no group-count changes (N=6 is frozen), no Random Forest / neural network /
+gradient-boosting-library substitution, no threshold relaxation.
+
+5.2 Config selection for G-M3 is frozen: among (G-M1, G-M2) passers, the
+highest mean path IC. If none pass both, the study FAILS at the highest
+gate reached and stops.
+
+5.3 No post-hoc re-runs with different seeds, folds, embargo lengths,
+costs, or signal rules. A gate failure is final for this artifact;
+corrections require a NEW study under a NEW name.
+
+5.4 All 8 configurations' results (pass or fail) are written to
+cpcv_ic_results.csv; nothing is hidden by selection.
+
+5.5 The OOS predictions behind G-M3 are archived (oos_predictions.csv) and
+the trade-level G-M3 series (g3_net_returns.csv) is archived so the net
+Sharpe is independently recomputable.
+
+SECTION 6. ARTIFACTS (all under data/results/daily_directional_model/)
+
+  SPEC_DAILY_DIRECTIONAL_MODEL.txt     (this file; never edited after run)
+  GATE_DAILY_DIRECTIONAL_MODEL.txt     (verbatim gate extraction)
+  cpcv_ic_results.csv                  (model x horizon x path ICs, n_test)
+  pbo_evaluation.json                  (PBO matrix, ranks, logits, DSR)
+  oos_predictions.csv                  (row, path, model, horizon, pred, y)
+  g3_net_returns.csv                   (G-M3 trade-level returns and costs)
+  REPORT_DAILY_DIRECTIONAL_MODEL.txt   (per-gate verdicts, selection,
+                                        final conclusion)
+
+SECTION 7. EXECUTION STAGES AND PROGRESS HOOKS
+
+  Stage 1 (done at pre-declaration): this SPEC + GATE ->
+           hook "daily directional model - SPEC/GATE pre-declared".
+  Stage 2: script build + CPCV execution + metrics ->
+           hook "daily directional model - CPCV execution and metrics".
+  Stage 3: gates G-M1..G-M3 + REPORT ->
+           hook "daily directional model - verdict".
+
+END OF SPEC. FROZEN 2026-09-08.

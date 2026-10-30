@@ -1,0 +1,22 @@
+US OIL ENGINE A/B MACRO TRANSFER - 2015-SOURCE CORRECTION SPEC
+Frozen 2026-09-29 before evaluate/usoil_macro_engines_v2.py exists or any V2 run. V1 data/results/usoil_macro_engines/REPORT_USOIL_MACRO.txt is immutable DATA BLOCKED after the exact requested 2010-start command returned fetch failed. Dukascopy-node's lightcmdusd instrument catalog lists 2011-09-23 07:09 UTC as the first available M1 date, so a 2010 M1 requirement cannot be satisfied from this instrument. This V2 does not overwrite or silently amend V1.
+
+PURPOSE: Complete the requested 2020-2026 US Oil Engine A/B screen using the locally available full 2015-2026 Dukascopy BID M1 file, with five pre-2020 years for indicator warmup. It is a proxy stress test under user-specified friction, not actual FTMO history. Null results are complete.
+
+SOURCE: C:/Users/Milad/download/lightcmdusd-m1-bid-2015-01-01-2026-09-27.csv. Require sorted unique UTC millisecond M1 timestamps, positive finite valid OHLC, first observed <=2015-01-03 UTC, last >=2026-09-25 UTC, at least 3 million observed M1 after removing exact carried no-tick O=H=L=C=prior close bars, and at least 100000 real M1 in each full 2016-2025 calendar year. Record SHA256, rows, yearly counts and quote-gap statistics. Never execute a synthetic no-tick minute. No new download or data splice. If source fails, mark DATA BLOCKED.
+
+GRIDS/ENGINES: Reuse exactly frozen evaluate/futures_prop_validation_phase1.py grids(), engine_a(), engine_b() and evaluate/gold_ensemble_real_cost.py replay(), as in V1. Continuous forward-filled 1H indicators, NY-wall 4H buckets [00,04), etc. and 17:00 ET D1 anchor. A requires prior completed 4H close beyond EMA29 +/-2.77 Wilder ATR29 in last completed D1 EMA50 direction, enters first real M1 open of next 4H bucket, initial BID-coordinate stop distance max(abs(entry BID-prior EMA29),1.5*ATR29), EMA29 ratchet after each 4H close. B requires prior H1 close beyond Donchian20 from t-2, prior H1 ADX14>=20 and last completed NY-wall 4H Supertrend(10,3) agreement, enters first real M1 open of next real H1 bar, 4*prior H1 ATR14 initial stop and close +/-4*ATR14 ratchet at each real H1 close. M1 adverse stop and gap logic is frozen; one position per engine, independent engine overlap permitted, no TP/time exit. Open-end positions are not closed-return observations.
+
+COST/SWAP: Same as V1: 0.03 all-in BID/ASK round-turn floor embedded once. Both long and short positions pay -5.0% annualized per one barrel without compounding at 17:00 ET Monday-Friday, Wednesday weight 3. At each boundary mark the last strictly prior observed BID close and charge -abs(mark)*0.05/365*weight. Count entry_time < boundary <= exit_time, including accrued open-end charges through tape end. Source prices must be positive. Report stale marks, closed and open-end swap separately. USD price units are per one barrel, not a broker lot; these are owner assumptions, not verified historical FTMO costs.
+
+SCORING/STATS: Replay 2015 onward; score only entries 2020-01-01 UTC through 2026-09-27 UTC exclusive. Cohort by NY entry year. For each engine report closed trades, net win rate, gross and net expectancy after 0.03 and swap, total net price-unit PnL, all swap paid, unannualized per-trade net Sharpe and chronological moving-block bootstrap P(mean net<=0) with 10000 resamples, block length 5, seed 20261028. Annual net PnL matrix 2020-2026 (partial 2026). Save full scored ledgers, summary, metadata and plain-text report. Full-span 2010 replay is unavailable; do not label this as 2010-2026 source validation.
+
+GATES (verbatim copied to GATE_USOIL_MACRO_V2.txt):
+G1: Each engine requires at least 150 closed scored trades entered from 2020 through the available 2026 tape.
+G2: Each engine requires positive net expectancy after the 0.03 spread floor and modeled swap.
+G3: Each engine requires unannualized per-trade net Sharpe > 0.
+G4: Each engine requires MBB P(mean net <= 0) <= 0.05 with 10000 resamples, block length 5, seed 20261028.
+G5: Each engine requires no negative net entry-cohort total in any full calendar year 2020-2025; partial 2026 is disclosed, not gated.
+G6: Overall 2015-source oil transfer passes Phase 1 only if the source qualifies and both engines pass G1-G5; any unavailable source makes the overall verdict DATA BLOCKED.
+
+Freeze SPEC/GATE before V2 code/run. Preserve all V1/V2 historical artifacts. Append PROGRESS and update graphify after code. Do not infer funded-account returns, challenge EV or deploy from a BID proxy.

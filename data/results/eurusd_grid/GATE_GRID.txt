@@ -1,0 +1,5 @@
+G1: Source chronology, OHLC, minute alignment and nonnegative integer tick volume pass; actual coverage, source hash and exact H1 volume sums are recorded.
+G2: Entries occur on real H1 buckets using prior completed bars only, with strict volume/EMA direction and 30-pip spacing; sizes start at 1.0 and multiply by 1.5 with at most one order per bucket.
+G3: Every basket/position reconciles gross minus a single 0.3-pip cost times size to net; only real H1 closes with net>30 close baskets; occupancy and homogeneous basket direction hold.
+G4: Absolute adverse floating drawdown and maximum depth include all baskets, including OPEN_AT_TAPE_END; calendar/observed underwater estimates are labeled and bounded by each basket's duration.
+G5: Closed wins, terminal open liability and marked total are reported separately; no forced-close or omitted-loss claim, parameter search, prop compliance claim or live-performance validation is made.

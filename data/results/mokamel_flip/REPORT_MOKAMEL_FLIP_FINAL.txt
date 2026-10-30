@@ -1,0 +1,100 @@
+REPORT — MOKAMEL FLIP FINAL VERDICT (HYPOTHESIS #16) — CONSOLIDATED
+=====================================================================
+Date: 2026-09-04. This report consolidates Stage A (signal quality),
+Stage B (literal 40/80 exit arm + money machine + unit ring), and
+Amendment 1 (scaled-exit arms) into the single final verdict for
+hypothesis #16. All prior artifacts in data/results/mokamel_flip/
+remain untouched; this file adds the closure only.
+
+1. VERDICT: NULL. The mokamel flip mechanism has no exploitable
+gross edge on US500 at any tested exit calibration. Stage C is NOT
+run, and the study is closed.
+
+2. WHY STAGE C IS SKIPPED (explicit reasoning, per the closure
+brief): Stage C would walk the literal 40/80 arm forward over
+2022-01..2026-04 with no parameter selection. The scaled-exit
+amendment already answered the deeper question — does the flip
+trigger have real gross edge, independent of exit calibration? —
+with a clear no: at properly scaled 5/10-pt brackets (two
+independently derived methods converging), gross expectancy is
+-0.0223 pts/trade, statistically indistinguishable from zero, and
+decisively negative (-0.5323) after the confirmed 0.51-pt real cost.
+Meanwhile the 40/80 arm's Stage-B pass is already fully diagnosed as
+a 2021-only drift-capture artifact (2022+ net -$101; 2025 -$1,849).
+Running Stage C would only reconfirm that documented finding —
+procedural box-ticking, not investigation. This project's honesty
+rules favor a complete, well-diagnosed null over ceremony.
+
+3. THE BRACKETING LOGIC (the study's actual finding):
+- WIDE exit (40/80 pt, the video's literal claim): 78% of trades
+  time out at the 15:55 forced exit; the arm becomes an
+  enter-on-flip, hold-to-close drift capture; its thin positive
+  expectancy (+0.2121 pts after cost) is concentrated entirely in
+  the 2021 burn-in year and is negative from 2022 onward. The
+  pattern's own stop/target logic never engages.
+- SCALED exit (5/10 pt, price-level ratio 8.0x and 1.0x median
+  ATR14(M5) converging on the same cell): the levels now engage
+  properly (time-exit share 2.7%; the day-close rule fires; the
+  aggressive/conservative machine activates) — and the edge
+  vanishes: gross expectancy ~0, after-cost -0.5323 pts/trade,
+  Sharpe -1.54, negative in 5 of 6 years.
+- Conclusion: what looked like signal at wide exits was session
+  drift, and what survives calibration to the instrument's actual
+  volatility is nothing. The two ends bracket zero.
+
+4. THE Q1 NOTE (Dow-Jones-only domain claim): this test was always
+  OUTSIDE the pattern's claimed domain — the presenter states the
+  pattern is taught and only claimed to work on Dow Jones, and no
+  Dow data exists in this project (verified; Amendment 1 documents
+  the sourcing check). The null result on US500 is therefore
+  CONSISTENT WITH, not contradictory to, the presenter's own stated
+  limitation. This must NOT be read as "the video was right": no Dow
+  test was run, and consistency with an untested claim is not
+  evidence for it. The accurate statement is the narrow one: a
+  US500 failure is unsurprising given the presenter's own claim,
+  and nothing more.
+
+5. WHAT THIS ADDS TO THE PROJECT: mechanism #16 is now the Nth
+  video/course-sourced pattern — alongside the VWAP trend-pullback,
+  Al Brooks H1/H2, Al Brooks H2/IBS, and the 50-combination
+  scalping screen — to fail under rigorous pre-declared testing on
+  US500-tick. The emerging pattern is now itself the finding:
+  informally-sourced discretionary/mechanical patterns, presented
+  without real backtest evidence, do not survive this project's
+  cost-aware, walk-forward, real-tick validation stack on this
+  instrument. Each null narrows the search space and strengthens
+  the economic-floor rule (gross expectancy must clear ~0.5 pt/trade
+  before anything else is worth measuring). The state-machine
+  methodology built here (hand-verified T1-T6/P1-P7 machine, full
+  audit trace, two-method exit derivation with pre-registered
+  convergence) is reusable for any future candle-close mechanism.
+
+STAGE-BY-STAGE RECORD (numbers as previously reported):
+- Stage A: GATE A1 PASS (n=2,988; MFE>MAE at all thresholds; p_boot
+  0.0144; mean e +0.0884 ATR) — with the disclosed fragilities:
+  unfiltered population fails clause (ii); entire excursion edge on
+  the SHORT side; mean (MFE-MAE) +0.42 pts below the cost floor.
+- Stage B: GATE B1 PASS on the literal 40/80 arm (+0.2121 pts after
+  cost, n=1,355, Sharpe 0.1269) — 2021-carried; unit ring non-binding
+  positive; day-close rule inert at that scale.
+- Amendment 1: GATE B1-AMENDED FAIL on both scaled arms (clause (i):
+  -0.5323 pts after cost; clauses (ii)/(iii) pass; the 78% time-exit
+  symptom resolved but the economics died).
+- Stage C: skipped, per section 2 above. No MT5/Model=4 work was
+  ever warranted (nothing reached Stage D eligibility).
+
+ARTIFACTS (data/results/mokamel_flip/): SPEC_MOKAMEL_FLIP.txt,
+GATE_MOKAMEL_FLIP.txt, SPEC/GATE_..._AMENDMENT_SCALED_EXIT.txt,
+base_candle_state_log.csv (81,369 rows), manual_verification_note.txt,
+signals.csv (3,227 flip entries), stage_a_stats.json,
+matrix_master.csv, trades_all_arms.csv, yearly_breakdown.csv,
+stage_b_stats.json, dow_us500_ratio_derivation.csv,
+matrix_scaled_arms.csv, trades_scaled_arms.csv,
+stage_b_scaled_stats.json, REPORT_MOKAMEL_FLIP.txt (Stage A),
+REPORT_MOKAMEL_FLIP_SCALED_EXIT.txt (amendment), this file.
+Scripts: evaluate/mokamel_flip_state_machine.py,
+mokamel_flip_stage_a.py, mokamel_flip_stage_b.py,
+mokamel_flip_stage_b_scaled.py.
+
+MOKAMEL_FLIP is closed. It joins the null-result list; no re-run
+without a genuinely new pre-declared SPEC.

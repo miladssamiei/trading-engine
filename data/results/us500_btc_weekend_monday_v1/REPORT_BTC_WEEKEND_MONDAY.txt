@@ -1,0 +1,119 @@
+REPORT: HYPOTHESIS 77 BTC WEEKEND -> MONDAY US500 CASH
+{
+  "source": {
+    "manifest_sha256": "f1f2145a1ed1b92de95b5ac47a76865be1449599ea0b58289bef7cc55d20243a",
+    "months": 64,
+    "rows": 46690,
+    "first_utc": "2021-01-01 00:00:00+00:00",
+    "last_utc": "2026-04-30 23:00:00+00:00"
+  },
+  "us500_sha256": "a8ee68f1a0010a1be9704c0d59fd5382aa798846cdae4d519b799ae21ec66c2d",
+  "spec_sha256": "807371613c0a738f52be12be04639d342173512277b2cb79b6d5e873b73eb97f",
+  "gate_sha256": "e699a0db4a971142f06db5552dccba6ed9ac8c719b8ae2629524c5cb5040c1c6",
+  "candidate_mondays": 278,
+  "executed_mondays": 247,
+  "skip_reasons": {
+    "MISSING_US500_EXIT": 27,
+    "MISSING_US500_ENTRY": 4
+  },
+  "calibration_2021_2022": {
+    "trades": 92,
+    "gross_mean_points": -6.846163043478204,
+    "base_mean_points": -7.356163043478205,
+    "base_total_points": -676.7669999999948,
+    "stress_mean_points": -7.866163043478203,
+    "stress_total_points": -723.6869999999947,
+    "base_win_rate": 0.41304347826086957,
+    "longs": 50,
+    "shorts": 42
+  },
+  "gated_2023_plus": {
+    "trades": 155,
+    "gross_mean_points": -1.1651741935483804,
+    "base_mean_points": -1.6751741935483802,
+    "base_total_points": -259.6519999999989,
+    "stress_mean_points": -2.1851741935483813,
+    "stress_total_points": -338.7019999999991,
+    "base_win_rate": 0.535483870967742,
+    "longs": 96,
+    "shorts": 59
+  },
+  "bootstrap_p_nonpositive": 0.7145,
+  "annual": {
+    "2021": {
+      "trades": 47,
+      "gross_mean_points": -11.100744680851019,
+      "base_mean_points": -11.610744680851019,
+      "base_total_points": -545.7049999999979,
+      "stress_mean_points": -12.120744680851015,
+      "stress_total_points": -569.6749999999977,
+      "base_win_rate": 0.3404255319148936,
+      "longs": 27,
+      "shorts": 20
+    },
+    "2022": {
+      "trades": 45,
+      "gross_mean_points": -2.40248888888882,
+      "base_mean_points": -2.9124888888888196,
+      "base_total_points": -131.06199999999689,
+      "stress_mean_points": -3.4224888888888207,
+      "stress_total_points": -154.01199999999693,
+      "base_win_rate": 0.4888888888888889,
+      "longs": 23,
+      "shorts": 22
+    },
+    "2023": {
+      "trades": 44,
+      "gross_mean_points": 1.2717272727272344,
+      "base_mean_points": 0.7617272727272343,
+      "base_total_points": 33.51599999999831,
+      "stress_mean_points": 0.25172727272723433,
+      "stress_total_points": 11.07599999999831,
+      "base_win_rate": 0.5681818181818182,
+      "longs": 27,
+      "shorts": 17
+    },
+    "2024": {
+      "trades": 48,
+      "gross_mean_points": 1.8366666666666636,
+      "base_mean_points": 1.3266666666666638,
+      "base_total_points": 63.679999999999865,
+      "stress_mean_points": 0.8166666666666634,
+      "stress_total_points": 39.19999999999985,
+      "base_win_rate": 0.4791666666666667,
+      "longs": 32,
+      "shorts": 16
+    },
+    "2025": {
+      "trades": 48,
+      "gross_mean_points": -6.013687499999965,
+      "base_mean_points": -6.523687499999963,
+      "base_total_points": -313.13699999999824,
+      "stress_mean_points": -7.033687499999968,
+      "stress_total_points": -337.6169999999985,
+      "base_win_rate": 0.5208333333333334,
+      "longs": 29,
+      "shorts": 19
+    },
+    "2026": {
+      "trades": 15,
+      "gross_mean_points": -2.4040666666665857,
+      "base_mean_points": -2.914066666666587,
+      "base_total_points": -43.710999999998805,
+      "stress_mean_points": -3.4240666666665844,
+      "stress_total_points": -51.36099999999877,
+      "base_win_rate": 0.6666666666666666,
+      "longs": 8,
+      "shorts": 7
+    }
+  },
+  "gates": {
+    "G-BW1": true,
+    "G-BW2": false,
+    "G-BW3": false,
+    "G-BW4": false
+  },
+  "verdict": "FAIL",
+  "caveat": "BID M5 and fixed spread proxy; no native execution, stop, floating loss, FTMO feed or Challenge pace validation. Repeated historical project search requires forward confirmation even on Phase-1 PASS."
+}
+FINAL PHASE-1 VERDICT: FAIL

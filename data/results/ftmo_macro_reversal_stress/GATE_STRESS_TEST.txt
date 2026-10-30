@@ -1,0 +1,19 @@
+GATE_STRESS_TEST
+Verbatim extraction of SECTION 4 gates of SPEC_STRESS_TEST.txt
+(frozen 2026-09-21, BEFORE any script for this study existed).
+
+G-T1 DATA INTEGRITY: both inputs load; exactly 458 trades; all entry/exit
+dates present in the D1 grid; swap-free point total equals 2,467.60 within
+0.01; economics $1/pt/lot with the 0.51 pt spread retained per trade.
+
+G-T2 ROLLING COVERAGE: every qualifying start date (2021-01..2025-12 trade
+entry dates) simulated exactly once; pass + fail + unresolved counts equal
+the start-date count.
+
+G-T3 ROLLING ROBUSTNESS: rolling-start pass rate over RESOLVED runs >= 50%.
+
+G-T4 MONTE-CARLO ROBUSTNESS: MC pass rate over RESOLVED runs >= 50% AND
+95th-percentile peak drawdown < 10.0%.
+
+OVERALL: PASS iff G-T1..G-T4 all PASS. FAIL is a complete, final answer:
+the #23 FixedLots=3.0 pass is start-luck/sequencing fragile.

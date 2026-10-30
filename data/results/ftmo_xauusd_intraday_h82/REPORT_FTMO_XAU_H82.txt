@@ -1,0 +1,140 @@
+H82 FTMO-NATIVE GOLD H1 PHASE-1 REPORT
+{
+  "generated_utc": "2026-09-25T10:02:04.442047+00:00",
+  "spec_sha256": "95b15c8d1f69fe25cc9eec2f26a5d22a113a66c5fdb2be6bdf306263d5622b5f",
+  "gate_sha256": "2154bd69a0736c4b181691830a78465fadb47e1489279fc7b6ed6606ee625d37",
+  "source": {
+    "source": "connected FTMO-Demo XAUUSD MT5 copy_rates_range H1",
+    "clock_conversion": "server wall epoch localized to Europe/Athens, then UTC",
+    "rows": 22074,
+    "first_server_epoch": 1672707600,
+    "last_server_epoch": 1790290800,
+    "first_utc": "2023-01-02T23:00:00+00:00",
+    "last_utc": "2026-09-24T20:00:00+00:00",
+    "largest_gap_hours": 74.0,
+    "strict_unique_utc_hours": true,
+    "sha256": "1c4d70e77bddbf58061946d462df027ee03f9c9e03b5c7613d16366488cb62ea",
+    "non_custom": true,
+    "contract_size": 100
+  },
+  "signal_funnel": {
+    "brk_long": 1712,
+    "brk_short": 1129,
+    "brk_both_raw": 0,
+    "cand_long": 976,
+    "cand_short": 548,
+    "anchor_block_l": 371,
+    "anchor_block_s": 381,
+    "adx_block": 321
+  },
+  "trade_funnel": {
+    "candidates": 1524,
+    "skipped_entry_hour": 350,
+    "shadowed_by_occupancy": 476,
+    "unresolved_exits": 5,
+    "missing_entries": 0,
+    "executed_or_marked": 339
+  },
+  "test": {
+    "n": 339,
+    "dates": 331,
+    "net_mean_units": 3.372781869169318,
+    "net_total_units": 1143.3730536483988,
+    "stress_mean_units": 2.9627818691693193,
+    "max_drawdown_units": 451.88466917017104,
+    "win_rate": 0.5427728613569321,
+    "median_hold_hours_upper": 8.0,
+    "side": {
+      "BUY": {
+        "size": 207,
+        "sum": 800.2233946415247
+      },
+      "SELL": {
+        "size": 132,
+        "sum": 343.1496590068741
+      }
+    },
+    "exit_type": {
+      "DAY_FLAT": 275,
+      "SL_TRAIL": 37,
+      "SL_INIT": 22,
+      "UNRESOLVED_MARK": 5
+    }
+  },
+  "years": {
+    "2024": {
+      "n": 130,
+      "net_total_units": 26.866405304603404,
+      "stress_mean_units": -0.20333534381074264
+    },
+    "2025": {
+      "n": 128,
+      "net_total_units": 615.4888406454183,
+      "stress_mean_units": 4.3985065675423325
+    },
+    "2026": {
+      "n": 81,
+      "net_total_units": 501.01780769837706,
+      "stress_mean_units": 5.775405033313299
+    }
+  },
+  "bootstrap": {
+    "p_mean_le_zero": 0.028,
+    "ci95_low": -0.09375720400791428,
+    "ci95_high": 6.900798494146752,
+    "date_blocks": 331
+  },
+  "pace_summary": [
+    {
+      "risk_pct": 0.5,
+      "starts": 278,
+      "pass": 0,
+      "breach": 0,
+      "timeout": 278,
+      "pass_rate": 0.0,
+      "breach_rate": 0.0,
+      "median_days_to_pass": null
+    },
+    {
+      "risk_pct": 1.0,
+      "starts": 278,
+      "pass": 30,
+      "breach": 10,
+      "timeout": 238,
+      "pass_rate": 0.1079136690647482,
+      "breach_rate": 0.03597122302158273,
+      "median_days_to_pass": 146.5
+    },
+    {
+      "risk_pct": 1.5,
+      "starts": 278,
+      "pass": 140,
+      "breach": 51,
+      "timeout": 87,
+      "pass_rate": 0.5035971223021583,
+      "breach_rate": 0.18345323741007194,
+      "median_days_to_pass": 128.0
+    },
+    {
+      "risk_pct": 2.0,
+      "starts": 278,
+      "pass": 190,
+      "breach": 59,
+      "timeout": 29,
+      "pass_rate": 0.6834532374100719,
+      "breach_rate": 0.21223021582733814,
+      "median_days_to_pass": 93.0
+    }
+  ],
+  "gates": {
+    "G-FT1": false,
+    "G-FT2": true,
+    "G-FT3": true,
+    "G-FT4": true,
+    "G-FT5": false,
+    "G-FT6": true
+  },
+  "verdict": "FAIL",
+  "limitations": "H1 bar fills and fixed spread are optimistic; challenged-risk rows use continuous lots and omit historical EURUSD conversion, commission, margin and order execution. H70 prior FAIL unchanged."
+}
+OVERALL VERDICT: FAIL

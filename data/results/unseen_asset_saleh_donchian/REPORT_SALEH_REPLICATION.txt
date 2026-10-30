@@ -1,0 +1,74 @@
+REPORT - HYPOTHESIS #58: SALEH 4H/1H DONCHIAN SUPERTREND - UNSEEN-ASSET REPLICATION PHASE 1
+Generated: 2026-09-24T22:06:31.737091+00:00  |  OVERALL VERDICT: FAIL
+
+Mechanics (frozen in SPEC_SALEH_REPLICATION.txt before the run): #57
+verbatim - 4H NY-wall Supertrend(10, 3.0) direction anchor; 1H epoch
+top-of-hour execution; entry at the 1H bar-t open when close(t-1) breaks
+the Donchian(20) channel of t-2 in the anchor's direction with Wilder
+ADX14(t-1) >= 20; anchor = last strictly-completed 4H wall bucket;
+initial SL = open -/+ 4xATR14(t-1); trailing ratchet at every REAL 1H
+close (SL = max/min(prev, close -/+ 4xATR), never loosens); no TP;
+#56/#57 spread architecture with per-instrument frozen cost floors
+(long fills at Ask = Bid + C, stops on Bid; short fills at Bid, stops on
+Ask with -C trigger offset); worst-case stop check from the entry bar;
+honest gap fills; single trade per instrument, signals <= exit bar
+shadowed; continuous fill grids starting at first REAL bucket, execution
+on REAL bars only; 1.0 lot; net PnL == bid-to-bid gross - C. Cost floors
+are the #54 virgin-onboarding owner estimates (no ask side in the tapes).
+Gates independent per instrument on the FULL tape (seed 20261006);
+CAL [2020..2023] / OOS [2024..present] reporting only.
+
+== BTCUSD (cost floor 15.0 RT) == 3260989 M1 bars, 58992 1H grid (54356 real), 14750 4H grid (13668 real), UTC 2020.01.01 00:00 .. 2026.09.23 23:59
+   FUNNEL: breakout closes L 2783 / S 2199 -> anchor-blocked L 793 / S 623, ADX-blocked 567 -> candidates 2388 (L 1339 / S 1049) -> shadowed 1746 -> EXECUTED 642.
+   FULL TAPE : n=642  win 32.7%  net expectancy -29.0418 u/trade (median -269.8151, total -18644.9 u)  PF 0.957  Net Sharpe -0.013  MBB P(mean<=0) 0.6527
+   gross mean (net + 15.0): -14.0418 u/trade (floor share 106.8% of gross)
+   CAL 2020-2023: n=384  win 32.8%  mean +19.5920  total +7523.3 u  Sharpe 0.012  PF 1.042
+   OOS 2024-pres: n=258  win 32.6%  mean -101.4272  total -26168.2 u  Sharpe -0.035  PF 0.897  -> CAL->OOS DEGRADES
+   sides: BUY: n=334 sum=+31314.1 u  SELL: n=308 sum=-49958.9 u  |  exits: {'SL_INIT': 77, 'SL_TRAIL': 565}
+   holding: median 37 h, mean 47.9 h, p90 102 h, max 267 h  |  init risk: median 1454.115 u (p10 284.924, p90 2924.142)
+   yearly   : 2020: n=105 sum=+7652.9 u; 2021: n=96 sum=-227.1 u; 2022: n=94 sum=+283.7 u; 2023: n=89 sum=-186.2 u; 2024: n=96 sum=+6877.7 u; 2025: n=99 sum=-28877.9 u; 2026: n=63 sum=-4167.9 u
+   GATES: G-SALREP1 trades >= 30 :    642 -> PASS  |  G-SALREP2 Net Sharpe > 0 :   -0.013 -> FAIL  |  G-SALREP3 MBB P <= 0.20 :   0.6527 -> FAIL
+   INSTRUMENT VERDICT: FAIL
+
+== ETHUSD (cost floor 2.0 RT) == 3375260 M1 bars, 58992 1H grid (56261 real), 14750 4H grid (14122 real), UTC 2020.01.01 00:00 .. 2026.09.23 23:59
+   FUNNEL: breakout closes L 2848 / S 2191 -> anchor-blocked L 746 / S 679, ADX-blocked 626 -> candidates 2386 (L 1426 / S 960) -> shadowed 1761 -> EXECUTED 625.
+   FULL TAPE : n=625  win 34.6%  net expectancy +4.2508 u/trade (median -15.8738, total +2656.8 u)  PF 1.110  Net Sharpe 0.030  MBB P(mean<=0) 0.1892
+   gross mean (net + 2.0): +6.2508 u/trade (floor share 32.0% of gross)
+   CAL 2020-2023: n=379  win 34.6%  mean +2.9014  total +1099.6 u  Sharpe 0.021  PF 1.086
+   OOS 2024-pres: n=246  win 34.6%  mean +6.3298  total +1557.1 u  Sharpe 0.041  PF 1.136  -> CAL->OOS IMPROVES/HOLDS
+   sides: BUY: n=332 sum=+134.9 u  SELL: n=293 sum=+2521.9 u  |  exits: {'SL_INIT': 68, 'SL_TRAIL': 557}
+   holding: median 38 h, mean 47.3 h, p90 102 h, max 212 h  |  init risk: median 83.292 u (p10 13.735, p90 176.680)
+   yearly   : 2020: n=99 sum=+24.2 u; 2021: n=97 sum=-132.5 u; 2022: n=88 sum=+1781.3 u; 2023: n=95 sum=-573.4 u; 2024: n=97 sum=+524.1 u; 2025: n=89 sum=+1803.3 u; 2026: n=60 sum=-770.3 u
+   GATES: G-SALREP1 trades >= 30 :    625 -> PASS  |  G-SALREP2 Net Sharpe > 0 :    0.030 -> PASS  |  G-SALREP3 MBB P <= 0.20 :   0.1892 -> PASS
+   INSTRUMENT VERDICT: PASS
+
+== USTECH (cost floor 1.0 RT) == 2936100 M1 bars, 58992 1H grid (49201 real), 14750 4H grid (12656 real), UTC 2020.01.01 00:00 .. 2026.09.23 23:59
+   FUNNEL: breakout closes L 3979 / S 2538 -> anchor-blocked L 923 / S 793, ADX-blocked 552 -> candidates 3786 (L 2363 / S 1423) -> shadowed 2858 -> EXECUTED 928.
+   FULL TAPE : n=928  win 38.1%  net expectancy -0.4777 u/trade (median -30.8955, total -443.3 u)  PF 0.993  Net Sharpe -0.002  MBB P(mean<=0) 0.5453
+   gross mean (net + 1.0): +0.5223 u/trade (floor share 191.5% of gross)  [INSIDE FLOOR-UNCERTAINTY BAND]
+   CAL 2020-2023: n=547  win 39.3%  mean +3.5274  total +1929.5 u  Sharpe 0.021  PF 1.062
+   OOS 2024-pres: n=381  win 36.5%  mean -6.2278  total -2372.8 u  Sharpe -0.023  PF 0.932  -> CAL->OOS DEGRADES
+   sides: BUY: n=510 sum=+5096.0 u  SELL: n=418 sum=-5539.3 u  |  exits: {'SL_TRAIL': 797, 'SL_INIT': 131}
+   holding: median 23 h, mean 33.8 h, p90 79 h, max 179 h  |  init risk: median 167.606 u (p10 54.849, p90 362.649)
+   yearly   : 2020: n=131 sum=+1077.1 u; 2021: n=128 sum=+747.5 u; 2022: n=146 sum=+909.3 u; 2023: n=142 sum=-804.4 u; 2024: n=134 sum=+4122.8 u; 2025: n=134 sum=-944.4 u; 2026: n=113 sum=-5551.1 u
+   GATES: G-SALREP1 trades >= 30 :    928 -> PASS  |  G-SALREP2 Net Sharpe > 0 :   -0.002 -> FAIL  |  G-SALREP3 MBB P <= 0.20 :   0.5453 -> FAIL
+   INSTRUMENT VERDICT: FAIL
+
+OVERALL VERDICT: FAIL (rule: OVERALL PASS only if ALL THREE instruments pass; passing: ETHUSD) - final for this artifact; no re-runs
+
+HONESTY NOTES
+- Single pre-declared configuration per instrument (#57 frozen values,
+  verbatim mechanics); no variant, parameter, or cost floor was run
+  before this verdict; net PnL embeds each floor in the fills
+  (net == bid-to-bid gross - C).
+- Cost floors are #54 virgin-onboarding OWNER ESTIMATES (no ask side in
+  the M1 BID exports); verdicts with positive gross mean below the floor
+  are flagged inside the floor-uncertainty band (SPEC 6).
+- Known optimism, declared in SPEC 8 (inherited from #57): bar-open
+  entries and level-touch stop fills are best-case on an H1 bar
+  reconstruction; exit-mix / holding / trailed-vs-initial statistics are
+  computed so hollow passes are detectable.
+- In-sample full-tape first-touch replication per instrument: a PASS is
+  NOT a validated result under validation_discipline (no walk-forward,
+  no year-sign gate) and does not authorize Phase 2; Phase 2 requires a
+  NEW pre-declared SPEC meeting the standard discipline.

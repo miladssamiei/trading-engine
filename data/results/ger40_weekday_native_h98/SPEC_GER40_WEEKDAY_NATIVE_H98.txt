@@ -1,0 +1,78 @@
+HYPOTHESIS 98: NATIVE FTMO GER40 MONDAY CASH-OPEN TO THURSDAY HOLD
+Declared 2026-09-25 before H98 evaluator code or H98 trade-return run.
+Null/FAIL is complete. No account orders.
+
+MECHANISM, STATUS AND SOURCE
+Germany 40 equity exposure may earn a multi-day equity-risk premium
+from the Monday European cash open to Thursday open. This is one fixed
+long-only rule with a hard prior-volatility stop. No instrument/threshold
+optimization inside H98. GER40 connected-account native tick history
+has not previously been used for this program's strategy returns.
+Native MT5 COPY_TICKS_ALL source 2022-01..2026-09, 68,426,565 ticks,
+zero invalid quotes, aggregated to real Bid/Ask M1 OHLC at
+data/results/ger40_native_source/ger40cash_native_tick_m1_2022_2026.csv
+SHA256 6d2b52f613467a8bb2e60d322ac10acaf08188f272e4d344c0d3f40f3fcb4582.
+Monthly native hashes/counts in source_meta.json. No missing minute
+filled. GER40.cash profit currency EUR, contract 1 EUR/index point/lot,
+point0.01, lot minimum0.01 and step0.01 by connected symbol metadata.
+Native first-tick M1 spread median1.45, p90 6.60 points on full source.
+FTMO publishes zero commission for all index CFD symbols. The owner
+states EUR10000 swap-free account and news holds allowed; swap posting
+must still be reconciled in Phase 2.
+
+CAUSAL DAILY ATR AND HOLIDAY RULE
+Convert UTC minute_epoch to Europe/Berlin wall time. A valid cash day
+has a real exact 09:00 M1 and uses only real M1 bars [09:00,17:30)
+for its Bid OHLC. Prior cash day must be completed before Monday entry
+and no more than four calendar days old. ATR20 is Wilder true range
+max(high-low,abs(high-prev close),abs(low-prev close)), seeded by first
+20 valid cash days' arithmetic mean and recursing (19*prior+TR)/20.
+For a Monday entry date, skip the week before entry if the Monday date
+is Dec22-Dec31 inclusive. Also skip if that week's Thursday is Jan1,
+May1, Oct3, Dec25, Dec26, or Ascension Day (Easter Sunday+39 days).
+These fixed statutory/known-early-closure dates are computable before
+entry; no future price is consulted. Prior source-only coverage found
+normal Thursday09 quote absence on 2024-12-23, 2025-04-28,
+2025-12-22 and 2025-12-29 Monday weeks; the calendar exclusions cover
+those dates without selecting on trade returns. No after-result repair.
+
+ENTRY, STOP, EXIT
+On each otherwise eligible Europe/Berlin Monday, buy at first real M1
+first-tick ASK in [09:00,09:05). Initial stop=entry ASK-2*prior ATR20.
+From entry minute onward, if real BID M1 open<=stop fill at worse BID
+open; else if actual BID low<=stop fill at stop. One trade/week, no
+short, target, trail, reentry or overlap. If unstopped, exit at first
+real M1 first-tick BID Thursday Berlin [09:00,09:15). A missing
+required quote is UNRESOLVED with no PnL. Exclude incomplete final
+week. Every resolved trade flat before Friday; hold through news allowed.
+
+COSTS, EVALUATION AND STOP
+Base net GER40 points=actual native BID exit - actual native ASK entry.
+Stressed net=base minus another 7.60 points: native full-source M1
+first-tick spread p90 6.60 plus 1.00 point slippage. Actual variable
+spread is already paid at entry. Zero index commission and owner-stated
+zero swap. R=stressed net/(2*prior ATR20). 2022-23 descriptive;
+2024 through partial 2026 gated. Report all source/holiday/entry/exit
+coverage, spread at entry, stops, duration, annual base/stress totals
+and both 90/180-day account pace. Five-week circular moving-block
+bootstrap of ordered 2024-26 stressed points, 10000 draws,
+numpy default_rng(20261008). No variants after results.
+If any Phase-1 gate fails, immutable REPORT FINAL_FAIL, no Phase 2.
+If all pass, separately freeze Phase-2 SPEC/GATE before exact native
+tick-order execution, EUR account floating equity, Prague daily reset,
+lot steps, margin, actual swap postings and full FTMO EUR10000 2-Step
+180-day challenge at fixed 2% initial risk. Target10% then5%, daily
+loss5%, overall loss10%, at least four entry dates per stage. Require
+>=70% full two-stage pass and <=10% equity breach over >=50 complete
+starts. At least 150 genuinely unseen forward trades and annual sign
+agreement remain necessary before claiming a verified strategy.
+
+VERBATIM GATES
+G-GE1: At least 120 fully resolved 2024-2026 Monday-to-Thursday GER40 trades on distinct Berlin entry dates, zero unresolved required exits, and native real-tick-derived M1 fills only.
+G-GE2: Strictly positive 2024-2026 mean stressed native GER40 points per trade after actual variable ASK/BID spread and another 7.60 points stress.
+G-GE3: Five-week circular moving-block bootstrap P(mean stressed GER40 points <= 0) at most 0.05 using 10000 draws and seed 20261008.
+G-GE4: Strictly positive stressed GER40 point totals separately in complete 2024, complete 2025 and partial 2026.
+G-GE5: If Phase 1 passes, a separately frozen exact-native EUR10000 two-stage 180-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts at fixed 2% initial risk.
+G-GE6: Tick-derived source hash, native first-tick variable Ask/Bid, causal prior completed cash ATR, actual Bid stop path, fixed prior-known closure skips, no weekend position, zero-swap assumption and fixed stress are verified with no account orders.
+
+All six gates must pass; Phase-1 PASS alone is not verified.

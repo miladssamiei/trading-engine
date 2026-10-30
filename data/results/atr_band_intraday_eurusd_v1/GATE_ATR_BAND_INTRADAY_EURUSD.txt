@@ -1,0 +1,4 @@
+G-EAB1: At least 150 executed trades in the 2024-2026 gated block.
+G-EAB2: Strictly positive mean double-cost net pips per trade in the gated block.
+G-EAB3: Date-bootstrap P(mean base net <= 0) at most 0.05, 10,000 resamples, seed 20260928.
+G-EAB4: Strictly positive base-net total pips in each complete gated year, 2024 and 2025.

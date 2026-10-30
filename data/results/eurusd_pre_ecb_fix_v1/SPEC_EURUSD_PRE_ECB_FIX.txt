@@ -1,0 +1,74 @@
+HYPOTHESIS 68: EURUSD PRE-ECB-FIX DOLLAR APPRECIATION
+Declared 2026-09-25 before this study's code or Phase-1 run.
+
+1. EXTERNAL MECHANISM AND RULE
+Krohn et al., Foreign Exchange Fixings and Returns around the Clock,
+Journal of Finance 2024, https://doi.org/10.1111/jofi.13306,
+Table I reports an average EURUSD return of -3.53 basis points
+from 02:00 New York to the ECB fixing at 14:15 Frankfurt in
+1999-2019 interdealer data. Ex ante rule: SELL EURUSD at 02:00
+America/New_York and cover at 14:15 Europe/Berlin on each weekday.
+The ECB fixing time is localized with Europe/Berlin, including
+weeks when U.S. and European DST switch dates differ. This is a
+separate published pre-fix mechanism from Hypothesis 67's failed
+post-London-fix drift. #67 remains final. Selecting another paper
+leg after #67 entails multiple-testing risk; a historical economic
+PASS is not yet a verified live-tradable system.
+
+2. DATA AND CALENDAR
+Use verified raw EURUSD CSV C:/Users/Milad/download/
+eurusd-tick-2020-01-01-2026-09-20.csv, epoch-ms UTC timestamp,
+askPrice, bidPrice. Source sha256:
+23376d5ffd9d5f287f92875faa4df303032162158fff20387c4c284894a8e3b1.
+Create all Monday-Friday America/New_York calendar dates from
+2020-01-02 to 2026-09-18 inclusive without inspecting prices.
+Entry target = NY date at 02:00:00 America/New_York; exit target
+= same civil date at 14:15:00 Europe/Berlin. Convert via IANA time
+zones; no fixed UTC offset. Do not remove holidays, news, or months.
+
+3. QUOTE EXECUTION PROXY AND COST
+First valid quote at or after each target within 10 seconds inclusive.
+Valid: finite positive Ask and Bid, Ask >= Bid. Count invalid quotes
+in each sampled window, exclude only those rows; skip/log a date
+when either target has no valid quote. No order replacement, stop,
+target, side flip, spread filter, or holding-time adjustment.
+Short at entry Bid; cover at exit Ask. Midpoint gross pips =
+(entryMid-exitMid)/0.00010. Executable quote net pips =
+(entryBid-exitAsk)/0.00010. Actual Bid/Ask spread is charged;
+extra-cost stress net pips = quote net - 0.3 to buffer execution
+friction beyond the user's stated EURUSD spread floor. No swap
+expected in this intraday window. First-quote fills still omit
+rejection, queueing, live latency, and market impact.
+
+4. PARTITION, INFERENCE, REPORTING
+2020-2023 dates descriptive only; 2024-01-01 through 2026-09-18
+is the gated chronological block. The external publication's
+underlying sample ended 2019; no parameters are selected on this
+broker quote tape. Report 2024, 2025, and 2026 partial separately,
+plus prior years, trade count, mean/total midpoint and quote net
+and stress pips, spread distribution, hold length, win rate, max
+drawdown, and skipped-date funnel. Resample gated entry dates with
+replacement 10000 times, seed 20261004. Report P(mean quote net
+<=0) and descriptive 95% mean quantiles. Apply Bonferroni 0.025
+for the two published-fix legs tested in this sequence. This
+does not correct for all earlier project hypotheses, so even a
+historical PASS must be followed by fresh execution and later
+forward observation before a live-edge claim.
+
+5. GATES, FROZEN BEFORE PHASE 1
+G-PEF1: At least 150 executed EURUSD trades on distinct 2024-2026 New York dates.
+G-PEF2: Strictly positive mean extra-cost stress net pips per executed trade in the gated block.
+G-PEF3: Date-bootstrap P(mean executable quote net <= 0) at most 0.025, 10000 resamples, seed 20261004.
+G-PEF4: Strictly positive executable quote-net total pips in each complete gated year 2024 and 2025.
+All four gates required for Phase-1 PASS. Otherwise FAIL final for
+this artifact. Do not rescue a failure by a day, month, news, year,
+side, spread, or clock-time subset. Avoid repeat tests of this rule.
+
+6. STOP RULE AND ARTIFACTS
+Save date roster, executed quotes, skips, metadata, REPORT even on
+FAIL. A Phase-1 FAIL stops before MT5. A PASS requires a separate
+frozen Model=4 native-Bid/Ask execution SPEC/GATE with order-state
+reconciliation, >=150 trades, year-sign agreement, and positive
+net expectation; future forward confirmation is then needed to
+address accumulated research selection. No old frozen artifact is
+modified.

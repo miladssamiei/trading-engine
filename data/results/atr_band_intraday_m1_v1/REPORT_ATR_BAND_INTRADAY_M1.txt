@@ -1,0 +1,39 @@
+REPORT: INTRADAY ATR LOWER-BAND M1 PATH AUDIT, HYPOTHESIS 61
+Generated UTC: 2026-09-24T23:12:41.161477+00:00   PHASE-1 VERDICT: FAIL
+Frozen M5 ATR-band buy limit; fixed Ask proxy for touches; pessimistic M1 entry-minute path; same-day forced exit.
+Historical data were exposed in H22; this study is neither a virgin holdout nor real Bid/Ask tick execution.
+
+US500
+FUNNEL: {"eligible_bars": 100118, "m1_rows": 1791504, "m1_sha256": "29ad8f8b25b43be43a87c4ac39575c3cd280d557661c31f8e691990949087453", "m5_rows": 364330, "m5_sha256": "a8ee68f1a0010a1be9704c0d59fd5382aa798846cdae4d519b799ae21ec66c2d", "no_printed_m1_in_order_window": 0, "orders_filled": 312, "orders_unfilled": 99806, "session_days": 1370, "valid_days": 1325}
+CALIBRATION (descriptive): {"double_cost_mean": 0.15313628065796703, "exit_counts": {"STOP": 81, "TARGET": 61}, "gross_mean": 1.173136280657966, "max_drawdown": 74.30565614948819, "n": 142, "net_mean": 0.6631362806579667, "net_total": 94.16535185343128, "net_win_rate": 0.4295774647887324, "same_entry_m1_exit_fraction": 0.08450704225352113}
+TEST 2024+ (gated): {"double_cost_mean": 0.19576684256625176, "exit_counts": {"STOP": 98, "TARGET": 70, "TIME": 2}, "gross_mean": 1.2157668425662511, "max_drawdown": 96.68402016997607, "n": 170, "net_mean": 0.7057668425662514, "net_total": 119.98036323626275, "net_win_rate": 0.4176470588235294, "same_entry_m1_exit_fraction": 0.10588235294117647}
+BOOTSTRAP (date blocks): {"ci_95_high": 2.4989422292534447, "ci_95_low": -0.8103487507152288, "date_blocks": 146, "p_mean_le_zero": 0.2065}
+ASSET GATES: {"G-AB1": true, "G-AB2": true, "G-AB3": false, "G-AB4": false}
+YEARLY:
+  2021: {"double_cost_mean": -1.5229232260594825, "exit_counts": {"STOP": 36, "TARGET": 16}, "gross_mean": -0.5029232260594829, "max_drawdown": 74.30565614948819, "n": 52, "net_mean": -1.0129232260594825, "net_total": -52.67200775509309, "net_win_rate": 0.3076923076923077, "same_entry_m1_exit_fraction": 0.1346153846153846}
+  2022: {"double_cost_mean": 2.364756984071942, "exit_counts": {"STOP": 20, "TARGET": 21}, "gross_mean": 3.3847569840719425, "max_drawdown": 36.492370158864105, "n": 41, "net_mean": 2.8747569840719422, "net_total": 117.86503634694964, "net_win_rate": 0.5121951219512195, "same_entry_m1_exit_fraction": 0.07317073170731707}
+  2023: {"double_cost_mean": 0.08127190329744374, "exit_counts": {"STOP": 25, "TARGET": 24}, "gross_mean": 1.101271903297443, "max_drawdown": 37.992691240221575, "n": 49, "net_mean": 0.5912719032974435, "net_total": 28.97232326157473, "net_win_rate": 0.4897959183673469, "same_entry_m1_exit_fraction": 0.04081632653061224}
+  2024: {"double_cost_mean": -0.4938893710236153, "exit_counts": {"STOP": 55, "TARGET": 39}, "gross_mean": 0.5261106289763836, "max_drawdown": 58.38328852176528, "n": 94, "net_mean": 0.016110628976383986, "net_total": 1.5143991237800947, "net_win_rate": 0.4148936170212766, "same_entry_m1_exit_fraction": 0.10638297872340426}
+  2025: {"double_cost_mean": 0.926720488776171, "exit_counts": {"STOP": 33, "TARGET": 21, "TIME": 1}, "gross_mean": 1.9467204887761713, "max_drawdown": 76.1610961414508, "n": 55, "net_mean": 1.436720488776171, "net_total": 79.01962688268941, "net_win_rate": 0.38181818181818183, "same_entry_m1_exit_fraction": 0.12727272727272726}
+  2026: {"double_cost_mean": 1.3683970109425356, "exit_counts": {"STOP": 10, "TARGET": 10, "TIME": 1}, "gross_mean": 2.3883970109425348, "max_drawdown": 20.804253912110653, "n": 21, "net_mean": 1.8783970109425354, "net_total": 39.446337229793244, "net_win_rate": 0.5238095238095238, "same_entry_m1_exit_fraction": 0.047619047619047616}
+
+XAUUSD
+FUNNEL: {"eligible_bars": 100272, "m1_rows": 2337538, "m1_sha256": "a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f", "m5_rows": 467633, "m5_sha256": "3e1365c2d5f57c913b657059c7af0aa58e97a3b0ea72a3639919b3d64f1a5fa5", "no_printed_m1_in_order_window": 0, "orders_filled": 409, "orders_unfilled": 99863, "session_days": 1697, "valid_days": 1667}
+CALIBRATION (descriptive): {"double_cost_mean": -1.1810652782100317, "exit_counts": {"STOP": 174, "TARGET": 71, "TIME": 3}, "gross_mean": -0.3610652782100314, "max_drawdown": 192.01000842239114, "n": 248, "net_mean": -0.7710652782100316, "net_total": -191.22418899608783, "net_win_rate": 0.29838709677419356, "same_entry_m1_exit_fraction": 0.2701612903225806}
+TEST 2024+ (gated): {"double_cost_mean": 0.8891480607238021, "exit_counts": {"STOP": 88, "TARGET": 71, "TIME": 2}, "gross_mean": 1.7091480607238019, "max_drawdown": 59.47712032199615, "n": 161, "net_mean": 1.299148060723802, "net_total": 209.16283777653211, "net_win_rate": 0.453416149068323, "same_entry_m1_exit_fraction": 0.2111801242236025}
+BOOTSTRAP (date blocks): {"ci_95_high": 2.845849042631908, "ci_95_low": -0.1515651477995982, "date_blocks": 148, "p_mean_le_zero": 0.0394}
+ASSET GATES: {"G-AB1": true, "G-AB2": true, "G-AB3": false, "G-AB4": false}
+YEARLY:
+  2020: {"double_cost_mean": -1.3647685265158114, "exit_counts": {"STOP": 33, "TARGET": 15}, "gross_mean": -0.5447685265158112, "max_drawdown": 51.1769720735922, "n": 48, "net_mean": -0.9547685265158113, "net_total": -45.82888927275894, "net_win_rate": 0.3125, "same_entry_m1_exit_fraction": 0.25}
+  2021: {"double_cost_mean": -1.0229032177466557, "exit_counts": {"STOP": 43, "TARGET": 21}, "gross_mean": -0.20290321774665543, "max_drawdown": 47.979979508439556, "n": 64, "net_mean": -0.6129032177466556, "net_total": -39.22580593578596, "net_win_rate": 0.328125, "same_entry_m1_exit_fraction": 0.15625}
+  2022: {"double_cost_mean": -0.7152901382614998, "exit_counts": {"STOP": 34, "TARGET": 20, "TIME": 2}, "gross_mean": 0.10470986173850047, "max_drawdown": 25.625519173782777, "n": 56, "net_mean": -0.3052901382614997, "net_total": -17.096247742643982, "net_win_rate": 0.39285714285714285, "same_entry_m1_exit_fraction": 0.25}
+  2023: {"double_cost_mean": -1.523415575561237, "exit_counts": {"STOP": 64, "TARGET": 15, "TIME": 1}, "gross_mean": -0.7034155755612368, "max_drawdown": 95.4521823756279, "n": 80, "net_mean": -1.113415575561237, "net_total": -89.07324604489895, "net_win_rate": 0.2, "same_entry_m1_exit_fraction": 0.3875}
+  2024: {"double_cost_mean": -0.8749132754845815, "exit_counts": {"STOP": 43, "TARGET": 24, "TIME": 1}, "gross_mean": -0.05491327548458149, "max_drawdown": 52.60719730723349, "n": 68, "net_mean": -0.4649132754845816, "net_total": -31.61410273295155, "net_win_rate": 0.36764705882352944, "same_entry_m1_exit_fraction": 0.3088235294117647}
+  2025: {"double_cost_mean": 1.4815309262203897, "exit_counts": {"STOP": 24, "TARGET": 26, "TIME": 1}, "gross_mean": 2.3015309262203894, "max_drawdown": 32.06259724919528, "n": 51, "net_mean": 1.8915309262203897, "net_total": 96.46807723723987, "net_win_rate": 0.5294117647058824, "same_entry_m1_exit_fraction": 0.11764705882352941}
+  2026: {"double_cost_mean": 3.025925316005806, "exit_counts": {"STOP": 21, "TARGET": 21}, "gross_mean": 3.845925316005803, "max_drawdown": 53.37520686753487, "n": 42, "net_mean": 3.4359253160058048, "net_total": 144.3088632722438, "net_win_rate": 0.5, "same_entry_m1_exit_fraction": 0.16666666666666666}
+
+OVERALL GATES: {"G-AB1": true, "G-AB2": true, "G-AB3": false, "G-AB4": false}
+OVERALL PHASE-1 VERDICT: FAIL
+A PASS only permits a new predeclared Model=4 real-tick execution study.
+A FAIL is final; no post-hoc time, instrument, year, hold, or exit subset may rescue this artifact.
+Bid M1 bars plus fixed spread cannot reveal the exact Ask order trigger or within-minute order path.

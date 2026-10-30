@@ -1,0 +1,36 @@
+REPORT: MONDAY RANGE STRATEGY - PHASE 1 (HYPOTHESIS #33)
+Generated: 2026-09-22 00:33:48  |  script: evaluate/monday_range_phase1.py
+SPEC/GATE: data/results/monday_range_screen/{SPEC,GATE}_MONDAY_RANGE.txt (frozen before code)
+Mechanism: Monday-range liquidity sweep/reclaim, first claim per week; discretionary
+oscillator divergence deliberately omitted (pre-declared, conservative).
+
+VERDICT: PASS   (G-MON1=True, G-MON2=True, G-MON3=True)
+
+1. DATA AND INTEGRITY
+  Tape: data\results\vwap_2021_2026\us500tick_m1.csv (1791504 M1 bars, 2021-01-03 18:00:00-05:00 .. 2026-04-30 19:59:00-04:00 NY)
+  M15 buckets: 121486 (sparse <15 M1 bars: 13883, 11.43%) built from M1 per tasking
+
+2. WEEKLY FUNNEL
+  ISO weeks on tape: 279 | weeks with Monday data: 278 | skipped (no Monday): 1
+  weeks with first-claim signal: 265 (LONG 113 / SHORT 152)
+  drops: no-M1-entry-before-Friday-cutoff=0 degenerate-risk=3
+  FINAL valid signals: 262
+
+3. OUTCOMES AND EXPECTANCY (points, pre-cost; reference spread floor 0.51 pt)
+  n=262 | gross mean=1.861 | median=-3.217 | total=487.49 | win share (gross>0)=14.9%
+  exit mix: SL=222, TP=40
+  MFE/R mean=2.700 | MAE/R mean=1.619 (descriptive)
+  LONG: n=112 gross mean=2.498 | SHORT: n=150 gross mean=1.385
+  by year: 2021: n=50 mean=2.36, 2022: n=50 mean=4.48, 2023: n=48 mean=4.74, 2024: n=47 mean=0.58, 2025: n=51 mean=-2.25, 2026: n=16 mean=0.35
+
+4. GATES (frozen verbatim in GATE file)
+  G-MON1 valid signals >= 75: 262 -> True
+  G-MON2 gross expectancy > 0: 1.8607 -> True
+  G-MON3 block bootstrap P(mean gross <= 0) <= 0.20: 0.0820 (block=5, 10000 iters) -> True
+  OVERALL PHASE-1: PASS
+
+5. NOTES AND CAVEATS
+  - SL-first when TP and SL are both touched inside one M1 bar (conservative, pre-declared).
+  - Gross is pre-cost; the edge must clear the 0.51 pt spread floor before economics.
+  - Weekly cadence (~1 trade/week) makes year splits thin; they are descriptive only.
+  - Null result is final for this artifact.

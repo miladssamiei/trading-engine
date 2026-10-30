@@ -1,0 +1,109 @@
+HYPOTHESIS #51 SPEC: XAUUSD KELTNER CHANNEL BREAKOUT - STRICT OOS PARTITION VERIFICATION
+Study ID: xauusd_kc_oos
+Date frozen: 2026-09-23, before any evaluation code was written or run.
+Status: frozen. Corrections or re-measurements require a NEW study name.
+Lineage: direct follow-up to #50 (cross_asset_kc_breakout, OVERALL FAIL but
+XAUUSD individually PASSED all three Phase-1 gates: 198 trades, mean +3.945
+u, Net Sharpe 1.072, MBB p=0.1746). #50 recorded two caveats: year-sign
+disagreement (gains concentrated 2025-2026) and in-sample single-run
+character. This study formalizes the temporal partition with the #50
+mechanics frozen verbatim. HONESTY CAVEAT DECLARED UP FRONT: the 2024+
+block was already observed in #50's report, so this is a temporal OOS
+partition of an already-observed tape (the #45 pattern), not independent
+confirmation on unseen data. A PASS here validates the partition, not the
+discovery. No parameter is re-chosen; the split date is owner-supplied.
+
+1. DATA
+1.1 Tape: data/results/xauusd_onboarding/xauusdtick_m1.csv (verified XAUUSD
+    M1, epoch-UTC time, columns time,open,high,low,close,tick_volume; sorted
+    ascending defensively). Price units; cost floor 0.41 round trip,
+    subtracted once per trade from gross.
+1.2 Timezone America/New_York (EST/EDT) for all wall-time logic.
+
+2. MULTI-TIMEFRAME AGGREGATION (identical to #50)
+2.1 Continuous 1h base grid: M1 epochs floored to 3600s slots; open=first,
+    high=max, low=min, close=last per slot; reindexed to the FULL continuous
+    3600s grid, missing bars forward-filled OHLC = prior close, volume = 0
+    (synthetic flat bars).
+2.2 4h execution bars: from the continuous 1h grid by NY WALL-clock bucket
+    [00:00-04:00), [04:00-08:00), ... DST buckets span 3 or 5 real hours.
+2.3 D1 anchor bars: strict forex/CFD daily bars ENDING 17:00 ET, built FROM
+    the continuous 1h grid by wall daily bucket [17:00, 17:00) (never from
+    the straddling [16:00-20:00) 4h bucket). First/last buckets may be
+    partial.
+2.4 For a 4h bar t with wall start w, the most recently completed D1 bar is
+    the [17:00,17:00) bucket whose end <= w.
+
+3. OOS WINDOW DEFINITION
+3.1 CALIBRATION (in-sample, exploratory): trades with ENTRY bar wall date in
+    [2020-01-01, 2023-12-31]. This absorbs indicator warmup and covers the
+    flat/negative regime (#50 yearly means 2020..2023: +0.7, -0.6, -4.2,
+    +0.4 u/trade).
+3.2 OUT-OF-SAMPLE (gated): trades with ENTRY bar wall date in
+    [2024-01-01, present] (tape end).
+3.3 The state machine runs CONTINUOUSLY across the boundary (one walk, one
+    1-trade cap; a trade open at the boundary belongs to the block of its
+    entry date). Performance tracking and ALL gates are strictly isolated to
+    the OOS block; calibration stats are reported for degradation context
+    only.
+
+4. STATE MACHINE (frozen #50 mechanics, verbatim)
+4.1 D1 anchor trend filter: EMA(50) of D1 Close (span=50, adjust=False,
+    masked NaN before index 49). Direction of the prior completed D1 bar k:
+    BULLISH iff Close(k) > EMA50(k); BEARISH iff Close(k) < EMA50(k);
+    equality arms neither side.
+4.2 4h Keltner channels on the strictly prior 4h bar t-1: EMA(29) of 4h
+    Close (span=29, adjust=False, masked NaN < 28); Wilder ATR(29);
+    Upper = EMA29 + 2.77*ATR29; Lower = EMA29 - 2.77*ATR29.
+4.3 Armed: Close(t-1), Upper(t-1), Lower(t-1), EMA29(t-1), ATR29(t-1) and
+    the mapped D1 direction all non-NaN.
+
+5. SIGNALS, EXECUTION AND RISK (frozen #50 mechanics, verbatim)
+5.1 Long at 4h bar t: Close(t-1) > Upper(t-1) AND D1 BULLISH. Short:
+    Close(t-1) < Lower(t-1) AND D1 BEARISH. Entry: Open of bar t. Max ONE
+    open trade; signals while open are counted (ignored-while-open) and
+    discarded; a trade occupies [entry_bar, exit_bar] inclusive.
+5.2 Initial risk distance D = max(|Entry - EMA29(t-1)|, 1.5*ATR29(t-1)).
+    Initial SL = Entry - D (long) / Entry + D (short).
+    R multiple = side*(Exit - Entry)/D.
+5.3 Walk j = entry_bar, entry_bar+1, ...: a) Open(j) beyond SL -> exit at
+    Open(j), reason SL_GAP (honest fill); b) Low/High(j) touches SL -> exit
+    at SL, reason SL (worst-case same-bar default); c) at the close of j,
+    ratchet SL to max/min(SL, EMA29(j)) (longs/shorts).
+5.4 No stop by the final 4h bar -> exit at that bar's close, FORCED_EOD,
+    included.
+5.5 MFE/MAE excursions over [entry_bar..exit_bar], descriptive only.
+5.6 Gross = side*(Exit - Entry) in price units; Net = Gross - 0.41.
+    Net Sharpe = mean(Net)/std(Net, ddof=1) * sqrt(252) over the block's
+    executed trades.
+
+6. PHASE 1 GATES (evaluated ONLY on the OOS block; frozen verbatim in
+   GATE_XAUUSD_OOS.txt)
+    G-OOS1: Total executed trades in OOS >= 30.
+    G-OOS2: Net Sharpe Ratio in OOS > 0.
+    G-OOS3: Moving-block bootstrap (10,000 resamples, block=5 trades,
+            seed 20260929) P(mean Net PnL <= 0) <= 0.20 on the OOS trades.
+    VERDICT RULE: PASS only if G-OOS1 AND G-OOS2 AND G-OOS3 all PASS. Any
+    FAIL is final for this artifact. Null results are complete, expected
+    deliverables.
+
+7. OUTPUTS (data/results/xauusd_kc_oos/)
+    SPEC_XAUUSD_OOS.txt (this file), GATE_XAUUSD_OOS.txt (written before the
+    run), REPORT_XAUUSD_OOS.txt (IS vs OOS degradation, net expectancy, gate
+    verdicts), xauusd_oos_signals.csv (OOS trades), xauusd_cal_signals.csv
+    (calibration trades, context), run_meta.json (sha256 lineage, funnel,
+    gates, verdict).
+
+8. HONESTY / ANTI-LEAK RULES
+8.1 All 4h inputs strictly prior; D1 inputs completed buckets; entries only
+    at 4h bar opens; gap fills at the open; worst-case same-bar stop; single
+    continuous walk (no re-arming or re-warmup at the boundary).
+8.2 Single frozen parameterization and split; no optimization, no re-runs;
+    sides and years reported as run.
+8.3 The 2024+ block was observed in #50 before this partition was declared;
+    a PASS certifies temporal stability of the already-seen block, NOT
+    independent out-of-sample discovery. Forward truth only comes from
+    pre-registered forward paper-tracking.
+8.4 Phase 2 (MT5 execution) requires PASS here plus the standard
+    walk-forward discipline (>=150 trades, year-by-year sign agreement
+    within OOS); MFE/MAE are exploratory descriptors, never results.

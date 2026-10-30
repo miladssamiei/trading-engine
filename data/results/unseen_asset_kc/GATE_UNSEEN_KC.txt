@@ -1,0 +1,16 @@
+GATE FILE - HYPOTHESIS #54 (unseen_asset_kc)
+Frozen 2026-09-24 BEFORE the Phase-1 script ran. Verbatim gate extraction
+from SPEC_UNSEEN_KC.txt section 7. Never edited after the run.
+Gates are applied INDEPENDENTLY to each instrument (USTECH, BTCUSD, ETHUSD)
+on the FULL tape (the entire tape is unseen data for this mechanic).
+
+G-REP1: Total executed trades >= 30.
+
+G-REP2: Net Sharpe Ratio > 0.
+
+G-REP3: Moving-block bootstrap (10,000 resamples, block=5 trades,
+        seed 20261002) P(mean Net PnL <= 0) <= 0.20.
+
+VERDICT RULE: an instrument PASSES only if G-REP1 AND G-REP2 AND G-REP3 all
+PASS. OVERALL PASS only if ALL THREE instruments PASS. Any FAIL is final
+for this artifact; corrections or re-measurements require a new study name.

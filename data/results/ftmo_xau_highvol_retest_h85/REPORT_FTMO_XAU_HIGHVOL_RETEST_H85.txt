@@ -1,0 +1,159 @@
+H85 FTMO GOLD HIGH-VOLUME RETEST PHASE-1 REPORT
+{
+  "generated_utc": "2026-09-25T10:43:43.738507+00:00",
+  "spec_sha256": "3978c633986735335cb2f30edd64ef91abc40e891a1c72dd74dc2aabc7083101",
+  "gate_sha256": "aa7ec4a2600e73dd2b95ff7d503f0b96320ce1ed5a175d5fc92d1504d4eefba1",
+  "source_sha256": "59add37f91b792ee0944780774ece65c797e799f46811b52b9772c65275e2e01",
+  "source_rows": 64684,
+  "source_first_utc": "2024-01-01T23:00:00+00:00",
+  "source_last_utc": "2026-09-24T20:45:00+00:00",
+  "funnel": {
+    "MISSING_OPENING_BAR": 5,
+    "STOP": 121,
+    "NO_OPENING_ADVANCE": 337,
+    "OPEN_CLOSE_NOT_ABOVE_REFERENCE": 84,
+    "NO_RETEST_REJECTION": 97,
+    "TARGET": 44,
+    "DAY_FLAT": 22,
+    "INVALID_ENTRY_GEOMETRY": 1
+  },
+  "years": {
+    "2024": {
+      "n": 64,
+      "base_total_units": -81.86499999999933,
+      "stress_total_units": -108.10499999999934
+    },
+    "2025": {
+      "n": 87,
+      "base_total_units": 167.2000000000071,
+      "stress_total_units": 131.53000000000716
+    },
+    "2026": {
+      "n": 36,
+      "base_total_units": -333.6049999999941,
+      "stress_total_units": -348.36499999999415
+    }
+  },
+  "gated": {
+    "signals": 124,
+    "trades": 123,
+    "complete": 123,
+    "dates": 123,
+    "missing_entry": 0,
+    "unresolved": 0,
+    "base_mean_units": -1.352886178861683,
+    "base_total_units": -166.404999999987,
+    "stress_mean_units": -1.7628861788616823,
+    "mean_stressed_r": -0.12844883048828595,
+    "win_rate": 0.34146341463414637,
+    "max_drawdown_units": 459.51999999999225,
+    "median_hold_hours_upper": 2.5,
+    "exit_reasons": {
+      "STOP": 76,
+      "TARGET": 29,
+      "DAY_FLAT": 18
+    }
+  },
+  "bootstrap": {
+    "date_blocks": 123,
+    "p_mean_le_zero": 0.8233,
+    "ci95_low": -4.229353658536424,
+    "ci95_high": 1.5527510162602494
+  },
+  "paid_90d_pace": [
+    {
+      "risk_pct": 0.5,
+      "starts": 114,
+      "pass": 0,
+      "breach": 0,
+      "timeout": 114,
+      "pass_rate": 0.0,
+      "breach_rate": 0.0,
+      "median_pass_days": null
+    },
+    {
+      "risk_pct": 1.0,
+      "starts": 114,
+      "pass": 19,
+      "breach": 32,
+      "timeout": 63,
+      "pass_rate": 0.16666666666666666,
+      "breach_rate": 0.2807017543859649,
+      "median_pass_days": 45.0
+    },
+    {
+      "risk_pct": 1.5,
+      "starts": 114,
+      "pass": 25,
+      "breach": 67,
+      "timeout": 22,
+      "pass_rate": 0.21929824561403508,
+      "breach_rate": 0.5877192982456141,
+      "median_pass_days": 37.0
+    },
+    {
+      "risk_pct": 2.0,
+      "starts": 114,
+      "pass": 30,
+      "breach": 79,
+      "timeout": 5,
+      "pass_rate": 0.2631578947368421,
+      "breach_rate": 0.6929824561403509,
+      "median_pass_days": 31.0
+    }
+  ],
+  "free_trial_14d_pace": [
+    {
+      "risk_pct": 0.5,
+      "starts": 122,
+      "pass": 0,
+      "breach": 0,
+      "timeout": 122,
+      "pass_rate": 0.0,
+      "breach_rate": 0.0,
+      "median_pass_days": null
+    },
+    {
+      "risk_pct": 1.0,
+      "starts": 122,
+      "pass": 4,
+      "breach": 1,
+      "timeout": 117,
+      "pass_rate": 0.03278688524590164,
+      "breach_rate": 0.00819672131147541,
+      "median_pass_days": 10.5
+    },
+    {
+      "risk_pct": 1.5,
+      "starts": 122,
+      "pass": 7,
+      "breach": 5,
+      "timeout": 110,
+      "pass_rate": 0.05737704918032787,
+      "breach_rate": 0.040983606557377046,
+      "median_pass_days": 11.0
+    },
+    {
+      "risk_pct": 2.0,
+      "starts": 122,
+      "pass": 10,
+      "breach": 13,
+      "timeout": 99,
+      "pass_rate": 0.08196721311475409,
+      "breach_rate": 0.10655737704918032,
+      "median_pass_days": 11.5
+    }
+  ],
+  "pace_provisional_if_unresolved": false,
+  "gates": {
+    "G-HV1": false,
+    "G-HV2": false,
+    "G-HV3": false,
+    "G-HV4": false,
+    "G-HV5": false,
+    "G-HV6": true
+  },
+  "verdict": "FAIL",
+  "limitations": "Historical FTMO native M15 BID bar proxy with fixed 0.41 Ask spread plus 0.41 stress; no true tick-level Ask, commission, slippage, EUR conversion, lot rounding, or independent post-discovery sample. Not a deployable EA."
+}
+OVERALL VERDICT: FAIL

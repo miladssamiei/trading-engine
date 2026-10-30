@@ -1,0 +1,327 @@
+SPEC_SESSION_TRANSFER
+Session-structure mechanism on US500: block-to-block return transfer
+(hypothesis #11, project hypothesis numbering)
+
+Status: SPEC written 2026-08-29 BEFORE any code or run. The companion
+GATE_SESSION_TRANSFER (artifact list, section 9) must be created as a
+verbatim extraction of every gate number in sections 6 and 7 BEFORE the
+first Phase-1 script runs. Nothing in this document may be changed
+after Phase-1 output exists; any addition is exploratory and labeled.
+
+------------------------------------------------------------------------
+1. MECHANISM AND DISTINCTNESS
+
+The signal is the relationship BETWEEN fixed NY time blocks in a day,
+not patterns inside one block. Two arms:
+
+  A. CARRY - a strong, volatile pre-open block (08:00-09:30) predicts
+     same-direction movement in the cash block (09:30-16:00).
+  B. FADE - a large post-close block (16:00-20:00) move that opposes
+     the cash block predicts mean reversion over the overnight window
+     (20:00 -> next 09:30) and, secondarily, in the next cash block.
+
+Distinct from every prior hypothesis, explicitly:
+
+  - ORB trades the FIRST MINUTES of the cash session against the rest
+    of the day (opening-range breakout levels). Carry uses only the
+    PRE-OPEN block return as predictor; no opening range, no breakout
+    levels, no intra-cash structure is consulted for the signal.
+  - VWAP MR and Bollinger MR trade INTRA-session deviation from a
+    session mean or band. Neither block arm uses any intra-block mean,
+    band, or VWAP.
+  - trend-pullback / H1/H2 / FVG trade continuation after intra-session
+    pullbacks marked by EMAs, leg counting, or gaps inside one session.
+    Session transfer uses daily block OPEN-TO-CLOSE returns only.
+  - SP2L trades a spike/gap candle structure AT the NY open with a
+    pending-order mechanism. Carry instead aggregates the full
+    08:00-09:30 return; no candle pattern, no pending orders, no gap
+    threshold against the prior close.
+  - multi-horizon momentum (daily and intraday) votes trend direction
+    from overlapping trailing windows at one decision time. Session
+    transfer compares non-overlapping adjacent blocks of one day.
+
+If either arm passes, its daily P&L must be correlated against all
+prior streams (section 8) to verify it is not another lens on the same
+edge; a pearson near the continuation family (> +0.35) is a red flag
+that the mechanism claim is false even if gates pass.
+
+------------------------------------------------------------------------
+2. DATA AND TIME DEFINITIONS
+
+Instrument: US500 index CFD, project symbol US500-tick (MT5 internal
+US500.c for D1 only, section 5). All intraday work uses the verified
+US500-tick exports; TimeCurrent is UTC for this symbol (proven in the
+ORB work; NY offsets computed with generic US DST, never hardcoded).
+
+Primary data: verified M5 export
+data/results/orb_2021_present/us500tick_m5.csv (364,330 bars,
+2021-01..2026-04, byte-exact vs terminal in prior studies).
+M15 is derived from M5 (floor(epoch/900)) only if ever needed; the
+Bollinger-MR Step-0 finding applies verbatim: 121,486 M15 buckets, 107
+partial (0.09%, kept as-is, tallied), and the verified M1 export must
+NOT be used as an aggregation source (it skips no-tick minutes,
+13,883 partial M15 buckets). This study needs only M5.
+
+Timezone: epoch UTC converted to America/New_York (wall minutes =
+hour*60 + minute of the bar OPEN). Same convention as ORB/VWAP/SP2L.
+
+Trading calendar: a date is a CASH DAY if a bar with wall 570 (09:30)
+exists on that NY date. Verified baseline: 1,370 cash dates
+2021-01..2026-04. Holidays and evening-only dates are excluded
+automatically (no 09:30 bar). No other calendar filter exists.
+
+Session blocks (NY wall minutes, bar OPEN time):
+
+  PRE   08:00-09:30   walls [480, 570)
+  CASH  09:30-16:00   walls [570, 960)
+  POST  16:00-20:00   walls [960, 1200)
+
+Tape reality, documented (verified in prior work): no ticks exist
+16:15-17:59 NY on any day (maintenance). The POST block therefore
+contains the 16:00-16:14 bars, a structural 105-minute gap, and the
+18:00-20:00 bars (which open the next trading day's Globex session but
+carry this date's wall clock). The block is USED AS SPECIFIED; the gap
+is inside the block return by construction and every statistic that
+uses r_post inherits it. The final M5 bucket of each day (16:10-16:14)
+is structurally partial; it is kept as the tape's close (Bollinger-MR
+convention) and not "fixed".
+
+Block open / close: open = first bar OPEN inside the block; close =
+last bar CLOSE inside the block (the 09:25 bar close for PRE, the
+15:55 bar close for CASH, the 19:55 bar close for POST).
+
+Day eligibility per block:
+  PRE  valid if bars at wall 480 and wall 565 both exist.
+  CASH valid if bar at wall 570 exists (the cash-day definition).
+  POST valid if bars at wall 960 and wall 1195 both exist.
+An analysis that needs a block uses only days where that block (and,
+for fade, the next day's CASH or PRE block) is valid; excluded days are
+tallied in the funnel, never silently dropped. Cross-day fade signals
+into a weekend (Friday POST -> Monday CASH) are INCLUDED and counted;
+Phase 2 financing treats them per the swap convention below.
+
+------------------------------------------------------------------------
+3. CORE DAILY VARIABLES (computed per cash day D)
+
+  r_pre   = ln(P_close_pre  / P_open_pre)     signed log return
+  r_cash  = ln(P_close_cash / P_open_cash)
+  r_post  = ln(P_close_post / P_open_post)
+  vol_pre  = sum of |ln(close_i/open_i)| over PRE M5 bars (simple
+             realized volatility; the std of M5 log returns is computed
+             and stored as a secondary column but NOT used in gates)
+  vol_cash = same definition over CASH M5 bars
+  hl_cash  = (max_high_cash - min_low_cash) / P_open_cash
+  r_ovn    = ln(P_open_cash(D+1) / P_close_post(D))   overnight window
+  All percent figures below are 100*exp(x)-1 or 100*x consistently;
+  document the chosen form in the CSV header (use percent-of-price =
+  100*(P_end/P_start - 1) for all reported MFE/MAE).
+
+Thresholds are CAUSAL percentile rules: P80(x, 252) = the 80th
+percentile of x over the TRAILING 252 valid days strictly before D
+(no same-day or future data; the first 252 days of the tape can
+produce no signals and are burn-in, consistent with the 2021 burn-in
+convention).
+
+------------------------------------------------------------------------
+4. HYPOTHESES (signal definitions, both pre-declared)
+
+HYPOTHESIS A - CARRY
+  Signal day D (evaluated at 09:30, the cash open):
+    |r_pre| >= P80(|r_pre|, 252)  AND  vol_pre >= P80(vol_pre, 252)
+  Direction: +1 if r_pre > 0, -1 if r_pre < 0 (r_pre = 0 impossible in
+  practice; if it occurs, no signal).
+  Position window (Phase 1, exit-free): from cash open (wall 570 bar
+  open) to cash close (15:55 bar close), M5 path.
+  Claim tested: same-direction transfer of pre-open imbalance into the
+  cash session, net of range/volatility controls (section 5).
+
+HYPOTHESIS B - FADE
+  Signal day D (evaluated at 20:00, the post-block close):
+    |r_post| >= P80(|r_post|, 252)  AND  sign(r_post) = -sign(r_cash)
+  Direction: -sign(r_post).
+  Primary window (Phase 1, exit-free): 20:00 bar close -> next cash
+  open (09:30 bar open) on the next valid cash day, M5 path.
+  Secondary window (informational only in Phase 1): the FULL next cash
+  block, same direction.
+  Claim tested: reversion of an outsized counter-cash drift after the
+  close, over the overnight.
+
+The two arms are independent tests; each is gated separately. Neither
+shares machinery with ORB/VWAP/SP2L/trend-pullback beyond the tape,
+calendar, cost, and bootstrap conventions.
+
+------------------------------------------------------------------------
+5. FILTERS AND REGIMES
+
+Applied IN Phase 1 (pre-declared, part of the signal itself):
+  - The percentile conditions of section 4 (these ARE the filters).
+  - Nothing else. No range-day filter, no max-move filter, no session
+    slope. Adding any filter after seeing Phase-1 output is exploratory
+    and cannot rescue a failed gate.
+
+Pre-declared DESCRIPTIVE splits (computed and reported in Phase 1, but
+NOT gates and NOT filters):
+  - hl_cash split at its full-sample median: signals on below-median
+    ("normal") vs above-median ("wide") days, per arm.
+  - vol_cash split at its full-sample median, same treatment.
+  - D1 regime label from US500.c (data/results/momentum_multihorizon/
+    us500c_d1.csv): up = close > EMA(200d), down = close < EMA(200d),
+    computed causally on completed D1 bars only. Signals split
+    up/down/range are reported per arm.
+
+Only if BOTH arms FAIL Phase 1: a single follow-on is permitted and
+must be pre-declared before running it - regime-conditional carry
+(carry signals only in the up/down D1 regime), one test, gates
+unchanged. It may not be iterated.
+
+------------------------------------------------------------------------
+6. PHASE 1 - SIGNAL QUALITY (no exits, no tuning)
+
+Per arm, per signal day: direction-native MFE and MAE measured on the
+M5 path over the arm's window, as percent of the entry price (carry:
+entry = cash open; fade: entry = 20:00 close), SP2L E-XTM first-bar
+convention (entry-bar close/extremes first, then running extremes over
+the remaining bars of the window). Fade windows that span weekends use
+the M5 bars that exist; the maintenance gap contributes nothing.
+
+Window-scaled MFE/MAE thresholds (pre-declared; the standard
+0.10/0.15/0.20% set is calibrated for 90-minute windows and is
+degenerate at block scale, where both sides routinely exceed 0.20%):
+  - CARRY (cash-block window): t in {0.25, 0.50, 0.75}%
+  - FADE   (overnight window): t in {0.10, 0.20, 0.30}%
+Rationale: cash-block median high-low is ~0.8-1.0% and the overnight
+median range ~0.4-0.5% on this tape; the chosen sets sit at comparable
+quantiles of their windows.
+
+Statistics per arm: n, mean/median MFE, mean/median MAE, mean and
+median of (MFE - MAE), count dominance at the arm's thresholds,
+after-cost expectancy per signal (gross median favorable move minus
+0.8 pt round trip expressed in percent of entry - descriptive only in
+Phase 1), yearly mean diffs, funnel (eligible days -> block-valid days
+-> percentile pass -> joint-condition pass).
+
+Phase 1 GATES (per arm; all must hold for that arm to advance):
+
+  G1  n >= 150 signal days AND n >= 5% of eligible days for the arm.
+  G2  count(MFE >= t) > count(MAE >= t) at ALL arm thresholds AND
+      mean(MFE - MAE) > 0.
+  G3  median(MFE) - median(MAE) >= +0.05%.
+  G4  Day bootstrap (10,000 resamples of per-day MFE-MAE, iid over
+      days): P(mean <= 0) <= 0.40. Reported alongside and required as
+      robustness: 10-day MOVING-BLOCK bootstrap P(mean <= 0) <= 0.45
+      (adjacent-day correlation from regimes; slightly relaxed bound).
+  G5  No single year contains > 40% of the arm's signal days AND the
+      yearly mean diff is > 0 in >= 4 of 5 full years (2021-2025;
+      2026 partial, reported only).
+
+PASS = G1-G5 for at least one arm -> Phase 2 for that arm ONLY. Any
+failure -> REPORT_SESSION_TRANSFER null write-up and STOP: no Phase 2,
+no EA. Honest stop-and-report is a complete deliverable.
+
+------------------------------------------------------------------------
+7. PHASE 2 - SIMPLE EXITS (only for a passing arm; all parameters
+fixed here in advance; no search)
+
+CARRY exit (one variant, no alternatives):
+  Entry: market at the cash-open bar open (wall 570), direction
+  sign(r_pre), 1 lot.
+  Exit: forced time exit at the 15:55 bar open (project convention:
+  VWAP MR / SP2L forced-exit timing).
+  Stop: none (time-only variant is the pre-declared primary).
+  The hl_cash-based stop variant (stop = cash open -/+ 0.75 x trailing
+  20-day median of hl_cash, force-close at 15:55 unchanged) is run as
+  a SINGLE pre-declared secondary variant, labeled; it cannot replace
+  the primary unless the primary passes gates and the secondary passes
+  the same gates with a HIGHER net Sharpe - one comparison, no grid.
+
+FADE exit (one variant, no alternatives):
+  Entry: market at the first bar open at/after 20:00, direction
+  -sign(r_post), 1 lot.
+  Exit: fixed time at the next cash-open bar open (wall 570), the
+  overnight window end.
+  The reversion-target variant (TP = entry +/- 0.5 x |P_close_post -
+  P_close_cash|, SL = entry -/+ 1.0 x the same distance, whichever
+  hits first, time exit unchanged) is the single pre-declared
+  secondary variant under the same one-comparison rule.
+
+Walk-forward: 2021 burn-in; folds 2022H1..2026H1 (the standard project
+FOLD_BOUNDS); the rules are fixed so the folds are a stability check,
+not a selection. Costs 0.8 pt round trip, $1/pt/lot, $10k base, no
+compounding. Financing reported ex-financing headline; the documented
+swap ambiguity (long -20 / short +2 $/day/lot vs strict MT5 points)
+noted once; fade positions span exactly one overnight (weekend signals
+span three calendar days; the swap convention's Wednesday x5 applies).
+
+Phase 2 GATES (S1-S4, project standard):
+  S1 net expectancy > 0 AND net Sharpe > 0 (daily P&L zero-filled over
+     cash days, sqrt(252), BARS_PER_YEAR = 252).
+  S2 >= 150 trades.
+  S3 >= 4 of 5 full years net positive AND no year > 60% of total net.
+  S4 net-of-0.8pt profitability (S1 restated as the explicit cost
+     gate).
+Any tuning after Phase-2 output = exploratory, labeled, cannot rescue.
+
+------------------------------------------------------------------------
+8. RECONCILIATION AND INTEGRATION
+
+Sharpe definition: exactly the pipeline standard - mean per-day P&L
+over std (ddof=1) x sqrt(252) on the zero-filled cash-day series.
+Correlations (pearson_zf: zero-filled union of days, >= 30 common
+days) of the arm's daily P&L against every prior stream with one:
+  ORB (data/results/orb_2021_present/py_trades.csv),
+  SP2L spike-gap (data/results/sp2l_2021_2026/py_trades.csv),
+  VWAP MR (data/results/vwap_2021_2026/py_days.csv),
+  VWAP trend-pullback (data/results/vwap_trend_pullback_rr/wf_trades.csv),
+  intraday momentum (data/results/momentum_intraday_rr/wf_trades.csv),
+  daily momentum P (data/results/momentum_multihorizon/variant_p_daily_n5.csv).
+  H1/H2, H2-morning and Bollinger MR have no P&L streams (stopped at
+  Phase 1); stated in every report, not silently omitted.
+Expected: near zero. |rho| > 0.35 vs any stream triggers a written
+investigation of whether the "new mechanism" claim survives.
+
+Integration, only if S-gates pass: EITHER a separate native EA with
+its own position limits (Step-4 conventions verbatim: NormPrice
+tick-grid rounding on every order and close, DST-aware session code,
+Model=0 yearly batches, Python-vs-MT5 reconciliation at the
+established tolerances, classify-don't-chase on tester-tape residual
+differences), OR an input to a meta-coordinator EA that switches
+strategy families by regime. The choice is made only after S-gates and
+correlations are on the table; this SPEC does not pre-commit to either.
+
+------------------------------------------------------------------------
+9. ARTIFACTS AND LOGGING (data/results/session_transfer/)
+
+  SPEC_SESSION_TRANSFER.txt      this document (before any code)
+  GATE_SESSION_TRANSFER.txt      verbatim gate extraction (before any
+                                 code)
+  day_blocks.csv                 per-day r_pre/r_cash/r_post, vols,
+                                 hl_cash, block validity flags
+  phase1_carry.csv / phase1_fade.csv   per-signal-day MFE/MAE rows
+  signal_funnel.csv              eligibility -> percentile -> joint
+                                 conditions, per arm
+  yearly_breakdown.csv           per-arm yearly n and mean diff
+  phase1_stats.json              gates, bootstrap output, splits
+  REPORT_SESSION_TRANSFER.txt    written after Phase 1 REGARDLESS of
+                                 outcome (null write-up if failed)
+  phase2/ artifacts              only if Phase 1 passes: trades,
+                                 folds, summary, correlations.csv
+  evaluate/session_transfer_phase1.py, and only on pass:
+  evaluate/session_transfer_phase2.py, reference/reconcile scripts
+
+PROGRESS.md hooks (append per stage, current style):
+  "session transfer - SPEC/GATE pre-declared", "session transfer -
+  Phase 1 run (carry/fade)", "session transfer - Phase 1 verdict",
+  and on pass "session transfer - Phase 2 WF verdict", "session
+  transfer - EA/validation".
+
+------------------------------------------------------------------------
+10. HONESTY CONVENTIONS (unchanged from the project)
+
+Gates are declared before output and never relaxed. In-sample
+explorations are labeled and cannot rescue. A null result with the
+full funnel is a complete deliverable. Correlation with failed
+families does not validate anything. Scope statements (one instrument,
+one tape, 5.3 years, block definitions as specified above including
+the maintenance-gap caveat) appear in every report.
+
+END OF SPEC_SESSION_TRANSFER

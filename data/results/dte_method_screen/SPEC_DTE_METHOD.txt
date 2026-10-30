@@ -1,0 +1,65 @@
+SPEC: DTE METHOD - DELIVERY + EXECUTION SCREEN (HYPOTHESIS #32)
+Frozen: 2026-09-22, BEFORE any Phase-1 code existed.
+Script (to exist only after this freeze): evaluate/dte_method_phase1.py
+Phase: 1 only - offline Python MFE/MAE excursion screen. No MT5 execution, no PnL claims.
+
+1. MECHANISM AND ALGORITHMIC TRANSLATION
+- Source concept ("DTE method", discretionary): trade in the direction of Higher-Timeframe DELIVERY (price accepting through M15 fair value gaps) using a Lower-Timeframe EXECUTION trigger (an M1 inverted FVG / V-spike: a displacement close through a fresh M1 gap in the HTF direction).
+- Algorithmic translation under test: M15 FVG state machine = delivery context; M1 FVG inversion within 6 bars = execution trigger; entry at the open of the bar after the displacement close; local spike extreme = initial stop reference for risk normalization.
+- DELIBERATE OMISSION (pre-declared): the discretionary method's "Target" liquidity trendlines are NOT modeled. The screen tests only the core directional edge (context-joined IFVG triggers). Targets would only improve realized economics relative to raw excursions; their omission makes the screen conservative w.r.t. the discretionary method.
+- Relationship to prior artifacts: distinct from data/results/fvg_continuation_signal_quality and fvg_continuation_rr (those tested M5 FVG continuation without HTF context join and without an inversion trigger). This is a screen, not a reopening of closed families.
+
+2. DATA
+- Tape: data/results/vwap_2021_2026/us500tick_m1.csv (1,791,504 M1 bars, 2021-01-03..2026-04-30, epoch-seconds UTC bar open times; verified export).
+- Timezone: America/New_York (EST/EDT via tz conversion). Setup candles = M1 bars whose OPEN time is strictly within the NY cash session [09:30, 15:30) (minute-of-day in [570, 930)).
+- M15 aggregation: built from the M1 tape per tasking (buckets = floor(open/15 min); OHLC from the bucket's M1 bars; buckets with no trades do not exist). NOTE: this deliberately overrides the project's standing 'M15 from M5' convention because the M1 tape is the execution tape and the delivery context must be computed on the same print set; the integrity section quantifies sparse buckets (< 15 M1 bars) and missing cash-session buckets.
+- Candle sequencing: consecutive PRINTED bars/buckets (missing no-trade minutes/buckets collapse; no synthetic fill).
+
+3. [D] DELIVERY STATE MACHINE (M15 FVGs)
+- Bullish M15 FVG at printed bucket i: Low[i] > High[i-2]; gap interval (High[i-2], Low[i]). Active once bucket i completes.
+- Bearish M15 FVG: High[i] < Low[i-2]; gap interval (High[i], Low[i-2]).
+- Mitigation: a bullish FVG is removed the moment an M15 bucket CLOSES below its gap bottom (High[i-2]); a bearish FVG when an M15 bucket closes above its gap top (Low[i-2]). Formation times and mitigations are judged only on COMPLETED buckets; mitigation check runs before new-pattern formation at the same completion.
+- The active list persists across sessions/days until mitigated (no age cap, no count cap).
+
+4. [E] EXECUTION STATE MACHINE (M1 FVG -> IFVG)
+- M1 FVG formation: identical 3-candle rule on printed M1 bars (bullish: Low[i] > High[i-2]; bearish: High[i] < Low[i-2]).
+- Inversion window: at most 6 printed M1 bars after the formation bar (displacement bar j with i < j <= i+6).
+  * SHORT (bearish IFVG): a fresh M1 BULLISH FVG whose gap bottom (High[i-2]) is pierced by a full 1-minute CLOSE strictly below it within the window.
+  * LONG (bullish IFVG): a fresh M1 BEARISH FVG whose gap top (Low[i-2]) is pierced by a full CLOSE strictly above it within the window.
+  * First qualifying displacement bar only; if none within 6 bars the formation expires.
+- Entry: the OPEN of the printed M1 bar immediately after the displacement bar (bar j+1).
+- Setup validity: BOTH the formation bar i and the displacement bar j must open within [09:30, 15:30) NY on the same NY date; the entry bar must open at or before 15:55 NY on that same date (else the signal is dropped as session-invalid, counted in the funnel).
+
+5. CONTEXT JOIN (D + E)
+- Query time t = the entry bar's open time (= displacement close minute).
+- M15 delivery state at t = active FVGs after all M15 buckets whose completion (bucket open + 15 min) is <= t. The forming bucket is excluded (its close is unknown) - causal.
+- SHORT valid iff the displacement candle's CLOSE lies inside or touching an active BEARISH M15 FVG (close in [gap bottom, gap top], inclusive).
+- LONG valid iff the displacement close lies inside or touching an active BULLISH M15 FVG.
+- Local extreme (stop reference): SHORT -> max High over printed M1 bars [i-1 .. j]; LONG -> min Low over [i-1 .. j] (spike candle through displacement). Risk = |entry - stop|. Signals with Risk <= 0 are degenerate and dropped (counted in the funnel).
+
+6. EXCURSION WALK (MFE/MAE, descriptive economics; PRE-COST)
+- Walk printed M1 bars from the entry bar (inclusive) forward to the last bar opening <= 15:55 NY on the entry's NY date.
+- MFE = max(0, favorable extreme - entry) in points in signal direction; MAE = max(0, entry - adverse extreme). Normalize: MFE_R = MFE / Risk, MAE_R = MAE / Risk.
+- No spread/swap is subtracted in this screen; the verified $0.51 real-tick spread floor is the reference the raw edge must eventually clear.
+
+7. PHASE-1 GATES (verbatim in GATE_DTE_METHOD.txt)
+- G-DTE1: Total session-valid signals >= 150.
+- G-DTE2: Mean MFE > Mean MAE at Risk thresholds (0.5R, 1.0R, 1.5R) for aggregate.
+- G-DTE3: Day-block bootstrap (10,000 iterations, seed 20260921) P(mean(MFE - MAE) <= 0) <= 0.20.
+
+8. MECHANICAL INTERPRETATIONS PRE-DECLARED
+- G-DTE1 counts the excursion-qualified signal set (post session filter, post context join, post degenerate-risk drop).
+- G-DTE2: at each k in {0.5, 1.0, 1.5}: excess_MFE(k) = mean(max(MFE - k*Risk, 0)) and excess_MAE(k) = mean(max(MAE - k*Risk, 0)) on the aggregate set; the gate requires excess_MFE(k) > excess_MAE(k) STRICTLY at all three k, and mean MFE > mean MAE.
+- G-DTE3: signals grouped by NY date; day blocks resampled with replacement (10,000 draws, numpy default_rng(20260921)); the statistic is the pooled per-signal mean of (MFE - MAE); PASS if P(mean <= 0) <= 0.20.
+- OVERALL PHASE-1 PASS = G-DTE1 AND G-DTE2 AND G-DTE3.
+
+9. HONESTY / ANTI-LEAK / STOP RULES
+- Causality: M15 context uses only completed buckets; M1 inversions resolve bar-by-bar; entries are next-bar opens; the walk uses only post-entry bars.
+- No parameter sweeps: window 6 bars, thresholds 0.5/1.0/1.5R, session [09:30,15:30), walk-to-15:55 are all frozen here.
+- Long/short and per-year splits are descriptive only.
+- Null result (any gate FAIL) is a complete, expected deliverable and ends this artifact.
+- This screen does not reopen the closed intraday families; a PASS would only justify a separate, fully pre-declared Phase-2 SPEC.
+
+10. ARTIFACTS
+- data/results/dte_method_screen/: SPEC_DTE_METHOD.txt (this file), GATE_DTE_METHOD.txt, REPORT_DTE_PHASE1.txt, dte_phase1_signals.csv, run_meta.json.
+- Script: evaluate/dte_method_phase1.py (written only after SPEC and GATE were frozen).

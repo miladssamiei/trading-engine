@@ -1,0 +1,65 @@
+HYPOTHESIS 101: EXPOSED H70 GOLD PLUS H94 US100 ACCOUNT-PACE PREFLIGHT
+Declared 2026-09-26 before H101 portfolio-joining code or returns.
+Null/FAIL is complete. No orders and no changes to frozen child verdicts.
+
+PURPOSE AND SOURCE
+This is a read-only necessary feasibility screen, not a deployable
+portfolio. Combine the frozen H70 15:59 native gold quote ledger at
+data/results/xauusd_saleh_intraday_real_quotes_close1559_v1/native_quote_trades.csv
+SHA256 17d0f1fc14c716c9cc428c6c4283bc13528ce28c4e1853ad4715de00df34107c
+and frozen H94 US100 Dukascopy-proxy ledger at
+data/results/us100_weekday_hold_h94/trades.csv
+SHA256 5cf3b14bab33e0f6bfff79fbff2a5793f33822981273bb35376c1cb2a75e51e1.
+H94 coverage CSV SHA256
+28251f94667e33fe498c01ef4803f438bbe7dc962fd1192a20fc1feb8190891d.
+The historical child outcomes were exposed before this combination;
+any portfolio PASS is exploratory, never forward confirmation.
+
+NORMALIZATION AND RISK ROWS
+Gold executable initial stop distance is absolute difference between
+entry Ask and initial SL for BUY or entry Bid and initial SL for SELL.
+Gold stressed R = frozen stress_units / that distance, retaining
+variable native Bid/Ask and extra 0.41 gold-unit stress. US100 stressed
+R = frozen stress_net / (entry-initial_stop), retaining 1.45 fixed
+spread plus 1.70 extra stress; native US100 spread is not established.
+Use fixed initial EUR risk per trade, no compounding: US100 EUR200
+(2%) in every row; gold EUR100 (1%), EUR150 (1.5%) or EUR200 (2%).
+Rows are a predeclared feasibility grid, not optimized deployment
+settings. When both instruments are open, risks add. No swap per owner.
+No additional portfolio discount or offset is assumed.
+
+CLEAN-WINDOW AND ACCOUNT REPLAY
+The 2024-02-14 gold native quote exit is unresolved; H94's 2025-12-22
+and 2025-12-29 Monday Thursday exits lack native FTMO quotes. Exclude
+every rolling 180-calendar-day start window touching any of those
+three dates; do not impute PnL. This intentionally leaves a selected
+clean subset and must be disclosed. Enumerate every NY Monday start
+from 2024-01-01 with 180 days fully observed through 2026-09-01,
+the gold source end. A trade is assigned to its NY exit date. Within
+each window, Stage 1 starts at EUR10000, target EUR11000, breach if
+close-only balance<=EUR9000. Require four distinct entry NY dates
+before target qualifies. After Stage 1 pass, Stage 2 starts the next
+calendar day at fresh EUR10000, target EUR10500, same EUR9000 floor
+and four distinct entry dates. Only trades entered on/after the stage
+start may count. Daily aggregate all eligible exits in time order;
+check the close-only floor before target. Full pass must occur within
+180 days of original start. Report timeout/breach/full pass and
+median pass days for each row, plus year-specific stressed R sums.
+Close-only equity, no daily-loss check, no native US100 ticks, no
+concurrency mechanics and no EURUSD conversion make this permissive.
+An apparent PASS cannot authorize account trading or paid evaluation.
+
+STOP RULE
+If any gate fails, immutable FINAL_FAIL and no execution Phase 2.
+If all pass, a separate frozen native-source and floating-risk study
+must resolve all missing exits before any verification claim. At
+least 150 genuinely unseen forward trades and annual sign agreement
+remain necessary for validated performance.
+
+VERBATIM GATES
+G-PF1: Both frozen trade-ledger SHA256 hashes and the H94 coverage SHA256 match, with at least 50 clean fully observed 180-day Monday starts after excluding the three predeclared unresolved-native windows.
+G-PF2: Equal-risk combined stressed R totals are strictly positive in complete 2024, complete 2025 and partial 2026, and both child legs have positive pooled stressed R over 2024-2026.
+G-PF3: At least one predeclared fixed gold-risk row (1%, 1.5% or 2%) with US100 at 2% has >=70% full two-stage close-only passes and <=10% close-only breaches across the same clean rolling starts.
+G-PF4: The source gaps and exposed-history status are disclosed, no unresolved return is imputed, no child record is modified and no account order is placed.
+
+All four gates must pass; even PASS is only a permissive preflight.

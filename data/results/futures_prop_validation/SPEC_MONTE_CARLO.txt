@@ -1,0 +1,50 @@
+ENGINE A PORTFOLIO MONTE CARLO - PREDECLARED SPEC
+Date: 2026-09-26. Written before prop_firm_monte_carlo.py exists or runs.
+This is a stress diagnostic on an exposed, in-sample CFD-proxy ledger.
+
+INPUT: data/results/futures_prop_validation/trades.csv. Filter engine exactly
+A_KC and asset exactly in GC, BTC, ETH. Preserve all qualifying rows. Net
+is the ledger's round-turn-cost-inclusive price-unit PnL. Initial_Risk is
+abs(entry - initial_stop) in the same price units. Require finite positive
+risk and finite net. R = net / Initial_Risk exactly, without clipping or
+per-asset renormalization. Pool one R observation per trade; source mix is
+therefore frequency weighted by historical counts.
+
+FREQUENCY: Calendar span is 2020-01-01 through 2026-09-23 inclusive, the
+union of the source tapes' full 2020-2026 window; days = inclusive date
+difference. Average portfolio trades/day = qualifying trade count / days.
+Calendar-time conversion is trade-count / that historical average. It is a
+frequency projection, not a simulation of actual trade arrival times,
+overlap, weekends, holidays or changing opportunity rates.
+
+SIMULATION: Base closed equity 100000 dollars, initial closed peak 100000.
+Phase-1 pass target 108000. Trailing closed-equity floor is max historical
+closed peak minus 10000 dollars, updated after every completed trade. At
+each step draw an R independently with replacement from the unified pool.
+For each risk fraction f in {0.0025,0.0050,0.0075,0.0100}, trade PnL dollars
+= drawn R * (pre-trade equity * f); new closed equity = prior equity + PnL;
+new peak = max(prior peak, new equity). PASS if equity >= 108000; otherwise
+RUIN if peak - equity >= 10000. The first reached boundary terminates the
+path. Run 10000 independent paths per fraction with separate reproducible
+PCG64 seeds 20260926, 20260927, 20260928, 20260929 respectively.
+
+COMPUTATIONAL STOP: Cap each path at 50000 drawn trades to prevent an
+unbounded simulation. Capped paths are CENSORED, never silently counted as
+pass or ruin. Report censored fraction, and verify path counts sum to 10000
+at every risk. No tuning of the cap or seeds after observing outcomes.
+
+OUTPUT: For each risk, report pass/ruin/censored fraction, median and 95th
+percentile number of trades among PASS paths only (linear empirical quantile),
+and those two counts divided by the historical average trades/day. If no
+paths pass, time quantiles are N/A. Save a path-level CSV and machine-readable
+metadata plus REPORT_MONTE_CARLO.txt. Input and script hashes are pinned.
+
+HONESTY: "Time to funded" here means only simulated Phase-1 target time;
+there is no second phase, payout, account rule, intratrade equity or actual
+funding event. The previous A_KC M1 per-position prop liquidation is already
+in the ledger. This Monte Carlo adds only a closed-equity 10000-dollar
+trailing check, not the firms' live unrealized-equity rule. Trade R values
+come from bid-only CFD proxies with assumed futures cost floors and unequal
+asset contract units. IID replacement breaks streaks, regimes, concurrent
+positions and time variation; probabilities are conditional on the observed
+R pool and must not be called prospective pass chances. No optimization.

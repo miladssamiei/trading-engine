@@ -1,0 +1,6 @@
+G-IW1: At least 50 fully resolved executed 2024-2026 Friday-flat gold trades on 50 distinct NY entry dates, zero unresolved exits and no synthetic entry or Friday fill.
+G-IW2: Strictly positive mean 2024-2026 stressed net gold units/trade after BID+0.41 executable prices, current metal commission and an additional 0.41 spread plus 0.25 slippage.
+G-IW3: Moving-block bootstrap P(mean stressed gold net/trade <= 0) at most 0.05 using block 5, 10000 draws and seed 20261001.
+G-IW4: Strictly positive stressed gold net totals in complete 2024, complete 2025 and partial 2026 separately.
+G-IW5: If Phase 1 passes, a separately frozen two-stage EUR10000 90-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts in one fixed risk row.
+G-IW6: All source hashes, flat missing-hour OHLC, causal prior-bar indicators, real M1 fills, zero weekend exposure, zero swap and predeclared fixed costs are verified with no account orders.

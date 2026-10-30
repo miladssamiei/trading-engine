@@ -1,0 +1,1 @@
+Gate per asset and SL/TP cell: at least 150 closed trades, net mean price-unit PnL > 0, and MBB p <= 0.05. Flag cells satisfying all three PASS; all others FAIL. No multiple-testing correction or walk-forward claim is implied.

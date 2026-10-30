@@ -1,0 +1,113 @@
+REPORT_SESSION_TRANSFER
+Session transfer (block-to-block returns), hypothesis #11, Phase 1
+verdict: BOTH ARMS FAIL -> project STOPS here (no Phase 2, no EA)
+
+Run: 2026-08-29. SPEC_SESSION_TRANSFER.txt and GATE_SESSION_TRANSFER.txt
+were written BEFORE any code. Data: verified US500-tick M5 export
+(364,330 bars, 2021-01..2026-04). Baselines reproduced: 1,656 calendar
+dates, 1,370 cash days (matches the verified-export baseline exactly).
+One carry signal spot-checked by independent recomputation: r_pre,
+direction, entry, MFE, MAE all exact.
+
+------------------------------------------------------------------------
+FUNNEL (signal_funnel.csv)
+
+                              carry    fade
+F0 cash days                  1,370    1,370
+F1 arm-eligible block days    1,370    1,053
+F2 joint percentile/sign conds   129      66
+F3 signal with window OK        129      66
+
+Carry eligible = pre-valid days (08:00 and 09:25 bars; all 1,370 cash
+days qualify). Fade eligible = post+cash-valid days: 1,053 — the post
+block requires 16:00 and 19:55 bars, which EXCLUDES Fridays (the CFD
+opens Sunday 18:00, so Friday evenings have no bars) and
+holiday-shortened days; structural, documented. The trailing-252-day
+causal percentiles consume 2021 as burn-in: first signals in 2022.
+
+------------------------------------------------------------------------
+CARRY ARM: decisive FAIL, and a significant REVERSAL
+
+n = 129 (9.4% of eligible days; G1 count fails: 129 < 150).
+Mean MFE 0.9428 / MAE 1.0740 -> mean diff -0.1312%.
+Median MFE 0.6688 / MAE 0.8559 -> median diff -0.2116% (G3 fails).
+Count dominance FAILS at all three thresholds (0.25%: 99 vs 105;
+0.50%: 79 vs 85; 0.75%: 57 vs 66; G2 fails).
+Day bootstrap P(mean<=0) = 0.8033 iid, 0.9074 moving-block(10): the
+day-level mean is significantly NEGATIVE, not just noisy.
+Yearly mean diffs: 2022 -0.1235 (74 signals = 57.4% of the arm, G5
+fail), 2023 -0.3850, 2024 -0.2505, 2025 -0.0174, 2026 +0.1224 (8,
+partial) -> 0 of 4 full years positive.
+
+Finding (reported, not traded): strong, volatile pre-open blocks do
+NOT carry into the cash session on this tape - they REVERSE. The
+reversal is uniform across D1 regimes (descriptive splits: down
+-0.0558 n=77, up -0.1582 n=41, range -0.5582 n=11), which is why the
+single pre-declared follow-on (regime-conditional carry) is NOT
+exercised: there is no regime cell where carry is positive, so the
+one permitted follow-on would be wasted; it stays unspent and this
+report documents why. Trading the reversal instead ("reverse carry")
+would be a post-hoc hypothesis swap - barred by the project's
+honesty rules and by this SPEC's own stop conditions.
+
+------------------------------------------------------------------------
+FADE ARM: near-miss structure, still a FAIL (4 of 5 gates)
+
+n = 66 (6.3% of eligible days; G1 count fails badly: 66 < 150 - the
+joint P80 + sign-opposition condition is rare).
+Mean MFE 0.5511 / MAE 0.4569 -> mean diff +0.0942% (positive).
+Median MFE 0.4642 / MAE 0.3325 -> median diff +0.0444% - 0.0056pp
+BELOW the pre-declared +0.05% floor (G3 fails).
+Count dominance FAILS at all three thresholds (0.10%: 56 vs 60;
+0.20%: 44 vs 51; 0.30%: 37 vs 38; G2 fails) despite the positive
+mean/median - the inverse of the continuation-family pattern: small
+adverse moves are more frequent, favorable tails are fatter.
+G4 PASSES, strongly: iid bootstrap P(mean<=0) = 0.1433, moving-block
+0.0836 - the day-level mean reversion signal is real but small.
+G5 fails: positive in 3 of 4 full years (2022 +0.3568 n=20, 2023
+-0.2135 n=9, 2024 +0.0290 n=11, 2025 +0.0050 n=21, 2026 +0.1155 n=5
+partial); max-year share 31.8% (within the 40% bound).
+
+Descriptive splits (pre-declared as non-gating, and they stay
+non-gating): the fade tilt concentrates on wide-cash-range days
+(+0.1909, n=51 vs -0.2346 on normal days), high vol_cash days
+(+0.1490 vs -0.1293), and the down regime (+0.2599 vs -0.0644 up).
+Every one of these subsamples is far below the 150-day sample floor;
+no combination can be tested without post-hoc filtering, which the
+GATE forbids as a rescue.
+
+------------------------------------------------------------------------
+WHAT THIS ADDS TO THE PROJECT PICTURE
+
+- Block-to-block transfer is a genuinely different lens (no opening
+  range, no bands, no candle patterns, no trailing-window votes), and
+  it fails like the rest: the carry direction is actively wrong and
+  the fade direction is real-but-too-small-and-too-rare (n=66, median
+  gap 0.0444% vs the 0.05% floor, dominance failing).
+- The two failures COHERE with the project-wide intraday picture:
+  raw-excursion mean reversion exists on this tape (fade's G4; carry's
+  reversal; Bollinger MR's flat-zero entries; VWAP MR's failed
+  trades) but never at the size, frequency, and consistency the gates
+  require after costs. Continuation transfer between blocks is the
+  mirror image: significantly absent (carry) in the only year-heavy
+  sample (2022 = 57% of carry signals - the volatile year produced
+  the pre-open imbalances and the cash session faded them).
+- No correlation section: Phase 2 never ran, so no P&L stream exists
+  (same honest note as every prior Phase-1 stop).
+
+------------------------------------------------------------------------
+VERDICT
+
+Per GATE_SESSION_TRANSFER stop rules: both arms failed Phase 1, the
+project stops at this report. No Phase 2 scripts written, no EA, no
+parameter adoption, follow-on left unspent with cause documented.
+Honest stop-and-report is a complete deliverable.
+
+Artifacts (data/results/session_transfer/): SPEC_SESSION_TRANSFER.txt,
+GATE_SESSION_TRANSFER.txt, day_blocks.csv (per-day block variables,
+1,656 rows), phase1_carry.csv (129), phase1_fade.csv (66),
+signal_funnel.csv, yearly_breakdown.csv, phase1_stats.json (gates,
+bootstraps, descriptive splits),
+evaluate/session_transfer_phase1.py.
+
+END OF REPORT_SESSION_TRANSFER

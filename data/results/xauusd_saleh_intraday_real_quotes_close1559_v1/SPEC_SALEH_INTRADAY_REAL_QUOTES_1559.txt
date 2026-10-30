@@ -1,0 +1,82 @@
+HYPOTHESIS 70 PHASE 2A REMEASUREMENT: XAUUSD SAME-DAY EXIT AT 15:59
+Declared 2026-09-25 after the native-quote 16:00-order artifact's
+final FAIL and before any code/run for this new named artifact.
+
+1. REASON FOR NEW MEASUREMENT AND FROZEN HISTORY
+The prior xauusd_saleh_intraday_real_quotes_v1 REPORT failed its
+coverage gate because five open trades received no gold CFD quote
+within 10 seconds after an exactly 16:00 New York market order.
+Read-only seek showed the next quote came at 18:00 New York on
+each date: the broker's two-hour session break. That fixed 16:00
+order is not executable and its FAIL remains final. Hypothesis
+70's original M1 rule exited on the final 15:00-16:00 REAL bar
+close, which occurs before 16:00. This new artifact sends the
+flat market order at 15:59:00 NY, inside that final bar and
+before the observed session cutoff. This is a declared clock
+implementation correction, not a favorable time optimization.
+All earlier trade/score reports remain frozen and unchanged.
+
+2. UNCHANGED SIGNAL, SOURCE, AND REPLAY
+Use #70/#57 H1/4H M1 signal candidate generation unchanged:
+4H NY-wall Supertrend(10,3), 1H Donchian(20) breakout,
+Wilder ADX14>=20 and 4xATR14 initial/trailing stop; eligible
+NY entry hours 00..15 and real 15:00-16:00 bar requirement.
+Use four native gold Bid/Ask tick CSV files with complete hashes
+from xauusd_onboarding/onboarding_stats.json; the #70 M1 tape
+hash is a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f.
+First valid quote within [signal-hour-open, +10 seconds] executes
+BUY at Ask or SELL at Bid, otherwise skip/log signal. Structural
+SL remains the M1 signal-bar BID open +/-4xcompleted ATR14, with
+actual raw Bid<=SL long or Ask>=SL short first-cross exit at
+the actual crossed quote (adverse gaps charged). After each
+completed REAL H1 bar still open, ratchet from the original M1
+BID close and ATR14; FILL bars do not ratchet. Recompute single-
+position occupancy from actual quote exits, shadowing signals on
+or before the exit H1 bar. Exclude/count malformed or inverted
+individual quotes; no other source repair, news filter, spread
+cap, side, stop, threshold, or session-window variation.
+
+3. ONLY CLOCK CORRECTION AND COVERAGE RULE
+At 15:59:00 America/New_York send market flat and use the first
+valid quote in [15:59:00,15:59:10] inclusive. Earlier stop wins.
+That quote is within the last REAL H1 bar of the same NY date,
+before 16:00 and before the 17:00 FX rollover. If missing for an
+open trade, log UNRESOLVED_EXIT, retain a clearly labeled last-
+valid-quote diagnostic mark, and fail the coverage gate; do not
+substitute a later executable exit or silently remove the trade.
+The first-quote model still omits live latency, order rejection,
+market impact, and swap; MT5 order execution remains a later gate.
+
+4. COST AND STATISTICS
+Native quote net gold units = exitBid-entryAsk for BUY and
+entryBid-exitAsk for SELL. Gross midpoint analog uses entry/exit
+quote mids. Actual variable Bid/Ask spread is charged. Extra-
+cost stress net = native quote net -0.41 gold units on each trade.
+Report trade funnel/coverage, entry and exit spread median/p90,
+stop and day-flat mix, year and side totals, hold times, mean,
+sum, win rate, drawdown, and exact comparison to #70 M1.
+2020-2023 descriptive; 2024-01-01 through 2026-09-01 NY entry
+dates gated. Bootstrap gated NY dates with replacement 10000
+times, seed 20261007, preserving all trades per date. Report
+P(mean native quote net<=0) and descriptive 95% quantiles.
+Use the same numerical gates as the failed 16:00 artifact; do
+not loosen a hurdle after observing its economic results.
+
+5. GATES, FROZEN BEFORE REMEASUREMENT RUN
+G-SRC1: At least 150 executed 2024-2026 trades spanning at least 150 distinct New York entry dates.
+G-SRC2: Strictly positive mean extra-0.41-cost-stress native quote net gold units per gated trade.
+G-SRC3: Date-bootstrap P(mean native quote net <= 0) at most 0.05, 10000 resamples, seed 20261007.
+G-SRC4: Strictly positive native quote-net total gold units in each complete gated year 2024 and 2025.
+G-SRC5: Zero unresolved open-trade exits, no cross-date positions, and no quote-source hash mismatch.
+All five required for the corrected native quote PASS. Otherwise
+FAIL final for this new artifact. The old 16:00-order FAIL is
+never erased even if this 15:59 exit passes.
+
+6. STOP RULE AND OUTPUTS
+Save this SPEC, verbatim GATE, native quote trades, skipped
+signals, metadata, and REPORT even on FAIL. If FAIL, no Model=4
+MT5 EA on this exact rule. If PASS, freeze a separate native gold
+custom-symbol Model=4 order-execution SPEC/GATE, reconcile
+>=150 trades, year signs, net economics and order state, then
+seek fresh forward confirmation given extensive historical
+selection. A native quote replay alone is not a live edge claim.

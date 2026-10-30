@@ -1,0 +1,184 @@
+SPEC_FTMO_MACRO_REVERSAL
+Study dir: data/results/ftmo_macro_reversal/
+Pre-declared: 2026-09-12, BEFORE any EA code, ini, or orchestrator script exists.
+Hypothesis number: #23 (owner-tasked; continues the post-Path-C descriptive lane).
+
+SECTION 0. SCOPE, PREMISE, AND STATUS
+
+0.1 Premise (swap-free): hypothesis #22-predecessor short_term_reversal FAILED its
+G-R2 net-economics gate ONLY because of CFD financing: 458 OOS trades, gross
++2,701.18 pts, financing -21,250.0 pts, net -18,782.4 pts (REPORT_SHORT_TERM_
+REVERSAL.txt). This study asks a NARROW counterfactual: on an FTMO $10,000
+Phase-1 Challenge account that is SWAP-FREE (swap forced to 0.00 on every
+trade), does the EXACT, ALREADY-GENERATED, UNMODIFIED g2 OOS trade list
+(data/results/short_term_reversal/g2_trades.csv, h=3, 2021-01-04..2026-04-28,
+186 long / 272 short) reach the +8% profit target ($10,800) before breaching
+the 5% daily ($500) or 10% max ($1,000) loss limits, at some fixed lot size?
+
+0.2 This is NOT new strategy research: no signal, feature, parameter, or window
+is created or tuned. The trade list is replayed as-is. Path C remains in force
+for the US500/XAUUSD CFD tapes; this is a post-termination execution/what-if
+simulation of frozen trades.
+
+0.3 This is NOT an FTMO qualification: ftmo10k_qualification_v1 remains
+INCOMPLETE (no verified account identity, quotes, or fills). FTMO rule numbers
+used here (5% daily loss, 10% max loss, 8% target, swap-free) are the
+owner-stated challenge parameters, simulated. downstream_model_allowed=false
+and live_execution_allowed=false regardless of verdict. Nothing here authorizes
+live trading or claims FTMO readiness.
+
+SECTION 1. EXECUTION PIPELINE (EA replay of frozen trades)
+
+1.1 New EA ea/MacroReversal_FTMO.mq5 (Signal-Reader design; bypasses the
+Python bridge for backtesting):
+  - OnInit parses MQL5\Files\g2_trades.csv (semicolon-free comma CSV; runner
+    copies it into both tester agents' sandboxes before the run). Columns
+    entry,exit,signal. Dates "YYYY-MM-DD" parsed with StringToTime.
+  - EXECUTION TIMESTAMP RULE: the reversal trades are D1-close-to-D1-close
+    (gross_pt was computed on US500.c D1 closes). The MT5 server day boundary
+    (00:00) immediately follows the entry/exit date's final tick, so the EA
+    arms each trade at entry_date 00:00 + 1 day and each exit at
+    exit_date 00:00 + 1 day: fills land on the FIRST REAL TICK at/after those
+    instants (real overnight gap + spread, replacing the idealized D1 close).
+  - OnTick order of operations: (a) FTMO guard heartbeat, (b) close open
+    position when TimeCurrent() >= armed exit time, (c) if flat and not
+    halted, open market order in signal direction when TimeCurrent() >= armed
+    entry time (signals whose window has fully passed are skipped, not
+    queued). Trades are non-overlapping by construction.
+  - Market orders: explicit grid-normalized prices (NormalizeDouble to the
+    0.01 trade grid), deviation 20, magic 26091201, volume normalized down to
+    the symbol volume step. Input FixedLots, default 5.0.
+  - Input InpProfitTargetUSD, default 10800: once REALIZED balance >= target,
+    the EA opens no new entries (Phase-1 pass semantics; any open position is
+    still closed at its armed exit).
+  - OnDeinit writes MQL5\Files\ftmo_reversal_trades.csv with columns:
+    ticket, entry_time, exit_time, type, lot, open_price, close_price,
+    commission, profit, swap, tick_value, tick_size, point
+    (profit = sum of DEAL_PROFIT over the position = price PnL only; swap and
+    commission recorded separately so the Python override is auditable).
+    A companion MQL5\Files\ftmo_reversal_status.csv records initial equity,
+    final balance, target_reached, breach flag + reason, last server time.
+
+1.2 PropFirmGuard integration (Include/PropFirmGuard.mqh, unmodified — it is
+frozen deploy infrastructure with compile-time 3.5%/8.0% constants that cannot
+be re-parameterized post-inclusion): the EA reuses the guard's PANIC_FLATTEN
+protocol verbatim — PG_Init registration, PG_IsBreached latch (global variable
+PROP_GUARD_BREACHED), PG_Breach/PG_CloseEverything panic flatten, and the
+EOD-balance global-variable anchor protocol — while the LIMIT CHECKS are the
+FTMO Challenge values, implemented in-EA because the tasking mandates strict
+5.0% max daily loss ($500) and 10.0% max loss ($1,000):
+  - DAILY: (prior server-day 00:00 latched balance - floating equity) /
+    latched balance >= 5.0%  -> PG_Breach("FTMO_DAILY_DRAWDOWN").
+  - MAX LOSS: floating equity <= initial equity * 0.90 (static $9,000 floor;
+    FTMO Challenge max loss is measured from INITIAL balance, not a trailing
+    HWM)  -> PG_Breach("FTMO_MAX_LOSS").
+  - The guard's own PG_OnTick() is NOT called (its 3.5%/8.0% trailing-HWM
+    checks are stricter than FTMO's and would truncate the replay early);
+    this deviation is declared here, not discovered later.
+
+SECTION 2. TESTER PROTOCOL
+
+2.1 configs/tester_FTMO_Reversal.ini generated by the orchestrator:
+    Expert=MacroReversal_FTMO, Symbol=US500.c, Period=D1 (daily-boundary
+    entries; Model=0 generates ticks from M1 regardless of chart period),
+    Model=0 (every tick from M1 bars, constant synthetic spread ~0.41 pt —
+    acceptable: the economics of this study are daily-scale), Optimization=0,
+    FromDate=2020-12-20, ToDate=2026-05-05 (full signal span + execution-day
+    buffer), Deposit=10000, Currency=USD, Leverage=100, VisualMode=0,
+    ReplaceReport=1, ShutdownTerminal=1, Report=<study>/tester_report_ref.xml.
+2.2 Headless batch: terminal64.exe /config:<ini> via subprocess with generous
+timeout (>= 7200 s); terminal64 and metatester64 killed before and after;
+agent log deltas archived; the fresh ftmo_reversal_trades.csv is taken from
+the attributable agent (both agents' copies retained).
+2.3 REFERENCE RUN at FixedLots=1.0 (max-information run: guard-safe, target-
+stop halts new entries once balance >= $10,800). Every lot L >= 1.0
+accumulates dollar PnL monotonically faster than the 1.0-lot run, so fills up
+to the 1.0-lot pass date cover the entire [1.0, 15.0] sweep without re-running
+the tester per lot.
+2.4 CONFIRMATION RUN at the sweep-selected optimal lot (FixedLots=<opt>):
+must reproduce the pass (balance >= target in the EA, no EA guard breach
+before pass) within tolerance (G-F4).
+
+SECTION 3. PYTHON ANALYSIS (evaluate/ftmo_macro_reversal_test.py)
+
+3.1 CRITICAL SWAP OVERRIDE: the MT5 tester applies the broker's default swap;
+the analysis FORCES swap = 0.00 on every trade: swap_free_profit = profit
+(raw DEAL_PROFIT sum) - commission. The tester-charged total swap is reported
+alongside as the documented delta between the broker account and the
+simulated swap-free account.
+
+3.2 Equity simulation from $10,000 on the US500.c D1 server-date grid
+(momentum_multihorizon/us500c_d1.csv):
+  - Realized balance: cumulative swap-free profits of closed trades.
+  - Marks: equity marked at D1 CLOSES for open positions.
+  - Worst-case floating within each server day uses the D1 adverse extreme
+    (low for longs, high for shorts) — deliberately pessimistic.
+  - FTMO daily loss: strictly (prior server-day 00:00 latched realized
+    balance - worst floating equity during the day) / latched balance < 5.0%.
+  - FTMO max loss: worst floating equity > $9,000 at all times (10% of
+    initial $10,000, static floor).
+3.3 Lot sweep L in {1.0, 1.5, ..., 15.0}: per-trade dollar PnL and commission
+scale linearly in L (spread is embedded in the recorded fill prices; tick
+value/size recorded by the EA). For each L the simulation runs
+chronologically UP TO ITS OWN pass date (first D1-close equity >= $10,800);
+L passes iff no daily-loss or max-loss breach occurs up to that date.
+Optimal L = earliest pass date (trading days from 2021-01-04); ties broken
+toward the smaller lot.
+3.4 Fill-vs-model cross-check: per-trade fill points ((close_fill -
+open_fill) * direction / tick_size) versus the CSV gross_pt; median and total
+drift reported (overnight-gap + spread effect of daily-boundary execution).
+3.5 Win rate at the optimal lot on swap-free trade PnL; average holding days
+per trade; days-to-pass for every passing lot.
+
+SECTION 4. GATES (verbatim in GATE_FTMO_MACRO_REVERSAL.txt)
+
+G-F1 EXECUTION INTEGRITY: EA compiles 0 errors/0 warnings; the reference
+tester run completes (agent log shows generation + test completion; a fresh
+ftmo_reversal_trades.csv is attributable); executed trades >= 95% of the
+signals armed before the EA target-stop (or before tape end).
+G-F2 SWAP-FREE OVERRIDE AUDIT: every trade's analysis PnL has swap forced to
+0.00; the tester-charged swap total is reported; no trade is dropped.
+G-F3 FTMO PHASE-1 FEASIBILITY: at least one L in [1.0, 15.0] (step 0.5)
+reaches equity >= $10,800 (D1-close mark) with, up to its pass date, no 5%
+daily-loss breach and equity strictly above $9,000 including worst-floating
+extremes.
+G-F4 CONFIRMATION RUN: a second tester run at the optimal L shows balance
+reaching >= $10,800 (or within one holding period of the Python pass date)
+with no EA guard breach before the pass.
+OVERALL: PASS iff G-F1..G-F4 all PASS. G-F3 FAIL (no feasible lot) is a
+complete, final answer: the swap-free counterfactual does not pass Phase 1.
+
+SECTION 5. HONESTY RULES
+
+5.1 The g2 trade list is frozen; ANY modification, reordering, filtering, or
+re-timing of trades voids the study. Fills land on real ticks at/after the
+armed times; no fill is edited. Lots affect ONLY position size.
+5.2 Pessimistic conventions: worst-intraday-floating via D1 extremes; static
+$9,000 floor checked on floating equity; daily anchor per tasking is the
+prior-day 00:00 server BALANCE (realized only) — deviations from FTMO's exact
+floating-inclusive anchor are conservative in the daily anchor but are
+declared, not hidden.
+5.3 Model=0's constant ~0.41 pt synthetic spread is a cost underestimate vs
+real ~0.51 median; noted, accepted (daily-scale economics).
+5.4 No claim of FTMO qualification, no live authorization, no re-opening of
+the failed short_term_reversal G-R2 verdict: that FAIL stands; this is its
+swap-free counterfactual only.
+
+SECTION 6. ARTIFACTS (data/results/ftmo_macro_reversal/)
+
+  SPEC_FTMO_MACRO_REVERSAL.txt        (this file; never edited after run)
+  GATE_FTMO_MACRO_REVERSAL.txt        (verbatim gate extraction)
+  compile/                             (archived EA source, .ex5, compile log,
+                                        sha256 pins)
+  tester_FTMO_Reversal_ref.ini        (archived generated configs)
+  tester_report_ref.xml                (tester report)
+  agent logs                           (freshness/delta evidence)
+  ftmo_reversal_trades.csv             (EA output, archived)
+  ftmo_reversal_status.csv             (EA status, archived)
+  confirmation/                        (optimal-lot re-run artifacts)
+  ftmo_equity_curve.png                (equity + drawdown at optimal lot)
+  REPORT_FTMO_MACRO_REVERSAL.txt       (verdicts, optimal lot, win rate,
+                                        peak FTMO drawdown percentages,
+                                        average days to pass)
+
+END OF SPEC. FROZEN 2026-09-12.

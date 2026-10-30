@@ -1,0 +1,87 @@
+REPORT - HYPOTHESIS #48: MULTI-TIMEFRAME BOLLINGER SQUEEZE TREND (4h anchor / 30m execution)
+Generated: 2026-09-23T21:54:17.418893+00:00  |  OVERALL VERDICT: FAIL
+Mechanics: 4h BB(29,1.82) inside KC(29EMA,1.56*ATR14) compression for >= 4 consecutive anchor bars then
+release (fire), 4h ADX(14) >= 19.11 trend filter, 4h LR-slope(11) direction; entry at 30m signal-bar open;
+initial SL 1.74*ATR4 and close-ratchet trail 3.71*ATR4 (ATR4 frozen at entry); honest gap fills;
+worst-case same-bar stop; continuous forward-filled 30m/4h grid per SPEC_BB_SQZ.txt.
+
+=== US500 (cost floor 0.51 points RT) ===
+1. DATA: 1791504 M1 rows -> 93266 30m bars (31849 synthetic = 34.1%) / 11659 4h bars, 2021-01-03 18:00:00 .. 2026-04-30 19:30:00
+   tape sha256 29ad8f8b25b43be4...
+2. FUNNEL: armed 30m bars=92998  4h squeeze-ON bars=851  4h FIRE events=88
+   candidate 30m bars: L=240 S=224  ignored-while-open=464  EXECUTED=56
+3. NET ECONOMICS (points): mean=1.023/trade  median=-25.498  total=57.3  win=23.2%  Net Sharpe=0.185
+   excursion asymmetry: mean MFE=61.88 vs mean MAE=35.26  (MFE/MAE=1.75)
+   sides: LONG: n=29 mean=7.25  SHORT: n=27 mean=-5.67
+   exit mix: {'SL': 55, 'FORCED_EOD': 1}
+   year-by-year net:
+      2021: n=  13  total=    -195.5  mean= -15.036
+      2022: n=   7  total=     217.9  mean=  31.128
+      2023: n=  12  total=     -81.6  mean=  -6.798
+      2024: n=  11  total=    -276.0  mean= -25.095
+      2025: n=  11  total=      -8.4  mean=  -0.762
+      2026: n=   2  total=     400.9  mean= 200.437
+4. GATES (independent, frozen in GATE_BB_SQZ.txt):
+   G-BB1 executed >= 30          :    56          -> PASS
+   G-BB2 Net Sharpe > 0           :     0.185    -> PASS
+   G-BB3 MBB P(mean<=0) <= 0.20   :    0.7037    -> FAIL  (block=5, 10000 resamples, seed 20260926)
+   US500 VERDICT: FAIL
+
+=== EURUSD (cost floor 0.3 pips RT) ===
+1. DATA: 2490896 M1 rows -> 117694 30m bars (34197 synthetic = 29.1%) / 14713 4h bars, 2020-01-01 17:00:00 .. 2026-09-18 16:30:00
+   tape sha256 e578692f3b02d985...
+2. FUNNEL: armed 30m bars=117424  4h squeeze-ON bars=1349  4h FIRE events=121
+   candidate 30m bars: L=280 S=320  ignored-while-open=600  EXECUTED=72
+3. NET ECONOMICS (pips): mean=3.291/trade  median=-26.215  total=237.0  win=34.7%  Net Sharpe=0.679
+   excursion asymmetry: mean MFE=82.42 vs mean MAE=35.17  (MFE/MAE=2.34)
+   sides: LONG: n=34 mean=-3.39  SHORT: n=38 mean=9.26
+   exit mix: {'SL': 71, 'FORCED_EOD': 1}
+   year-by-year net:
+      2020: n=  10  total=     295.8  mean=  29.576
+      2021: n=   7  total=      25.3  mean=   3.611
+      2022: n=  12  total=     115.1  mean=   9.590
+      2023: n=   7  total=     -93.5  mean= -13.364
+      2024: n=  10  total=     187.7  mean=  18.767
+      2025: n=  16  total=    -268.9  mean= -16.803
+      2026: n=  10  total=     -24.4  mean=  -2.442
+4. GATES (independent, frozen in GATE_BB_SQZ.txt):
+   G-BB1 executed >= 30          :    72          -> PASS
+   G-BB2 Net Sharpe > 0           :     0.679    -> PASS
+   G-BB3 MBB P(mean<=0) <= 0.20   :    0.3876    -> FAIL  (block=5, 10000 resamples, seed 20260926)
+   EURUSD VERDICT: FAIL
+
+=== XAUUSD (cost floor 0.41 price units RT) ===
+1. DATA: 2337538 M1 rows -> 116876 30m bars (38929 synthetic = 33.3%) / 14611 4h bars, 2020-01-01 18:00:00 .. 2026-09-01 16:30:00
+   tape sha256 a8c4c1d6551d27f3...
+2. FUNNEL: armed 30m bars=116608  4h squeeze-ON bars=1660  4h FIRE events=139
+   candidate 30m bars: L=400 S=416  ignored-while-open=816  EXECUTED=103
+3. NET ECONOMICS (price units): mean=-1.476/trade  median=-11.692  total=-152.0  win=27.2%  Net Sharpe=-0.615
+   excursion asymmetry: mean MFE=33.34 vs mean MAE=18.34  (MFE/MAE=1.82)
+   sides: LONG: n=52 mean=4.04  SHORT: n=51 mean=-7.10
+   exit mix: {'SL': 101, 'SL_GAP': 2}
+   year-by-year net:
+      2020: n=  17  total=     -36.2  mean=  -2.128
+      2021: n=  28  total=    -119.8  mean=  -4.277
+      2022: n=  13  total=     -94.7  mean=  -7.287
+      2023: n=   8  total=       3.7  mean=   0.462
+      2024: n=  16  total=     -29.6  mean=  -1.848
+      2025: n=  13  total=     247.8  mean=  19.061
+      2026: n=   8  total=    -123.3  mean= -15.408
+4. GATES (independent, frozen in GATE_BB_SQZ.txt):
+   G-BB1 executed >= 30          :   103          -> PASS
+   G-BB2 Net Sharpe > 0           :    -0.615    -> FAIL
+   G-BB3 MBB P(mean<=0) <= 0.20   :    0.7892    -> FAIL  (block=5, 10000 resamples, seed 20260926)
+   XAUUSD VERDICT: FAIL
+
+OVERALL VERDICT: FAIL (requires all three instruments to pass G-BB1..G-BB3 independently)
+
+HONESTY NOTES
+- Continuous forward-fill convention: synthetic flat bars fill no-tick minutes, maintenance breaks, holidays
+  and weekends; LR slope is exactly 0 on constant windows (arms neither side), but Wilder ATR/ADX decay across
+  long gaps, so post-gap fires can carry mechanically tightened stops - a declared consequence of the continuity
+  convention (SPEC 2.2/9.3), not a post-hoc fix.
+- The fired flag of an anchor bar applies to every 30m bar of the following 4h window; after an exit inside a
+  window, later bars of the same window may re-enter (SPEC 3.5).
+- Single pre-declared parameterization (owner-supplied); no optimization, no re-runs; sides, years and
+  instruments reported as run. Phase-1 screen is in-sample by construction; MFE/MAE are exploratory
+  descriptors, never results. Phase 2 (MT5 execution) only on overall PASS; any FAIL is final here.

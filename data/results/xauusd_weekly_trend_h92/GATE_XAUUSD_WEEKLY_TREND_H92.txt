@@ -1,0 +1,6 @@
+G-WC1: At least 100 fully resolved executed 2024-2026 weeks, zero unresolved exits and every entry and exit backed by a real source M1 bar before Friday.
+G-WC2: Strictly positive mean 2024-2026 stressed net gold units per trade after 0.41 executable spread, current metal commission and an additional 0.66 spread/slippage stress.
+G-WC3: Five-week circular moving-block bootstrap P(mean stressed net <= 0) at most 0.05, 10000 draws and seed 20261002.
+G-WC4: Strictly positive 2024, 2025 and partial-2026 stressed net gold totals separately.
+G-WC5: If Phase 1 passes, a separately frozen two-stage EUR10000 90-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts in one fixed risk row.
+G-WC6: Source hash, corrected completed-day signals, real M1 fills, same-week exits, zero swap and fixed predeclared costs are verified with no account orders.

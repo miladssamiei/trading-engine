@@ -1,0 +1,52 @@
+REPORT - HYPOTHESIS #57: SALEH 4H/1H DONCHIAN SUPERTREND - XAUUSD PHASE 1
+Generated: 2026-09-24T21:43:17.458932+00:00  |  OVERALL VERDICT: PASS
+
+Mechanics (frozen in SPEC_SALEH_DONCHIAN.txt before the run): 4H NY-wall
+Supertrend(10, 3.0) direction anchor (standard final-band recursion,
+Wilder ATR10); 1H execution on epoch top-of-hour slots; entry at the 1H
+bar-t open when close(t-1) breaks the Donchian(20) channel of t-2 in the
+anchor's direction with Wilder ADX14(t-1) >= 20; the anchor 4H bar is the
+last one strictly completed before the 1H open (previous wall bucket).
+Initial SL = open -/+ 4xATR14(t-1); trailing ratchet at every REAL 1H
+close: SL = max/min(prev SL, close -/+ 4xATR). No TP. Spread 0.41 with
+#56 mechanics (long fills at Ask, stops on Bid; short fills at Bid, stops
+on Ask with -0.41 trigger offset); worst-case stop check from the entry
+bar; honest gap fills; single trade, signals <= exit bar shadowed;
+continuous fill grids, execution on REAL bars only; 1.0 lot, PnL in price
+units ($100/unit/lot); Net PnL == bid-to-bid gross - 0.41 exactly.
+
+1. TAPE: 2337538 M1 bars -> 58438 1H grid bars (38988 real / 19450 fill), 14612 4H grid bars (10662 real / 3950 fill), UTC 2020.01.01 23:00 .. 2026.09.01 20:59 (xauusd_onboarding tape, verified 2026-09-04;
+   full tape, single in-sample pass; CAL/OOS split reporting only).
+
+2. FUNNEL: breakout closes L 2870 / S 1983 -> anchor-blocked L 711 / S 677, ADX-blocked 470 -> candidates 2514 (L 1577 / S 937) -> shadowed by occupancy 1954 -> EXECUTED 560.
+
+3. NET ECONOMICS (price units, 1.0 lot):
+   FULL TAPE : n=560  win 39.5%  expectancy +5.9480 u/trade (median -5.2200, total +3330.9 u = +333,088 $)  PF 1.648  Net Sharpe 0.131  MBB P(mean<=0) 0.0004
+   gross mean (net + 0.41): +6.3580 u/trade (floor share 6.4% of gross)
+   CAL 2020-2023: n=335  win 36.7%  mean +1.7752  total +594.7 u  Sharpe 0.078  PF 1.251
+   OOS 2024-pres: n=225  win 43.6%  mean +12.1609  total +2736.2 u  Sharpe 0.186  PF 1.987
+
+4. CHARACTER DIAGNOSTICS (not gated):
+   sides    : BUY: n=311 sum=+2653.8 u  SELL: n=249 sum=+677.1 u
+   exits    : {'SL_TRAIL': 495, 'SL_INIT': 64, 'END': 1}
+   holding  : median 42 h, mean 56.5 h, p90 126 h, max 309 h
+   init risk: median 20.507 u, p10 11.453, p90 56.015 u
+   yearly   : 2020: n=71 sum=+513.9 u; 2021: n=85 sum=+2.8 u; 2022: n=93 sum=+38.5 u; 2023: n=86 sum=+39.5 u; 2024: n=93 sum=-131.3 u; 2025: n=85 sum=+893.3 u; 2026: n=47 sum=+1974.1 u
+
+5. GATES (frozen in GATE_SALEH_DONCHIAN.txt before the run):
+   G-SAL1 executed trades >= 30        :    560      -> PASS
+   G-SAL2 Net Sharpe > 0               :     0.131  -> PASS
+   G-SAL3 MBB P(mean<=0) <= 0.20       :    0.0004  -> PASS
+   OVERALL VERDICT: PASS
+
+HONESTY NOTES
+- Single pre-declared configuration; no variant, parameter, or cost floor
+  was run before this verdict; the fixed 0.41 spread is the pre-declared
+  cost model, embedded in the fills (net == bid-to-bid gross - 0.41).
+- Known optimism, declared in SPEC 8: bar-open entries and level-touch stop
+  fills are best-case on an H1 bar reconstruction; the exit-mix / holding /
+  trailed-vs-initial statistics exist to expose any hollow pass.
+- Full-tape in-sample single screen: under validation_discipline a PASS here
+  is NOT a validated result (no walk-forward, no year-sign requirement) and
+  does not by itself authorize Phase 2 (MT5 execution); a Phase 2 needs a new
+  pre-declared SPEC meeting the standard discipline.

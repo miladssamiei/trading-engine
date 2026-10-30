@@ -1,0 +1,6 @@
+G1: Each asset x engine x arm cell requires at least 50 closed scored trades.
+G2: Each cell requires positive net expectancy after its spread floor and modeled swap.
+G3: Each cell requires unannualized per-trade net Sharpe > 0.
+G4: Each cell requires MBB P(mean net <= 0) <= 0.05 with 10000 resamples, block length 5, seed 20261030.
+G5: Each cell requires successful source, chronology, single-cost and rollover accounting integrity checks.
+G6: Overall four-asset structural adaptation passes Phase 1 only if all sixteen cells pass G1-G5; an unavailable source makes the overall verdict DATA BLOCKED.

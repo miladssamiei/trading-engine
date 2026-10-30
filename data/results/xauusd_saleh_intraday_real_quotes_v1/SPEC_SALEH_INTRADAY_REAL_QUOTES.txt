@@ -1,0 +1,90 @@
+HYPOTHESIS 70 PHASE 2A: XAUUSD SAME-DAY SALEH NATIVE BID/ASK REPLAY
+Declared 2026-09-25 after #70 M1 Phase-1 PASS and before this
+study's code or real-quote replay run.
+
+1. OBJECTIVE AND FROZEN RULE
+Qualify whether #70's same-day gold Donchian/Supertrend signal
+still clears the user's 0.41 XAUUSD CFD spread on native variable
+Bid/Ask ticks. Use exactly #70's signal candidates: H57/#70
+load_ctx() and detect_signals(), 4H Supertrend(10,3) anchor,
+1H Donchian(20), Wilder ADX14>=20, 4xATR14 initial and trailing
+stops; entry hours NY 00..15, and a real 15:00-16:00 flat bar
+required. The M1 signal tape and all indicator values remain
+unchanged. Recompute occupancy from real tick exits, so later
+signals are only skipped while an earlier real-quote trade is
+open; never splice a bar-model trade list into quote prices.
+This is a native quote-economic qualification before MT5 order
+execution, not a new optimization or a live-trading approval.
+
+2. HASHED SOURCE AND CLOCKS
+Raw native gold files and hashes are the four entries in
+data/results/xauusd_onboarding/onboarding_stats.json; check every
+file's complete SHA-256 against that frozen inventory before replay.
+CSV columns timestamp epoch-ms UTC, askPrice, bidPrice; sorted
+within and across files. The #70 source M1 hash is
+a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f.
+NY wall time is America/New_York, DST aware. Each eligible entry
+target is its H1 signal-bar open in UTC. End target = 16:00:00 NY
+on that same NY entry date, approximately the M1 final-bar close
+used in #70; this fixed market order is sent one hour before the
+17:00 NY FX rollover. No interday carry or financing.
+
+3. ENTRIES, STOPS, RATC HETS, FORCED EXIT
+For entry take first valid raw quote at or after H1 target and
+within 10 seconds inclusive; if absent skip/log this candidate
+and continue to later signals. Valid quote: finite positive Ask
+and Bid, Ask>=Bid; exclude/count invalid raw rows. Long executes
+at entry Ask; short at entry Bid. Initial structural stop is
+calculated unchanged from M1 signal bar BID open plus/minus 4x
+completed ATR14(t-1), NOT refit from quote execution price.
+Long stop is hit at first valid quote whose Bid<=SL; short stop
+at first whose Ask>=SL. Exit at that actual Bid (long) or Ask
+(short), including adverse gaps; no assumption of a fill at the
+stop level. After every completed REAL H1 bar during the live
+trade, if no stop fired, ratchet exactly #57/#70 from that bar's
+M1 BID close and ATR14 of that bar (max/min by side). FILL hours
+neither check stops nor ratchet in the H1 proxy, but native quotes
+if present still check stops; any such mismatch must be counted.
+At 16:00 NY send market flat and take the first valid quote in
+[16:00:00,16:00:10]. Earlier stop always has priority. If there
+is no valid exit quote by 16:00:10 while a trade is open, log
+UNRESOLVED_EXIT and fail the coverage gate; never remove that
+trade from economics or substitute a later quote. One trade at a
+time; signals at or before the exit H1 bar are shadowed. No
+spread cap, additional retries, holiday or news exclusions,
+side/time changes, or stop/target adjustment.
+
+4. COST, COMPARISON, PARTITION, INFERENCE
+Native quote net gold units = exitBid-entryAsk for longs and
+entryBid-exitAsk for shorts. Gross midpoint analog is side x
+(exitMid-entryMid). Measured spread drag = gross-net. Extra-cost
+stress = quote net -0.41 per executed trade, a buffer beyond the
+actual quote spread. Report entry/exit spread median and p90,
+gap-through-stop loss, stop/day-flat mix, year and side results,
+full funnel including absent entries/unresolved exits and invalid
+quotes, and comparison with #70's M1 trade count/total/means.
+2020-2023 descriptive; 2024-01-01 through 2026-09-01 NY entry
+dates gated. Bootstrap gated NY dates with replacement 10000
+times, seed 20261007, retaining all trades per date. Report
+P(mean native quote net<=0) and descriptive 95% quantiles.
+Do not search parameters or report a post-hoc favorable subset.
+
+5. GATES, FROZEN BEFORE PHASE 2A REPLAY
+G-SRQ1: At least 150 executed 2024-2026 trades spanning at least 150 distinct New York entry dates.
+G-SRQ2: Strictly positive mean extra-0.41-cost-stress native quote net gold units per gated trade.
+G-SRQ3: Date-bootstrap P(mean native quote net <= 0) at most 0.05, 10000 resamples, seed 20261007.
+G-SRQ4: Strictly positive native quote-net total gold units in each complete gated year 2024 and 2025.
+G-SRQ5: Zero unresolved open-trade exits, no cross-date positions, and no quote-source hash mismatch.
+All gates required for native quote replay PASS. Otherwise FAIL
+is final for this artifact, regardless of #70 bar-model PASS.
+
+6. STOP RULE AND DELIVERABLES
+Save this SPEC, verbatim GATE, raw quote trades, skips, source
+hashes, execution funnel, metadata, and REPORT even on FAIL.
+If FAIL, do not run an MT5 EA for this same rule. If PASS,
+freeze a separate native Model=4 custom-symbol MT5 SPEC/GATE
+before EA code or tester; reconcile actual order/tick execution,
+>=150 trades, year signs and positive net. A native quote PASS
+would still not validate live fills, and accumulated historical
+selection requires later forward observation. No prior frozen
+SPEC/GATE/REPORT is modified.

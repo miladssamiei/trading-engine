@@ -1,0 +1,71 @@
+REPORT_PAIRS_STRESS
+Generated: 2026-09-21T18:02:25
+
+PREMISE: ftmo_pairs_us500_usa30 (#24) showed the swap-free US500/USA30 pairs
+counterfactual passes FTMO Phase 1 at Multiplier 5.0 from the March 2021 list
+start (pass 2021-05-11, 42 trading days, peak daily 3.72%) - a single-path result
+on 18 trades. This study stresses that pass at the same frozen economics: (A) rolling
+fresh challenges on every trade entry date, and (B) 10,000 seeded shuffles of the
+18-trade list. Methodological twin of ftmo_macro_reversal_stress (#26). NOT new
+strategy research; the pairs #19 FAIL stands; not an FTMO qualification;
+downstream_model_allowed=false, live_execution_allowed=false.
+
+ECONOMICS: 18 frozen pairs (2021-03-12..2026-06-23); swap-free realized = (gross_usd -
+spread_cost_usd) x 5.0 (verified spreads 0.51/2.28 pt embedded; swap dropped); total
+$+1541.85 at 1x -> $+7709.25 at 5.0x. US500 marks us500c_d1;
+Dow marks = D1 aggregation of the #24 restamped Athens-wall M5 tape (common grid =
+intersection). Worst floating = SIMULTANEOUS adverse D1 extremes of both legs (#24).
+Daily anchor = prior-day realized balance (5.0% of anchor); static $9,000 floor; pass
+judged on REALIZED balance >= $10,800 (tasking definition); same-day breach voids a
+pass. Reconstruction audit: |grid-close gross - gross_usd| median $0.00.
+
+TEST A - ROLLING CHALLENGE STARTS (fresh $10,000 per start date)
+  start dates simulated: 18
+  Rolling Start Pass Rate: 16.67% of all starts (3/18); 16.67% of resolved (3/18)
+  Average Days to Pass: 35.3 trading days (median 40)
+  Failures: 15 -> 5% Daily Loss 14 (93.3%) | 10% Max Loss floor 1 (6.7%)
+  Unresolved (tape end before pass/breach): 0
+  Peak drawdown of passing runs: median 4.14%, p95 5.98%
+  Per-start outcomes:
+    2021-03-12: PASS                end 2021-06-08  elapsed   63 d  pass in 63.0 d  peakDD 4.14%
+    2021-05-10: FAIL       (daily)  end 2021-07-19  elapsed   51 d
+    2021-06-17: FAIL       (daily)  end 2021-07-19  elapsed   23 d
+    2022-01-24: PASS                end 2022-01-26  elapsed    3 d  pass in 3.0 d  peakDD 0.00%
+    2022-02-24: PASS                end 2022-04-21  elapsed   40 d  pass in 40.0 d  peakDD 6.18%
+    2022-09-27: FAIL       (daily)  end 2022-09-28  elapsed    2 d
+    2022-10-21: FAIL       (daily)  end 2022-10-24  elapsed    2 d
+    2022-10-28: FAIL       (daily)  end 2022-11-02  elapsed    4 d
+    2022-11-01: FAIL       (daily)  end 2022-11-02  elapsed    2 d
+    2022-11-03: FAIL       (daily)  end 2022-11-04  elapsed    2 d
+    2022-11-07: FAIL       (daily)  end 2022-11-10  elapsed    4 d
+    2022-11-09: FAIL       (daily)  end 2022-11-10  elapsed    2 d
+    2023-06-02: FAIL       (daily)  end 2023-06-15  elapsed   10 d
+    2024-04-09: FAIL       (daily)  end 2024-04-12  elapsed    4 d
+    2025-04-02: FAIL       (floor)  end 2025-04-04  elapsed    3 d
+    2025-06-16: FAIL       (daily)  end 2025-07-30  elapsed   33 d
+    2026-02-04: FAIL       (daily)  end 2026-02-05  elapsed    2 d
+    2026-05-04: FAIL       (daily)  end 2026-05-06  elapsed    3 d
+
+TEST B - MONTE CARLO SEQUENCING (10,000 shuffles, seed 20260921)
+  Sequencing: trades re-sequenced back-to-back on consecutive common-grid days,
+  each carrying its original holding span and dual-leg daily adverse/close path
+  (chronology destroyed, per-trade risk preserved - SPEC 3.2).
+  Monte Carlo Pass Rate: 14.80% of all runs (1480/10000); 14.80% of resolved (1480/10000)
+  Failures: 8520 -> daily 7897 | floor 623; unresolved 0
+  Median Peak Drawdown: 3.86%   95th Percentile Peak Drawdown: 7.23%
+  Median days-to-pass (passing runs): 40 trading days
+
+GATES
+G-S1 DATA INTEGRITY: 18 trades=True, dates on common grid, swap-free total $+1541.85 (expect $+1541.85), spreads retained, 3+15+0=18 starts -> PASS
+G-S2 ROLLING PASS RATE: resolved pass rate 16.67% >= 50% -> FAIL
+G-S3 MONTE-CARLO ROBUSTNESS: resolved pass rate 14.80% >= 50% AND p95 peak DD 7.23% < 10.0% -> FAIL
+OVERALL VERDICT: FAIL - the Multiplier=5.0 pass is start-luck/sequencing fragile
+
+CAVEATS: worst floating assumes SIMULTANEOUS adverse D1 extremes of both legs
+(very pessimistic for a spread); the daily limit is 5% of the prior-day balance
+anchor (FTMO's live rule is a fixed $500); pass requires REALIZED balance (floating
+gains cannot trigger a pass); Monte Carlo blocks are a sequencing device, not a
+calendar simulation; offline D1-close marks vs the #24 EA fills differed by median
+-$7.02 per pair (overnight-gap execution + Dow spread); the Athens restamp carries
+<= 1 h DST-rule skew vs the US500 server clock; unresolved runs are non-passes in
+the primary rates.

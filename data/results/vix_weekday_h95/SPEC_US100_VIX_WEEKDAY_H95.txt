@@ -1,0 +1,74 @@
+HYPOTHESIS 95: US100 MONDAY-THURSDAY DIRECTION FROM PRIOR CBOE VIX9D/VIX CURVE
+Declared 2026-09-25 before H95 evaluator code or signal/return join.
+Null/FAIL is complete. No account orders.
+
+MECHANISM AND LINEAGE
+The 9-day versus 30-day implied-volatility curve is an observable prior-week
+equity stress gauge. When Friday's 9-day implied volatility is at least the
+30-day value, acute stress may persist into the following cash week. Enter
+short in that case; otherwise enter long. This is one fixed binary rule,
+not a threshold search. H94 US100 weekday long returns and challenge pace
+are already exposed, so H95's 2024-26 section is an historical evaluation,
+not untouched forward confirmation. H94 records remain immutable.
+
+SOURCES AND TIMING
+US100 Dukascopy USTECH BID M1: data/results/virgin_assets/ustech_m1.csv
+SHA256 152f9c995b370e5391cb7da99b64a8002ceee5e52cc68899ddca409ac7e15e39.
+Official Cboe daily close snapshots downloaded 2026-09-25:
+data/results/vix_weekday_h95/VIX_History.csv
+SHA256 4c1af3176a904f3a0dd6dcc55b3762283ed0d972f55c863641cd29c03bf6efd6;
+data/results/vix_weekday_h95/VIX9D_History.csv
+SHA256 6b5ca2eb12aae4c072e21ec6ee8f7806f7e4c12e319e2bf754fdc6ee44ea97cb.
+Use last COMMON positive Cboe daily close strictly before the Monday date,
+no older than four calendar days. Thus normal Friday close is used Monday;
+a Friday market holiday allows Thursday. No Monday/Tuesday same-week close.
+Missing common signal excludes entry, reported in coverage. Cboe snapshots
+are retrospective downloads; publication timing/revisions need separate
+verification before live use. All times US100 M1 epoch UTC -> NY wall time.
+
+ENTRY, STOP AND EXIT
+Cash day [09:30,16:00) NY iff exact 09:30 real M1 exists; daily ATR20 is
+Wilder high/low/previous-close true range using prior completed cash day,
+seeded at first 20 valid days, recursing (19*prior+TR)/20. Freshness <=4 days.
+On every eligible Monday, enter at first real M1 open [09:30,09:35).
+If VIX9D close < VIX close, long at synthetic ASK = BID+1.45.
+If VIX9D close >= VIX close, short at BID. Initial stop distance 2*prior
+ATR20 from executable entry. Long stop: if BID open <= stop, exit at worse
+BID open; else if BID low <= stop, exit at BID stop. Short stop: if ASK open
+>= stop, exit at worse ASK open; else if ASK high >= stop, exit at ASK stop.
+ASK proxy at every bar is BID+1.45. Monitor from entry minute onward.
+If unstopped, exit at first real Thursday [11:00,11:15) M1 open at BID
+for long, synthetic ASK for short. Missing required quote is UNRESOLVED,
+no PnL. Exclude incomplete final tape week. One trade/week, no reentry,
+no weekend position. News holds allowed by owner.
+
+COSTS, SPLIT, TEST
+Connected FTMO-Demo US100.cash read-only 2026-09-25 snapshot spread 1.45
+points; $1/point/lot; index commission zero per FTMO publication. Stress
+subtracts another 1.45 spread and 0.25 slippage round trip from net points.
+Owner-stated zero swap. This uses a fixed spread proxy, not historical FTMO
+variable Bid/Ask. 2020-23 descriptive; 2024-26 historical evaluation with
+prior H94 asset-outcome exposure. Circular five-week moving-block bootstrap
+of ordered 2024-26 stress points, 10000 draws, seed 20261005. Report all
+trade and source coverage, side counts, annual sums, stops and holding time.
+No strategy variants or gate changes after returns are observed.
+
+STOP RULE AND FOLLOW-UP
+If any Phase-1 gate fails, REPORT FINAL_FAIL and do not run Phase 2. If all
+Phase-1 gates pass, a new frozen Phase-2 SPEC/GATE must check exact native
+FTMO Bid/Ask, EUR conversion, floating daily equity, Prague reset, lot size
+and full two-stage EUR10000 challenge at fixed 0.5%, 1%, 2% initial risk.
+Pass means >=70% full two-stage completions within 180 calendar days and
+<=10% equity breaches across >=50 fully observed starts. No Phase-1 result
+alone is a verified strategy. At least 150 genuinely unseen forward trades
+and annual sign agreement are required before a verified claim.
+
+VERBATIM GATES
+G-VW1: At least 120 fully resolved 2024-2026 Monday-to-Thursday US100 trades on 120 distinct NY entry dates, zero unresolved exits, no missing qualifying prior Cboe signal and only real M1 fills.
+G-VW2: Strictly positive 2024-2026 stressed mean US100 points per trade after 1.45 executable spread plus another 1.45 spread and 0.25 slippage.
+G-VW3: Five-week circular moving-block bootstrap P(mean stressed points <= 0) at most 0.05 using 10000 draws and seed 20261005.
+G-VW4: Strictly positive stressed US100 point totals separately in complete 2024, complete 2025 and partial 2026.
+G-VW5: If Phase 1 passes, a separately frozen two-stage EUR10000 180-calendar-day prop replay must attain at least 70% full-challenge pass and at most 10% equity breach over at least 50 fully observed starts in one fixed 0.5%, 1% or 2% initial-risk row.
+G-VW6: All three source hashes, causal common prior Cboe close, prior completed ATR, correctly sided synthetic Bid/Ask stops, no weekend exposure, zero swap and fixed predeclared costs are verified with no account orders.
+
+All six gates must pass; Phase-1 PASS alone is not verified.

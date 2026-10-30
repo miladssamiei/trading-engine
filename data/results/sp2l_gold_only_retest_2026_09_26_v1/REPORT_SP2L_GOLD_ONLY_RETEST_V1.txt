@@ -1,0 +1,24 @@
+SP2L GOLD ONLY RETEST V1 - REPORT
+Tape: data\results\xauusd_onboarding\xauusdtick_m1.csv | 2337538 M1 rows | 2020-01-01T23:00:00+00:00 through 2026-09-01T20:59:00+00:00
+Tape SHA256: a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f
+Bid-only XAUUSD proxy; corrected H56 transfer engine; full-tape exploratory test.
+MBB uses 10000 trade-order moving-block samples, block length 5, seed 20260926.
+
+XAUUSD_CFD_0.41 | cost 0.410 | gate PASS
+Trades 501; net mean 0.331808; net sum 166.236 gold units; per-trade mean/std 0.09609; MBB P(mean<=0) 0.0158
+Exits {'STOP': 224, 'TARGET': 277, 'PROP_LIQUIDATION': 0, 'END': 0}; same-minute 7.98%; max equity DD 40.901 gold units
+Sides {'long': {'n': 227, 'mean': 0.6055462555065948, 'net': 137.45899999999702}, 'short': {'n': 274, 'mean': 0.10502554744522531, 'net': 28.776999999991734}}
+Annual NY entry cohorts {'2020': {'n': 80, 'net': 7.336000000004965}, '2021': {'n': 49, 'net': -13.884999999995983}, '2022': {'n': 58, 'net': 1.8710000000046132}, '2023': {'n': 37, 'net': 9.538000000000991}, '2024': {'n': 72, 'net': 8.373999999994089}, '2025': {'n': 133, 'net': 31.333999999986833}, '2026': {'n': 72, 'net': 121.66799999999327}}
+Funnel {'setups': 12940, 'busy': 10725, 'cooldown': 0, 'killed': 37, 'expired': 1677, 'entered': 501, 'trend_dead': 539}
+
+GC_PROXY_0.146 | cost 0.146 | gate PASS
+Trades 502; net mean 0.662707; net sum 332.679 gold units; per-trade mean/std 0.19730; MBB P(mean<=0) 0.0000
+Exits {'STOP': 191, 'TARGET': 311, 'PROP_LIQUIDATION': 0, 'END': 0}; same-minute 10.16%; max equity DD 25.191 gold units
+Sides {'long': {'n': 227, 'mean': 0.9358193832599482, 'net': 212.43100000000823}, 'short': {'n': 275, 'mean': 0.43726545454546906, 'net': 120.248000000004}}
+Annual NY entry cohorts {'2020': {'n': 80, 'net': 35.7379999999974}, '2021': {'n': 50, 'net': 1.569999999998531}, '2022': {'n': 58, 'net': 15.764999999998814}, '2023': {'n': 37, 'net': 34.96199999999936}, '2024': {'n': 72, 'net': 28.294000000012097}, '2025': {'n': 133, 'net': 87.77800000001447}, '2026': {'n': 72, 'net': 128.57199999999165}}
+Funnel {'setups': 12940, 'busy': 10722, 'cooldown': 0, 'killed': 37, 'expired': 1679, 'entered': 502, 'trend_dead': 541}
+
+Limitations: Constant cost floor and bid-only M1 OHLC; same-minute order path is unknown and extreme-entry fills may be optimistic.
+The short entry-minute stop bug in the original H56 tester is corrected in this transfer engine. This is not a direct rerun of its original implementation.
+The full tape has informed prior research; passes are exploratory, not walk-forward confirmation.
+GC proxy is not native CME GC data or Lucid execution; actual spreads, market depth, fees, slippage, fills and prop-rule compliance remain unmeasured.

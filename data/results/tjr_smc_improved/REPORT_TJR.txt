@@ -1,0 +1,28 @@
+TJR V1 IMPROVED SWEEP + BOS + 1R TRAIL - PHASE 1 REPORT
+Requested Hypothesis #95 label collides with existing us100_vix_weekday_h95; unique study identity tjr_smc_improved.
+Observed BID M1 proxy tapes; fixed round-trip cost floors XAUUSD 0.585, US500 0.51.
+Swing pivots require 6 past and 2 future real bars, with 2-bar confirmation lag.
+M1 stop has priority; favorable ratchet becomes effective on the following observed M1.
+MBB: 10000 moving-block resamples, block 5, seed 20261012.
+OVERALL TWO-ASSET PHASE 1 GATE: FAIL
+
+ASSET | CLOSED | WIN% | GROSS/TRADE | NET/TRADE | NET TOTAL | NET SHARPE | MBB P | GATE
+XAUUSD | 2551 | 23.36 | 0.987086 | 0.402086 | 1025.7210 | 0.02065 | 0.1308 | FAIL
+US500 | 164 | 24.39 | 1.040323 | 0.530323 | 86.9730 | 0.01034 | 0.4303 | FAIL
+
+DETAILS
+XAUUSD: 2,337,538 observed M1 rows, 467,633 real M5 grid bars, cost 0.585; source SHA256 a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f
+  G1-G3 {'G1': True, 'G2': True, 'G3': False}; exit {'INITIAL_STOP': 1391, 'TRAIL_STOP': 1160}; OPEN_END 0; NY overnight 664; mean net R -0.06003; mean MFE R 1.28618; largest ratchet step 10
+  Pivot/sweep/BoS funnel {'pivot_highs': 35998, 'pivot_lows': 35423, 'bull_sweeps': 27257, 'bear_sweeps': 28548, 'dual_sweeps': 327, 'no_opposing_pivot': 0, 'invalidated': 22685, 'replaced_or_cancelled': 28707, 'confirmed_bos': 4249, 'no_cash_entry': 0}; fill/occupancy funnel {'bos_candidates': 4249, 'no_exact_m1': 18, 'shadowed': 1680, 'invalid_initial_risk': 0}
+  Annual entry-cohort count/net {'2020': {'trades': 362, 'net': 6.973999999999478}, '2021': {'trades': 381, 'net': -231.9970000000044}, '2022': {'trades': 350, 'net': -71.41499999999928}, '2023': {'trades': 341, 'net': 38.114000000002534}, '2024': {'trades': 401, 'net': 43.37800000000834}, '2025': {'trades': 435, 'net': 250.27399999999125}, '2026': {'trades': 281, 'net': 990.3929999999955}}
+  Ledger C:\Users\Milad\Desktop\RR\data\results\tjr_smc_improved\trades_XAUUSD.csv
+US500: 1,791,504 observed M1 rows, 121,486 real M15 grid bars, cost 0.510; source SHA256 29ad8f8b25b43be43a87c4ac39575c3cd280d557661c31f8e691990949087453
+  G1-G3 {'G1': True, 'G2': True, 'G3': False}; exit {'INITIAL_STOP': 81, 'TRAIL_STOP': 83}; OPEN_END 0; NY overnight 102; mean net R 0.05283; mean MFE R 1.46369; largest ratchet step 9
+  Pivot/sweep/BoS funnel {'pivot_highs': 9099, 'pivot_lows': 8530, 'bull_sweeps': 2148, 'bear_sweeps': 2332, 'dual_sweeps': 75, 'no_opposing_pivot': 0, 'invalidated': 745, 'replaced_or_cancelled': 1188, 'confirmed_bos': 209, 'no_cash_entry': 15}; fill/occupancy funnel {'bos_candidates': 194, 'no_exact_m1': 0, 'shadowed': 30, 'invalid_initial_risk': 0}
+  Annual entry-cohort count/net {'2021': {'trades': 24, 'net': 516.6369999999997}, '2022': {'trades': 30, 'net': -428.81300000000056}, '2023': {'trades': 26, 'net': 91.4340000000011}, '2024': {'trades': 36, 'net': 41.63999999999032}, '2025': {'trades': 36, 'net': 69.39700000000266}, '2026': {'trades': 12, 'net': -203.32200000000284}}
+  Ledger C:\Users\Milad\Desktop\RR\data\results\tjr_smc_improved\trades_US500.csv
+
+LIMITS
+Short initial stop is the sweep high as an ASK-trigger price; the fixed BID/ASK floor can cause an immediate short stop.
+No fixed target, time exit or forced cash-session exit. Open-end positions are excluded from closed statistics.
+Fixed cost, BID-only OHLC, same-M1 uncertainty, zero financing and previously inspected tapes prevent broker/account validation.

@@ -1,0 +1,10 @@
+H93 US500 WEEKDAY HOLD - FINAL_FAIL
+Dukascopy BID M1 proxy; owner-stated zero swap; news holds allowed. No orders.
+Source/SPEC/GATE SHA256: 29ad8f8b25b43be43a87c4ac39575c3cd280d557661c31f8e691990949087453 / 26c0279ab32949ffbc1fcb38b76e0d63ffe89d4f0cee2ba4104067809fc7ffc0 / bc3a81fa10354dcbfd17e23402408884f64bc9abf1e805a9316515eafc2ef2ee
+M1/cash-day rows: (1791504, 1370)
+All/OOS trades/unresolved: (267, 118, 3)
+Coverage: {'EXECUTED': 267, 'NO_PRIOR_ATR': 4, 'NO_MONDAY_CASH_OPEN': 4, 'UNRESOLVED_THURSDAY': 3}
+OOS stressed mean/total/bootstrap P: (20.032974595510854, 2363.8910022702808, 0.0019)
+Annual: {"2024": {"n": 52, "stress_sum": 756.774000229723}, "2025": {"n": 49, "stress_sum": 1169.9629994091574}, "2026": {"n": 17, "stress_sum": 437.1540026314004}}
+Gates: {"G-WH1": false, "G-WH2": true, "G-WH3": true, "G-WH4": true, "G-WH5": "NOT_RUN", "G-WH6": false}
+Historical exposed proxy, not native FTMO execution or unseen forward confirmation.

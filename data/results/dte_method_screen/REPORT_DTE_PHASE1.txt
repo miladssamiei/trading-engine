@@ -1,0 +1,46 @@
+REPORT: DTE METHOD (DELIVERY + EXECUTION) - PHASE 1 (HYPOTHESIS #32)
+Generated: 2026-09-22 00:11:44  |  script: evaluate/dte_method_phase1.py
+SPEC/GATE: data/results/dte_method_screen/{SPEC,GATE}_DTE_METHOD.txt (frozen before code)
+Mechanism: M15 FVG delivery context + M1 inverted-FVG (V-spike) execution; discretionary
+liquidity-target trendlines deliberately omitted (core directional edge only).
+
+VERDICT: FAIL   (G-DTE1=True, G-DTE2=False, G-DTE3=False)
+
+1. DATA AND INTEGRITY
+  Tape: data\results\vwap_2021_2026\us500tick_m1.csv (1791504 M1 bars, 2021-01-03 18:00:00-05:00 .. 2026-04-30 19:59:00-04:00 NY)
+  Cash-session [09:30,15:30) M1 bars: 485650 | M15 buckets: 121486 (sparse <15 bars: 13883, 11.43%)
+  M15 built from the M1 tape per tasking (project M5 convention overridden; integrity above).
+
+2. FUNNEL
+  in-session M1 FVG formations: bull=59288 bear=53537
+  inverted within 6 bars: short=24501 long=23005
+  drops: displacement-out-of-session=484 entry-missing/late=1 date-mixed=0 degenerate-risk=4
+  pre-context session-valid: 47017
+  context-joined (active same-direction M15 FVG): short=4294 long=3370
+  FINAL excursion-qualified signals: 7664 | by year: 2021:1179, 2022:1558, 2023:1573, 2024:1362, 2025:1481, 2026:511
+
+3. EXCURSION EXPECTANCY (points, pre-cost; reference spread floor 0.51 pt round trip)
+  AGGREGATE: n=7664 MFE=17.206 MAE=18.275 diff=-1.068 (MFE/R=4.848 MAE/R=5.014, MFE>MAE share=48.5%)
+    0.5R: excess MFE=15.134 vs excess MAE=16.197
+    1.0R: excess MFE=13.278 vs excess MAE=14.355
+    1.5R: excess MFE=11.645 vs excess MAE=12.712
+  LONG: n=3370 MFE=18.970 MAE=18.989 diff=-0.020 (MFE/R=4.680 MAE/R=4.735, MFE>MAE share=52.0%)
+    0.5R: excess MFE=16.596 vs excess MAE=16.681
+    1.0R: excess MFE=14.436 vs excess MAE=14.697
+    1.5R: excess MFE=12.535 vs excess MAE=12.979
+  SHORT: n=4294 MFE=15.822 MAE=17.714 diff=-1.892 (MFE/R=4.980 MAE/R=5.233, MFE>MAE share=45.7%)
+    0.5R: excess MFE=13.986 vs excess MAE=15.818
+    1.0R: excess MFE=12.369 vs excess MAE=14.086
+    1.5R: excess MFE=10.946 vs excess MAE=12.503
+
+4. GATES (frozen verbatim in GATE file)
+  G-DTE1 total session-valid signals >= 150: 7664 -> True
+  G-DTE2 mean MFE > mean MAE: 17.206 vs 18.275 -> False; threshold excesses -> {'0.5R': False, '1.0R': False, '1.5R': False}
+  G-DTE3 day-block bootstrap P(mean(MFE-MAE)<=0) <= 0.20: 0.9359 (n_day_blocks=1265) -> False
+  OVERALL PHASE-1: FAIL
+
+5. NOTES AND CAVEATS
+  - Excursions are pre-cost; before the 0.51 pt spread any residual diff must clear it to matter.
+  - No discretionary target trendlines modeled (omission pre-declared, conservative for the method).
+  - M15 context uses completed buckets only; M1 sequencing is printed-bar based.
+  - Null result is final for this artifact; a PASS would only justify a separate Phase-2 SPEC.

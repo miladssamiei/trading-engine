@@ -1,0 +1,226 @@
+REVALIDATION_REPORT_CHILDREN
+Standalone Model=4 (real-tick) revalidation of ORB and SP2L
+(two independent execution-layer re-measurements; not new hypotheses)
+
+Status: written 2026-09-02 after the pre-declared runs, per
+SPEC_TICK_MODEL_REVALIDATION_CHILDREN.txt and
+GATE_TICK_MODEL_REVALIDATION_CHILDREN.txt (O1-O3, S1-S3 extracted
+before any script ran). All 12 batches (6 ORB M5 + 6 SP2L M1) ran on
+real ticks ("generating based on real ticks", "real ticks begin from
+2021.01.03" in every batch) and passed. The EAs, original
+REPORTs/RECONCILEs, and all prior revalidation artifacts are
+untouched.
+
+VERDICT IN ONE LINE: ORB and SP2L remain NET-POSITIVE under real
+ticks but retain only a fraction of their documented Model=0 edge
+(ORB net -75.6%, Sharpe 0.337 -> 0.074; SP2L net -50.8%,
+common-universe Sharpe 0.275 -> 0.133); reconciliation agreement
+drops below the pre-declared bars (ORB 70.4% < 90%; SP2L 84.3% <
+85%), with SP2L's documented bad 2025 WORSENING (-260.25 -> -341.68)
+and its per-trade expectancy now ~5x SMALLER than measured real
+execution costs. The strategies' "validated" status was a
+synthetic-tick-execution statement; under real-tick execution both
+are marginal.
+
+------------------------------------------------------------------------
+1. ORB STANDALONE MODEL=4 (gates O1-O3)
+
+1.1 O1 FAIL - reconciliation agreement 70.4% (311/442) vs the >= 90%
+bar (original Model=0: 93.1% = 416/447). 424 of 437 MT5 trades
+matched to the Python reference (18 py-only / 13 mt5-only). The
+divergence is dominated by EXIT PATH differences on the real tape:
+among 424 matched pairs, exit price within 1.5 pts for only 342, exit
+time within 15 min for only 352 (mean exit-time delta 317 min, max
+11,172 min), mapped reason equal for 354. Real wicks cross SL/TP
+levels at different moments than the Python engine's M5 bid bars.
+Day-level decision diffs: 54 of 1,655 (orders_placed_diff 43,
+entry_direction_diff 10, boundary 1); unmatched classes: entry/
+market_entry_ask_vs_bid and entry_straddle (same families as
+Model=0), plus "other" 15. NOTE: the RECONCILE.md generated in
+.../orb/ contains correct RECOMPUTED TABLES but its narrative
+verdict paragraphs are the script's hardcoded Model=0 text - rely on
+the tables, not that narrative.
+1.2 O2 (descriptive) - against both references:
+                       Python ref   Model=0 MT5   MODEL=4 MT5
+  trades                  442           447           437
+  net PnL              +531.13       +470.67       +114.91
+  Sharpe                  n/a          0.337         0.0745
+  maxDD                   n/a          5.13%         7.92%
+  return/DD               n/a          0.917         0.145
+  Net change vs Model=0: -75.6% PnL, -77.9% Sharpe, +54% maxDD.
+  Yearly (Model=0 -> Model=4): 2021 -29.23->+28.80, 2022
+  +266.83->+283.17, 2023 +400.03->+374.31, 2024 -182.25->-190.93,
+  2025 -228.03->-297.03, 2026 +243.32->-83.41. Three consecutive
+  negative years (2024-2026 incl. the 2026 flip from +243 to -83);
+  the surviving edge is 2022-2023.
+1.3 O3 (descriptive) - ORB-Model-4 vs buy-and-hold on the real tape
+  (BH recomputed from the verified real-tick-derived M5 export: +34.66%
+  on the $10k base, maxDD 32.24%, Sharpe 0.819, return/DD 1.075,
+  financing -$55,360): ORB Sharpe 0.0745 vs 0.819 and return/DD 0.145
+  vs 1.075 - ORB does NOT beat BH on Sharpe or return/DD under real
+  ticks (it did not under Model=0 either). What ORB still offers:
+  maxDD 7.92% vs BH 32.24%, no financing drag, and a small positive
+  net (+1.15% over 5.3y). Economically: marginal.
+
+------------------------------------------------------------------------
+2. SP2L STANDALONE MODEL=4 (gates S1-S3)
+
+2.1 S1 FAIL (marginal) - agreement 84.3% (1,130/1,341 matched) vs the
+>= 85% bar (original Model=0: 89.7%). TRADE MATCHING IMPROVED
+sharply: 1,341 of 1,349 MT5 trades matched (vs 1,275 under Model=0;
+only 10 py-only / 8 mt5-only). The documented "two-tapes" residual
+class (knife-edge OHLC inequalities) SHRINKS as the dominant residual
+and is REPLACED by real-fill classes: exit_slippage 122 (level
+slippage at target/stop on real variable-spread fills), mixed
+exit-reason flips 45 (py target vs mt5 stop_loss), exit_bar_shift 38
+(level touched at bar edges), remainder ~6 across the known small
+classes; unexplained (hard): 1. Mean adverse entry delta (mt5-py):
++0.210 pts; exit adverse delta mean -0.344 pts.
+2.2 S2 (descriptive) - against the Model=0 MT5 result:
+                       Model=0 MT5    MODEL=4 MT4
+  trades                 1,343          1,349
+  net PnL               +281.84        +138.65
+  Sharpe (common univ.)   0.275          0.133
+  maxDD                   4.17%          5.13%
+  Net change: -50.8% PnL, -51.6% Sharpe, +23% maxDD. Own-universe
+  (1,655-day) Sharpe 0.121; win rate 34.5% (unchanged character).
+  Yearly (Model=0 -> Model=4): 2021 +100.07->+52.79, 2022
+  +153.14->+174.07, 2023 +140.91->+74.33, 2024 +129.24->+146.48,
+  2025 -260.25->-341.68, 2026 +18.73->+32.66. THE DOCUMENTED BAD
+  2025 WORSENS by 31% under real ticks and remains the decisive
+  negative year.
+2.3 S3 - expectancy vs real costs (the honesty note gets WORSE):
+  per-trade net expectancy = +0.103 pts. Real spread over SP2L's own
+  entry window (09:30-15:30 NY): median 0.510 / mean 0.480 pts
+  (n=47.6M ticks) - HIGHER than the synthetic constant 0.41 and
+  ~64% of the assumed 0.8 pt round trip by itself. Measured adverse
+  fill deltas vs the Python bid-tape reference: ~0.21 entry + ~0.34
+  exit = ~0.55 pts adverse per round trip, ~5x the net expectancy
+  per trade. SP2L's net edge after real execution is of the order of
+  ONE-FIFTH of measured transaction costs - the prior note
+  ("expectancy of the order of transaction costs") is now optimistic;
+  the honest statement is that SP2L's executed edge is SMALLER than
+  its execution-cost noise.
+
+------------------------------------------------------------------------
+3. SPREAD RE-MEASUREMENT (both strategies' windows, real ticks)
+
+  window                      n ticks     median   mean
+  ORB entry 10:00-10:30 NY    5,767,166   0.510    0.481
+  ORB session 09:30-16:00 NY  51,630,431  0.510    0.480
+  SP2L entry 09:30-15:30 NY   47,578,782  0.510    0.480
+  full tape (prior reval)      96,219,507 0.516    0.537
+  synthetic Model=0 constant   -           0.410    0.410
+Both strategies trade inside windows whose real median spread is
+~0.51 pts - ~25% above the 0.41 pt the synthetic tape imposed and
+the project's cost assumptions carried. This alone accounts for a
+material share of the net degradation (~437-1,349 round trips x
+~0.1 pt extra spread = ~44-135 pts), with the remainder from
+different stop/target fill paths on real wicks (the diag_20240419
+class, in bulk) - exactly the classes the reconciles now show.
+
+------------------------------------------------------------------------
+4. COMBINED IMPLICATIONS - STALE vs ROBUST (no re-adjudication here)
+
+New real-tick-grounded baselines this revalidation establishes:
+  ORB : +114.91, 437 trades, Sharpe 0.0745, maxDD 7.92%, ret/DD 0.145
+  SP2L: +138.65, 1,349 trades, common-universe Sharpe 0.133,
+        maxDD 5.13%, 2025 -341.68
+
+POTENTIALLY STALE (verdict depended on Model=0 ORB/SP2L numbers that
+this revalidation shows were inflated by synthetic-tick execution):
+  - The ORB and SP2L validation REPORTs' headline stats (ORB 0.337/
+    5.13%; SP2L 0.275/4.17%) as statements of EXECUTED performance.
+    They remain accurate as Model=0 records; as realism baselines
+    they are superseded by the numbers above.
+  - Static portfolio baselines S1/S2/S3 and the portfolio study's
+    combined book (built on Model=0 child streams).
+  - Meta-coordinator Phase-1 E-gates (E1's "> every child's Sharpe >
+    0.337" bar and its child baselines were Model=0 products; its
+    Phase-1 numbers were Python-engine-based but its CHILD inputs
+    and eligibility rationale lean on the Model=0 validations).
+    Note: the meta-coordinator FAILED anyway on E4 concentration -
+    see robust list.
+  - Regime rotation's Phase-2 G1 reference framing ("ORB 0.337 the
+    current best") and any future work citing 0.337/0.275 as "the
+    strategies' Sharpe".
+  - SP2L ablation/sensitivity conclusions insofar as they are quoted
+    as executed (they are offline Python-engine results and stand as
+    such).
+
+ROBUST (verdict survives the correction; no re-litigation needed):
+  - Regime rotation Phase-2 FAIL: already failed under Model=0 AND
+    the Model=4 re-run (worse). Unchanged.
+  - Meta-coordinator FAIL: failed on E4 (2023 concentration ~73%),
+    a structural concentration failure, not a close-call against the
+    0.337 bar. A lower real baseline would not rescue it.
+  - Calendar effects NULL: OVERNIGHT failed O1/O2 outright (not
+    significant, financing-dominated); DOW failed D1 decisively
+    (Monday REVERSED). The O4 gate's 0.337 bar never activated.
+  - Meta-labeling NULL: failed M5 (total improvement NEGATIVE -
+    degenerate half-sizing); the M1 bar (0.275) change is
+    irrelevant to that failure mode.
+  - VWAP MR NULL (negative expectancy), session-transfer NULL,
+    multi-horizon momentum NULL, trend-pullback NULL, Al Brooks
+    signal-quality null: all failed decisively under conditions at
+    least as favorable as Model=0; a worse real baseline cannot
+    rescue them.
+  - The OFFLINE Python-engine results generally: the Python engine
+    always ran on the real-tick-derived M1/M5 exports, so its
+    results (including regime rotation Phase 1) are unaffected by
+    the tester tick-model correction - only EXECUTED (MT5) numbers
+    change meaning.
+
+Bottom line, stated plainly: the project's only two individually
+validated strategies do NOT retain their documented edge under
+real-tick execution. Both remain slightly net-positive (ORB +114.91,
+SP2L +138.65 over 5.3 years on a $10k base) with Sharpe 0.07-0.13 -
+economically marginal, with SP2L's edge smaller than its measured
+execution-cost noise and ORB's edge concentrated in 2022-2023. Any
+future deployment, portfolio, or coordination work must use the
+Model=4 numbers above as the executed-performance baseline, and the
+out-of-scope revalidations (VWAP MR, meta-coordinator, calendar,
+meta-labeling) remain available as separate pre-declared work -
+though every one of their verdicts already fails or nulls under
+conditions no better than Model=0.
+
+------------------------------------------------------------------------
+5. HONESTY AND CONTINUITY
+
+  - Re-measurements, not new hypotheses; no renumbering.
+  - ea/ORB_Strategy.mq5 and ea/SP2L_SpikeGap.mq5 untouched (same
+    binaries as the original validations, verified by the batch
+    runner's Expert references).
+  - Original REPORT.md/RECONCILE.md for both strategies, and all
+    regime-rotation/tick-model revalidation artifacts, untouched.
+  - The full-range Model=4 probe (P1/P2 PASS) was reused, not
+    repeated; every batch confirmed "generating based on real
+    ticks".
+  - The uncomfortable finding is reported in full: the two validated
+    strategies' executed edge largely does not survive real ticks.
+    This is a complete and valuable deliverable.
+
+------------------------------------------------------------------------
+6. ARTIFACTS (data/results/tick_model_revalidation_children/)
+
+  SPEC_TICK_MODEL_REVALIDATION_CHILDREN.txt
+  GATE_TICK_MODEL_REVALIDATION_CHILDREN.txt
+  orb_model4_trades.csv / orb_model4_days.csv (stitched Model=4)
+  sp2l_model4_trades.csv / sp2l_model4_days.csv
+  orb_model4_reconcile.csv / sp2l_model4_reconcile.csv
+  spread_comparison_orb_sessions.csv /
+  spread_comparison_sp2l_sessions.csv /
+  spread_comparison_windows.csv
+  yearly_breakdown_orb_model4.csv / yearly_breakdown_sp2l_model4.csv
+  children_model4_stats.json (all metrics + references)
+  REVALIDATION_REPORT_CHILDREN.txt (this document)
+  orb/ sp2l/ working dirs (batches incl. per-batch meta.json +
+  agent logs, stitched mt5 sets, copied py references, RECONCILE.md
+  outputs)
+  Scripts (evaluate/): children_reval_run_batches.py,
+  children_reval_extract.py, children_reval_stats.py,
+  children_reval_spread.py; original reconcile scripts reused
+  unmodified via --base-dir (orb_reconcile_fullrange.py,
+  sp2l_reconcile.py).
+
+END OF REVALIDATION_REPORT_CHILDREN

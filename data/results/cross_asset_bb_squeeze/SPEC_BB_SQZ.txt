@@ -1,0 +1,127 @@
+HYPOTHESIS #48 SPEC: MULTI-TIMEFRAME BOLLINGER SQUEEZE TREND (4h anchor, 30m execution)
+Study ID: cross_asset_bb_squeeze
+Date frozen: 2026-09-23, before any evaluation code was written or run.
+Status: frozen. Corrections or re-measurements require a NEW study name.
+Lineage: sibling of #47 (cross_asset_vol_squeeze, FAIL final). #47 entered 15m Donchian
+breakouts while the 4h squeeze was STILL ON; this study tests a materially different
+arming mechanic - the squeeze FIRE (compression >= 4 consecutive 4h bars, then release)
+with a 4h ADX trend-strength filter and an 11-bar slope direction gate - executed on
+30m bars with 4h-ATR-sized initial and trailing stops. Parameterization (29/1.82 BB,
+29EMA/1.56 KC, ADX 14 >= 19.11, LR 11, 1.74/3.71 multipliers) is owner-supplied and
+frozen as given; no parameter search, one run per instrument.
+
+1. DATA
+1.1 Tapes (verified M1, epoch-UTC time, columns time,open,high,low,close,
+    tick_volume; sorted ascending defensively before aggregation):
+    - US500 : data/results/vwap_2021_2026/us500tick_m1.csv  (points; cost floor 0.51)
+    - EURUSD: data/results/eurusd_onboarding/eurusdtick_m1.csv (pips, 1 pip = 0.0001; cost floor 0.3)
+    - XAUUSD: data/results/xauusd_onboarding/xauusdtick_m1.csv (price units; cost floor 0.41)
+1.2 Timezone America/New_York (EST/EDT) for all wall-time logic.
+1.3 Cost floors are round-trip, subtracted once per trade from gross.
+
+2. MULTI-TIMEFRAME AGGREGATION
+2.1 30m bars: M1 epochs floored to 1800s slots; open=first, high=max, low=min,
+    close=last, volume=sum per slot. NY wall 30m boundaries align exactly with the
+    epoch-1800 grid because the NY UTC offset is always a whole number of hours.
+2.2 Continuity: the 30m series is reindexed to the FULL continuous 1800s grid from
+    first to last slot; missing bars are forward-filled with OHLC = prior close,
+    volume = 0 (synthetic flat bars). This fills no-tick minutes, maintenance
+    breaks, holidays and weekends alike.
+2.3 4h anchor bars: built FROM the continuous 30m grid by NY WALL-clock bucket
+    [00:00-04:00), [04:00-08:00), ... (open=first, high=max, low=min, close=last).
+    Wall bucketing means DST-transition anchor buckets span 3 or 5 real hours;
+    buckets are contiguous by construction. The two series are strictly aligned.
+
+3. STATE MACHINE (causal 4h indicators; all on completed anchor bars)
+3.1 For a 30m bar t, the 4h input is the most recently completed 4h bar relative
+    to the open of t: the wall bucket strictly before the wall bucket containing t.
+    Its indicators include that 4h bar's own close, known at its end.
+3.2 On the 4h series (close c, high h, low l):
+    - SMA29 and population stddev (ddof=0) -> BB = SMA29 +/- 1.82*std29.
+    - EMA29 (span=29, adjust=False) and Wilder ATR(14) -> KC = EMA29
+      +/- 1.56*ATR14. Wilder/RMA: TR=max(H-L,|H-cPrev|,|L-cPrev|),
+      ATR(13)=mean(TR 0..13), ATR(i)=(ATR(i-1)*13+TR(i))/14.
+    - Squeeze ON at 4h bar k iff BB_upper(k) < KC_upper(k) AND
+      BB_lower(k) > KC_lower(k). Squeeze is defined only where all four band
+      inputs are non-NaN.
+    - ADX(14), Wilder double smoothing: +DM/-DM with tie->0; TR, +DM, -DM
+      RMA-smoothed (first = mean of the first 14 terms from index 1);
+      +DI=100*sDM/sTR, -DI=100*sDM/sTR; DX=100*|+DI-(-DI)|/(+DI+(-DI));
+      ADX(27)=mean(DX 14..27), ADX(i)=(ADX(i-1)*13+DX(i))/14 after.
+    - Linear-regression slope (11): least-squares slope of the last 11 4h
+      closes vs x=0..10 (closed form; exactly 0.0 on a constant window).
+    - ATR(14) Wilder as above - used for stop sizing.
+3.3 SQUEEZE FIRED at 4h bar k: squeeze ON at each of k-4, k-3, k-2, k-1 (at
+    least 4 consecutive completed ON bars) AND squeeze OFF at k (all five bars
+    defined). "At least 4" is checked on the trailing four bars; longer ON runs
+    qualify automatically.
+3.4 Armed 4h bar k: k >= 33 (0-based; covers BB(29) warmup plus the 4-bar
+    squeeze history) AND ADX, LR slope, ATR non-NaN AND squeeze defined at
+    k, k-1, k-2, k-3, k-4.
+3.5 The fired flag of anchor bar k applies to EVERY 30m bar whose most recently
+    completed 4h bar is k (the whole following 4h window). If a trade exits
+    inside that window, a later 30m bar in the same window may re-enter
+    (declared; no once-per-fire cap beyond the 1-open-trade cap).
+
+4. SIGNALS AND EXECUTION
+4.1 Long signal at 30m bar t: 4h Squeeze Fired TRUE, 4h ADX >= 19.11, 4h LR
+    slope > 0. Short: Fired TRUE, ADX >= 19.11, slope < 0.
+4.2 Execution cap: max ONE open trade per instrument; signals while a trade is
+    open are counted (ignored-while-open) and discarded. A trade occupies bars
+    [entry_bar, exit_bar] inclusive; the next actionable signal is at
+    exit_bar + 1 or later.
+4.3 Entry: Open price of the signal bar t.
+
+5. EXCURSION WALK AND TRAILING-STOP EXIT
+5.1 ATR4 = Wilder ATR(14) of the mapped anchor bar (strictly prior 4h state),
+    FROZEN AT ENTRY and used for all distance math of that trade.
+5.2 Initial SL = Entry - 1.74*ATR4 (long) / Entry + 1.74*ATR4 (short).
+5.3 Walk 30m bars j = entry_bar, entry_bar+1, ... in order (long case; short
+    mirrored):
+    a) Open(j) <= SL -> exit at Open(j), reason SL_GAP (honest fill);
+    b) Low(j)  <= SL -> exit at SL, reason SL (worst-case default on same-bar
+       dual conditions);
+    c) at the close of j, ratchet: SL = max(SL, max Close over
+       [entry_bar..j] - 3.71*ATR4), with ATR4 frozen per 5.1.
+5.4 If no stop is hit by the final 30m bar, exit at that bar's close, reason
+    FORCED_EOD, included in results.
+5.5 Per-trade record includes MFE/MAE excursions over [entry_bar..exit_bar]
+    (long MFE = max High - Entry, MAE = Entry - min Low; short mirrored),
+    in instrument units, descriptive only.
+
+6. ECONOMICS
+6.1 Gross = side*(Exit - Entry) in instrument units: points for US500 and
+    XAUUSD, pips (x10,000) for EURUSD. Net = Gross - cost floor (0.51 / 0.3 /
+    0.41 respectively), one round trip per trade.
+6.2 Net Sharpe (per-trade convention): mean(Net)/std(Net, ddof=1) * sqrt(252)
+    over executed trades of the instrument.
+
+7. PHASE 1 GATES (applied INDEPENDENTLY to each instrument; frozen verbatim in
+   GATE_BB_SQZ.txt)
+    G-BB1: Total executed signals >= 30.
+    G-BB2: Net Sharpe Ratio > 0.
+    G-BB3: Moving-block bootstrap (10,000 resamples, block=5 trades,
+           seed 20260926) P(mean Net PnL <= 0) <= 0.20.
+    VERDICT RULE: an instrument PASSES only if G-BB1 AND G-BB2 AND G-BB3 all
+    PASS. OVERALL verdict PASS only if ALL THREE instruments PASS. Any FAIL is
+    final for this artifact; corrections require a new study name. Null
+    results are complete, expected deliverables.
+
+8. OUTPUTS (data/results/cross_asset_bb_squeeze/)
+    SPEC_BB_SQZ.txt (this file), GATE_BB_SQZ.txt (written before the run),
+    REPORT_BB_SQZ_PHASE1.txt (funnel, net expectancy, exit mix), bb_sqz_signals.csv
+    (all instruments, asset column), run_meta.json (sha256 lineage of tapes and
+    script, funnel, gates, verdict).
+
+9. HONESTY / ANTI-LEAK RULES
+9.1 All 4h inputs strictly completed; entries only at 30m bar opens; no
+    intrabar lookahead; gap fills at the open; worst-case same-bar stop.
+9.2 Single frozen parameterization; no optimization, no re-runs, no post-hoc
+    filtering; sides, years and instruments reported separately and pooled.
+9.3 CONSEQUENCE OF 2.2, declared honestly: synthetic flat bars feed the
+    indicators; LR slope is exactly 0.0 on constant windows (arms neither
+    side), while Wilder ATR/ADX decay across long gaps, so post-gap fires can
+    carry mechanically tightened stops. Accepted under the declared continuity
+    convention; no bar-skipping or ATR-freezing fix is applied.
+9.4 Phase 2 (MT5 execution) only on overall PASS; in-sample character of this
+    screen acknowledged; MFE/MAE are exploratory descriptors, never results.

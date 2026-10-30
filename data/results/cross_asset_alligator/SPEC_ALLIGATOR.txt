@@ -1,0 +1,132 @@
+HYPOTHESIS #49 SPEC: ALLIGATORAI TREND STRATEGY (4h anchor, 1h execution, fixed 1:1 harvest)
+Study ID: cross_asset_alligator
+Date frozen: 2026-09-23, before any evaluation code was written or run.
+Status: frozen. Corrections or re-measurements require a NEW study name.
+Lineage: third cross-asset study. #47 (squeeze-still-ON 15m Donchian, FAIL) and
+#48 (squeeze-FIRE + ADX, FAIL) both died on trailing-stop harvests of favorable
+MFE/MAE asymmetry; this study tests a different signal family entirely - Bill
+Williams Alligator alignment on two timeframes with a momentum gate - under a
+FIXED symmetric 1:1 ATR bracket (the #46 exit paradigm on a new mechanism).
+Parameterization (Alligator 5/8/13 with shifts 3/5/8, EMA100 anchor, ADX>30,
+CMO +/-20, StochRSI 20/80, 2.0xATR bracket) is owner-supplied and frozen as
+given; no parameter search, one run per instrument.
+
+1. DATA
+1.1 Tapes (verified M1, epoch-UTC time, columns time,open,high,low,close,
+    tick_volume; sorted ascending defensively before aggregation):
+    - US500 : data/results/vwap_2021_2026/us500tick_m1.csv  (points; cost floor 0.51)
+    - EURUSD: data/results/eurusd_onboarding/eurusdtick_m1.csv (pips, 1 pip = 0.0001; cost floor 0.3)
+    - XAUUSD: data/results/xauusd_onboarding/xauusdtick_m1.csv (price units; cost floor 0.41)
+1.2 Timezone America/New_York (EST/EDT) for all wall-time logic.
+1.3 Cost floors are round-trip, subtracted once per trade from gross.
+
+2. MULTI-TIMEFRAME AGGREGATION
+2.1 1h bars: M1 epochs floored to 3600s slots; open=first, high=max, low=min,
+    close=last, volume=sum per slot. NY wall 1h boundaries align exactly with
+    the epoch-3600 grid because the NY UTC offset is always a whole number of
+    hours.
+2.2 Continuity: the 1h series is reindexed to the FULL continuous 3600s grid
+    from first to last slot; missing bars are forward-filled with OHLC = prior
+    close, volume = 0 (synthetic flat bars). This fills no-tick minutes,
+    maintenance breaks, holidays and weekends alike.
+2.3 4h anchor bars: built FROM the continuous 1h grid by NY WALL-clock bucket
+    [00:00-04:00), [04:00-08:00), ... (open=first, high=max, low=min,
+    close=last). DST-transition anchor buckets span 3 or 5 real hours; buckets
+    are contiguous by construction. The two series are strictly aligned.
+
+3. STATE MACHINE (causal indicators)
+3.1 Alligator (both timeframes), canonical Bill Williams source = median
+    price (H+L)/2. SMMA(N) = Wilder/RMA: SMMA(N-1) = mean of the first N
+    values, SMMA(i) = (SMMA(i-1)*(N-1) + x(i))/N (alpha = 1/N).
+    - Lips(u) = SMMA_5[u-3]; Teeth(u) = SMMA_8[u-5]; Jaw(u) = SMMA_13[u-8]
+      (strict causal forward-shifts; undefined during warmup).
+3.2 For a 1h execution bar t: every 1h input is evaluated at bar t-1 (the
+    strictly completed prior bar): Close(t-1), Alligator(t-1), ADX(t-1),
+    CMO(t-1), StochRSI_K(t-1), ATR(t-1). The 4h input is the most recently
+    completed 4h bar relative to the open of t (the wall bucket strictly
+    before the bucket containing t): its Alligator values and EMA(100) of
+    Close include that anchor bar's own close, known at its end.
+3.3 1h indicators:
+    - Alligator per 3.1.
+    - ADX(14) Wilder double smoothing: +DM/-DM with tie->0; TR, +DM, -DM
+      RMA-smoothed (first = sum of the first 14 terms from index 1);
+      +DI=100*sDM/sTR, -DI=100*sDM/sTR; DX=100*|+DI-(-DI)|/(+DI+(-DI));
+      ADX(27)=mean(DX 14..27), ADX(i)=(ADX(i-1)*13+DX(i))/14 after.
+    - CMO(14): up=Close-PrevClose clipped at 0, down mirrored, both summed
+      over 14 bars; CMO=100*(Su-Sd)/(Su+Sd); undefined (NaN) when Su+Sd=0.
+    - StochRSI: RSI(14) Wilder (RMA of gains/losses, seeded with 14-term
+      means); raw = 100*(RSI-min(RSI,14))/(max(RSI,14)-min(RSI,14)),
+      undefined when the 14-bar RSI range is 0; K = 3-bar SMA of raw.
+    - ATR(14) Wilder (stop sizing).
+3.4 4h indicators: Alligator per 3.1 on 4h bars; EMA(100) of 4h Close
+    (span=100, adjust=False, masked NaN before index 99).
+3.5 Armed: bar t is armed iff every input in 3.2/3.4 is non-NaN (implicit
+    warmup ~30 1h bars for StochRSI/ADX and ~100 anchor bars for EMA100).
+
+4. SIGNALS AND EXECUTION
+4.1 Long signal at 1h bar t (all evaluated on strictly prior state):
+    - 1h trend: Lips1h(t-1) > Teeth1h(t-1) > Jaw1h(t-1) AND Close(t-1) > Lips1h(t-1).
+    - 4h trend: Lips4h > Teeth4h > Jaw4h (mapped anchor) AND Close(t-1) > EMA100_4h.
+    - Momentum/strength: ADX1h(t-1) > 30 AND CMO1h(t-1) > 20 AND StochRSI_K(t-1) < 20.
+    Short is the exact mirror: reversed inequalities, CMO1h < -20,
+    StochRSI_K > 80.
+4.2 Execution cap: max ONE open trade per instrument; signals while a trade
+    is open are counted (ignored-while-open) and discarded. A trade occupies
+    bars [entry_bar, exit_bar] inclusive; the next actionable signal is at
+    exit_bar + 1 or later.
+4.3 Entry: Open price of the signal bar t.
+
+5. EXCURSION WALK AND FIXED 1:1 HARVEST
+5.1 1R = 2.0 * ATR1h(t-1) (strictly prior completed 1h bar).
+5.2 Initial SL = Entry - 1R (long) / Entry + 1R (short); hard TP = Entry + 1R
+    (long) / Entry - 1R (short). Fixed symmetric 1:1 bracket.
+5.3 Walk 1h bars j = entry_bar, entry_bar+1, ... in order (long case; short
+    mirrored), checks in order:
+    a) Open(j) <= SL -> exit at Open(j), reason SL_GAP (honest fill);
+    b) Open(j) >= TP -> exit at Open(j), reason TP_GAP (honest fill);
+    c) Low(j)  <= SL -> exit at SL, reason SL (worst-case default when both
+       levels are touched in the same bar);
+    d) High(j) >= TP -> exit at TP, reason TP.
+5.4 If no level is hit by the final 1h bar, exit at that bar's close, reason
+    FORCED_EOD, included in results.
+5.5 Per-trade record includes MFE/MAE excursions over [entry_bar..exit_bar]
+    (long MFE = max High - Entry, MAE = Entry - min Low; short mirrored),
+    in instrument units, descriptive only.
+
+6. ECONOMICS
+6.1 Gross = side*(Exit - Entry) in instrument units: points for US500 and
+    XAUUSD, pips (x10,000) for EURUSD. Net = Gross - cost floor (0.51 / 0.3 /
+    0.41 respectively), one round trip per trade.
+6.2 Net Sharpe (per-trade convention): mean(Net)/std(Net, ddof=1) * sqrt(252)
+    over executed trades of the instrument.
+
+7. PHASE 1 GATES (applied INDEPENDENTLY to each instrument; frozen verbatim in
+   GATE_ALLIGATOR.txt)
+    G-ALI1: Total executed signals >= 30.
+    G-ALI2: Net Sharpe Ratio > 0.
+    G-ALI3: Moving-block bootstrap (10,000 resamples, block=5 trades,
+            seed 20260927) P(mean Net PnL <= 0) <= 0.20.
+    VERDICT RULE: an instrument PASSES only if G-ALI1 AND G-ALI2 AND G-ALI3
+    all PASS. OVERALL verdict PASS only if ALL THREE instruments PASS. Any
+    FAIL is final for this artifact; corrections require a new study name.
+    Null results are complete, expected deliverables.
+
+8. OUTPUTS (data/results/cross_asset_alligator/)
+    SPEC_ALLIGATOR.txt (this file), GATE_ALLIGATOR.txt (written before the
+    run), REPORT_ALLIGATOR_PHASE1.txt (funnel, net expectancy, win rate, exit
+    mix), alligator_signals.csv (all instruments, asset column), run_meta.json
+    (sha256 lineage of tapes and script, funnel, gates, verdict).
+
+9. HONESTY / ANTI-LEAK RULES
+9.1 All 1h inputs strictly prior (bar t-1), all 4h inputs completed anchor
+    bars; entries only at 1h bar opens; no intrabar lookahead; gap fills at
+    the open; worst-case same-bar default to SL.
+9.2 Single frozen parameterization; no optimization, no re-runs, no post-hoc
+    filtering; sides, years and instruments reported separately and pooled.
+9.3 CONSEQUENCE OF 2.2, declared honestly: synthetic flat bars feed the
+    indicators. Flat windows drive CMO/StochRSI undefined or zero (killing
+    weekend signals), flatten SMMA toward the last close, and decay Wilder
+    ATR/ADX across long gaps. Accepted under the declared continuity
+    convention; no bar-skipping or ATR-freezing fix is applied.
+9.4 Phase 2 (MT5 execution) only on overall PASS; in-sample character of this
+    screen acknowledged; MFE/MAE are exploratory descriptors, never results.

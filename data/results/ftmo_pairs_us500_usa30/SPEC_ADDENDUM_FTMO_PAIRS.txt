@@ -1,0 +1,53 @@
+SPEC_ADDENDUM_FTMO_PAIRS (new file; the frozen SPEC_FTMO_PAIRS.txt is NOT edited)
+Study dir: data/results/ftmo_pairs_us500_usa30/
+Pre-declared: 2026-09-13, BEFORE any run of the substituted configuration.
+
+SECTION A. DISCOVERED DATA LIMITATION
+
+A.1 The frozen SPEC/EA specify broker DJ30.c as the Dow leg (the broker symbol
+table has no USA30.c). Execution attempt on 2026-09-13 established:
+  - MetaTrader5 API D1 export of DJ30.c returns 933 bars, 2022-11-21 ..
+    2026-07-01 only; the terminal's local TenTrade-Server cache
+    (bases\TenTrade-Server\history\DJ30.c\*.hcc) likewise starts with
+    2022.hcc (November). The server holds no earlier DJ30.c history.
+  - Consequence: the six pair trades entered 2021-03-12 .. 2022-09-27
+    (57% of the study's +$1,572.62 gross) cannot be filled on DJ30.c.
+    Dropping or re-dating them would violate SPEC section 5.1.
+
+SECTION B. PRE-DECLARED SUBSTITUTION (before any run uses it)
+
+B.1 The Dow leg executes on an IN-AGENT CUSTOM SYMBOL "USA30Duk":
+  - Built by the EA itself in OnInit: CustomSymbolCreate + properties
+    (digits 2, point 0.01, tick size 0.01, tick value 0.01 -> exactly
+    $1 per index point per lot, the SAME convention as the original #19
+    study's USA30 leg; volume min/step 0.01; contract size 1; USD;
+    spread 228 points = the verified 2.28-pt USA30 median), then M5 bars
+    imported with CustomRatesReplace from usa30_m5_eet.csv staged in the
+    common folder (FILE_COMMON, per the build 6182 sandbox rule).
+  - Source tape: data/results/usa30_onboarding/usa30tick_m5.csv — the
+    VERIFIED Dukascopy USA30 M5 aggregate (0 monotonic violations,
+    0 duplicates; onboarding audit 2026-09-05), 2020-01 .. 2026-09.
+    This is the SAME tape the original #19 study used for its Dow leg,
+    so the substitution makes execution CLOSER to the study, not further.
+  - Clock convention: Dukascopy UTC epochs are restamped to Europe/Athens
+    (EET/EEST) wall time by the orchestrator before staging, so the
+    custom bars sit on the same wall clock as the broker's US500.c server
+    timeline. Residual mismatch is at most the broker-vs-Athens DST rule
+    difference (<= 1 h around switch dates), affecting only the Dow leg's
+    intraday fill instants at the low-volatility overnight hour; Python
+    D1 marks are built from the SAME restamped tape, so bar data and
+    marks are internally consistent by construction.
+  - DJ30.c remains the SPEC's nominal leg; this addendum documents that
+    all executed results use USA30Duk uniformly for ALL 18 trades (no
+    mixed feeds within the study). The DJ30.c export (933 bars,
+    dj30c_d1.csv) is retained as evidence of the limitation.
+
+SECTION C. WHAT DOES NOT CHANGE
+
+C.1 Gates G-P1..G-P4, the FTMO parameters, the swap-free override, the
+18-trade list, lots30 ratios, arming convention, sweep range [1.0, 30.0],
+and all honesty rules remain exactly as frozen in SPEC_FTMO_PAIRS.txt and
+GATE_FTMO_PAIRS.txt. The REPORT will cite this addendum wherever the Dow
+leg symbol appears.
+
+END OF ADDENDUM. FROZEN 2026-09-13 BEFORE the substituted run.

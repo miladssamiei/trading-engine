@@ -1,0 +1,169 @@
+SPEC_SHORT_TERM_REVERSAL
+Study dir: data/results/short_term_reversal/
+Pre-declared: 2026-09-08, BEFORE any script exists.
+Lineage: third leg of the daily-horizon program. Tests whether the
+anti-prediction signature found by the daily directional model
+(REPORT_DAILY_DIRECTIONAL_MODEL.txt: all 8 CPCV configs negative OOS IC,
+lgbm t-stats -6..-10) reflects genuine short-term mean-reversion structure
+that a model trained on a DISJOINT macro era would learn and carry forward.
+This is NOT a sign-flip of the prior study: predictions are evaluated
+one-sided positive here; a negative-IC outcome is a FAILURE, not an edge.
+
+SECTION 0. SCOPE AND TERMINAL STAKES
+
+0.1 Hypothesis: extreme macro/intermarket deviations (the same 5 orthogonal
+features) combined with short-horizon price exhaustion predict 1-3 day
+mean reversion in US500, with structure learned on 2015-2019 that
+generalizes across the 2020 structural break to 2021-2026.
+
+0.2 This is the FINAL strategy-research artifact on the US500/XAUUSD CFD
+tapes. If G-R1 or G-R2 fails, the report writes "TRANSITION TO PATH C:
+RESEARCH EXHAUSTED" and the project ceases pattern/ML strategy research on
+these tapes. No further SPEC may be proposed for them.
+
+SECTION 1. DATA (frozen sources)
+
+1.1 US500 prices, full span: data/results/momentum_multihorizon/
+us500c_d1.csv (broker US500.c D1 export, verified 2014-06-23..2026-08,
+epoch UTC, OHLC). ONE price series for the entire study - no seam between
+eras. Daily close P_t = the D1 bar close. Informational reconciliation on
+the 2021-2026 overlap vs the tick-tape cash closes: report median and 95th
+percentile of |close difference| (different feeds; economics never touch
+the tick tape in this study).
+
+1.2 USA30 leg (for ffd_log_spdj): broker USA30.c D1 export fetched at
+script stage via the MT5 API into this study dir (usa30c_d1.csv), required
+2014-06..2026-04. PRE-DECLARED CONTINGENCY: if the broker D1 history does
+not cover 2015-01-01, ffd_log_spdj is EXCLUDED from this study (4 features
+remain; recorded in the report; not a failure, not a substitution).
+
+1.3 XAUUSD: no XAUUSD-level feature exists in the frozen 5-feature set;
+XAUUSD series are not part of this study (the "US500/XAUUSD tapes" in the
+Path C clause refers to the project's research program, not this
+artifact's inputs).
+
+1.4 FRED: VIXCLS, T10Y2Y, DFII10 re-downloaded 2014-01-01..2026-08-31
+(fredgraph, archived raw/ with provenance). Same availability rules as
+SPEC 1.3 of the feature pipeline: VIX same-day; T10Y2Y/DFII10 published s
+usable s+1; forward-fill <= 5 rows with publication-date tracking;
+current-vintage limitation accepted once, documented.
+
+1.5 Calendar: US500.c D1 trading dates. Features/targets indexed on them.
+
+SECTION 2. TEMPORAL ISOLATION (frozen)
+
+2.1 Train window: 2015-01-01..2019-12-31. Effective start = first date
+ALL surviving features are non-NaN (with l=252 FFD warmup from the
+2014-06-23 tape start, FFD features begin ~mid-2015; the dropped head
+rows are reported). Estimated ~1,100 usable rows.
+
+2.2 Gap: 2020-01-01..2020-12-31 dropped entirely. The COVID shock year
+is a structural embargo. NOTHING (no statistic, no scaling, no d*, no
+imputation) may read 2020 rows.
+
+2.3 Test window (strict OOS): 2021-01-01..2026-04-30. Hard end.
+
+2.4 Every parameter - FFD d*, standardization mean/std, hyperparameters,
+sigma for target standardization (train-side), any quantile - is fit on
+train rows only and applied frozen to test rows.
+
+SECTION 3. FEATURES (same definitions, re-calibrated to train)
+
+3.1 The 5 features of SPEC_DAILY_FEATURE_ENGINEERING section 3, rebuilt
+on the US500.c D1 calendar (and USA30.c D1 for the ratio if available):
+ffd_log_us500, ffd_log_spdj, vrp, tslope_d21, dfii10_d21. Formulas, l=252,
+21-row differences, VR21 prior-returns, FRED shifts: identical.
+
+3.2 FFD d* search: grid 0.05..0.95 step 0.05, ADF (constant, AIC lag)
+statistic < -2.86, smallest passing d, computed EXCLUSIVELY on train
+rows (post-warmup); d* locked, applied unchanged to the test window.
+Full grid diagnostics to fracdiff_reversal_d.json. No passing d ->
+feature excluded (recorded; no substitution).
+
+SECTION 4. MODELS (trees barred)
+
+Model A - ElasticNet (regression on y_{t,h}): train-fold
+standardization; hyperparameters alpha x l1_ratio on the SAME grid as
+SPEC_DAILY_DIRECTIONAL_MODEL section 2; internal sklearn
+TimeSeriesSplit(n_splits=5) over train rows only; selection metric =
+mean validation-fold Spearman IC; refit on full train.
+
+Model B - RidgeClassifier (on sign of the raw forward log return):
+alpha in {0.1, 1.0, 10.0, 100.0, 1000.0}; the SAME TimeSeriesSplit(5)
+procedure with selection by mean validation-fold Spearman IC of
+decision_function; features standardized with train statistics.
+
+Global seed 42. Exactly these two estimators; no trees, no ensembles,
+no per-horizon feature selection.
+
+SECTION 5. TARGETS AND EVALUATION
+
+5.1 y_{t,h} = ln(P_{t+h}/P_t) / (sigma_t * sqrt(h)), sigma_t = trailing
+20-return std (ddof=1, includes r_t) on US500.c D1 closes, h in {1,2,3};
+trailing rows lacking P_{t+h} dropped per horizon. Classifier label =
+sign(ln(P_{t+h}/P_t)).
+
+5.2 Evaluation: predictions on test rows only; Spearman IC per
+(model, horizon) = 6 configurations.
+
+SECTION 6. GATES (verbatim-extracted into GATE_SHORT_TERM_REVERSAL.txt)
+
+G-R1 (OOS IC FLOOR): on the 2021-01-01..2026-04-30 test window, the
+Spearman IC between predictions and y_{t,h} must be >= 0.025 for at
+least one (model, horizon) of the 6 configurations. One-sided positive:
+negative or near-zero IC is a failure. If no configuration passes,
+the study FAILS at G-R1 and G-R2 is not evaluated.
+
+G-R2 (NET ECONOMIC VIABILITY): among G-R1 passers, the configuration
+with the highest test IC is selected (selection by IC only, BEFORE any
+economics are computed). Signal s_t = sign(prediction) (+1/-1/0 at
+exactly zero); NON-OVERLAPPING trades t0, t0+h, ... from the first test
+row; gross = s_t * (P_{t+h} - P_t) in D1-close points; costs = 0.51 pt
+round-trip spread + financing at the documented convention (swap_long
+-20 pt/night, swap_short +2 pt/night, Wednesday-night starts x5, on
+calendar nights of the actual hold); annualized net Sharpe =
+mean/std(ddof=1) * sqrt(252/h) must be > 0 on the test window. Gross
+Sharpe, total costs, and per-year net points are reported alongside.
+
+SECTION 7. HONESTY AND TERMINAL STOP RULES
+
+7.1 No sign inversion. If the best test IC is strongly NEGATIVE, that is
+a FAILURE (the anti-prediction signature did not invert into a tradable
+edge under temporal isolation). Flipping signs after viewing test
+results is the forbidden post-hoc rescue, and this pre-declaration
+closes that door explicitly.
+
+7.2 Failure at G-R1 or G-R2 -> the script writes into the report:
+"TRANSITION TO PATH C: RESEARCH EXHAUSTED" - the absolute termination
+of strategy research on the US500/XAUUSD CFD tapes; no further pattern
+or ML SPEC may be proposed for them.
+
+7.3 No re-runs with different windows, grids, costs, seeds, or feature
+subsets after any test-window metric is viewed. A gate failure is final.
+
+7.4 INFEASIBLE (distinct from Path C): only if US500.c D1 data cannot
+support the study (missing/short tape). Feature-level contingencies
+(3.2 exclusions, missing USA30.c) are recorded and the study proceeds
+with the surviving features.
+
+SECTION 8. ARTIFACTS (data/results/short_term_reversal/)
+
+  SPEC_SHORT_TERM_REVERSAL.txt      (this file; never edited after run)
+  GATE_SHORT_TERM_REVERSAL.txt      (verbatim gate extraction)
+  raw/                              (FRED 2014-2026 archive + provenance)
+  usa30c_d1.csv                     (broker export for the ratio leg)
+  fracdiff_reversal_d.json          (train-window d* search diagnostics)
+  reversal_oos_predictions.csv      (test rows, model, horizon, pred, y)
+  REPORT_SHORT_TERM_REVERSAL.txt    (verdicts, IC table, economics,
+                                     Path C declaration on failure)
+
+SECTION 9. EXECUTION STAGES AND PROGRESS HOOKS
+
+  Stage 1 (done at pre-declaration): this SPEC + GATE ->
+           hook "short-term reversal - SPEC/GATE pre-declared".
+  Stage 2: data build, train-window calibration, fits, test evaluation ->
+           hook "short-term reversal - train, test, and metrics".
+  Stage 3: gates + REPORT + Path C determination ->
+           hook "short-term reversal - final verdict and Path C determination".
+
+END OF SPEC. FROZEN 2026-09-08.

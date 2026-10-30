@@ -1,0 +1,5 @@
+G1: The two frozen v1.02 tester segments are complete and hash-identical to the first V1.02 audit; broker H1 history includes the tester's 2023 warmup and all available 2024-2026 scoring history.
+G2: Every logged OPEN and minimum-lot event matches an independent Python signal in the enclosing H1; OPEN direction agrees, 0.01 minimum-lot overrides stay within the 3.5% planned stop-risk cap, and no minimum-lot block lacks the stated cap reason.
+G3: Every OPEN initial SL and logged trailing SL matches Python within one 0.01 Gold-unit tick; list every divergence without altering tolerance.
+G4: Chronological MT5 OPEN/exit accounting has no overlapping opens, orphan exits or unexplained ending position; list panic, rejection and post-fill risk events. Report Python signals lacking logged action after accounting for occupied intervals.
+G5: Exact Python fill and intrabar-exit parity remains UNTESTED unless complete same-feed historical broker ticks become available. A signal/stop parity pass is not proof of profitability or live execution quality.

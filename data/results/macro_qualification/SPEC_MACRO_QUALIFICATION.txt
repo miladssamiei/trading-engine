@@ -1,0 +1,261 @@
+SPEC_MACRO_QUALIFICATION.txt
+Written 2026-09-06, BEFORE any qualification script was written or run.
+
+0. WHAT THIS IS
+
+Data-and-feasibility qualification of the XAUUSD Scheduled Macro-Surprise
+mechanism (Rank 1 conditional lead of the 2026-09-06 deep-research triage,
+data/results/project_status/INTRADAY_DEEP_RESEARCH_2026-09-06.md and its
+source ledger report-source.md). NOT a strategy backtest: no trade rule,
+no parameter search, no EA work, no MT5 tester runs, no signals. The
+single question: can an event dataset of provable pre-release provenance
+be joined to the verified XAUUSD tick tape, and does a strictly
+POST-LATENCY directional move of at least 2x the measured cost floor
+exist? This enforces the project's twice-confirmed rule that
+contemporaneous event jumps are not executable trade expectancy. A
+failure at any gate G-Q1..G-Q4 abandons the mechanism BEFORE any trading
+rule is designed.
+
+1. FROZEN UNIVERSE AND WINDOW (never widened after this document)
+
+Event families (exactly three; headline series fixed):
+- NFP: BLS Employment Situation, "total nonfarm payroll employment"
+  change (thousands), FIRST release for the reference month.
+- RETAIL: Census Advance Retail Sales, retail sales m/m percent,
+  advance estimate.
+- DURABLE: Census Advance Report on Durable Goods, manufacturers' new
+  orders m/m percent, advance estimate.
+No other headline inside a report (unemployment rate, ex-auto retail,
+core capital goods, etc.), no revised or later-vintage re-releases, and
+no other event families: CPI, FOMC, PCE, GDP, ISM and everything else
+are BARRED substitutes even on failure.
+
+Primary window: 2021-01-01 .. 2026-04-30 UTC (task-owner-frozen; note
+for the record that the verified XAUUSD tape is longer, 2020-01-01
+23:00 UTC .. 2026-09-01 20:59:59.911 UTC, per data/results/
+xauusd_onboarding/REPORT.md). ONE pre-declared power fallback, declared
+HERE and therefore not post-hoc: if and only if the G-Q3 count in the
+primary window is < 150 usable events, the window extends once to the
+full verified tape 2020-01-01 .. 2026-08-31 and G-Q3 is re-evaluated
+once; still < 150 -> G-Q3 FAIL terminates. If used, the extension is
+stated in the REPORT as a declared fallback, never as a rescue.
+
+2. PRICE DATA (verified 2026-09-05; read-only here)
+
+The onboarded Dukascopy XAUUSD tick tape: 385,483,125 ticks, epoch-UTC
+timestamps with sub-second precision, bid and ask per tick, 0 duplicate
+timestamps / monotonic violations / spread inversions (onboarding
+report, ACCEPTED). Raw sources, read-only inputs: the four
+C:\Users\Milad\download\xauusd-tick-*.csv vendor files plus the
+2024-12-31 patch (sha256 in the onboarding report). The verified bar
+exports under data/results/xauusd_onboarding/ are NOT modified. All
+timestamps in this study are UTC epoch; MT5 clocks (TimeCurrent /
+TimeTradeServer) are NOT used anywhere in this qualification. Cost
+floor: full-tape median spread $0.41/oz; the cash-session median $0.399
+is reported alongside wherever the floor is cited, and the BINDING
+floor for every gate is $0.41.
+
+3. G-Q1 - EVENT PROVENANCE (verdict BEFORE any price is read)
+
+Sourcing. Identify and fetch one PRIMARY machine-readable external
+source carrying, per event: exact scheduled release timestamp, consensus
+(forecast) value, and first actual value. Acceptable candidates
+(highest preference first): a historical economic-calendar API with
+per-event archived forecasts (e.g., Fin2Dev), a documented CSV archive
+of the historical calendar (e.g., a pinned Kaggle Global Economic
+Calendar dataset), FXStreet calendar exports, or another reputable
+archive that is event-keyed and retrievable in bulk. One SECONDARY
+independent source of the same kind is named for audit cross-checks
+only. MT5's internal CalendarValueHistory is BARRED as a source: its
+records carry no historical value-arrival timestamp usable as an event
+clock and calendar functions are unavailable in the Strategy Tester
+(MQL5 documentation, verified 2026-09-06). Verification anchors (not
+consensus providers): BLS Employment Situation schedule and archived
+press releases (bls.gov), Census retail and M3 advance-release
+schedules and press releases (census.gov), and ALFRED vintages (PAYEMS,
+RSAFS, DGORDER) for first-published actuals.
+
+Provenance rules:
+- Consensus must be the value archived FOR THAT EVENT (event-date
+  keyed, as known before release) by the primary source; a consensus
+  recomputed or restated later is unacceptable. The primary source's
+  methodology/fields documentation is fetched and archived with the
+  data.
+- Actual must be the FIRST published value. If a source can only
+  provide the revised value for an event, that event is EXCLUDED and
+  counted in the exclusion table (never patched from memory).
+- One primary source for ALL events. No mixing of providers per event.
+  The primary source is frozen at G-Q1 completion; it may not be
+  switched after any return has been computed.
+- Every raw vendor payload is archived under this study's raw/ with
+  retrieval date and content hash; nothing is re-fetched silently.
+
+GATE G-Q1. PASS requires ALL of:
+(a) primary source frozen and documented (name, access method,
+    retrieval dates, hashes); secondary audit source named;
+(b) field coverage >= 95% of the OFFICIAL schedule count of the three
+    families in the window (schedule counts from the BLS/Census
+    schedule pages, logged) with all three required fields present;
+    every missing/excluded event listed with a reason code (delayed,
+    shutdown-affected, missing consensus, revised-only, other);
+(c) provenance audit: 12 stratified sampled events (4 per family, at
+    least one per year of the window) checked against agency primary
+    documents - scheduled date/time vs the agency schedule page, first
+    actual vs the agency press release / ALFRED first vintage. Each
+    discrepancy (wrong period, wrong unit, wrong value) removes that
+    event from the dataset; more than 3 discrepant events of 12 ->
+    G-Q1 FAIL (source untrustworthy; the mechanism dies here unless a
+    DIFFERENT primary source is qualified in a NEW, separately
+    documented pass BEFORE any price data is read - and only if the
+    original failure was a sourcing failure, not a coverage failure of
+    the universe itself);
+(d) the archived dataset is complete and loadable (macro_event_dataset
+    _raw.csv) with per-field provenance columns.
+Any of (a)-(d) failing -> G-Q1 FAIL, STOP: complete deliverable.
+
+4. G-Q2 - CLOCK SYNCHRONIZATION
+
+Mechanics:
+- Scheduled times are converted America/New_York -> UTC epoch with a
+  DST-aware tz library (zoneinfo). Mechanical invariant checked for
+  EVERY event: the three families release at 08:30 ET, so the UTC time
+  must be 12:30 (EDT) or 13:30 (EST) consistent with that date's DST
+  calendar. Violations are timestamp-suspect: isolated -> event
+  EXCLUDED (logged); systematic (> 10% of events) -> G-Q2 FAIL.
+- Officially rescheduled events (e.g., government-shutdown delays that
+  moved releases off the usual pattern) are kept only if the primary
+  source timestamp matches a verifiable agency notice or archived
+  schedule; otherwise excluded.
+- Join: T=0 is the scheduled release epoch. Entry tick for a buffer B
+  in {30s, 90s} = FIRST tick with ts >= T+B; if that tick's ts > T+120s
+  the event is EXCLUDED as non-quoting. Exit tick for horizon H in
+  {300s, 900s} = LAST tick with ts <= T+H; if no tick exists in
+  [T+H-60s, T+H] the event is EXCLUDED. Missing exact-second ticks are
+  handled ONLY by this next-available-tick rule: no interpolation, no
+  bar-derived prices, no backfill.
+- Activity-burst sanity: for NFP events the tick rate in [T, T+5s) must
+  exceed the [T-300s, T-60s) baseline by >= 5x; a missing burst flags
+  the event for manual audit (and exclusion if unexplained). For RETAIL
+  and DURABLE the burst check is informational only (weaker signature)
+  and cannot exclude by itself.
+- Manual spot-check (hard-fail rule): 6 events (2 per family) with
+  printed tick windows (last 5 ticks before T, first 10 after T)
+  eyeballed against the audit log. ANY timezone ambiguity, DST offset
+  mismatch, or unexplained gap found -> G-Q2 HARD FAIL.
+
+GATE G-Q2. PASS requires: zero unresolved timestamp-suspect events
+beyond the logged isolated exclusions, the DST invariant holding for
+every retained event, the 6 manual spot-checks clean, and every
+retained event having valid entry/exit ticks under the rules above.
+Anything else -> G-Q2 FAIL, STOP: complete deliverable.
+
+5. G-Q3 - STATISTICAL POWER (counted BEFORE any return is computed)
+
+Usable event = frozen-family event inside the window that passed G-Q1
+field/provenance requirements and G-Q2 join rules, and is not a
+simultaneous release. If two frozen families release at the same
+timestamp, BOTH events are excluded (attribution ambiguity on a single
+tape); such days are logged. Events with surprise exactly zero
+(consensus == actual) are excluded from directional measurement and
+counted separately.
+
+GATE G-Q3. PASS requires: >= 150 usable events AND >= 150 unique NY
+calendar dates carrying at least one usable event, in the primary
+window (with the single pre-declared fallback extension of section 1
+if needed). The count script prints the counts BEFORE computing any
+price difference, and the counts are logged. Fewer than 150 after the
+fallback -> G-Q3 FAIL, STOP: complete deliverable. No event family may
+be added to raise the count.
+
+6. G-Q4 - POST-LATENCY MEASUREMENT (only if G-Q1..G-Q3 all PASS)
+
+Definitions (fixed here):
+- Surprise s_i = first_actual - consensus, family-native units,
+  standardized per family by the full-window StdDev of surprises over
+  that family's usable events (a scale computation only; sign and any
+  threshold are untouched by it).
+- Direction d_i = -sign(standardized surprise): positive growth
+  surprise -> SHORT gold, negative -> LONG (literature sign of Elder,
+  Miao & Ramchander 2012; Smales & Yang 2015 for the timing caveat).
+- mid = (bid+ask)/2 from the tick tape. GROSS directional move of a
+  cell = d_i * (mid_exit - mid_entry), in $/oz.
+- Cells: PRIMARY = entry T+30s -> exit T+300s. SECONDARY (reported,
+  non-binding) = (T+30s -> T+900s), (T+90s -> T+300s), (T+90s ->
+  T+900s). All four are computed and reported.
+- No price movement from T=0 to the buffer end is EVER credited, in
+  any cell, in any reported number that feeds a gate.
+
+GATE G-Q4. PASS requires ALL of:
+(i) PRIMARY-cell mean gross directional move across all usable events
+    >= $0.82/oz (2.0x the $0.41 binding floor). If the entire
+    published move occurs inside the un-tradeable 30-second jump
+    window, the executable edge is zero and the hypothesis FAILS -
+    explicitly the expected possible outcome per Smales-Yang (majority
+    of the gold reaction complete within ~90 seconds);
+(ii) family robustness: the PRIMARY-cell mean is positive in >= 2 of
+    the 3 families AND the pooled mean remains > 0 after removing the
+    single best family;
+(iii) year robustness: no single calendar year contributes > 50% of
+    the total positive PRIMARY-cell move.
+Failure of any clause -> G-Q4 FAIL: the mechanism is abandoned.
+
+Reported alongside, never binding: the T0 -> T+30s contemporaneous
+jump per family (a tape-vs-literature sanity check - if the tape's own
+total-window response is ~zero, the failure is recorded as decay
+evidence); MAE/MFE of the directional position inside the primary
+cell; a net-of-spread variant (long entries at ask, short entries at
+bid, exits opposite) as execution context.
+
+7. HONESTY / ANTI-LEAK / STOP RULES
+
+- A failure at any gate G-Q1..G-Q4 is a COMPLETE deliverable and
+  terminates the hypothesis. Null qualification = valid result.
+- No substituting other event families (CPI, FOMC, PCE, ...) if the
+  frozen three fail or lack power. No new entry buffers (30s/90s
+  fixed), no new horizons (300s/900s fixed), no surprise thresholds
+  (all eligible events traded by sign), no re-denomination after
+  numbers are seen.
+- No measuring the jump from T=0 and claiming it as executable.
+- Post-G-Q4 discovery of a provenance ERROR (fact, not choice):
+  affected events removed, counts and gate verdicts restated ONCE,
+  original and corrected verdicts both documented; no events may be
+  added in this correction pass.
+- If this qualification fails at any gate, the project accepts the
+  2026-09-06 triage verdict: single-instrument CFD-tape intraday edges
+  are exhausted; no 19th pattern will be invented to fill the gap; the
+  remaining shortlist paths are the daily-horizon candidates of
+  LITERATURE_EDGE_REVIEW.txt (gold-macro conditioned holds, index-pair
+  relative value, VRP-conditioned exposure).
+- No signals generated, no orders, no EA, no tester. A Phase-1
+  strategy study is permitted ONLY on a four-gate PASS and requires
+  its own pre-declared SPEC; nothing here authorizes one.
+
+8. ARTIFACTS (all under data/results/macro_qualification/)
+
+- SPEC_MACRO_QUALIFICATION.txt (this document).
+- GATE_MACRO_QUALIFICATION.txt (verbatim extraction of G-Q1..G-Q4,
+  created now, BEFORE any script runs).
+- raw/ (archived vendor payloads with retrieval dates and hashes).
+- macro_event_dataset.csv (cleaned events: event_id, family,
+  reference_period, scheduled_et, scheduled_utc, consensus, actual,
+  surprise_std, direction, provenance columns, exclusion_code/reason).
+- clock_sync_audit.txt (per-event T=0 epoch, join ticks, staleness,
+  burst ratios; the 6 manual spot-check transcripts; DST invariant
+  table).
+- post_latency_returns.csv (per-event per-cell gross moves, MAE/MFE,
+  net-of-spread variant).
+- REPORT_MACRO_QUALIFICATION.txt (verdicts on G-Q1..G-Q4 with all
+  counts, exclusions, and the outcome-verdict logic applied verbatim).
+
+9. ENVIRONMENT NOTES
+
+Project python: C:\Users\Milad\miniconda3\envs\reinforce_rl\python.exe.
+Raw tick CSVs in C:\Users\Milad\download are read-only inputs. Shell is
+PowerShell 5.1: no && (use ; / if ($?)). No MT5 terminal is needed or
+started for any part of this qualification.
+
+PROGRESS.md hooks (append per stage, in order):
+"macro qualification - SPEC/GATE pre-declared"
+"macro qualification - data sourcing and sync"
+"macro qualification - latency measurement"
+"macro qualification - verdict"

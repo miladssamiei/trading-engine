@@ -1,0 +1,48 @@
+REPORT_PROPGUARD_VERIFICATION
+Study dir: data/results/propguard_verification/
+Harness: deploy/infrastructure/verify_propguard_live.py
+Executed: 2026-09-09 19:18:14 UTC
+SPEC: deploy/infrastructure/SPEC_EXECUTION_INFRASTRUCTURE.txt (frozen 2026-09-08)
+
+Artifacts audited: Include/PropFirmGuard.mqh, ea/ORB_Strategy_Live.mq5/.ex5,
+  ea/SP2L_SpikeGap_Live.mq5/.ex5, scripts/TestPropGuard.mq5/.ex5
+
+AUDIT CHECKS
+  [S] PG_MAX_DAILY_LOSS_PCT = 3.5 (SPEC 3.5)                   PASS
+  [S] PG_MAX_TRAILING_DD_PCT = 8.0 (SPEC 8.0)                  PASS
+  [S] PG_MAX_SPREAD_US500 = 0.60 (SPEC 0.60)                   PASS
+  [S] PG_MAX_SPREAD_XAUUSD = 0.45 (SPEC 0.45)                  PASS
+  [S] PG_MAX_SLIPPAGE_INDEX_PT = 0.20 (SPEC 0.20)              PASS
+  [S] PG_RISK_PER_TRADE_PCT = 0.5 (SPEC 0.5)                   PASS
+  [S] PG_MAX_CONCURRENT_RISK_PCT = 1.0 (SPEC 1.0)              PASS
+  [S] PG_MAGIC_ORB = 26082201 (SPEC 26082201)                  PASS
+  [S] PG_MAGIC_SP2L = 26082701 (SPEC 26082701)                 PASS
+  [S] ORB_Strategy_Live.mq5 PG_Init tag + magic default        PASS
+  [S] SP2L_SpikeGap_Live.mq5 PG_Init tag + magic default       PASS
+  [S] ORB_Strategy_Live.mq5 guard integration call-sites       PASS
+  [S] SP2L_SpikeGap_Live.mq5 guard integration call-sites      PASS
+  [B] TestPropGuard.ex5 deployed to MQL5/Scripts               PASS
+  [B] ORB_Strategy_Live.ex5 fresh + clean compile + source magic PASS
+  [B] SP2L_SpikeGap_Live.ex5 fresh + clean compile + source magic PASS
+  [C] demo account (trade_mode == 0)                           PASS
+  [C] US500.c selectable                                       PASS
+  [C] GTV read path available (file)                           PASS
+  [R] runner EA + tester ini deployed                          PASS
+  [R] zero FAIL count (4 passed)                               PASS
+  [R] R1 daily 3.6% breach forces latch + PANIC_FLATTEN        PASS
+  [R] R2 trailing 8.1% breach forces latch + PANIC_FLATTEN     PASS
+  [R] R3 PROP_GUARD_BREACHED GTV latched (in-test verification) PASS
+  [R] R4 PG_EntryAllowed refuses entries while latched         PASS
+  [R] R5 deviation enforcement <= 0.20 index pt                PASS
+  [R] R6a guard state reset by script                          PASS
+  [R] R1b simulated daily DD is ~3.6% (got 3.60)               PASS
+  [R] R2b simulated trailing DD is ~8.1% (got 8.10)            PASS
+  [R] R5b deviation 2000 x point 0.00010000 <= 0.20 index pt   PASS
+
+Checks failed: 0 of 30
+
+NOTES
+  Phase R executed headlessly in the MT5 Strategy Tester (synthetic demo environment, US500-tick M5, Model=0) via deploy/infrastructure/TestPropGuardRunner.mq5, which runs the shared scripts/TestPropGuardBody.mqh verbatim; agent-sandbox GTVs are isolated by design, so reset evidence is the in-log 'guard state reset' line.
+  The interactive live-chart detector remains available: run without --tester-run and attach MQL5/Scripts/TestPropGuard.ex5 to any demo chart.
+
+VERDICT: PASS

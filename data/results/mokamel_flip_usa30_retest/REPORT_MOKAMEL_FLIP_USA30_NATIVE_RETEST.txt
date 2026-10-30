@@ -1,0 +1,108 @@
+REPORT_MOKAMEL_FLIP_USA30_NATIVE_RETEST.txt
+MOKAMEL_FLIP (USA30 native re-test) - FINAL REPORT
+Written 2026-09-05. Domain re-test of hypothesis #16 on its claimed
+instruments; NOT a new hypothesis; original SPEC/GATE/REPORT untouched.
+
+=======================================================================
+VERDICT: NULL - STAGE A FAIL ON THE NATIVE DOMAIN. STAGE B NOT RUN
+(GATE_ADDENDUM STOP RULE). MT5/Model=4 WORK NOT EARNED.
+=======================================================================
+
+This is the STRONGER NULL the domain re-test was designed to produce: the
+pattern fails signal-quality ON THE PRESENTER'S OWN CLAIMED INSTRUMENT
+(Dow Jones). The original US500 result ("tested outside the claimed
+domain") is now fully resolved: the wrong-domain excuse is gone, and the
+US500 Stage-A pass is exposed as an instrument artifact, consistent with
+its prior diagnosis (2021-drift carry, short-side-only, edge below the
+cost floor).
+
+-----------------------------------------------------------------------
+1. SETUP (all pre-declared in SPEC_ADDENDUM/GATE_ADDENDUM, 2026-09-05,
+   before any re-test code ran)
+
+- Machine/stage code: evaluate/mokamel_flip_state_machine.py,
+  mokamel_flip_stage_a.py - EXISTING, UNMODIFIED, driven via module
+  attribute injection (data/results/mokamel_flip_usa30_retest/run_retest.py).
+- Data: onboarded USA30 tape (Dukascopy usa30idxusd, 143.8M ticks,
+  2020-01..2026-09, 0 dup/mono/inversion; onboarding REPORT verified).
+  BINDING WINDOW 2025-07-01..2026-08-31 (task-owner decision; 2020-2025H1
+  excluded on vendor-archive cash-session hour-holes, coverage grounds
+  only, fixed before any strategy number existed).
+- Point convention: 1 index point = 1.0; literal 40/80 = 40/80 index
+  points (planned BINDING Stage-B arm - never reached).
+- Cost floors (declared, unused by Stage A which is exit-free):
+  COST_PRIMARY 2.282 pts (cash median spread), COST_WIDE 2.558 (cash p90).
+- Universe: 365 zero-fill days; WARMUP 200; window [570,870) NY; indecision
+  filter 0.10; thresholds 0.50/0.75/1.00 x ATR14; bootstrap 10k/seed 20260903.
+
+-----------------------------------------------------------------------
+2. STAGE A RESULT vs THE FROZEN US500 RUN
+
+                       USA30 native        US500 (frozen 2026-09-03)
+cash days run          899 (machine)      1,370
+raw flip entries       1,291              3,227
+binding (filtered) n   506 (234 days)     2,988 (1,238 days)
+signal rate            2.2/day            2.4/day
+mean e (ATR)           +0.0208            +0.0884
+median e (ATR)         -0.058             +0.109
+MFE>MAE @ 0.50 ATR     380 vs 407  FAIL   2,440 vs 2,415  pass
+MFE>MAE @ 0.75 ATR     342 vs 347  FAIL   2,159 vs 2,070  pass
+MFE>MAE @ 1.00 ATR     296 vs 304  FAIL   1,903 vs 1,804  pass
+bootstrap p            0.5845      FAIL   0.0144          pass
+shorts / longs mean e  +0.175 / -0.132    +0.276 / -0.092
+unfiltered mean e      -0.0296 (p 0.714)  negative-context flag
+GATE A1                FAIL (ii)+(iii)    PASS
+
+Clause (i) alone passed (n=506 >= 150). MAE DOMINATES AT EVERY THRESHOLD
+on native ground; the median binding excursion is adverse. The short-side
+tilt repeats in shape (shorts positive, longs negative) but is far weaker
+than on US500 and does not survive to the population level.
+
+-----------------------------------------------------------------------
+3. THE PRE-DECLARED QUESTIONS, ANSWERED BY THIS NULL
+
+- "Does Stage A pass on native ground?" NO - and not marginally: adverse
+  excursions dominate at every threshold, bootstrap p=0.58.
+- "How does edge magnitude compare to US500?" Mean e collapses from
+  +0.0884 to +0.0208 ATR (median negative); the direction-asymmetry shape
+  (shorts only) persists but attenuates (+0.276 -> +0.175 short mean e).
+- "Does the 78%-time-exit symptom occur on USA30 at native 40/80?" MOOT -
+  Stage B was never earned. For the record, the Stage-A excursion profile
+  (MAE>=MFE counts at all scales) predicts the literal 40/80 arm would
+  resolve worse than on US500, where it already carried a diagnosed
+  2021-only drift.
+- MT5 tick import / Model=4: NOT performed (task-owner bar requires
+  Stage A AND Stage B passes; Model=0 banned regardless).
+
+-----------------------------------------------------------------------
+4. INTERPRETATION (directness per project convention)
+
+The presenter's Dow-origin claim is now tested directly and fails at the
+first gate: on a 14-month, coverage-verified native USA30 tape, the flip
+trigger has no favorable-excursion dominance. Combined with the frozen
+US500 findings (Stage B pass = 2021 drift; scaled exits = zero gross
+edge), MOKAMEL_FLIP is null in BOTH domains, and the US500 Stage-A pass
+joins the Model=0-era artifacts as an instrument/window-specific accident.
+No further domain, scaling, or filter variation is permitted without a
+genuinely new pre-declared SPEC.
+
+Honest caveats: (a) the binding window is 14 months, not 5+ years -
+yearly-sign analysis is impossible by construction; (b) 2025H2 months
+carry declared partial hour-censoring (machine ran only on bars that
+exist; coverage table in the SPEC_ADDENDUM); neither caveat plausibly
+flips a MAE-dominant profile into a pass.
+
+-----------------------------------------------------------------------
+5. ARTIFACTS
+
+data/results/mokamel_flip_usa30_retest/
+  SPEC_ADDENDUM_MOKAMEL_FLIP_USA30_NATIVE_RETEST.txt   (pre-declared)
+  GATE_ADDENDUM_MOKAMEL_FLIP_USA30_NATIVE_RETEST.txt   (pre-declared)
+  run_retest.py                 (driver; originals untouched)
+  usa30_days_binding.csv        (365-day universe)
+  base_candle_state_log.csv     (machine audit trace)
+  signals.csv                   (506 binding + context)
+  stage_a_stats.json            (gate evaluation)
+  REPORT_MOKAMEL_FLIP_USA30_NATIVE_RETEST.txt   (this file)
+Upstream: data/results/usa30_onboarding/ (tape verification),
+evaluate/mokamel_flip_state_machine.py + mokamel_flip_stage_a.py (frozen).

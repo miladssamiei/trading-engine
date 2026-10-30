@@ -1,0 +1,11 @@
+FUTURES PROP VALIDATION INTRADAY - RE-MEASUREMENT V1 GATE
+Written before re-measurement code or run. Unchanged from the initial gate.
+
+Each of nine asset-engine rows is gated on its full tape: executed trades >=
+30, event-indexed per-trade Net Sharpe = mean / sample std(ddof=1) > 0, and
+moving-block bootstrap P(mean net <= 0) <= 0.20. Bootstrap: 10,000 resamples,
+five-trade contiguous blocks with replacement, seed 20260926. If fewer than
+five trades or undefined Sharpe, gate FAIL. Overall PASS only if all nine
+rows PASS. No optimization, ablation, winner-picking or refitting. CAL/OOS
+and yearly views are diagnostics only. A FAIL is final for this artifact;
+a PASS remains an in-sample proxy, not a confirmed live result.

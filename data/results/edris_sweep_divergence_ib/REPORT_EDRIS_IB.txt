@@ -1,0 +1,59 @@
+HYPOTHESIS #96: H4 SWEEP / M30 HIDDEN RSI DIVERGENCE / STRICT INSIDE BAR - 2026-10-14
+EXPLORATORY PHASE 1; NO INDEPENDENT WALK-FORWARD OR LIVE/PROP VALIDATION
+
+Cost floors once embedded: US5000.51, USTECH1.66, XAUUSD0.41 native units.
+Signals: prior observed completed NY H4 EMA50 trend, current-bucket sweep through t-1,
+pivot confirmed by sweep s close, strictly hidden RSI14 divergence, strict M30 inside bar t.
+Entry: first retained M1 open in exact next M30 bucket; single occupancy per asset/arm.
+Risk = directional BID distance + once-embedded cost; capped executable target+3R, stop-1R unless adverse gap.
+Killzones: actual NY entry time [02:00,05:00) or [08:00,11:00).
+
+SIX-CELL PERFORMANCE MATRIX
+Asset   Arm             Closed Open  Win%    GrossMean   NetMean     NetR/Trade RSharpe   MBBp   Verdict
+US500   ALL_HOURS          177    0 24.29   -0.41074    -0.92074    -0.03172   -0.01842  0.5646 FAIL
+  Gates G1=True G2=False G3=False G4=False; SL134 TP43, collisions0, adverse gaps12.
+  Closed net native total-162.971000, totalR-5.614113; unresolved mark native0.000000, R0.000000; NY-date-crossing positions71, average hold6.14 hours.
+  Annual entry cohorts: {"2021": {"closed": 33, "net_r": -13.0, "net_units": -17.702000000002954}, "2022": {"closed": 40, "net_r": 3.9863565644074166, "net_units": -94.77499999999964}, "2023": {"closed": 41, "net_r": 2.5915898767606595, "net_units": 12.774999999998272}, "2024": {"closed": 34, "net_r": -2.184840993416488, "net_units": -60.996000000000095}, "2025": {"closed": 26, "net_r": 5.992781155015225, "net_units": 20.697000000001935}, "2026": {"closed": 3, "net_r": -3.0, "net_units": -22.969999999999345}}
+US500   KILLZONE_ONLY       15    0 33.33   4.34893     3.83893     0.33333    0.17078   0.0904 FAIL
+  Gates G1=False G2=True G3=True G4=False; SL10 TP5, collisions0, adverse gaps0.
+  Closed net native total57.584000, totalR5.000000; unresolved mark native0.000000, R0.000000; NY-date-crossing positions2, average hold7.37 hours.
+  Annual entry cohorts: {"2022": {"closed": 2, "net_r": 2.00000000000005, "net_units": 22.572000000000116}, "2023": {"closed": 3, "net_r": 1.0, "net_units": 8.108000000001084}, "2024": {"closed": 4, "net_r": 4.0, "net_units": 43.38800000000083}, "2025": {"closed": 4, "net_r": 0.0, "net_units": -0.5579999999990832}, "2026": {"closed": 2, "net_r": -2.0, "net_units": -15.925999999999476}}
+USTECH  ALL_HOURS          206    0 25.24   -1.10395    -2.76395    0.00956    0.00549   0.4370 FAIL
+  Gates G1=True G2=False G3=True G4=False; SL154 TP52, collisions0, adverse gaps1.
+  Closed net native total-569.374000, totalR1.970210; unresolved mark native0.000000, R0.000000; NY-date-crossing positions68, average hold7.81 hours.
+  Annual entry cohorts: {"2020": {"closed": 25, "net_r": 3.0, "net_units": 372.61599999999817}, "2021": {"closed": 31, "net_r": -3.0, "net_units": -17.788000000004104}, "2022": {"closed": 44, "net_r": 8.0, "net_units": -337.4210000000148}, "2023": {"closed": 31, "net_r": -11.02978990279093, "net_units": -284.2559999999921}, "2024": {"closed": 36, "net_r": 8.0, "net_units": -51.207999999989624}, "2025": {"closed": 15, "net_r": -3.0, "net_units": 13.755000000001019}, "2026": {"closed": 24, "net_r": 0.0, "net_units": -265.07199999998556}}
+USTECH  KILLZONE_ONLY       23    0 13.04   -11.85491   -13.51491   -0.47826   -0.34722  0.8859 FAIL
+  Gates G1=False G2=False G3=False G4=False; SL20 TP3, collisions0, adverse gaps0.
+  Closed net native total-310.843000, totalR-11.000000; unresolved mark native0.000000, R0.000000; NY-date-crossing positions1, average hold2.19 hours.
+  Annual entry cohorts: {"2020": {"closed": 4, "net_r": 0.0, "net_units": 10.679999999998472}, "2021": {"closed": 1, "net_r": 3.0, "net_units": 108.12000000000262}, "2022": {"closed": 6, "net_r": -2.0, "net_units": -41.65000000000509}, "2023": {"closed": 6, "net_r": -6.0, "net_units": -170.40999999999804}, "2024": {"closed": 1, "net_r": -1.0, "net_units": -21.294000000001688}, "2025": {"closed": 2, "net_r": -2.0, "net_units": -46.29899999999907}, "2026": {"closed": 3, "net_r": -3.0, "net_units": -149.98999999999796}}
+XAUUSD  ALL_HOURS          168    0 22.02   0.94184     0.53184     -0.11905   -0.07160  0.8071 FAIL
+  Gates G1=True G2=False G3=False G4=False; SL131 TP37, collisions0, adverse gaps0.
+  Closed net native total89.349000, totalR-20.000000; unresolved mark native0.000000, R0.000000; NY-date-crossing positions54, average hold10.72 hours.
+  Annual entry cohorts: {"2020": {"closed": 35, "net_r": -11.0, "net_units": 16.01399999999944}, "2021": {"closed": 18, "net_r": -2.0, "net_units": -42.13900000000126}, "2022": {"closed": 25, "net_r": -9.0, "net_units": -36.04399999999987}, "2023": {"closed": 20, "net_r": -8.0, "net_units": 3.962999999998374}, "2024": {"closed": 29, "net_r": -1.0, "net_units": 42.14100000000167}, "2025": {"closed": 24, "net_r": 16.0, "net_units": 180.46799999999803}, "2026": {"closed": 17, "net_r": -5.0, "net_units": -75.05399999999872}}
+XAUUSD  KILLZONE_ONLY       34    0 26.47   1.21562     0.80562     0.05882    0.03284   0.4370 FAIL
+  Gates G1=False G2=True G3=True G4=False; SL25 TP9, collisions0, adverse gaps0.
+  Closed net native total27.391000, totalR2.000000; unresolved mark native0.000000, R0.000000; NY-date-crossing positions4, average hold19.51 hours.
+  Annual entry cohorts: {"2020": {"closed": 5, "net_r": 7.0, "net_units": 32.33900000000153}, "2021": {"closed": 4, "net_r": -4.0, "net_units": -58.97100000000046}, "2022": {"closed": 8, "net_r": -4.0, "net_units": -18.424000000000433}, "2023": {"closed": 1, "net_r": -1.0, "net_units": -1.4600000000000364}, "2024": {"closed": 8, "net_r": 0.0, "net_units": -1.8840000000004693}, "2025": {"closed": 4, "net_r": 4.0, "net_units": 36.76099999999951}, "2026": {"closed": 4, "net_r": 0.0, "net_units": 39.030000000000655}}
+
+SOURCE / GRID AUDIT
+US500: 2021-01-03T23:00:00+00:00..2026-04-30T23:59:00+00:00; raw1,791,504, retained1,791,449, carried removed55; observed M3061,416, H48,505; DST3h0,5h0.
+  SHA256 29ad8f8b25b43be43a87c4ac39575c3cd280d557661c31f8e691990949087453
+  Funnel {"signals": {"completed_m30": 61416, "trend_ready": 61052, "strict_inside": 7432, "sweep_and_inside": 2805, "hidden_divergence_setups": 231, "no_next_bucket": 0, "degenerate_risk": 7, "unscored_entry": 0, "fractal_lows": 7949, "fractal_highs": 7922}, "arms": {"ALL_HOURS": {"eligible_setups": 224, "session_filtered": 0, "shadowed_occupied": 47, "executed": 177}, "KILLZONE_ONLY": {"eligible_setups": 224, "session_filtered": 207, "shadowed_occupied": 2, "executed": 15}}}
+USTECH: 2020-01-01T00:00:00+00:00..2026-09-23T23:59:00+00:00; raw2,936,100, retained2,297,525, carried removed638,575; observed M3077,884, H411,097; DST3h0,5h0.
+  SHA256 152f9c995b370e5391cb7da99b64a8002ceee5e52cc68899ddca409ac7e15e39
+  Funnel {"signals": {"completed_m30": 77884, "trend_ready": 77546, "strict_inside": 9727, "sweep_and_inside": 3827, "hidden_divergence_setups": 263, "no_next_bucket": 1, "degenerate_risk": 1, "unscored_entry": 0, "fractal_lows": 10350, "fractal_highs": 10305}, "arms": {"ALL_HOURS": {"eligible_setups": 261, "session_filtered": 0, "shadowed_occupied": 55, "executed": 206}, "KILLZONE_ONLY": {"eligible_setups": 261, "session_filtered": 238, "shadowed_occupied": 0, "executed": 23}}}
+XAUUSD: 2020-01-01T23:00:00+00:00..2026-09-01T20:59:00+00:00; raw2,337,538, retained2,335,270, carried removed2,268; observed M3077,947, H410,662; DST3h0,5h0.
+  SHA256 a8c4c1d6551d27f3796f8d9b88d332172c41c76c151844e759492837152e7b1f
+  Funnel {"signals": {"completed_m30": 77947, "trend_ready": 77587, "strict_inside": 10492, "sweep_and_inside": 3977, "hidden_divergence_setups": 236, "no_next_bucket": 5, "degenerate_risk": 6, "unscored_entry": 0, "fractal_lows": 10543, "fractal_highs": 10479}, "arms": {"ALL_HOURS": {"eligible_setups": 225, "session_filtered": 0, "shadowed_occupied": 57, "executed": 168}, "KILLZONE_ONLY": {"eligible_setups": 225, "session_filtered": 188, "shadowed_occupied": 3, "executed": 34}}}
+
+LIMITS / HONESTY
+The supplied fixed floors are scenarios, not measured current broker fees, variable spreads or slippage.
+Gold0.41 is the explicit requested floor. No switch to0.585 or optimization after outcomes.
+There are no swap/margin/account-level/prop guards. Overnight/weekend holds and terminal open marks are disclosed.
+Carried-row predicate can also exclude genuine repeated flat observations; first row has no predecessor.
+Observed-bar indicators do not manufacture weekend/synthetic candles. Partial source-boundary bars do not establish complete prehistory.
+M30 repeated DST wall hours remain distinct; H4 bounds use actual NY localization. Pivots never use future confirmation.
+Within-M1 event order is unknown; adverse-first collisions and adverse open gaps are deliberately pessimistic.
+MBB is unadjusted conditional uncertainty on already-researched history, not a research-wide multiple-testing correction.
+Owner100-trade PASS is exploratory; no independent walk-forward or live profitability claim follows.
+Artifacts: frozen SPEC/GATE, setup and context grids, six full trade ledgers, summary.csv and metadata.json.

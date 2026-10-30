@@ -1,0 +1,105 @@
+GATE_META_COORDINATOR
+Meta-coordinator gates for hypothesis #12 (ORB + SP2L ensemble)
+
+Status: written 2026-08-29 before any Phase-1 script. This file is a
+verbatim extraction of all E and F gates in sections 4 and 5 of
+SPEC_META_COORDINATOR. Nothing here may be relaxed after ensemble
+output exists. Any new gate is exploratory and labeled.
+
+------------------------------------------------------------------------
+PHASE 1 GATES (OFFLINE ENSEMBLE OVER EXISTING CSVS)
+
+Let arm A be equal-notional weights and arm B be causal equal-risk
+weights, both using the same meta-rules R1-R3.
+
+E1. Sharpe dominance
+    For each arm (A and B) compute daily PnL over the common day
+    universe, zero-filled, and Sharpe as mean divided by standard
+    deviation (ddof=1) times sqrt(252).
+    Gate:
+        Sharpe > 0
+        AND Sharpe strictly greater than Sharpe of every child (with
+            two children this means > max(0.337, 0.275))
+        AND Sharpe strictly greater than the corresponding ungated
+            static arm from the prior portfolio study:
+            Arm A must beat S1's 0.420.
+            Arm B must beat S2's 0.418.
+
+E2. Drawdown bound
+    Compute true max drawdown of the ensemble cumulative PnL curve at
+    the 2.00-lot book size.
+    Worst child drawdown at the same book size is
+    max(2 x 5.13%, 2 x 4.17%) = 10.26%.
+    Gate: ensemble max drawdown <= 1.10 x 10.26% = 11.29%.
+
+E3. Activity floor
+    Gate: number of days with at least one trade in the ensemble
+    >= 150.
+
+E4. Yearly profit shape
+    Over full years 2021-2025:
+        At least 4 of 5 years net positive
+        AND no single year contributes more than 60 percent of total
+            net PnL.
+    2026 is partial; it is reported but does not count toward the
+    4-of-5 rule.
+
+PHASE 1 PASS CONDITION
+    An arm passes Phase 1 if it satisfies E1-E4.
+    Phase 1 passes overall if at least one arm (A or B) passes all
+    E-gates.
+    If both arms fail, the project must stop at REPORT_META_COORDINATOR:
+    no Phase 2 code, no EA.
+
+------------------------------------------------------------------------
+PHASE 2 GATES (MT5 EXECUTION), ONLY IF PHASE 1 PASSES
+
+F1. Consistency between offline and MT5 ensemble
+    Run the master EA in MT5 over the same window in Model=0 batch
+    mode, with meta-rules identical to Phase 1 and trailing statistics
+    computed from MT5's own closed-trade history.
+    Gate:
+        MT5 ensemble Sharpe is within +/- 0.15 (absolute difference) of
+        the offline Phase-1 Sharpe for the same arm.
+        AND MT5 ensemble max drawdown is within +/- 20 percent
+        (relative difference) of the offline Phase-1 max drawdown.
+    These tolerances are sized by the documented SP2L cross-tape
+    residuals, not chosen loosely.
+
+F2. Execution integrity
+    Gate: all of the following must hold over the test window:
+    - No "double-fills" attributable to the coordinator (no single
+      child signal resulting in more than one unintended position).
+    - Each trade is attributed to exactly one child via magic numbers;
+      no trade is left unattributed.
+    - Risk caps R3 are never violated on any day: total lots per day
+      and per child stay within declared limits; this is verifiable via
+      coordinator_days.csv versus positions.
+    - Gating decisions in MT5 (child allowed/blocked per day) match the
+      Python Phase-1 reference on at least 95 percent of days; every
+      mismatch must be classified and explained.
+
+PHASE 2 PASS CONDITION
+    An arm is validated in MT5 if both F1 and F2 hold for that arm.
+    If F-gates fail, the meta-coordinator is not validated; children
+    remain individually as before and the coordinator is rejected.
+
+------------------------------------------------------------------------
+STOP AND HONESTY RULES
+
+    If Phase 1 fails E-gates for both arms, no Phase 2 scripts or EAs
+    may be written. REPORT_META_COORDINATOR is the final deliverable.
+
+    If Phase 2 fails F-gates, the meta-coordinator cannot be used in
+    production; any further work on it is exploratory and cannot change
+    the failed verdict.
+
+    No child strategy's entries, exits, or parameters may be altered
+    under this SPEC. The embedded child modules must reproduce each
+    child's validated trade set exactly when gating is disabled;
+    failure of this check is an automatic F-gate failure.
+
+    Any variant meta-rule or weighting scheme added after seeing
+    results must be labeled exploratory and cannot rescue a failed arm.
+
+END OF GATE_META_COORDINATOR

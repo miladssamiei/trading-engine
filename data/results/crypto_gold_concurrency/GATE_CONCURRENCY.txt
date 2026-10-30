@@ -1,0 +1,4 @@
+G1: Six frozen input hashes and schema checks pass; 2,277 records include exactly 2,275 finite-R closed and two missing-R OPEN_END rows; closed total net R reconciles.
+G2: For each K, all 2,277 master records are either accepted or rejected exactly once; accepted occupancy never exceeds K; K=6 accepts all source records; saved accepted-ledger IDs match the walk.
+G3: Each daily series has the identical continuous UTC calendar index, sums to the net R of accepted closed trades, and contains no contribution from OPEN_END rows.
+G4: Every K x risk cell has exactly 10,000 terminal paths whose PASS, DAILY_LOSS, STATIC_LOSS and TIMEOUT counts sum to 10,000; phase thresholds, pass-day quantiles and summary rates reconcile with the saved path ledger.

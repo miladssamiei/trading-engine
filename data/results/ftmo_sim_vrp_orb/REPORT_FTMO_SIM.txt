@@ -1,0 +1,43 @@
+REPORT: FTMO CHALLENGE MONTE CARLO ON VRP-ORB ARM A (HYPOTHESIS #37)
+Generated: 2026-09-23 16:54:15  |  script: evaluate/ftmo_sim_vrp_orb.py
+SPEC/GATE: data/results/ftmo_sim_vrp_orb/{SPEC,GATE}_FTMO_SIM.txt (frozen before code)
+
+INTEGRITY GATES: G-F1=True & G-F2=True & G-F3=True  ->  OVERALL PASS
+
+1. INPUT POPULATION (data/results/orb_vrp_filter/orb_vrp_filtered_trades.csv, filter_arm=A)
+   trades=171  losers=83  win_rate=51.5%
+   avg_net=2.651 pt  mean_loss=21.212 pt
+   R distribution: mean=0.1250  std=1.2720  min=-2.3209  max=2.5953
+   worst trade -49.23 pt  best trade 55.05 pt
+
+2. SIMULATION DESIGN
+   10000 iid with-replacement challenges per risk level, seed 20260923, halt priority PASS > MAX_LOSS > DAILY.
+   barriers: equity >= $10800 pass, <= $9000 max loss, single-trade PnL <= $-500 daily breach.
+   safety cap 100000 trades/challenge; unresolved must be 0 (G-F2).
+
+3. RESULTS BY RISK LEVEL
+    Risk % |    Pass |  MaxLoss |   Daily | MedTrades(pass) | MedTrades(maxloss) |  TargetR |  FloorR
+     0.25% |  99.86% |    0.14% |   0.00% |             221 |                317 |     32.0 |    40.0
+     0.50% |  96.66% |    3.34% |   0.00% |              94 |                118 |     16.0 |    20.0
+     0.75% |  90.34% |    9.66% |   0.00% |              53 |                 68 |     10.7 |    13.3
+     1.00% |  85.31% |   14.69% |   0.00% |              34 |                 45 |      8.0 |    10.0
+     1.50% |  77.51% |   22.49% |   0.00% |              18 |                 23 |      5.3 |     6.7
+     2.00% |  73.40% |   26.60% |   0.00% |              11 |                 14 |      4.0 |     5.0
+
+4. OPTIMAL RISK (frozen rule: max pass rate, ties to lower risk)
+   Optimal Risk %: 0.25%  (pass rate 99.86%)
+   risk 0.25%: floor is 40.0R away; expected worst losing streak within median pass length ~7.5 trades x ~1R each
+   risk 0.50%: floor is 20.0R away; expected worst losing streak within median pass length ~6.3 trades x ~1R each
+   risk 0.75%: floor is 13.3R away; expected worst losing streak within median pass length ~5.5 trades x ~1R each
+   risk 1.00%: floor is 10.0R away; expected worst losing streak within median pass length ~4.9 trades x ~1R each
+   risk 1.50%: floor is 6.7R away; expected worst losing streak within median pass length ~4.0 trades x ~1R each
+   risk 2.00%: floor is 5.0R away; expected worst losing streak within median pass length ~3.3 trades x ~1R each
+
+5. NOTES AND CAVEATS
+   Daily-loss breach needs a single trade <= -2.50R (at 2.00% risk, the loosest threshold on the grid);
+   population min R is -2.32R, so the single-trade daily rule cannot bind anywhere on this grid;
+   the binding failure mode is the $9,000 total-loss floor, not the daily rule.
+   Descriptive measurement only: Hypothesis #31 overall verdict remains FAIL (G-VRP3);
+   Arm A conditioning is in-sample selection, so these pass rates are optimistic by construction.
+   iid draws ignore PnL clustering/regime dependence; calendar time is not simulated
+   (median trades-to-pass at hundreds of trades >> the ~171 historical signals over 3.4 years).

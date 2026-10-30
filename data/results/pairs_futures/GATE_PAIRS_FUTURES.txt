@@ -1,0 +1,10 @@
+GATE_PAIRS_FUTURES
+Pre-declared 2026-09-11, before evaluate/pairs_futures_eikon.py was run. Verbatim gate extraction from SPEC_PAIRS_FUTURES.txt. Verdicts are recorded only in REPORT_PAIRS_FUTURES.txt at run time; this file is never edited after the run.
+
+G-F1 (cointegration density): PASS iff the fraction of rolling 252-day windows (stepped 21 trading days) of the out-of-sample spread series with ADF p-value < 0.05 is >= 0.30. Otherwise FAIL.
+
+G-F2 (net edge): PASS iff total Net Profit in USD (after ES and YM spreads plus commissions, zero overnight swap) > 0. Otherwise FAIL.
+
+G-F3 (risk-adjusted return): PASS iff the annualized net Sharpe ratio (daily PnL including flat days, mean/std ddof=1 x sqrt(252)) > 0.50. Otherwise FAIL.
+
+OVERALL: PASS iff G-F1 AND G-F2 AND G-F3. Any FAIL is final for this artifact; re-tests require a new pre-declared SPEC under a new name.
